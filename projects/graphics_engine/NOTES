@@ -1,0 +1,20 @@
+Lulu cover:
+    Size:
+        Spine width: 11.03 Postscript points wide (0.153")
+        Spine begins 621 Postscript points (8.63") from the left.
+        Total cover width: 1253.03 X 810 Postscript points (17.40" X 11.25")
+        Bleed seems to be 1/8 of an inch (0.125"), since 11.25" is .25 more than 11" high.
+        8.5*2 + 0.125*2 = 17 + 0.25 = 0.15" for the spine, or about 1/8".
+    Don't know what DPI to use -- 300? 600?
+        Lulu recommends 300.
+    Ideas:
+        Helvetica font, white.
+            Actually Futura would be nice!
+        Gold/yellow/brown background.
+            See "lulu gears" reference image.
+        Interesting pattern overlaid, like plaid.
+            See "lulu gears texture" reference image.
+        Gears intermeshed.
+        Faint source code.
+        Faint edge equation.
+        No text on back, just design.

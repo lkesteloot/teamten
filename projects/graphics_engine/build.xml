@@ -1,0 +1,55 @@
+<project name="graphics_engine" default="run" basedir=".">
+    <property name="work.dir" value="work"/>
+    <property name="source.dir" value="."/>
+    <property name="teamten.dir" value="../.."/>
+
+    <path id="compile.classpath">
+        <fileset dir="${teamten.dir}/java/dist"/>
+    </path>
+
+    <path id="run.classpath">
+        <pathelement location="${work.dir}"/>
+        <path refid="compile.classpath"/>
+    </path>
+
+    <path refid="libraries"/>
+
+    <target name="clean">
+        <delete dir="${work.dir}"/>
+    </target>
+
+    <target name="prepare">
+        <mkdir dir="${work.dir}"/>
+    </target>
+
+    <target name="depend" depends="prepare">
+        <depend srcdir="${source.dir}" destdir="${work.dir}"
+            classpathref="compile.classpath" cache="${work.dir}">
+
+            <include name="**/*.java"/>
+        </depend>
+    </target>
+
+    <target name="compile" depends="depend">
+        <javac srcdir="${source.dir}" destdir="${work.dir}"
+	    classpathref="compile.classpath" debug="on" optimize="on"
+	    deprecation="on" source="1.6">
+
+            <compilerarg value="-Xlint:unchecked"/>
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+
+    <target name="run" depends="compile">
+        <java className="Cover" classpathref="run.classpath" fork="true">
+            <jvmarg value="-Xmx1024m"/>
+        </java>
+    </target>
+
+    <target name="runPdfTest" depends="compile">
+        <java className="PdfTest" classpathref="run.classpath" fork="true">
+            <jvmarg value="-Xmx1024m"/>
+        </java>
+    </target>
+</project>
+
