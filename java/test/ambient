@@ -1,0 +1,101 @@
+#!/usr/bin/env java_launcher
+# vim:ft=java:nospell
+# lib:/home/lk/kiln/teamten/java/dist/teamten.jar
+
+// Copyright 2011 Lawrence Kesteloot
+
+import com.teamten.image.ImageUtils;
+import com.teamten.math.Complex;
+import com.teamten.math.Matrix;
+import com.teamten.math.Vector;
+import com.teamten.render.Renderer;
+import com.teamten.render.Triangle;
+import com.teamten.render.Material;
+import com.teamten.render.AmbientOcclusionMaterial;
+import com.teamten.render.Color;
+
+import java.awt.image.BufferedImage;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import java.util.zip.GZIPInputStream;
+
+/**
+ * Reads a model from a file and renders it with ambient occlusion.
+ */
+public class ambient {
+    private static final int SUPERSAMPLE = 1;
+    private static final int AMBIENT_GRID = 1;
+
+    public static void main(String[] args) throws IOException {
+        if (args.length == 0) {
+            System.err.printf("Usage: %s model.tri.gz%n", ambient.class.getSimpleName());
+            System.exit(1);
+        }
+
+        String filename = args[0];
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    new GZIPInputStream(new FileInputStream(filename))));
+
+        Renderer renderer = new Renderer(SUPERSAMPLE);
+        renderer.lookAt(Vector.make(0, 0, 0.6), Vector.make(0, -0.06, 0));
+
+        Material material = new AmbientOcclusionMaterial(Color.WHITE, AMBIENT_GRID, AMBIENT_GRID);
+        renderer.setMaterial(material);
+
+        // Model positions.
+        double xOffset = 0.28;
+        double yOffset = 0.15;
+        Vector[] offsets = new Vector[4];
+        offsets[0] = Vector.make(-xOffset, yOffset, 0);
+        offsets[1] = Vector.make(-xOffset, -yOffset, 0);
+        offsets[2] = Vector.make(xOffset, yOffset, 0);
+        offsets[3] = Vector.make(xOffset, -yOffset, 0);
+
+        String line;
+        int triangleCount = 0;
+        while ((line = reader.readLine()) != null) {
+            String[] fields = line.split(" +");
+
+            Triangle triangle = new Triangle(
+                    Vector.make(
+                        Double.parseDouble(fields[3]),
+                        Double.parseDouble(fields[4]),
+                        Double.parseDouble(fields[5])),
+                    Vector.make(
+                        Double.parseDouble(fields[0]),
+                        Double.parseDouble(fields[1]),
+                        Double.parseDouble(fields[2])),
+                    Vector.make(
+                        Double.parseDouble(fields[6]),
+                        Double.parseDouble(fields[7]),
+                        Double.parseDouble(fields[8])));
+
+            for (int i = 0; i < offsets.length; i++) {
+                renderer.addTriangle(triangle.withOffset(offsets[i]));
+            }
+
+            triangleCount++;
+            if (triangleCount % 100000 == 0) {
+                System.out.printf("Loaded %,d triangles%n", triangleCount);
+            }
+        }
+
+        double planeY = -0.31;
+        double planeSize = 0.5;
+        renderer.addTriangle(new Triangle(
+                    Vector.make(-planeSize, planeY, -planeSize),
+                    Vector.make(planeSize, planeY, -planeSize),
+                    Vector.make(planeSize, planeY, planeSize)));
+        renderer.addTriangle(new Triangle(
+                    Vector.make(-planeSize, planeY, -planeSize),
+                    Vector.make(planeSize, planeY, planeSize),
+                    Vector.make(-planeSize, planeY, planeSize)));
+
+        BufferedImage image = renderer.render(700, 400);
+        ImageUtils.save(image, "out.png");
+    }
+}

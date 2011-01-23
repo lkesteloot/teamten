@@ -1,0 +1,113 @@
+#!/usr/bin/env java_launcher
+# vim:ft=java:nospell
+# lib:/home/lk/kiln/teamten/java/dist/teamten.jar
+
+// Copyright 2011 Lawrence Kesteloot
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.teamten.chess.Board;
+import com.teamten.chess.ComputerPlayer;
+import com.teamten.chess.Piece;
+import com.teamten.chess.Move;
+import com.teamten.chess.Game;
+import com.teamten.chess.Side;
+import com.teamten.chess.server.ChessServer;
+
+/**
+ * Plays chess to test the code.
+ */
+public class chess {
+    private static final boolean CHECK_TEST = false;
+    private static final boolean PROMOTION_TEST = false;
+    private static final boolean PLAY_GAME = false;
+    private static final boolean PLAY_PUZZLE_GAME = true;
+    private static final boolean CHESS_SERVER = false;
+
+    public static void main(String[] args) {
+        Board board = new Board();
+        Game game = new Game(board);
+
+        if (PLAY_GAME) {
+            ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
+            ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
+
+            board.initializeTraditionalChess();
+            board.print("");
+
+            int side = Side.WHITE;
+            while (true) {
+                ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
+                ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
+                if (evaluatedMove.getMove() == null) {
+                    break;
+                }
+                board.print(side == Side.BLACK ? "    " : "");
+                side = Side.getOtherSide(side);
+            }
+        }
+
+        if (PLAY_PUZZLE_GAME) {
+            ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
+            ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
+
+            board.initializeEmpty();
+            board.setPiece(Board.getIndex(8, 8), Piece.WHITE_KING);
+            board.setPiece(Board.getIndex(6, 6), Piece.WHITE_ROOK);
+            board.setPiece(Board.getIndex(7, 6), Piece.BLACK_QUEEN);
+            board.setPiece(Board.getIndex(8, 6), Piece.BLACK_KING);
+            board.setPiece(Board.getIndex(7, 5), Piece.BLACK_BISHOP);
+            board.setPiece(Board.getIndex(8, 5), Piece.BLACK_PAWN);
+            board.setPiece(Board.getIndex(8, 4), Piece.WHITE_ROOK);
+            board.setPiece(Board.getIndex(4, 2), Piece.WHITE_QUEEN);
+            board.print("");
+
+            int side = Side.WHITE;
+            while (true) {
+                ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
+                ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
+                if (evaluatedMove.getMove() == null) {
+                    break;
+                }
+                board.print(side == Side.BLACK ? "    " : "");
+                side = Side.getOtherSide(side);
+            }
+        }
+
+        if (CHECK_TEST) {
+            board.initializeEmpty();
+            int index = Board.getIndex(4, 6);
+            Piece piece = Piece.WHITE_KING;
+            board.setPiece(index, piece);
+            board.setPiece(Board.getIndex(6, 7), Piece.BLACK_QUEEN);
+            board.setPiece(Board.getIndex(3, 5), Piece.WHITE_KNIGHT);
+            board.print("");
+            List<Move> moveList = new ArrayList<Move>();
+            piece.addMoves(board, index, false, moveList);
+            board.removeIllegalMoves(moveList);
+            for (Move move : moveList) {
+                game.addMove(move);
+                board.print("    ");
+
+                game.undoMove();
+            }
+        }
+
+        if (PROMOTION_TEST) {
+            board.initializeEmpty();
+            board.setPiece(Board.getIndex(4, 6), Piece.WHITE_PAWN);
+            board.setPiece(Board.getIndex(1, 1), Piece.WHITE_KING);
+            board.setPiece(Board.getIndex(1, 8), Piece.BLACK_KING);
+            board.print("");
+            ComputerPlayer computerPlayer = new ComputerPlayer(board, game, Side.WHITE);
+            computerPlayer.makeMove();
+            board.print("");
+        }
+
+        if (CHESS_SERVER) {
+            ChessServer chessServer = new ChessServer();
+            chessServer.start();
+        }
+    }
+}

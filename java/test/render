@@ -1,0 +1,127 @@
+#!/usr/bin/env java_launcher
+# vim:ft=java:nospell
+# lib:/home/lk/kiln/teamten/java/dist/teamten.jar
+
+// Copyright 2011 Lawrence Kesteloot
+
+import com.teamten.image.ImageUtils;
+import com.teamten.math.Matrix;
+import com.teamten.math.Vector;
+import com.teamten.render.Renderer;
+import com.teamten.render.Triangle;
+
+import java.awt.image.BufferedImage;
+
+import java.io.IOException;
+
+/**
+ * Simple rendering test.
+ */
+public class render {
+    public static void main(String[] args) throws IOException, InterruptedException {
+        Renderer renderer = new Renderer();
+        Triangle triangle;
+
+        /// renderer.lookAt(Vector.make(0, 0, 200), Vector.make(0, 0, 0));
+        Vector target = Vector.make(
+                -0.20769 + 0.009200000000000014/2,
+                -0.07214 + 0.008809999999999998/2,
+                -0.27612000000000004 + 0.009660000000000002/2).multiply(100);
+        renderer.lookAt(target.add(Vector.make(0.0, 0.0, 0.8)), target);
+
+        if (false) {
+            // Simple triangle.
+            triangle = new Triangle(
+                    Vector.make(0, 0, 0),
+                    Vector.make(0, 100, 0),
+                    Vector.make(100, 0, 0));
+            renderer.addTriangle(triangle);
+        } else if (true) {
+            triangle = new Triangle(
+                    Vector.make(-0.19883,-0.06333,-0.27612000000000003).multiply(100),
+                    Vector.make(-0.20275,-0.06348,-0.27244).multiply(100),
+                    Vector.make(-0.19872,-0.0658,-0.27459).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.19872,-0.0658,-0.27459).multiply(100),
+                    Vector.make(-0.20303,-0.06624,-0.27114).multiply(100),
+                    Vector.make(-0.19855,-0.06824,-0.27306).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.19872,-0.0658,-0.27459).multiply(100),
+                    Vector.make(-0.20275,-0.06348,-0.27244).multiply(100),
+                    Vector.make(-0.20303,-0.06624,-0.27114).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.19855,-0.06824,-0.27306).multiply(100),
+                    Vector.make(-0.20311,-0.06884,-0.26990000000000003).multiply(100),
+                    Vector.make(-0.1985,-0.0702,-0.2712).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.19855,-0.06824,-0.27306).multiply(100),
+                    Vector.make(-0.20303,-0.06624,-0.27114).multiply(100),
+                    Vector.make(-0.20311,-0.06884,-0.26990000000000003).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.20275,-0.06348,-0.27244).multiply(100),
+                    Vector.make(-0.2071,-0.06418,-0.26940000000000003).multiply(100),
+                    Vector.make(-0.20303,-0.06624,-0.27114).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.20303,-0.06624,-0.27114).multiply(100),
+                    Vector.make(-0.20769,-0.06725,-0.26854).multiply(100),
+                    Vector.make(-0.20311,-0.06884,-0.26990000000000003).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.20303,-0.06624,-0.27114).multiply(100),
+                    Vector.make(-0.2071,-0.06418,-0.26940000000000003).multiply(100),
+                    Vector.make(-0.20769,-0.06725,-0.26854).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.1985,-0.0702,-0.2712).multiply(100),
+                    Vector.make(-0.20311,-0.06884,-0.26990000000000003).multiply(100),
+                    Vector.make(-0.20287,-0.07065,-0.26771).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.1985,-0.0702,-0.2712).multiply(100),
+                    Vector.make(-0.20287,-0.07065,-0.26771).multiply(100),
+                    Vector.make(-0.19849,-0.07214,-0.26926).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.20311,-0.06884,-0.26990000000000003).multiply(100),
+                    Vector.make(-0.20769,-0.06725,-0.26854).multiply(100),
+                    Vector.make(-0.20735,-0.06929,-0.26646000000000003).multiply(100));
+            renderer.addTriangle(triangle);
+            triangle = new Triangle(
+                    Vector.make(-0.20311,-0.06884,-0.26990000000000003).multiply(100),
+                    Vector.make(-0.20735,-0.06929,-0.26646000000000003).multiply(100),
+                    Vector.make(-0.20287,-0.07065,-0.26771).multiply(100));
+            renderer.addTriangle(triangle);
+        } else {
+            // Wave.
+            int step = 2;
+            for (int x = -120; x <= 80; x += step) {
+                for (int y = -120; y <= 80; y += step) {
+                    triangle = new Triangle(
+                            Vector.make(x, y, wave(x, y)),
+                            Vector.make(x, y + step, wave(x, y + step)),
+                            Vector.make(x + step, y, wave(x + step, y)));
+                    renderer.addTriangle(triangle);
+
+                    triangle = new Triangle(
+                            Vector.make(x, y + step, wave(x, y + step)),
+                            Vector.make(x + step, y + step, wave(x + step, y + step)),
+                            Vector.make(x + step, y, wave(x + step, y)));
+                    renderer.addTriangle(triangle);
+                }
+            }
+        }
+
+        BufferedImage image = renderer.render(400, 400);
+        ImageUtils.save(image, "out.png");
+    }
+
+    private static double wave(int x, int y) {
+        return Math.sin(x/20.0) * Math.sin(y/20.0) * 30;
+    }
+}
