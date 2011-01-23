@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<project name="teamten" default="dist">
+    <property name="classes.dir" value="classes"/>
+    <property name="source.dir" value="src"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="depend_cache.dir" value="depend_cache"/>
+    <property name="lib.dir" value="lib"/>
+
+    <path id="compile.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="${classes.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${depend_cache.dir}"/>
+    </target>
+
+    <target name="prepare">
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <target name="depend" depends="prepare">
+        <depend srcdir="${source.dir}" destdir="${classes.dir}"
+            classpathref="compile.classpath" cache="${depend_cache.dir}">
+
+            <include name="**/*.java"/>
+        </depend>
+    </target>
+
+    <target name="compile" depends="depend">
+        <javac srcdir="${source.dir}" destdir="${classes.dir}"
+	    classpathref="compile.classpath" debug="on" optimize="on"
+	    deprecation="on" source="1.6">
+
+            <compilerarg value="-Xlint:unchecked"/>
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+
+    <target name="copy" depends="prepare">
+        <copy todir="${classes.dir}">
+            <fileset dir="${source.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="dist" depends="compile,copy">
+        <jar destfile="${dist.dir}/teamten.jar" basedir="${classes.dir}"/>
+        <copy todir="${dist.dir}">
+            <fileset dir="${lib.dir}"/>
+        </copy>
+    </target>
+
+    <target name="publish" depends="dist">
+        <exec outputproperty="timestamp" executable="date">
+            <arg value="+%Y.%m.%d"/>
+        </exec>
+        <copy file="${dist.dir}/teamten.jar"
+            tofile="/home/lk/public_html/teamten-${timestamp}.jar"/>
+        <echo message="Published file is teamten-${timestamp}.jar"/>
+    </target>
+</project>
