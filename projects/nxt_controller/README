@@ -1,0 +1,4 @@
+This projects allows the user to control a Lego NXT motor through a web page.
+The goal was to allow the user to hook up widgets to create simple programs,
+for teaching my 5-year-old to program. Ideally the web interface would run on
+an iPad for ease of interaction.
