@@ -16,6 +16,7 @@ import java.awt.image.Kernel;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -825,6 +826,22 @@ public class ImageUtils {
     }
 
     /**
+     * Load an image from an input stream.
+     */
+    public static BufferedImage load(InputStream inputStream) throws IOException {
+        BufferedImage image = ImageIO.read(inputStream);
+
+        // I don't know why this happens, and whether it's okay to always go to BGR.
+        if (image.getType() == 0) {
+            image = ImageUtils.convertType(image, BufferedImage.TYPE_3BYTE_BGR);
+        }
+
+        log("Loaded input stream (%dx%d)", image.getWidth(), image.getHeight());
+
+        return image;
+    }
+
+    /**
      * Saves an image to a filename, auto-detecting the type.
      */
     public static void save(BufferedImage image, String filename) throws IOException {
@@ -843,6 +860,30 @@ public class ImageUtils {
         }
 
         ImageIO.write(image, fileType, new File(filename));
+    }
+
+    /**
+     * Saves an image to an output stream, auto-detecting the type from the MIME type.
+     */
+    public static void save(BufferedImage image, OutputStream outputStream, String mimeType)
+        throws IOException {
+
+        log("Saving output stream of type \"%s\" (%dx%d)", mimeType,
+                image.getWidth(), image.getHeight());
+
+        String fileType;
+
+        if (mimeType.toLowerCase().equals("image/png")) {
+            fileType = "png";
+        } else if (mimeType.toLowerCase().equals("image/jpg")
+                || mimeType.toLowerCase().equals("image/jpeg")) {
+
+            fileType = "jpg";
+        } else {
+            throw new IllegalArgumentException("Mime type not supported: " + mimeType);
+        }
+
+        ImageIO.write(image, fileType, outputStream);
     }
 
     /**
