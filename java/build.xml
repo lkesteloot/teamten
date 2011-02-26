@@ -5,6 +5,7 @@
     <property name="dist.dir" value="dist"/>
     <property name="depend_cache.dir" value="depend_cache"/>
     <property name="lib.dir" value="lib"/>
+    <property name="javadoc.dir" value="../../teamten-gh-pages/javadoc"/>
 
     <path id="compile.classpath">
         <fileset dir="${lib.dir}">
@@ -63,5 +64,17 @@
         <copy file="${dist.dir}/teamten.jar"
             tofile="/home/lk/public_html/teamten-${timestamp}.jar"/>
         <echo message="Published file is teamten-${timestamp}.jar"/>
+    </target>
+
+    <target name="javadoc" depends="prepare">
+        <mkdir dir="${javadoc.dir}"/>
+        <javadoc
+            sourcepath="${source.dir}"
+            packagenames="*"
+            destdir="${javadoc.dir}"
+            classpathref="compile.classpath"
+            access="package"
+            version="false">
+        </javadoc>
     </target>
 </project>
