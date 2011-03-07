@@ -11,7 +11,7 @@ import java.awt.image.DataBufferByte;
  * Library's Antialias.c file.
  */
 public class StretchOp extends AbstractBufferedImageOp {
-    private static final double LANCZOS_SUPPORT = 3;
+    private static final double LANCZOS_FILTER_RADIUS = 3;
     private final int mDestWidth;
     private final int mDestHeight;
 
@@ -39,15 +39,16 @@ public class StretchOp extends AbstractBufferedImageOp {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
 
-        // Figure out how much we're scaling. This is positive if we're shrinking.
+        // Figure out how much we're scaling. 0.5 means shrinking by half, 2.0 means
+        // doubling in size. It's the value you divide the destination pixel
+        // location by to get the source pixel location.
         double scale;
-        double filterScale;
         if (srcHeight == mDestHeight) {
             // Prepare for horizontal stretch.
-            filterScale = scale = (double) srcWidth / mDestWidth;
+            scale = (double) mDestWidth / srcWidth;
         } else if (srcWidth == mDestWidth) {
             // Prepare for vertical stretch.
-            filterScale = scale = (double) srcHeight / mDestHeight;
+            scale = (double) mDestHeight / srcHeight;
         } else {
             throw new IllegalArgumentException(
                     "Can only stretch in one direction. Use ResizeOp instead.");
@@ -72,116 +73,179 @@ public class StretchOp extends AbstractBufferedImageOp {
         int srcStride = srcWidth*bytesPerPixel;
         int destStride = mDestWidth*bytesPerPixel;
 
-        // Determine support size (length of resampling filter).
-        double support = LANCZOS_SUPPORT;
-        if (filterScale < 1.0) {
-            filterScale = 1.0;
-            support = 0.5;
+        // The half size of filter width (distance from center to edge).
+        double filterRadius;
+        // We want to scale the filter, so we calculate the inverse of this scale and
+        // multiple the input to the filter by that.
+        double invFilterScale;
+        if (scale > 1.0) {
+            // If expanding, we don't want the filter to get any smaller than
+            // its default filter radius, so we hard-code it to half a pixel with no
+            // scaling.
+            filterRadius = 0.5;
+            invFilterScale = 1.0;
+        } else {
+            // If shrinking, use a wide filter that covers many pixels in the source image.
+            // The more we shrink (smaller "scale"), the bigger the filter (area we're
+            // sampling from).
+            filterRadius = LANCZOS_FILTER_RADIUS / scale;
+            invFilterScale = scale;
         }
-        support *= filterScale;
 
         // Coefficient buffer (with rounding safety margin).
-        double[] k = new double[(int) support * 2 + 10];
+        double[] filter = new double[(int) filterRadius*2 + 10];
 
-        // Vertical stretch.
         if (srcWidth == mDestWidth) {
-            for (int yy = 0; yy < mDestHeight; yy++) {
-                double center = (yy + 0.5f) * scale;
-                double ww = 0.0;
-                double ss = 1.0 / filterScale;
-
-                // Calculate filter weights.
-                double ymin = Math.floor(center - support);
-                if (ymin < 0.0) {
-                    ymin = 0.0;
-                }
-                double ymax = Math.ceil(center + support);
-                if (ymax > srcHeight) {
-                    ymax = srcHeight;
-                }
-
-                for (int y = (int) ymin; y < (int) ymax; y++) {
-                    double w = lanczosFilter((y - center + 0.5) * ss) * ss;
-                    k[y - (int) ymin] = w;
-                    ww = ww + w;
-                }
-                if (ww == 0.0) {
-                    ww = 1.0;
-                } else {
-                    ww = 1.0 / ww;
-                }
-
-                for (int xx = 0; xx < mDestWidth*bytesPerPixel; xx++) {
-                    ss = 0.0;
-                    for (int y = (int) ymin; y < (int) ymax; y++) {
-                        ss = ss + ((int) srcData[y*srcStride + xx] & 0xFF) * k[y-(int) ymin];
-                    }
-                    ss = ss * ww + 0.5;
-
-                    int result;
-                    if (ss < 0.5) {
-                        result = 0;
-                    } else if (ss >= 255.0) {
-                        result = 255;
-                    } else {
-                        result = (int) ss;
-                    }
-
-                    destData[yy*destStride + xx] = (byte) result;
-                }
-            }
+            verticalStretch(srcData, destData, scale, invFilterScale, filterRadius, filter,
+                    srcHeight, bytesPerPixel, srcStride, destStride);
         } else {
-            // Horizontal stretch.
-            for (int xx = 0; xx < mDestWidth; xx++) {
-                double center = (xx + 0.5) * scale;
-                double ww = 0.0;
-                double ss = 1.0 / filterScale;
-
-                double xmin = Math.floor(center - support);
-                if (xmin < 0.0) {
-                    xmin = 0.0;
-                }
-                double xmax = Math.ceil(center + support);
-                if (xmax > srcWidth) {
-                    xmax = srcWidth;
-                }
-
-                for (int x = (int) xmin; x < (int) xmax; x++) {
-                    double w = lanczosFilter((x - center + 0.5) * ss) * ss;
-                    k[x - (int) xmin] = w;
-                    ww = ww + w;
-                }
-                if (ww == 0.0) {
-                    ww = 1.0;
-                } else {
-                    ww = 1.0 / ww;
-                }
-
-                for (int yy = 0; yy < mDestHeight; yy++) {
-                    for (int b = 0; b < bytesPerPixel; b++) {
-                        ss = 0.0;
-                        for (int x = (int) xmin; x < (int) xmax; x++) {
-                            ss = ss + ((int) srcData[yy*srcStride + x*bytesPerPixel + b] & 0xFF)
-                                * k[x - (int) xmin];
-                        }
-                        ss = ss * ww + 0.5;
-
-                        int result;
-                        if (ss < 0.5) {
-                            result = 0;
-                        } else if (ss >= 255.0) {
-                            result = 255;
-                        } else {
-                            result = (int) ss;
-                        }
-
-                        destData[yy*destStride + xx*bytesPerPixel + b] = (byte) result;
-                    }
-                }
-            }
+            horizontalStretch(srcData, destData, scale, invFilterScale, filterRadius, filter,
+                    srcWidth, bytesPerPixel, srcStride, destStride);
         }
 
         return dest;
+    }
+
+    /**
+     * Stretches the image vertically given the stretching parameters.
+     */
+    private void verticalStretch(byte[] srcData, byte[] destData,
+            double scale, double invFilterScale, double filterRadius, double[] filter,
+            int srcHeight, int bytesPerPixel, int srcStride, int destStride) {
+
+        // Go down the destination image. We use this as the outer loop because
+        // for given destination row we must calculate the filter profile (including
+        // clipping at the top and bottom edges) and we can reuse it for a whole row.
+        for (int destY = 0; destY < mDestHeight; destY++) {
+            // The center of the filtered region in the source.
+            double srcCenterY = (destY + 0.5)/scale;
+
+            // Calculate the extends of the filtering region in the source,
+            // clamping at the edges of the window. beginY is inclusive, endY
+            // exclusive.
+            int beginY = (int) Math.floor(srcCenterY - filterRadius);
+            if (beginY < 0) {
+                beginY = 0;
+            }
+            int endY = (int) Math.ceil(srcCenterY + filterRadius);
+            if (endY > srcHeight) {
+                endY = srcHeight;
+            }
+
+            // Calculate filter weights and total area under them.
+            double filterArea = 0.0;
+            for (int srcY = beginY; srcY < endY; srcY++) {
+                double weight = lanczosFilter((srcY + 0.5 - srcCenterY)*invFilterScale);
+                filter[srcY - beginY] = weight;
+                filterArea += weight;
+            }
+
+            // Normalize the filter area to 1.0.
+            if (filterArea != 0.0) {
+                double invFilterArea = 1.0 / filterArea;
+                for (int i = 0; i < endY - beginY; i++) {
+                    filter[i] *= invFilterArea;
+                }
+            }
+
+            // Go through the width of the image (which is the same in the
+            // source and destination) and each sub-color component.
+            for (int x = 0; x < mDestWidth*bytesPerPixel; x++) {
+                // Apply filter to this column and sub-color.
+                double result = 0.0;
+                for (int srcY = beginY; srcY < endY; srcY++) {
+                    result += ((int) srcData[srcY*srcStride + x] & 0xFF)*filter[srcY - beginY];
+                }
+
+                // Round to nearest value.
+                result += 0.5;
+
+                // Clamp and convert to int.
+                int intResult;
+                if (result < 0.5) {
+                    intResult = 0;
+                } else if (result >= 255.0) {
+                    intResult = 255;
+                } else {
+                    intResult = (int) result;
+                }
+
+                // Write to destination image.
+                destData[destY*destStride + x] = (byte) intResult;
+            }
+        }
+    }
+
+    /**
+     * Stretches the image horizontally given the stretching parameters.
+     */
+    private void horizontalStretch(byte[] srcData, byte[] destData,
+            double scale, double invFilterScale, double filterRadius, double[] filter,
+            int srcWidth, int bytesPerPixel, int srcStride, int destStride) {
+
+        // Go across the destination image. We use this as the outer loop because
+        // for given destination column we must calculate the filter profile (including
+        // clipping at the left and right edges) and we can reuse it for a whole column.
+        for (int destX = 0; destX < mDestWidth; destX++) {
+            double srcCenterX = (destX + 0.5)/scale;
+
+            // Calculate the extends of the filtering region in the source,
+            // clamping at the edges of the window. beginX is inclusive, endX
+            // exclusive.
+            int beginX = (int) Math.floor(srcCenterX - filterRadius);
+            if (beginX < 0) {
+                beginX = 0;
+            }
+            int endX = (int) Math.ceil(srcCenterX + filterRadius);
+            if (endX > srcWidth) {
+                endX = srcWidth;
+            }
+
+            // Calculate filter weights and total area under them.
+            double filterArea = 0.0;
+            for (int srcX = beginX; srcX < endX; srcX++) {
+                double weight = lanczosFilter((srcX + 0.5 - srcCenterX)*invFilterScale);
+                filter[srcX - beginX] = weight;
+                filterArea += weight;
+            }
+
+            // Normalize the filter area to 1.0.
+            if (filterArea != 0.0) {
+                double invFilterArea = 1.0 / filterArea;
+                for (int i = 0; i < endX - beginX; i++) {
+                    filter[i] *= invFilterArea;
+                }
+            }
+
+            // Go through the height of the image (which is the same in the
+            // source and destination).
+            for (int y = 0; y < mDestHeight; y++) {
+                // Go through each sub-color.
+                for (int b = 0; b < bytesPerPixel; b++) {
+                    double result = 0.0;
+                    for (int srcX = beginX; srcX < endX; srcX++) {
+                        result += ((int) srcData[y*srcStride + srcX*bytesPerPixel + b] & 0xFF)
+                            *filter[srcX - beginX];
+                    }
+
+                    // Round to nearest value.
+                    result += 0.5;
+
+                    // Clamp and convert to int.
+                    int intResult;
+                    if (result < 0.5) {
+                        intResult = 0;
+                    } else if (result >= 255.0) {
+                        intResult = 255;
+                    } else {
+                        intResult = (int) result;
+                    }
+
+                    // Write to destination image.
+                    destData[y*destStride + destX*bytesPerPixel + b] = (byte) intResult;
+                }
+            }
+        }
     }
 
     /**
