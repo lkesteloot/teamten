@@ -123,30 +123,11 @@ public class StretchOp extends AbstractBufferedImageOp {
             // Calculate the extends of the filtering region in the source,
             // clamping at the edges of the window. beginY is inclusive, endY
             // exclusive.
-            int beginY = (int) Math.floor(srcCenterY - filterRadius);
-            if (beginY < 0) {
-                beginY = 0;
-            }
-            int endY = (int) Math.ceil(srcCenterY + filterRadius);
-            if (endY > srcHeight) {
-                endY = srcHeight;
-            }
+            int beginY = Math.max(0, (int) Math.floor(srcCenterY - filterRadius));
+            int endY = Math.min(srcHeight, (int) Math.ceil(srcCenterY + filterRadius));
 
-            // Calculate filter weights and total area under them.
-            double filterArea = 0.0;
-            for (int srcY = beginY; srcY < endY; srcY++) {
-                double weight = lanczosFilter((srcY + 0.5 - srcCenterY)*invFilterScale);
-                filter[srcY - beginY] = weight;
-                filterArea += weight;
-            }
-
-            // Normalize the filter area to 1.0.
-            if (filterArea != 0.0) {
-                double invFilterArea = 1.0 / filterArea;
-                for (int i = 0; i < endY - beginY; i++) {
-                    filter[i] *= invFilterArea;
-                }
-            }
+            // Calculate the profile of the filter.
+            makeFilter(beginY, endY, srcCenterY, invFilterScale, filter);
 
             // Go through the width of the image (which is the same in the
             // source and destination) and each sub-color component.
@@ -192,30 +173,11 @@ public class StretchOp extends AbstractBufferedImageOp {
             // Calculate the extends of the filtering region in the source,
             // clamping at the edges of the window. beginX is inclusive, endX
             // exclusive.
-            int beginX = (int) Math.floor(srcCenterX - filterRadius);
-            if (beginX < 0) {
-                beginX = 0;
-            }
-            int endX = (int) Math.ceil(srcCenterX + filterRadius);
-            if (endX > srcWidth) {
-                endX = srcWidth;
-            }
+            int beginX = Math.max(0, (int) Math.floor(srcCenterX - filterRadius));
+            int endX = Math.min(srcWidth, (int) Math.ceil(srcCenterX + filterRadius));
 
-            // Calculate filter weights and total area under them.
-            double filterArea = 0.0;
-            for (int srcX = beginX; srcX < endX; srcX++) {
-                double weight = lanczosFilter((srcX + 0.5 - srcCenterX)*invFilterScale);
-                filter[srcX - beginX] = weight;
-                filterArea += weight;
-            }
-
-            // Normalize the filter area to 1.0.
-            if (filterArea != 0.0) {
-                double invFilterArea = 1.0 / filterArea;
-                for (int i = 0; i < endX - beginX; i++) {
-                    filter[i] *= invFilterArea;
-                }
-            }
+            // Calculate the profile of the filter.
+            makeFilter(beginX, endX, srcCenterX, invFilterScale, filter);
 
             // Go through the height of the image (which is the same in the
             // source and destination).
@@ -244,6 +206,37 @@ public class StretchOp extends AbstractBufferedImageOp {
                     // Write to destination image.
                     destData[y*destStride + destX*bytesPerPixel + b] = (byte) intResult;
                 }
+            }
+        }
+    }
+
+    /**
+     * Given an extent and a center within that extent, and a filter scale, calculates 
+     * the filter along that extent. The area of the filter is normalized to 1.0.
+     *
+     * @param begin start of the extend, inclusive.
+     * @param end end of the extend, exclusive.
+     * @param center the center of the filter, between begin and end.
+     * @param invFilterScale reciprocal of how much we scale the filter by.
+     * @param filter the first (end - begin) entries of this array are filled
+     * with the filter coefficients.
+     */
+    private static void makeFilter(int begin, int end, double center, double invFilterScale,
+            double filter[]) {
+
+        // Calculate filter weights and total area under them.
+        double filterArea = 0.0;
+        for (int src = begin; src < end; src++) {
+            double weight = lanczosFilter((src + 0.5 - center)*invFilterScale);
+            filter[src - begin] = weight;
+            filterArea += weight;
+        }
+
+        // Normalize the filter area to 1.0.
+        if (filterArea != 0.0) {
+            double invFilterArea = 1.0 / filterArea;
+            for (int i = 0; i < end - begin; i++) {
+                filter[i] *= invFilterArea;
             }
         }
     }
