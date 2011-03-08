@@ -121,7 +121,7 @@ public class DecomposableConvolveOp extends AbstractBufferedImageOp {
         double[] kernel = new double[arraySize];
 
         // Precompute constant.
-        double twoSigmapSquared = 2*sigma*sigma;
+        double twoSigmaSquared = 2*sigma*sigma;
 
         // Keep track of total so we can normalize.
         double total = 0;
@@ -133,7 +133,7 @@ public class DecomposableConvolveOp extends AbstractBufferedImageOp {
             double distanceSquared = i*i;
 
             // Don't bother dividing by constant, we normalize anyway.
-            double value = Math.exp(-distanceSquared / twoSigmapSquared);
+            double value = Math.exp(-distanceSquared / twoSigmaSquared);
             kernel[index] = value;
 
             total += value;
