@@ -1,0 +1,53 @@
+#!/usr/bin/env java_launcher
+# vim:ft=java:nospell
+# lib:../dist/teamten.jar
+
+// Copyright 2011 Lawrence Kesteloot
+
+import com.teamten.image.ImageUtils;
+
+import java.awt.image.BufferedImage;
+
+import java.io.IOException;
+
+/**
+ * Creates an image with concentric rings. Useful for scale tests.
+ */
+public class make_test_image {
+    public static void main(String[] args) throws IOException {
+        if (args.length != 4) {
+            System.err.println("Usage: make_test_image filename width height scale");
+            System.exit(-1);
+        }
+
+        String filename = args[0];
+        int width = Integer.parseInt(args[1]);
+        int height = Integer.parseInt(args[2]);
+        int scale = Integer.parseInt(args[3]);
+
+        int[] sineTable = new int[256];
+        for (int i = 0; i < 256; i++) {
+            sineTable[i] = (int) (127.5*Math.sin(Math.PI*(i - 127.5)/127.5) + 127.5);
+        }
+
+        BufferedImage image = ImageUtils.makeWhite(width, height);
+
+        long before = System.currentTimeMillis();
+        for (int y = 0; y < height; y++) {
+            int oy = y - height/2;
+            for (int x = 0; x < width; x++) {
+                int ox = x - width/2;
+
+                int dist = ((ox*ox + oy*oy)*scale)/256;
+                int gray = sineTable[dist & 0xFF];
+                int pixel = (gray << 16) | (gray << 8) | gray;
+
+                image.setRGB(x, y, pixel);
+            }
+        }
+        long after = System.currentTimeMillis();
+        System.out.println(after - before);
+
+        ImageUtils.save(image, filename);
+    }
+}
