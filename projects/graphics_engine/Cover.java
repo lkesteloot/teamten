@@ -1,6 +1,7 @@
 // Copyright 2011 Lawrence Kesteloot
 
 import com.teamten.image.ImageUtils;
+import com.teamten.image.Typeface;
 import com.teamten.util.Files;
 import java.awt.Color;
 import java.awt.font.TextLayout;
@@ -108,7 +109,7 @@ public class Cover {
         }
 
         // Title.
-        Font font = ImageUtils.getFont("Helvetica", true, false, false, TITLE_PT*DPI);
+        Font font = ImageUtils.getFont(Typeface.HELVETICA, true, false, false, TITLE_PT*DPI);
         g.setColor(TITLE_TEXT_COLOR);
         g.setFont(font);
         TextLayout textLayout = new TextLayout("Graphics Engine", font, g.getFontRenderContext());
@@ -116,7 +117,7 @@ public class Cover {
         textLayout.draw(g, WIDTH - MARGIN - width, toPixels(TITLE_POS_IN));
 
         // Authors.
-        font = ImageUtils.getFont("Helvetica", false, false, false, AUTHOR_PT*DPI);
+        font = ImageUtils.getFont(Typeface.HELVETICA, false, false, false, AUTHOR_PT*DPI);
         g.setColor(AUTHOR_TEXT_COLOR);
         g.setFont(font);
         textLayout = new TextLayout("Lawrence Kesteloot", font, g.getFontRenderContext());
@@ -137,7 +138,7 @@ public class Cover {
             + "rasterizes in a pipeline arrangement.#The GE has a RISC core with a back-end "
             + "specialized for rasterizing triangles.").split("#");
 
-        font = ImageUtils.getFont("Helvetica", false, false, false, BLURB_PT*DPI);
+        font = ImageUtils.getFont(Typeface.HELVETICA, false, false, false, BLURB_PT*DPI);
         g.setColor(BLURB_TEXT_COLOR);
         g.setFont(font);
         for (int i = 0; i < blurb.length; i++) {
@@ -206,7 +207,7 @@ public class Cover {
             "TREEPUT",
         };
 
-        Font font = ImageUtils.getFont("Courier", true, false, false, CODE_PT*DPI);
+        Font font = ImageUtils.getFont(Typeface.COURIER, true, false, false, CODE_PT*DPI);
         g.setColor(CODE_TEXT_COLOR);
         g.setFont(font);
         for (int i = 0; i < code.length; i++) {

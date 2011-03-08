@@ -33,7 +33,7 @@
     <target name="compile" depends="depend">
         <javac srcdir="${source.dir}" destdir="${work.dir}"
 	    classpathref="compile.classpath" debug="on" optimize="on"
-	    deprecation="on" source="1.6">
+	    deprecation="on" source="1.6" includeantruntime="false">
 
             <compilerarg value="-Xlint:unchecked"/>
             <include name="**/*.java"/>

@@ -913,70 +913,77 @@ public class ImageUtils {
     }
 
     /**
-     * Return a font of the specified typeface and attributes and size. The only supported
-     * typefaces are "Helvetica", "Futura", and "Courier".
+     * Return a font of the specified typeface and attributes and size.
      */
-    public static Font getFont(String typeface, boolean bold, boolean italic, boolean narrow,
+    public static Font getFont(Typeface typeface, boolean bold, boolean italic, boolean narrow,
             double size) throws FontFormatException, IOException {
 
+        // Figure out which filename to load.
         String filename;
 
-        if (typeface.equals("Helvetica")) {
-            int number = 45
-                + (italic ? 1 : 0)
-                + (narrow ? 2 : 0)
-                + (bold ? 20 : 0);
+        switch (typeface) {
+            case HELVETICA:
+                int helveticaNumber = 45
+                    + (italic ? 1 : 0)
+                    + (narrow ? 2 : 0)
+                    + (bold ? 20 : 0);
 
-            filename = "fonts/helr" + number + "w.ttf";
-        } else if (typeface.equals("Futura")) {
-            /**
-                Florencesans:
-                1 = roman
-                2 = ? (slightly smaller)
-                3 = italic
-                4 = italic lighter
-                5 = very compressed
-                6, 7, 8 = ditto
-                9 = slightly compressed
-                10, 11, 12 = ditto
-                13 = extended
-                14, 15, 16 = ditto
-                +16 = small caps
-                33 = bold
-                34 = bold italic
-                35-36 = small caps
-                37 = outline
-                38 = outline italic
-                39-40 = small caps
-                41 = shadow
-                42 = shadow italic
-                43-44 = small caps
-                45 = reverse italic
-                46 = reverse italic slightly smaller
-            */
+                filename = "fonts/helr" + helveticaNumber + "w.ttf";
+                break;
 
-            int number;
-            if (bold) {
-                number = 33 + (italic ? 1 : 0);
-            } else {
-                number = 1
-                    + (italic ? 2 : 0)
-                    + (narrow ? 8 : 0);
-            }
+            case FUTURA:
+                /**
+                    Florencesans:
+                    1 = roman
+                    2 = ? (slightly smaller)
+                    3 = italic
+                    4 = italic lighter
+                    5 = very compressed
+                    6, 7, 8 = ditto
+                    9 = slightly compressed
+                    10, 11, 12 = ditto
+                    13 = extended
+                    14, 15, 16 = ditto
+                    +16 = small caps
+                    33 = bold
+                    34 = bold italic
+                    35-36 = small caps
+                    37 = outline
+                    38 = outline italic
+                    39-40 = small caps
+                    41 = shadow
+                    42 = shadow italic
+                    43-44 = small caps
+                    45 = reverse italic
+                    46 = reverse italic slightly smaller
+                */
 
-            filename = String.format("fonts/Florsn%02d.ttf", number);
-        } else if (typeface.equals("Courier")) {
-            if (bold && italic) {
-                filename = "fonts/courbi.ttf";
-            } else if (bold) {
-                filename = "fonts/courbd.ttf";
-            } else if (italic) {
-                filename = "fonts/couri.ttf";
-            } else {
-                filename = "fonts/cour.ttf";
-            }
-        } else {
-            throw new IllegalArgumentException("Unknown typeface " + typeface);
+                int futuraNumber;
+                if (bold) {
+                    futuraNumber = 33 + (italic ? 1 : 0);
+                } else {
+                    futuraNumber = 1
+                        + (italic ? 2 : 0)
+                        + (narrow ? 8 : 0);
+                }
+
+                filename = String.format("fonts/Florsn%02d.ttf", futuraNumber);
+                break;
+
+            case COURIER:
+                if (bold && italic) {
+                    filename = "fonts/courbi.ttf";
+                } else if (bold) {
+                    filename = "fonts/courbd.ttf";
+                } else if (italic) {
+                    filename = "fonts/couri.ttf";
+                } else {
+                    filename = "fonts/cour.ttf";
+                }
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unknown typeface " + typeface);
         }
 
         log("Loading font \"%s\"", filename);
