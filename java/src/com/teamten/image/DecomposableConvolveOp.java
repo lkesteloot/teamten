@@ -7,16 +7,18 @@ import java.awt.image.DataBufferByte;
 
 /**
  * Like ConvolveOp, this convolves a kernel with an image. But this class assumes that
- * the filter is linear decomposable, and performs the operation in two passes.
+ * the filter is linearly decomposable, and performs the operation in two passes.
  */
 public class DecomposableConvolveOp extends AbstractBufferedImageOp {
     private final double[] mKernel;
 
     /**
      * The kernel is the horizontal or vertical cross-section of the 2D kernel
-     * through its center.
+     * through its center. The kernel should have an odd length.
      */
     public DecomposableConvolveOp(double[] kernel) {
+        assert kernel.length % 2 != 0;
+
         mKernel = kernel;
     }
 
@@ -26,7 +28,8 @@ public class DecomposableConvolveOp extends AbstractBufferedImageOp {
         assert src.getType() == BufferedImage.TYPE_3BYTE_BGR
             || src.getType() == BufferedImage.TYPE_4BYTE_ABGR;
 
-        // Apply the kernel twice, once in each direction.
+        // Apply the kernel twice, once in each direction. Each convolve() call both
+        // applies the kernel horizontally and transposes the image.
         return convolve(convolve(src));
     }
 
@@ -105,7 +108,7 @@ public class DecomposableConvolveOp extends AbstractBufferedImageOp {
     }
 
     /**
-     * Returns a gaussian kernel of the specified radius, where the radius represents
+     * Returns a Gaussian kernel of the specified radius, where the radius represents
      * one sigma (standard deviation).
      */
     public static double[] makeGaussianKernel(double radius) {

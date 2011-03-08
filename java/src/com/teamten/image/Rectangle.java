@@ -101,6 +101,10 @@ public class Rectangle {
         return mY + mHeight;
     }
 
+    /**
+     * Return an X11-style string representation of the rectangle in the format
+     * "WIDTHxHEIGHT+X+Y".
+     */
     public String toString() {
         return mWidth + "x" + mHeight + "+" + mX + "+" + mY;
     }

@@ -26,7 +26,7 @@ public class ResizeOp extends AbstractBufferedImageOp {
         int intHeight = srcHeight;
 
         // Pick first direction to minimize size of intermediate image.
-        if (srcWidth*mDestHeight < mDestWidth*srcHeight) {
+        if ((long) srcWidth*mDestHeight < (long) mDestWidth*srcHeight) {
             intHeight = mDestHeight;
         } else {
             intWidth = mDestWidth;
