@@ -28,6 +28,10 @@ public class TemplateProcessor {
         EXPRESSION,
         // In expression, saw close brace.
         SAW_CLOSE_BRACE,
+        // Saw % after open brace, now in statement.
+        STATEMENT,
+        // In statement, saw percent.
+        SAW_PERCENT,
     }
     private State mState = State.NORMAL;
     private PrintStream mWriter;
@@ -88,6 +92,10 @@ public class TemplateProcessor {
                     endNormal();
                     startExpression();
                     mState = State.EXPRESSION;
+                } else if (ch == '%') {
+                    endNormal();
+                    startStatement();
+                    mState = State.STATEMENT;
                 } else {
                     mWriter.print('{');
                     mWriter.print(ch);
@@ -114,6 +122,31 @@ public class TemplateProcessor {
                     mState = State.EXPRESSION;
                 }
                 break;
+
+            case STATEMENT:
+                if (ch == '%') {
+                    mState = State.SAW_PERCENT;
+                } else {
+                    mWriter.print(ch);
+                }
+                break;
+
+            case SAW_PERCENT:
+                if (ch == '}') {
+                    endStatement();
+                    startNormal();
+                    mState = State.NORMAL;
+                } else {
+                    mWriter.print('%');
+
+                    if (ch == '%') {
+                        // Nothing, stay in this state.
+                    } else {
+                        mWriter.print(ch);
+                        mState = State.STATEMENT;
+                    }
+                }
+                break;
         }
     }
 
@@ -131,5 +164,13 @@ public class TemplateProcessor {
 
     private void endExpression() {
         mWriter.print(");\n" + mIndent);
+    }
+
+    private void startStatement() {
+        // Nothing.
+    }
+
+    private void endStatement() {
+        // Nothing.
     }
 }
