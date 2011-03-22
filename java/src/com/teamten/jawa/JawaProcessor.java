@@ -4,7 +4,7 @@ package com.teamten.jawa;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.io.Reader;
 
 /**
@@ -15,18 +15,24 @@ public class JawaProcessor {
     /**
      * The character being read is at this column, 1-based.
      */
-    private PrintWriter mWriter;
-    private int mColumn = 1;
-    private boolean mCapturingFilename = false;
+    private PrintStream mWriter;
     private String mIncludedFilename = "";
+    private static enum State {
+        // Parsing Java code from the top.
+        NORMAL,
+        // Parsing the filename of an included template.
+        TEMPLATE_FILENAME,
+    }
+    private State mState = State.NORMAL;
 
     public void processFile(String inputFilename, String outputFilename)
         throws IOException {
 
         Reader reader = new FileReader(inputFilename);
+        mState = State.NORMAL;
 
         try {
-            mWriter = new PrintWriter(outputFilename);
+            mWriter = new PrintStream(outputFilename);
 
             try {
                 int ch;
@@ -42,31 +48,25 @@ public class JawaProcessor {
     }
 
     private void processChar(char ch) throws IOException {
-        if (ch == '\n' || ch == '\r') {
-            // End of line.
-            if (mCapturingFilename) {
-                mCapturingFilename = false;
+        switch (mState) {
+            case NORMAL:
+                if (ch == '`') {
+                    mState = State.TEMPLATE_FILENAME;
+                } else {
+                    mWriter.print(ch);
+                }
+                break;
 
-                new TemplateProcessor().processFile(mIncludedFilename,
-                        mWriter);
-            } else {
-                mWriter.println();
-            }
-
-            // Start the line over.
-            mColumn = 1;
-        } else {
-            if (mCapturingFilename) {
-                mIncludedFilename += ch;
-            } else if (ch == '#' && mColumn == 1) {
-                mCapturingFilename = true;
-                mIncludedFilename = "";
-            } else {
-                mWriter.print(ch);
-            }
-
-            // Next character.
-            mColumn++;
+            case TEMPLATE_FILENAME:
+                if (ch == '`') {
+                    new TemplateProcessor().processFile(mIncludedFilename,
+                            mWriter);
+                    mState = State.NORMAL;
+                    mIncludedFilename = "";
+                } else {
+                    mIncludedFilename += ch;
+                }
+                break;
         }
     }
 }

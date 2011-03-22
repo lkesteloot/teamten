@@ -4,7 +4,7 @@ package com.teamten.jawa;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.io.Reader;
 
 /**
@@ -26,9 +26,9 @@ public class TemplateProcessor {
         SAW_CLOSE_BRACE,
     }
     private State mState = State.NORMAL;
-    private PrintWriter mWriter;
+    private PrintStream mWriter;
 
-    public void processFile(String filename, PrintWriter writer)
+    public void processFile(String filename, PrintStream writer)
         throws IOException {
 
         System.out.println("Including <" + filename + ">");
@@ -103,7 +103,7 @@ public class TemplateProcessor {
     }
 
     private void startNormal() {
-        mWriter.print("System.out.print(\"");
+        mWriter.print("writer.print(\"");
     }
 
     private void endNormal() {
@@ -111,7 +111,7 @@ public class TemplateProcessor {
     }
 
     private void startExpression() {
-        mWriter.print("System.out.print(");
+        mWriter.print("writer.print(");
     }
 
     private void endExpression() {
