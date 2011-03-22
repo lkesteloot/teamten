@@ -15,6 +15,10 @@ public class TemplateProcessor {
      * Generates prettier but perhaps less performant code.
      */
     private static final boolean PRETTY_CODE = true;
+    /**
+     * The indent equivalent to the print statement, minus the plus sign.
+     */
+    private static final String PRINT_INDENT = "           ";
     private static enum State {
         // Processing template text.
         NORMAL,
@@ -27,13 +31,23 @@ public class TemplateProcessor {
     }
     private State mState = State.NORMAL;
     private PrintStream mWriter;
+    private String mIndent = "";
 
-    public void processFile(String filename, PrintStream writer)
+    public TemplateProcessor withPrintStream(PrintStream writer) {
+        mWriter = writer;
+        return this;
+    }
+
+    public TemplateProcessor withIndent(String indent) {
+        mIndent = indent;
+        return this;
+    }
+
+    public void processFile(String filename)
         throws IOException {
 
         System.out.println("Including <" + filename + ">");
 
-        mWriter = writer;
         Reader inputReader = new FileReader(filename);
 
         try {
@@ -57,7 +71,8 @@ public class TemplateProcessor {
                     mState = State.SAW_OPEN_BRACE;
                 } else if (ch == '\n') {
                     if (PRETTY_CODE) {
-                        mWriter.print("\\n\"\n+ \"");
+                        mWriter.print("\\n\"\n" + mIndent
+                                + PRINT_INDENT + "+ \"");
                     } else {
                         mWriter.print("\\n");
                     }
@@ -107,7 +122,7 @@ public class TemplateProcessor {
     }
 
     private void endNormal() {
-        mWriter.println("\");");
+        mWriter.print("\");\n" + mIndent);
     }
 
     private void startExpression() {
@@ -115,6 +130,6 @@ public class TemplateProcessor {
     }
 
     private void endExpression() {
-        mWriter.println(");");
+        mWriter.print(");\n" + mIndent);
     }
 }
