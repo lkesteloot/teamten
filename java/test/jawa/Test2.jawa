@@ -1,0 +1,11 @@
+
+import java.io.PrintStream;
+
+public class Test2 {
+    public static void main(String[] args) {
+        int max = 5;
+        PrintStream writer = System.out;
+
+        `test2.html`
+    }
+}

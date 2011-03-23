@@ -1,0 +1,11 @@
+
+import java.io.PrintStream;
+
+public class Test1 {
+    public static void main(String[] args) {
+        String name = "world";
+        PrintStream writer = System.out;
+
+        `test1.html`
+    }
+}
