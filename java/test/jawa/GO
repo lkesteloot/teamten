@@ -3,4 +3,5 @@ if [ -z "$N" ]; then
     echo "Usage: GO <N>"
     exit 1
 fi
-ant -find build.xml dist && java -cp ../../dist/\* com.teamten.jawa.Jawa Test$N.jawa Test$N.java && javac Test$N.java && java Test$N
+export CLASSPATH=".:../../dist/*"
+ant -find build.xml dist && java com.teamten.jawa.Jawa Test$N.jawa Test$N.java && javac Test$N.java && java Test$N

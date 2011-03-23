@@ -1,5 +1,6 @@
 
 import java.io.PrintStream;
+import com.teamten.jawa.Jawa;
 
 /**
  * Test of expressions.
@@ -7,7 +8,7 @@ import java.io.PrintStream;
 public class Test1 {
     public static void main(String[] args) {
         String name = "world";
-        PrintStream writer = System.out;
+        Jawa.reset(System.out);
 
         `test1.html`
     }

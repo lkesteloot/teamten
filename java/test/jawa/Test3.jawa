@@ -1,5 +1,6 @@
 
 import java.io.PrintStream;
+import com.teamten.jawa.Jawa;
 
 /**
  * Test of calling a method from within a statement.
@@ -7,12 +8,12 @@ import java.io.PrintStream;
 public class Test3 {
     public static void main(String[] args) {
         int max = 5;
-        PrintStream writer = System.out;
+        Jawa.reset(System.out);
 
         `test3.html`
     }
 
-    private static void hello(PrintStream writer, int count) {
+    private static void hello(int count) {
         `test3-hello.html`
     }
 }

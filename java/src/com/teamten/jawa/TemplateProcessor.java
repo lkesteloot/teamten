@@ -18,7 +18,6 @@ public class TemplateProcessor {
     /**
      * The indent equivalent to the print statement, minus the plus sign.
      */
-    private static final String PRINT_INDENT = "           ";
     private static enum State {
         // Processing template text.
         NORMAL,
@@ -36,6 +35,13 @@ public class TemplateProcessor {
     private State mState = State.NORMAL;
     private PrintStream mWriter;
     private String mIndent = "";
+    private int mCounter;
+    private String mWriterName;
+    private String mPrintIndent;
+
+    public TemplateProcessor() {
+        setCounter(0);
+    }
 
     public TemplateProcessor withPrintStream(PrintStream writer) {
         mWriter = writer;
@@ -47,12 +53,40 @@ public class TemplateProcessor {
         return this;
     }
 
+    public TemplateProcessor withCounter(int counter) {
+        setCounter(counter);
+        return this;
+    }
+
+    /**
+     * Can probably remove this now that we put the code inside its own block.
+     */
+    private void setCounter(int counter) {
+        mCounter = counter;
+
+        mWriterName = "jawaWriter";
+        if (mCounter > 0) {
+            mWriterName += mCounter;
+        }
+
+        // Compute print indent string.
+        int length = mWriterName.length() + 5;
+        mPrintIndent = "";
+        for (int i = 0; i < length; i++) {
+            mPrintIndent += " ";
+        }
+    }
+
     public void processFile(String filename)
         throws IOException {
 
         System.out.println("Including <" + filename + ">");
 
         Reader inputReader = new FileReader(filename);
+
+        mWriter.print("{\n" + mIndent);
+        mWriter.print("java.io.PrintStream " + mWriterName
+                + " = com.teamten.jawa.Jawa.getPrintStream();\n" + mIndent);
 
         try {
             startNormal();
@@ -66,6 +100,8 @@ public class TemplateProcessor {
         } finally {
             inputReader.close();
         }
+
+        mWriter.print("}\n" + mIndent);
     }
 
     private void processChar(char ch) {
@@ -76,7 +112,7 @@ public class TemplateProcessor {
                 } else if (ch == '\n') {
                     if (PRETTY_CODE) {
                         mWriter.print("\\n\"\n" + mIndent
-                                + PRINT_INDENT + "+ \"");
+                                + mPrintIndent + "+ \"");
                     } else {
                         mWriter.print("\\n");
                     }
@@ -151,7 +187,7 @@ public class TemplateProcessor {
     }
 
     private void startNormal() {
-        mWriter.print("writer.print(\"");
+        mWriter.print(mWriterName + ".print(\"");
     }
 
     private void endNormal() {
@@ -159,7 +195,7 @@ public class TemplateProcessor {
     }
 
     private void startExpression() {
-        mWriter.print("writer.print(");
+        mWriter.print(mWriterName + ".print(");
     }
 
     private void endExpression() {

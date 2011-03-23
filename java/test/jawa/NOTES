@@ -1,0 +1,52 @@
+
+- What if the `` syntax evaluated to a sequence of statements and eventually
+  a return statement, returning a String?
+    - Advantages:
+        - No magic "writer" variable to declare to pass around.
+        - Perhaps faster if writer is not buffered.
+    - Disadvantages:
+        - Perhaps slower if have to make large strings.
+        - Not good for very large outputs that have to fit in memory.
+        - A bit magical and not obvious.
+            - Could force syntax:
+                return `foo.html`;
+            - Might be even more misleading.
+    - How to implement:
+        - Create local StringBuilder with unique name.
+            - Can use same name in every method.
+        - HTML and expressions append to it.
+        - Statements are on their own.
+        - After last statement, return it.
+- What if the `` syntax appended to a StringBuilder.
+    - Many of the same disadvantages of PrintStream.
+- What if the `` syntax appended to a global thread-local variable.
+    - Would find:
+        PrintStream _writer = com.teamten.jawa.Jawa.WRITER.get();
+        _writer.print(...);
+    - Perhaps expensive to get the variable each time?
+    - How do you eventually get the output?
+        - You'd write it at the start of your handler.
+        - Could set a PrintStream, StringBuilder, etc.
+        - Maybe default to a PrintStream on top of a ByteArrayOutputStream.
+            - And can get string or bytes at the end.
+    - How would you guarantee that the thread-local is reset each time?
+- In template, if a {% %} line is entirely on its own line (only whitespace
+  before and after), remove all whitespace and newline.
+
+- Inside {% %} delegate back to Jawa parser since we'll have other things
+  there, possibly including other templates.
+
+- Test calling other function from within {% %}.
+
+- Does it make sense to call other function from {{ }}? The function would
+  have to return a string, which means our template would have to accumulate
+  a string.
+
+- Perhaps `` should return a string, not write to a writer.
+    - Advantages:
+        - No magic "writer" variable.
+        - Perhaps faster if writer is not buffered.
+    - Disadvantages:
+        - Perhaps slower if have to make large strings.
+        - Not good for very large outputs that have to fit in memory.
+        - Must be used in an expression, so can't have statements.
