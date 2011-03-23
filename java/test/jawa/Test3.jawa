@@ -1,0 +1,18 @@
+
+import java.io.PrintStream;
+
+/**
+ * Test of calling a method from within a statement.
+ */
+public class Test3 {
+    public static void main(String[] args) {
+        int max = 5;
+        PrintStream writer = System.out;
+
+        `test3.html`
+    }
+
+    private static void hello(PrintStream writer, int count) {
+        `test3-hello.html`
+    }
+}

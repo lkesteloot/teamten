@@ -1,6 +1,9 @@
 
 import java.io.PrintStream;
 
+/**
+ * Test of expressions.
+ */
 public class Test1 {
     public static void main(String[] args) {
         String name = "world";

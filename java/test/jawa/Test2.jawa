@@ -1,6 +1,9 @@
 
 import java.io.PrintStream;
 
+/**
+ * Test of statements.
+ */
 public class Test2 {
     public static void main(String[] args) {
         int max = 5;
