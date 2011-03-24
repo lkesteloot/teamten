@@ -2,9 +2,10 @@
 
 package com.teamten.jawa;
 
-import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
+
+import org.apache.commons.io.FileUtils;
 
 /**
  * Processes a template into Java code.
@@ -101,7 +102,13 @@ public class TemplateProcessor {
 
         System.out.println("Including <" + filename + ">");
 
-        Reader inputReader = new FileReader(filename);
+        String template = FileUtils.readFileToString(new File(filename));
+        // Strip trailing \n.
+        int length = template.length();
+        if (length > 0 && template.charAt(length - 1) == '\n') {
+            template = template.substring(0, length - 1);
+        }
+
         mWriter = new StringBuilder();
 
         switch (OUTPUT_METHOD) {
@@ -120,19 +127,14 @@ public class TemplateProcessor {
         }
 
         startNewLine();
+        startNormal();
 
-        try {
-            startNormal();
-
-            int ch;
-            while ((ch = inputReader.read()) != -1) {
-                processChar((char) ch);
-            }
-
-            endNormal();
-        } finally {
-            inputReader.close();
+        for (int i = 0; i < template.length(); i++) {
+            char ch = template.charAt(i);
+            processChar(ch);
         }
+
+        endNormal();
 
         switch (OUTPUT_METHOD) {
             case PRINT_STREAM:
