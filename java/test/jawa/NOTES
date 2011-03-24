@@ -7,6 +7,14 @@
       whether we had a statement. If yes when we get to \n, remove contents
       of line. Also keep track of position of start of line. Also do this
       at end of file?
+    - Hmm, quite hard to do after the fact, since the line is already
+      split in the generated code. Instead, pre-process the input file,
+      removing leading blanks, trailing blanks, and trailing newline.
+    - Also remove trailing newline if there's a \ at end of line.
+    - New plan: Keep track of continuous string before {%, from its
+      first character to the closing quote. Do same with space after
+      %}. When we reach \n, analyze both and remove both if they're
+      made up entirely of spaces/tabs.
 
 - Inside {% %} delegate back to Jawa parser since we'll have other things
   there, possibly including other templates.

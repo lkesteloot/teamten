@@ -47,7 +47,7 @@ public class TemplateProcessor {
     private int mCounter;
     private String mWriterName;
     private String mAppendMethod;
-    private String mPrintIndent;
+    private String mAppendMethodIndent;
 
     public TemplateProcessor() {
         setCounter(0);
@@ -86,9 +86,9 @@ public class TemplateProcessor {
 
         // Compute print indent string.
         int length = mAppendMethod.length() - 1;
-        mPrintIndent = "";
+        mAppendMethodIndent = "";
         for (int i = 0; i < length; i++) {
-            mPrintIndent += " ";
+            mAppendMethodIndent += " ";
         }
     }
 
@@ -148,11 +148,10 @@ public class TemplateProcessor {
                 if (ch == '{') {
                     mState = State.SAW_OPEN_BRACE;
                 } else if (ch == '\n') {
+                    mWriter.append("\\n");
                     if (PRETTY_CODE) {
-                        mWriter.append("\\n\"\n" + mIndent
-                                + mPrintIndent + "+ \"");
-                    } else {
-                        mWriter.append("\\n");
+                        mWriter.append("\"\n" + mIndent
+                                + mAppendMethodIndent + "+ \"");
                     }
                 } else if (ch == '\\') {
                     mWriter.append("\\\\");
