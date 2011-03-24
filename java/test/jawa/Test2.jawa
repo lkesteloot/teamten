@@ -1,15 +1,13 @@
 
-import java.io.PrintStream;
-import com.teamten.jawa.Jawa;
-
 /**
  * Test of statements.
  */
 public class Test2 {
     public static void main(String[] args) {
-        int max = 5;
-        Jawa.reset(System.out);
+        System.out.print(new Test2().hello(5));
+    }
 
+    private String hello(int max) {
         `test2.html`
     }
 }

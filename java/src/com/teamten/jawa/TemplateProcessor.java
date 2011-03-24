@@ -16,6 +16,16 @@ public class TemplateProcessor {
      */
     private static final boolean PRETTY_CODE = true;
     /**
+     * How to output the template.
+     */
+    private static enum OutputMethod {
+        // PrintStream instance.
+        PRINT_STREAM,
+        // StringBuilder instance.
+        STRING_BUILDER,
+    }
+    private static OutputMethod OUTPUT_METHOD = OutputMethod.STRING_BUILDER;
+    /**
      * The indent equivalent to the print statement, minus the plus sign.
      */
     private static enum State {
@@ -37,6 +47,7 @@ public class TemplateProcessor {
     private String mIndent = "";
     private int mCounter;
     private String mWriterName;
+    private String mAppendMethod;
     private String mPrintIndent;
 
     public TemplateProcessor() {
@@ -69,8 +80,18 @@ public class TemplateProcessor {
             mWriterName += mCounter;
         }
 
+        switch (OUTPUT_METHOD) {
+            case PRINT_STREAM:
+                mAppendMethod = mWriterName + ".print";
+                break;
+
+            case STRING_BUILDER:
+                mAppendMethod = mWriterName + ".append";
+                break;
+        }
+
         // Compute print indent string.
-        int length = mWriterName.length() + 5;
+        int length = mAppendMethod.length() - 1;
         mPrintIndent = "";
         for (int i = 0; i < length; i++) {
             mPrintIndent += " ";
@@ -84,9 +105,20 @@ public class TemplateProcessor {
 
         Reader inputReader = new FileReader(filename);
 
-        mWriter.print("{\n" + mIndent);
-        mWriter.print("java.io.PrintStream " + mWriterName
-                + " = com.teamten.jawa.Jawa.getPrintStream();\n" + mIndent);
+        switch (OUTPUT_METHOD) {
+            case PRINT_STREAM:
+                mWriter.print("{\n" + mIndent);
+                mWriter.print("java.io.PrintStream " + mWriterName
+                        + " = com.teamten.jawa.Jawa.getPrintStream();\n"
+                        + mIndent);
+                break;
+
+            case STRING_BUILDER:
+                mWriter.print("StringBuilder " + mWriterName
+                        + " = new StringBuilder();\n"
+                        + mIndent);
+                break;
+        }
 
         try {
             startNormal();
@@ -101,7 +133,16 @@ public class TemplateProcessor {
             inputReader.close();
         }
 
-        mWriter.print("}\n" + mIndent);
+        switch (OUTPUT_METHOD) {
+            case PRINT_STREAM:
+                mWriter.print("}\n" + mIndent);
+                break;
+
+            case STRING_BUILDER:
+                mWriter.print("return " + mWriterName + ".toString();\n"
+                        + mIndent);
+                break;
+        }
     }
 
     private void processChar(char ch) {
@@ -187,7 +228,7 @@ public class TemplateProcessor {
     }
 
     private void startNormal() {
-        mWriter.print(mWriterName + ".print(\"");
+        mWriter.print(mAppendMethod + "(\"");
     }
 
     private void endNormal() {
@@ -195,7 +236,7 @@ public class TemplateProcessor {
     }
 
     private void startExpression() {
-        mWriter.print(mWriterName + ".print(");
+        mWriter.print(mAppendMethod + "(");
     }
 
     private void endExpression() {

@@ -1,19 +1,17 @@
 
-import java.io.PrintStream;
-import com.teamten.jawa.Jawa;
-
 /**
  * Test of calling a method from within a statement.
  */
 public class Test3 {
     public static void main(String[] args) {
-        int max = 5;
-        Jawa.reset(System.out);
+        System.out.print(new Test3().page(5));
+    }
 
+    private String page(int max) {
         `test3.html`
     }
 
-    private static void hello(int count) {
+    private String hello(int count) {
         `test3-hello.html`
     }
 }

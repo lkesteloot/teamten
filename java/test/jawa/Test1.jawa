@@ -1,15 +1,13 @@
 
-import java.io.PrintStream;
-import com.teamten.jawa.Jawa;
-
 /**
  * Test of expressions.
  */
 public class Test1 {
     public static void main(String[] args) {
-        String name = "world";
-        Jawa.reset(System.out);
+        System.out.print(hello("world"));
+    }
 
+    private static String hello(String name) {
         `test1.html`
     }
 }
