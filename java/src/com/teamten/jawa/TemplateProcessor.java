@@ -157,8 +157,10 @@ public class TemplateProcessor {
                     } else {
                         mWriter.print("\\n");
                     }
+                } else if (ch == '\\') {
+                    mWriter.print("\\\\");
                 } else if (ch == '"') {
-                    mWriter.print("\"");
+                    mWriter.print("\\\"");
                 } else {
                     mWriter.print(ch);
                 }

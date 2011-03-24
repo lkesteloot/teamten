@@ -1,4 +1,3 @@
-- Escape double quotes inside HTML.
 
 - In template, if a {% %} line is entirely on its own line (only whitespace
   before and after), remove all whitespace and newline.
