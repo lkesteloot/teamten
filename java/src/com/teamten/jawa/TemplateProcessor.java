@@ -8,13 +8,13 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 
 /**
- * Processes a template into Java code.
+ * Processes a template into Java code that prints the template contents.
  */
 public class TemplateProcessor {
     /**
-     * Generates prettier but perhaps less performant code.
+     * Name of the variable we're writing to.
      */
-    private static final boolean PRETTY_CODE = true;
+    private static final String WRITER_NAME = "jawaWriter";
     /**
      * How to output the template.
      */
@@ -24,9 +24,9 @@ public class TemplateProcessor {
         // StringBuilder instance.
         STRING_BUILDER,
     }
-    private static OutputMethod OUTPUT_METHOD = OutputMethod.STRING_BUILDER;
+    private OutputMethod mOutputMethod;
     /**
-     * The indent equivalent to the print statement, minus the plus sign.
+     * Parser state machine.
      */
     private static enum State {
         // Processing template text.
@@ -43,49 +43,58 @@ public class TemplateProcessor {
         SAW_PERCENT,
     }
     private State mState = State.NORMAL;
+    /**
+     * Generating the Java code into this.
+     */
     private StringBuilder mWriter;
+    /**
+     * Indent the entire Java code by this much.
+     */
     private String mIndent = "";
-    private int mCounter;
-    private String mWriterName;
+    /**
+     * The full method (including writer name) used to append template
+     * text.
+     */
     private String mAppendMethod;
+    /**
+     * An indent for lines that go below the writer line.
+     */
     private String mAppendMethodIndent;
+    /**
+     * These four keep track of the text before and after a statement on
+     * a line. If, at the end of the line, these are entirely blank, we
+     * remove them.
+     */
     private int mPreStatementBegin;
     private int mPreStatementEnd;
     private int mPostStatementBegin;
     private int mPostStatementEnd;
 
     public TemplateProcessor() {
-        setCounter(0);
+        setOutputMethod(OutputMethod.STRING_BUILDER);
     }
 
+    /**
+     * Configures the indent at the front of every Java line.
+     */
     public TemplateProcessor withIndent(String indent) {
         mIndent = indent;
         return this;
     }
 
-    public TemplateProcessor withCounter(int counter) {
-        setCounter(counter);
-        return this;
-    }
-
     /**
-     * Can probably remove this now that we put the code inside its own block.
+     * Specifies how the run-time code should output the template.
      */
-    private void setCounter(int counter) {
-        mCounter = counter;
+    private void setOutputMethod(OutputMethod outputMethod) {
+        mOutputMethod = outputMethod;
 
-        mWriterName = "jawaWriter";
-        if (mCounter > 0) {
-            mWriterName += mCounter;
-        }
-
-        switch (OUTPUT_METHOD) {
+        switch (mOutputMethod) {
             case PRINT_STREAM:
-                mAppendMethod = mWriterName + ".print";
+                mAppendMethod = WRITER_NAME + ".print";
                 break;
 
             case STRING_BUILDER:
-                mAppendMethod = mWriterName + ".append";
+                mAppendMethod = WRITER_NAME + ".append";
                 break;
         }
 
@@ -97,11 +106,14 @@ public class TemplateProcessor {
         }
     }
 
-    public String processFile(String filename)
-        throws IOException {
+    /**
+     * Process the template in the file and return Java code that will
+     * print it. The trailing newline from the template is removed.
+     */
+    public String processFile(String filename) throws IOException {
+        System.out.println("Processing <" + filename + ">");
 
-        System.out.println("Including <" + filename + ">");
-
+        // Read the template all at once so we can pre-process it a bit.
         String template = FileUtils.readFileToString(new File(filename));
         // Strip trailing \n.
         int length = template.length();
@@ -109,18 +121,19 @@ public class TemplateProcessor {
             template = template.substring(0, length - 1);
         }
 
+        // We'll write Java to this builder.
         mWriter = new StringBuilder();
 
-        switch (OUTPUT_METHOD) {
+        // Create our output variable.
+        switch (mOutputMethod) {
             case PRINT_STREAM:
-                mWriter.append("{\n" + mIndent);
-                mWriter.append("java.io.PrintStream " + mWriterName
+                mWriter.append("java.io.PrintStream " + WRITER_NAME
                         + " = com.teamten.jawa.Jawa.getPrintStream();\n"
                         + mIndent);
                 break;
 
             case STRING_BUILDER:
-                mWriter.append("StringBuilder " + mWriterName
+                mWriter.append("StringBuilder " + WRITER_NAME
                         + " = new StringBuilder();\n"
                         + mIndent);
                 break;
@@ -136,13 +149,13 @@ public class TemplateProcessor {
 
         endNormal();
 
-        switch (OUTPUT_METHOD) {
+        switch (mOutputMethod) {
             case PRINT_STREAM:
-                mWriter.append("}\n" + mIndent);
+                // Nothing.
                 break;
 
             case STRING_BUILDER:
-                mWriter.append("return " + mWriterName + ".toString();\n"
+                mWriter.append("return " + WRITER_NAME + ".toString();\n"
                         + mIndent);
                 break;
         }
@@ -168,10 +181,8 @@ public class TemplateProcessor {
                     if (!deleted) {
                         mWriter.append("\\n");
                     }
-                    if (PRETTY_CODE) {
-                        mWriter.append("\"\n" + mIndent
-                                + mAppendMethodIndent + "+ \"");
-                    }
+                    mWriter.append("\"\n" + mIndent
+                            + mAppendMethodIndent + "+ \"");
                     startNewLine();
                 } else if (ch == '\\') {
                     mWriter.append("\\\\");

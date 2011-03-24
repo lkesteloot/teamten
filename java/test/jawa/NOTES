@@ -1,6 +1,4 @@
 
-- Expand append() in template processor.
-
 - Inside {% %} delegate back to Jawa parser since we'll have other things
   there, possibly including other templates.
 
