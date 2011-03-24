@@ -48,6 +48,10 @@ public class TemplateProcessor {
     private String mWriterName;
     private String mAppendMethod;
     private String mAppendMethodIndent;
+    private int mPreStatementBegin;
+    private int mPreStatementEnd;
+    private int mPostStatementBegin;
+    private int mPostStatementEnd;
 
     public TemplateProcessor() {
         setCounter(0);
@@ -115,6 +119,8 @@ public class TemplateProcessor {
                 break;
         }
 
+        startNewLine();
+
         try {
             startNormal();
 
@@ -142,17 +148,29 @@ public class TemplateProcessor {
         return mWriter.toString();
     }
 
+    private void startNewLine() {
+        mPreStatementBegin = mWriter.length();
+        mPreStatementEnd = -1;
+        mPostStatementBegin = -1;
+        mPostStatementEnd = -1;
+    }
+
     private void processChar(char ch) {
         switch (mState) {
             case NORMAL:
                 if (ch == '{') {
                     mState = State.SAW_OPEN_BRACE;
                 } else if (ch == '\n') {
-                    mWriter.append("\\n");
+                    mPostStatementEnd = mWriter.length();
+                    boolean deleted = possiblyDeleteLine();
+                    if (!deleted) {
+                        mWriter.append("\\n");
+                    }
                     if (PRETTY_CODE) {
                         mWriter.append("\"\n" + mIndent
                                 + mAppendMethodIndent + "+ \"");
                     }
+                    startNewLine();
                 } else if (ch == '\\') {
                     mWriter.append("\\\\");
                 } else if (ch == '"') {
@@ -168,6 +186,12 @@ public class TemplateProcessor {
                     startExpression();
                     mState = State.EXPRESSION;
                 } else if (ch == '%') {
+                    if (mPreStatementEnd == -1) {
+                        mPreStatementEnd = mWriter.length();
+                    } else {
+                        // Disable for this line.
+                        mPreStatementBegin = -1;
+                    }
                     endNormal();
                     startStatement();
                     mState = State.STATEMENT;
@@ -211,6 +235,9 @@ public class TemplateProcessor {
                     endStatement();
                     startNormal();
                     mState = State.NORMAL;
+                    if (mPreStatementEnd != -1) {
+                        mPostStatementBegin = mWriter.length();
+                    }
                 } else {
                     mWriter.append('%');
 
@@ -223,6 +250,37 @@ public class TemplateProcessor {
                 }
                 break;
         }
+    }
+
+    private boolean possiblyDeleteLine() {
+        if (mPreStatementBegin != -1
+                && mPreStatementEnd != -1
+                && mPostStatementBegin != -1
+                && isBlank(mPreStatementBegin, mPreStatementEnd)
+                && isBlank(mPostStatementBegin, mPostStatementEnd)) {
+
+            if (mPreStatementBegin < mPreStatementEnd) {
+                mWriter.delete(mPreStatementBegin, mPreStatementEnd);
+            }
+            if (mPostStatementBegin < mPostStatementEnd) {
+                mWriter.delete(mPostStatementBegin, mPostStatementEnd);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isBlank(int begin, int end) {
+        for (int i = begin; i < end; i++) {
+            char ch = mWriter.charAt(i);
+            if (ch != ' ' && ch != '\t') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void startNormal() {
