@@ -4,7 +4,6 @@ package com.teamten.jawa;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.Reader;
 
 /**
@@ -43,7 +42,7 @@ public class TemplateProcessor {
         SAW_PERCENT,
     }
     private State mState = State.NORMAL;
-    private PrintStream mWriter;
+    private StringBuilder mWriter;
     private String mIndent = "";
     private int mCounter;
     private String mWriterName;
@@ -52,11 +51,6 @@ public class TemplateProcessor {
 
     public TemplateProcessor() {
         setCounter(0);
-    }
-
-    public TemplateProcessor withPrintStream(PrintStream writer) {
-        mWriter = writer;
-        return this;
     }
 
     public TemplateProcessor withIndent(String indent) {
@@ -98,23 +92,24 @@ public class TemplateProcessor {
         }
     }
 
-    public void processFile(String filename)
+    public String processFile(String filename)
         throws IOException {
 
         System.out.println("Including <" + filename + ">");
 
         Reader inputReader = new FileReader(filename);
+        mWriter = new StringBuilder();
 
         switch (OUTPUT_METHOD) {
             case PRINT_STREAM:
-                mWriter.print("{\n" + mIndent);
-                mWriter.print("java.io.PrintStream " + mWriterName
+                mWriter.append("{\n" + mIndent);
+                mWriter.append("java.io.PrintStream " + mWriterName
                         + " = com.teamten.jawa.Jawa.getPrintStream();\n"
                         + mIndent);
                 break;
 
             case STRING_BUILDER:
-                mWriter.print("StringBuilder " + mWriterName
+                mWriter.append("StringBuilder " + mWriterName
                         + " = new StringBuilder();\n"
                         + mIndent);
                 break;
@@ -135,14 +130,16 @@ public class TemplateProcessor {
 
         switch (OUTPUT_METHOD) {
             case PRINT_STREAM:
-                mWriter.print("}\n" + mIndent);
+                mWriter.append("}\n" + mIndent);
                 break;
 
             case STRING_BUILDER:
-                mWriter.print("return " + mWriterName + ".toString();\n"
+                mWriter.append("return " + mWriterName + ".toString();\n"
                         + mIndent);
                 break;
         }
+
+        return mWriter.toString();
     }
 
     private void processChar(char ch) {
@@ -152,17 +149,17 @@ public class TemplateProcessor {
                     mState = State.SAW_OPEN_BRACE;
                 } else if (ch == '\n') {
                     if (PRETTY_CODE) {
-                        mWriter.print("\\n\"\n" + mIndent
+                        mWriter.append("\\n\"\n" + mIndent
                                 + mPrintIndent + "+ \"");
                     } else {
-                        mWriter.print("\\n");
+                        mWriter.append("\\n");
                     }
                 } else if (ch == '\\') {
-                    mWriter.print("\\\\");
+                    mWriter.append("\\\\");
                 } else if (ch == '"') {
-                    mWriter.print("\\\"");
+                    mWriter.append("\\\"");
                 } else {
-                    mWriter.print(ch);
+                    mWriter.append(ch);
                 }
                 break;
 
@@ -176,8 +173,8 @@ public class TemplateProcessor {
                     startStatement();
                     mState = State.STATEMENT;
                 } else {
-                    mWriter.print('{');
-                    mWriter.print(ch);
+                    mWriter.append('{');
+                    mWriter.append(ch);
                     mState = State.NORMAL;
                 }
                 break;
@@ -186,7 +183,7 @@ public class TemplateProcessor {
                 if (ch == '}') {
                     mState = State.SAW_CLOSE_BRACE;
                 } else {
-                    mWriter.print(ch);
+                    mWriter.append(ch);
                 }
                 break;
 
@@ -196,8 +193,8 @@ public class TemplateProcessor {
                     startNormal();
                     mState = State.NORMAL;
                 } else {
-                    mWriter.print('}');
-                    mWriter.print(ch);
+                    mWriter.append('}');
+                    mWriter.append(ch);
                     mState = State.EXPRESSION;
                 }
                 break;
@@ -206,7 +203,7 @@ public class TemplateProcessor {
                 if (ch == '%') {
                     mState = State.SAW_PERCENT;
                 } else {
-                    mWriter.print(ch);
+                    mWriter.append(ch);
                 }
                 break;
 
@@ -216,12 +213,12 @@ public class TemplateProcessor {
                     startNormal();
                     mState = State.NORMAL;
                 } else {
-                    mWriter.print('%');
+                    mWriter.append('%');
 
                     if (ch == '%') {
                         // Nothing, stay in this state.
                     } else {
-                        mWriter.print(ch);
+                        mWriter.append(ch);
                         mState = State.STATEMENT;
                     }
                 }
@@ -230,19 +227,19 @@ public class TemplateProcessor {
     }
 
     private void startNormal() {
-        mWriter.print(mAppendMethod + "(\"");
+        mWriter.append(mAppendMethod + "(\"");
     }
 
     private void endNormal() {
-        mWriter.print("\");\n" + mIndent);
+        mWriter.append("\");\n" + mIndent);
     }
 
     private void startExpression() {
-        mWriter.print(mAppendMethod + "(");
+        mWriter.append(mAppendMethod + "(");
     }
 
     private void endExpression() {
-        mWriter.print(");\n" + mIndent);
+        mWriter.append(");\n" + mIndent);
     }
 
     private void startStatement() {

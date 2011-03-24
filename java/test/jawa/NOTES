@@ -1,21 +1,13 @@
 
+- Expand append() in template processor.
+
 - In template, if a {% %} line is entirely on its own line (only whitespace
   before and after), remove all whitespace and newline.
+    - Keep track of whether we saw only white space on a line, and
+      whether we had a statement. If yes when we get to \n, remove contents
+      of line. Also keep track of position of start of line. Also do this
+      at end of file?
 
 - Inside {% %} delegate back to Jawa parser since we'll have other things
   there, possibly including other templates.
 
-- Test calling other function from within {% %}.
-
-- Does it make sense to call other function from {{ }}? The function would
-  have to return a string, which means our template would have to accumulate
-  a string.
-
-- Perhaps `` should return a string, not write to a writer.
-    - Advantages:
-        - No magic "writer" variable.
-        - Perhaps faster if writer is not buffered.
-    - Disadvantages:
-        - Perhaps slower if have to make large strings.
-        - Not good for very large outputs that have to fit in memory.
-        - Must be used in an expression, so can't have statements.

@@ -72,10 +72,9 @@ public class JawaProcessor {
 
             case TEMPLATE_FILENAME:
                 if (ch == '`') {
-                    new TemplateProcessor()
-                        .withPrintStream(mWriter)
-                        .withIndent(mIndent)
-                        .processFile(mIncludedFilename);
+                    mWriter.print(new TemplateProcessor()
+                            .withIndent(mIndent)
+                            .processFile(mIncludedFilename));
                     mState = State.NORMAL;
                     mIncludedFilename = "";
                 } else if (ch == '\n') {
