@@ -1,7 +1,55 @@
 
-- Add comments.
-
 - Inside {% %} delegate back to Jawa parser since we'll have other things
   there, possibly including other templates.
+    - Must race ahead to end of %} to get string, then pass that.
+    - Perhaps skip this.
 
 - Handle backticks in strings and comments.
+
+- Add template comments.
+    - Proposed:     {* Comment here *}
+    - Alternative:  {% /* Comment here */ %}
+
+- Add template inheritance.
+    - Have syntax for directive.
+        - {! !}
+    - Directive for parent template.
+        - {! extend filename !}
+    - Tornado style:
+        - Directive for block.
+            - {! block NAME !}
+            - {! end block !}
+        - Directive for overriding.
+            - (Same)
+        - Examples:
+            - super: <title>{! block title !}{! end !}</title>
+            - sub: {! block title !}Profile of {{ user.getName() }}{! end !}
+    - Or the whole {! !} is the block.
+        - Directive for block.
+            - {!NAME:contents!}
+        - Examples:
+            - super: <title>{!title:!}</title>
+            - or: <title>{!title!}</title>
+            - sub: {!title:Profile of {{ user.getName() }}!}
+        - And use different thing for directives, like:
+            - {# extend filename #}
+        - Might prefer {$title:Profile$} to look like $var substitution.
+    - How to implement?
+        - Parse parent (recursively).
+        - Parse all the blocks in template.
+            - Handle nested directives, strings, comments.
+        - Or force directives to be on their own line.
+            - Doesn't work for original block, only for override, and not even
+              then.
+        - Substitute blocks into parent.
+        - Parse file normally.
+
+- Provide way to escape all these things like {{.
+    - Put backslash in front: \{{, \{%, \{*
+    - Use hex code, &x7b;
+
+- Write unit tests for all this.
+    - Provide hooks to submit strings and get strings back.
+
+- How to handle HTML, attribute, and JS escaping?
+    - Default, with way to avoid, or force user to do it?
