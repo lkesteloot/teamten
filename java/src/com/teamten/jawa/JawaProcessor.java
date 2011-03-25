@@ -12,10 +12,8 @@ import java.io.Reader;
  * included templates.
  */
 public class JawaProcessor {
-    /**
-     * The character being read is at this column, 1-based.
-     */
     private PrintStream mWriter;
+    // Parser state.
     private static enum State {
         // Parsing Java code.
         NORMAL,
@@ -28,6 +26,9 @@ public class JawaProcessor {
     private String mIncludedFilename;
     private String mIndent;
 
+    /**
+     * Process a Jawa file, storing the Java code in another file.
+     */
     public void processFile(String inputFilename, String outputFilename)
         throws IOException {
 
@@ -50,12 +51,18 @@ public class JawaProcessor {
         }
     }
 
+    /**
+     * Reset the state machine for a new input file.
+     */
     private void resetState() {
         mState = State.INDENT;
         mIncludedFilename = "";
         mIndent = "";
     }
 
+    /**
+     * Process an input character.
+     */
     private void processChar(char ch) throws IOException {
         switch (mState) {
             case NORMAL:

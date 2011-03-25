@@ -115,7 +115,9 @@ public class TemplateProcessor {
 
         // Read the template all at once so we can pre-process it a bit.
         String template = FileUtils.readFileToString(new File(filename));
-        // Strip trailing \n.
+        // Strip trailing \n. We never want it and it makes it hard
+        // to have sub-templates that fit nicely within HTML. (It
+        // forces nested templates to be followed by whitespace.)
         int length = template.length();
         if (length > 0 && template.charAt(length - 1) == '\n') {
             template = template.substring(0, length - 1);
@@ -127,9 +129,8 @@ public class TemplateProcessor {
         // Create our output variable.
         switch (mOutputMethod) {
             case PRINT_STREAM:
-                mWriter.append("java.io.PrintStream " + WRITER_NAME
-                        + " = com.teamten.jawa.Jawa.getPrintStream();\n"
-                        + mIndent);
+                // Not implemented. Somehow get a PrintStream instance
+                // and put it into a local WRITER_NAME variable.
                 break;
 
             case STRING_BUILDER:
@@ -163,6 +164,9 @@ public class TemplateProcessor {
         return mWriter.toString();
     }
 
+    /**
+     * Reset the state for a new template line.
+     */
     private void startNewLine() {
         mPreStatementBegin = mWriter.length();
         mPreStatementEnd = -1;
@@ -170,6 +174,9 @@ public class TemplateProcessor {
         mPostStatementEnd = -1;
     }
 
+    /**
+     * Process an input character and advance the state machine.
+     */
     private void processChar(char ch) {
         switch (mState) {
             case NORMAL:
@@ -265,6 +272,12 @@ public class TemplateProcessor {
         }
     }
 
+    /**
+     * If a line was entirely made up of whitespace, a statement,
+     * then more whitespace, delete the whitespace and following newline.
+     * That stuff wasn't meant to be part of the output, it was just
+     * the nicest way to format the statement.
+     */
     private boolean possiblyDeleteLine() {
         if (mPreStatementBegin != -1
                 && mPreStatementEnd != -1
@@ -272,6 +285,10 @@ public class TemplateProcessor {
                 && isBlank(mPreStatementBegin, mPreStatementEnd)
                 && isBlank(mPostStatementBegin, mPostStatementEnd)) {
 
+            // We need these guards against the possibility that
+            // the "being" is past the end of the string. The delete()
+            // method really should recognize that if begin == length == end
+            // then there's nothing to do, but it throws.
             if (mPreStatementBegin < mPreStatementEnd) {
                 mWriter.delete(mPreStatementBegin, mPreStatementEnd);
             }
@@ -285,6 +302,10 @@ public class TemplateProcessor {
         return false;
     }
 
+    /**
+     * Return whether the span between begin (inclusive) and end (exclusive) of
+     * mWriter is made up of spaces and tabs.
+     */
     private boolean isBlank(int begin, int end) {
         for (int i = begin; i < end; i++) {
             char ch = mWriter.charAt(i);

@@ -8,6 +8,9 @@ public class Test1 {
     }
 
     private static String hello(String name) {
+        // The backtick syntax creates Java code that writes the contents
+        // of the file to a string and returns the string. The template
+        // has access to variables and other symbols visible from here.
         `test1.html`
     }
 }

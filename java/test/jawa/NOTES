@@ -4,3 +4,4 @@
 - Inside {% %} delegate back to Jawa parser since we'll have other things
   there, possibly including other templates.
 
+- Handle backticks in strings and comments.
