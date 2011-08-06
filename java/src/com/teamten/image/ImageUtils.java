@@ -14,14 +14,26 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Kernel;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.metadata.IIOMetadataNode;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
+
+import org.w3c.dom.Node;
 
 /**
  * Assorted utility methods for transforming images.
@@ -926,6 +938,126 @@ public class ImageUtils {
         }
 
         ImageIO.write(image, fileType, outputStream);
+    }
+
+    /**
+     * Saves a list of images as an animated GIF with the specified pause time for each
+     * image and whether to loop continuously. The filename must end with ".gif".
+     *
+     * Based on code from http://elliot.kroo.net/software/java/GifSequenceWriter/
+     */
+    public static void saveAnimatedGif(List<BufferedImage> images, String filename,
+            int frameTimeMs, boolean loop) throws IOException {
+
+        if (images.isEmpty()) {
+            throw new IllegalArgumentException("Animated GIF must have at least one image");
+        }
+
+        if (!filename.toLowerCase().endsWith(".gif")) {
+            throw new IllegalArgumentException("Output filename must end with .gif");
+        }
+
+        log("Saving animated GIF \"%s\" (%dx%d, %d frames, %d ms delay, %slooping)", filename,
+                images.get(0).getWidth(), images.get(0).getHeight(), images.size(),
+                frameTimeMs, loop ? "" : "not ");
+
+        // Find a GIF writer.
+        ImageWriter writer;
+        Iterator<ImageWriter> itr = ImageIO.getImageWritersBySuffix("gif");
+        if (!itr.hasNext()) {
+            // Can't happen, it's included in Java.
+            throw new IllegalStateException("No GIF image writers found");
+        } else {
+            // Pick the first one.
+            writer = itr.next();
+        }
+
+        // Determine the image type from the first image.
+        int imageType = images.get(0).getType();
+
+        // Round frame time to nearest centisecond.
+        int frameTimeCs = (frameTimeMs + 5) / 10;
+
+        // Output file.
+        ImageOutputStream output = new FileImageOutputStream(new File(filename));
+
+        // Set up the write parameters. We'll use these for every frame.
+        ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
+        ImageTypeSpecifier imageTypeSpecifier =
+            ImageTypeSpecifier.createFromBufferedImageType(imageType);
+
+        IIOMetadata imageMetaData = writer.getDefaultImageMetadata(imageTypeSpecifier,
+                imageWriteParam);
+
+        String metaFormatName = imageMetaData.getNativeMetadataFormatName();
+
+        IIOMetadataNode root = (IIOMetadataNode) imageMetaData.getAsTree(metaFormatName);
+
+        // Basic parameters.
+        IIOMetadataNode graphicControlExtensionNode = getChild(root, "GraphicControlExtension");
+        graphicControlExtensionNode.setAttribute("disposalMethod", "none");
+        graphicControlExtensionNode.setAttribute("userInputFlag", "FALSE");
+        graphicControlExtensionNode.setAttribute("transparentColorFlag", "FALSE");
+        graphicControlExtensionNode.setAttribute("delayTime", Integer.toString(frameTimeCs));
+        graphicControlExtensionNode.setAttribute("transparentColorIndex", "0");
+
+        IIOMetadataNode commentNode = getChild(root, "CommentExtensions");
+        commentNode.setAttribute("CommentExtension", "Created by the Team Ten Library");
+
+        IIOMetadataNode applicationEntensionsNode = getChild(root, "ApplicationExtensions");
+
+        // Set looping.
+        IIOMetadataNode applicationExtensionNode = new IIOMetadataNode("ApplicationExtension");
+
+        applicationExtensionNode.setAttribute("applicationID", "NETSCAPE");
+        applicationExtensionNode.setAttribute("authenticationCode", "2.0");
+
+        int loopBit = loop ? 0 : 1;
+
+        applicationExtensionNode.setUserObject(new byte[] {
+            0x1,
+            (byte) (loopBit & 0xFF),
+            (byte) ((loopBit >> 8) & 0xFF)
+        });
+        applicationEntensionsNode.appendChild(applicationExtensionNode);
+
+        imageMetaData.setFromTree(metaFormatName, root);
+
+        writer.setOutput(output);
+        writer.prepareWriteSequence(null);
+
+        try {
+            // Write each of the images.
+            for (BufferedImage image : images) {
+                // No thumbnails.
+                IIOImage iioImage = new IIOImage(image, null, imageMetaData);
+                writer.writeToSequence(iioImage, imageWriteParam);
+            }
+        } finally {
+            writer.endWriteSequence();
+            output.close();
+        }
+    }
+
+    /**
+     * Returns an existing child node, or creates and returns a new child node if
+     * the requested node does not exist.
+     */
+    private static IIOMetadataNode getChild(IIOMetadataNode parent, String name) {
+        // Search for existing node.
+        for (int i = 0; i < parent.getLength(); i++) {
+            Node child = parent.item(i);
+
+            if (child.getNodeName().equalsIgnoreCase(name)) {
+                return (IIOMetadataNode) child;
+            }
+        }
+
+        // Not found. Create new child node.
+        IIOMetadataNode node = new IIOMetadataNode(name);
+        parent.appendChild(node);
+
+        return node;
     }
 
     /**
