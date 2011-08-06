@@ -1,4 +1,10 @@
 
+- Consider switching to a parser generator.
+    - Options:
+        JavaCC: http://java.net/projects/javacc/
+        ANTLR
+    - Can we still do tricky things like remove blanks?
+
 - Inside {% %} delegate back to Jawa parser since we'll have other things
   there, possibly including other templates.
     - Must race ahead to end of %} to get string, then pass that.

@@ -810,6 +810,48 @@ public class ImageUtils {
     }
 
     /**
+     * Generate a checkerboard image. The squares are anchored at the upper-left
+     * corner of the image.
+     *
+     * @param width the width of the generated image
+     * @param height the height of the generated image
+     * @param color1 the color of the square in the upper-left corner
+     * @param color2 the alternating color
+     * @param squareSize the width and height of the checker square
+     */
+    public static BufferedImage makeCheckerboard(int width, int height,
+            Color color1, Color color2, int squareSize) {
+
+        BufferedImage image = make(width, height, color1);
+
+        Graphics2D g = createGraphics(image);
+        g.setPaint(color2);
+
+        for (int y = 0; y < height; y += squareSize) {
+            for (int x = y % (squareSize*2); x < width; x += squareSize*2) {
+                g.fillRect(x, y, squareSize, squareSize);
+            }
+        }
+
+        g.dispose();
+
+        return image;
+    }
+
+    /**
+     * Compose the given image over a checkerboard to look for the transparency area.
+     */
+    public static BufferedImage composeOverCheckerboard(BufferedImage image) {
+        BufferedImage checkerboard = makeCheckerboard(
+                image.getWidth(), image.getHeight(),
+                new Color(0.65f, 0.65f, 0.65f, 1.0f),
+                new Color(0.70f, 0.70f, 0.70f, 1.0f),
+                16);
+
+        return compose(checkerboard, image);
+    }
+
+    /**
      * Load an image from a filename.
      */
     public static BufferedImage load(String filename) throws IOException {
