@@ -1156,6 +1156,18 @@ public class ImageUtils {
                 }
                 break;
 
+            case GARAMOND:
+                if (bold && italic) {
+                    throw new IllegalArgumentException("Garamond does not have bold italic");
+                } else if (bold) {
+                    filename = "fonts/Garamonb.ttf";
+                } else if (italic) {
+                    filename = "fonts/Garamoni.ttf";
+                } else {
+                    filename = "fonts/Garamond.ttf";
+                }
+                break;
+
             default:
                 throw new IllegalArgumentException("Unknown typeface " + typeface);
         }

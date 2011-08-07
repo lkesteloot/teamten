@@ -9,4 +9,5 @@ public enum Typeface {
     HELVETICA,
     FUTURA,
     COURIER,
+    GARAMOND,
 }
