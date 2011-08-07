@@ -1,0 +1,216 @@
+#!/usr/bin/env java_launcher
+# vim:ft=java:nospell
+# lib:../../java/dist/teamten.jar
+
+// Copyright 2011 Lawrence Kesteloot
+
+import com.teamten.image.ImageUtils;
+import com.teamten.image.Typeface;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.Graphics2D;
+import java.awt.font.GlyphVector;
+import java.awt.font.TextLayout;
+import java.awt.image.BufferedImage;
+import java.awt.geom.Point2D;
+
+import java.io.IOException;
+
+/**
+ * Create the cover image for the book "Lawrence Kesteloot in a Nutshell".
+ */
+public class make_cover {
+    // Sizes.
+    // DPI from http://en.wikipedia.org/wiki/List_of_displays_by_pixel_density
+    private static final int SCREEN_DPI = 128; // MacBook Air 13"
+    private static final int PRINT_DPI = 300;
+    private static final double PAGE_WIDTH_IN = 4.25;
+    private static final double PAGE_HEIGHT_IN = 6.87;
+    private static final double SPINE_WIDTH_IN = 0.153; // XXX fix.
+    private static final double WIDTH_IN = 2*PAGE_WIDTH_IN + SPINE_WIDTH_IN;
+    private static final double HEIGHT_IN = PAGE_HEIGHT_IN;
+    private static final double MARGIN_IN = 0.19;
+    private static final double HLINE_HEIGHT_IN = 0.1;
+    private static final double MIDDLE_HLINE_POS_IN = 3.5;
+    private static final double NAME1_HEIGHT_IN = 0.6;
+    private static final double NAME2_HEIGHT_IN = 0.6;
+    private static final double NUT_HEIGHT_IN = 0.55;
+    private static final double SUBTITLE_HEIGHT_IN = 0.55;
+
+    // Font sizes.
+    private static final double NAME_FONT_SIZE_IN = 0.68;
+    private static final double NUT_FONT_SIZE_IN = 0.45;
+    private static final double SUBTITLE_FONT_SIZE_IN = 0.20;
+
+    // Colors.
+    private static final Color BACKGROUND_COLOR = Color.WHITE;
+    private static final Color HIGHLIGHT_COLOR = new Color(0.6f, 0.0f, 0.0f, 1.0f);
+    private static final Color DEBUG_COLOR = Color.GRAY;
+    private static final Color BLACK_TEXT_COLOR = Color.BLACK;
+    private static final Color WHITE_TEXT_COLOR = Color.WHITE;
+
+    // Flags.
+    private static final boolean DRAW_SPINE = false;
+    private static final boolean DRAW_MARGIN = false;
+
+    private final String mFilename;
+    private final int mDpi;
+
+    public static void main(String[] args) throws IOException, FontFormatException {
+        new make_cover(args).run();
+    }
+
+    private make_cover(String[] args) {
+        if (args.length != 1) {
+            System.err.println("Usage: make_cover filename");
+            System.exit(-1);
+        }
+
+        mFilename = args[0];
+        mDpi = SCREEN_DPI;
+    }
+
+    private void run() throws IOException, FontFormatException {
+        int width = toPixels(WIDTH_IN);
+        int height = toPixels(HEIGHT_IN);
+
+        BufferedImage image = ImageUtils.make(width, height, BACKGROUND_COLOR);
+        Graphics2D g = ImageUtils.createGraphics(image);
+
+        // ----------------------------------------------------------------------------------
+        // Front page
+
+        int frontLeftX = toPixels(PAGE_WIDTH_IN + SPINE_WIDTH_IN);
+
+        // HLine on top.
+        g.setPaint(HIGHLIGHT_COLOR);
+        g.fillRect(frontLeftX + toPixels(MARGIN_IN), 0,
+                toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), toPixels(HLINE_HEIGHT_IN));
+
+        // HLine in middle.
+        int y = toPixels(MIDDLE_HLINE_POS_IN);
+        int itemHeight = toPixels(HLINE_HEIGHT_IN);
+        g.setPaint(HIGHLIGHT_COLOR);
+        g.fillRect(frontLeftX + toPixels(MARGIN_IN), y,
+                toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), itemHeight);
+        y += itemHeight;
+
+        // First name
+        itemHeight = toPixels(NAME1_HEIGHT_IN);
+        Font font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false,
+                toPixels(NAME_FONT_SIZE_IN));
+        g.setColor(BLACK_TEXT_COLOR);
+        g.setFont(font);
+        TextLayout textLayout = new TextLayout("LAWRENCE", font, g.getFontRenderContext());
+        int textWidth = (int) textLayout.getBounds().getWidth();
+        int textHeight = (int) textLayout.getBounds().getHeight();
+        if (true) {
+            justifyText(g, font, BLACK_TEXT_COLOR, "LAWRENCE", frontLeftX + toPixels(MARGIN_IN),
+                frontLeftX + toPixels(PAGE_WIDTH_IN - MARGIN_IN),
+                y + itemHeight/2 + textHeight/2);
+        } else {
+            textLayout.draw(g, frontLeftX + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+                    y + itemHeight/2 + textHeight/2);
+        }
+        y += itemHeight;
+
+        // Last name
+        itemHeight = toPixels(NAME2_HEIGHT_IN);
+        textLayout = new TextLayout("KESTELOOT", font, g.getFontRenderContext());
+        textWidth = (int) textLayout.getBounds().getWidth();
+        textHeight = (int) textLayout.getBounds().getHeight();
+        if (true) {
+            justifyText(g, font, BLACK_TEXT_COLOR, "KESTELOOT", frontLeftX + toPixels(MARGIN_IN),
+                frontLeftX + toPixels(PAGE_WIDTH_IN - MARGIN_IN),
+                y + itemHeight/2 + textHeight/2);
+        } else {
+            textLayout.draw(g, frontLeftX + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+                    y + itemHeight/2 + textHeight/2);
+        }
+        y += itemHeight;
+
+        // Nutshell
+        itemHeight = toPixels(NUT_HEIGHT_IN);
+        g.setPaint(HIGHLIGHT_COLOR);
+        g.fillRect(frontLeftX + toPixels(MARGIN_IN), y,
+                toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), itemHeight);
+        font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false,
+                toPixels(NUT_FONT_SIZE_IN));
+        g.setColor(WHITE_TEXT_COLOR);
+        g.setFont(font);
+        textLayout = new TextLayout("IN A NUTSHELL", font, g.getFontRenderContext());
+        textWidth = (int) textLayout.getBounds().getWidth();
+        textHeight = (int) textLayout.getBounds().getHeight();
+        textLayout.draw(g, frontLeftX + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+                y + itemHeight/2 + textHeight/2);
+        y += itemHeight;
+
+        // Subtitle
+        itemHeight = toPixels(SUBTITLE_HEIGHT_IN);
+        font = ImageUtils.getFont(Typeface.GARAMOND, false, true, false,
+                toPixels(SUBTITLE_FONT_SIZE_IN));
+        g.setColor(BLACK_TEXT_COLOR);
+        g.setFont(font);
+        textLayout = new TextLayout("Collected stories and essays",
+                font, g.getFontRenderContext());
+        textWidth = (int) textLayout.getBounds().getWidth();
+        textHeight = (int) textLayout.getBounds().getHeight();
+        textLayout.draw(g, frontLeftX + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+                y + itemHeight/2 + textHeight/2);
+
+        // ----------------------------------------------------------------------------------
+        // Back page
+
+        // ----------------------------------------------------------------------------------
+        // Spine
+
+        // ----------------------------------------------------------------------------------
+        // Debug
+
+        if (DRAW_SPINE) {
+            g.setColor(DEBUG_COLOR);
+            g.drawRect(toPixels(WIDTH_IN/2 - SPINE_WIDTH_IN/2), 0,
+                    toPixels(SPINE_WIDTH_IN), toPixels(HEIGHT_IN));
+        }
+
+        if (DRAW_MARGIN) {
+            g.setColor(DEBUG_COLOR);
+            g.drawRect(toPixels(MARGIN_IN), toPixels(MARGIN_IN),
+                    toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN),
+                    toPixels(PAGE_HEIGHT_IN - 2*MARGIN_IN));
+            g.drawRect(frontLeftX + toPixels(MARGIN_IN), toPixels(MARGIN_IN),
+                    toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN),
+                    toPixels(PAGE_HEIGHT_IN - 2*MARGIN_IN));
+        }
+
+        g.dispose();
+        ImageUtils.save(image, mFilename);
+    }
+
+    /**
+     * Draw the string at y so that the letters are evenly spread from x1 to x2.
+     */
+    private void justifyText(Graphics2D g, Font font, Color color,
+            String text, int x1, int x2, int y) {
+
+        GlyphVector glyphVector = font.createGlyphVector(g.getFontRenderContext(), text);
+        int textWidth = (int) glyphVector.getLogicalBounds().getWidth();
+        int padding = x2 - x1 - textWidth;
+        double characterPadding = (double) padding / (text.length() - 1);
+
+        for (int i = 1; i < glyphVector.getNumGlyphs(); i++) {
+            Point2D p = glyphVector.getGlyphPosition(i);
+            p.setLocation(p.getX() + i*characterPadding, p.getY());
+            glyphVector.setGlyphPosition(i, p);
+        }
+
+        g.setPaint(color);
+        g.fill(glyphVector.getOutline(x1, y));
+    }
+
+    private int toPixels(double inches) {
+        return (int) (inches*mDpi + 0.5);
+    }
+}
