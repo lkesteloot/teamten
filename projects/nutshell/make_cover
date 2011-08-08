@@ -13,8 +13,9 @@ import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.font.GlyphVector;
 import java.awt.font.TextLayout;
-import java.awt.image.BufferedImage;
 import java.awt.geom.Point2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 import java.io.IOException;
 
@@ -26,23 +27,34 @@ public class make_cover {
     // DPI from http://en.wikipedia.org/wiki/List_of_displays_by_pixel_density
     private static final int SCREEN_DPI = 128; // MacBook Air 13"
     private static final int PRINT_DPI = 300;
-    private static final double PAGE_WIDTH_IN = 4.25;
+    // Important text/images must be 0.375" away from edge.
+    // http://connect.lulu.com/t5/Cover-Formatting/What-dimensions-should-my-book-cover-images-have/ta-p/33279
+    private static final double BLEED_IN = 0.125;
+    private static final double PAGE_WIDTH_IN = 4.25; // Not including bleed, including margin.
     private static final double PAGE_HEIGHT_IN = 6.87;
-    private static final double SPINE_WIDTH_IN = 0.153; // XXX fix.
-    private static final double WIDTH_IN = 2*PAGE_WIDTH_IN + SPINE_WIDTH_IN;
-    private static final double HEIGHT_IN = PAGE_HEIGHT_IN;
+    private static final double SPINE_WIDTH_IN = 0.489; // Get from Lulu, depends on page count
+    private static final double WIDTH_IN = 2*PAGE_WIDTH_IN + SPINE_WIDTH_IN + 2*BLEED_IN;
+    private static final double HEIGHT_IN = PAGE_HEIGHT_IN + 2*BLEED_IN;
     private static final double MARGIN_IN = 0.19;
     private static final double HLINE_HEIGHT_IN = 0.1;
+    // Positions are relative to top of page, not including bleed. (They start where bleed ends.)
     private static final double MIDDLE_HLINE_POS_IN = 3.5;
     private static final double NAME1_HEIGHT_IN = 0.6;
     private static final double NAME2_HEIGHT_IN = 0.6;
     private static final double NUT_HEIGHT_IN = 0.55;
     private static final double SUBTITLE_HEIGHT_IN = 0.55;
+    private static final double TEAM_TEN_HEIGHT_IN = 0.50;
+    private static final double BACK_TITLE_HEIGHT_IN = 0.50;
 
     // Font sizes.
     private static final double NAME_FONT_SIZE_IN = 0.68;
     private static final double NUT_FONT_SIZE_IN = 0.45;
     private static final double SUBTITLE_FONT_SIZE_IN = 0.20;
+    private static final double FRONT_TEAM_TEN_PRESS_FONT_SIZE_IN = 0.15;
+    private static final double BACK_TEAM_TEN_FONT_SIZE_IN = 0.25;
+    private static final double BACK_TITLE_FONT_SIZE_IN = 0.25;
+    private static final double SPINE_TITLE_FONT_SIZE_IN = 0.30;
+    private static final double SPINE_TEAM_TEN_PRESS_FONT_SIZE_IN = 0.10;
 
     // Colors.
     private static final Color BACKGROUND_COLOR = Color.WHITE;
@@ -52,8 +64,8 @@ public class make_cover {
     private static final Color WHITE_TEXT_COLOR = Color.WHITE;
 
     // Flags.
-    private static final boolean DRAW_SPINE = false;
     private static final boolean DRAW_MARGIN = false;
+    private static final boolean DRAW_BLEED = true;
 
     private final String mFilename;
     private final int mDpi;
@@ -63,13 +75,21 @@ public class make_cover {
     }
 
     private make_cover(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Usage: make_cover filename");
+        int count = 0;
+        int dpi = SCREEN_DPI;
+
+        if (count < args.length && args[count].equals("--print")) {
+             dpi = PRINT_DPI;
+             count++;
+        }
+
+        if (count >= args.length) {
+            System.err.println("Usage: make_cover [--print] filename");
             System.exit(-1);
         }
 
-        mFilename = args[0];
-        mDpi = SCREEN_DPI;
+        mFilename = args[count];
+        mDpi = dpi;
     }
 
     private void run() throws IOException, FontFormatException {
@@ -82,18 +102,19 @@ public class make_cover {
         // ----------------------------------------------------------------------------------
         // Front page
 
-        int frontLeftX = toPixels(PAGE_WIDTH_IN + SPINE_WIDTH_IN);
+        int pageLeft = toPixels(BLEED_IN + PAGE_WIDTH_IN + SPINE_WIDTH_IN);
+        int pageTop = toPixels(BLEED_IN);
 
-        // HLine on top.
+        // HLine on top. Extend into the bleed.
         g.setPaint(HIGHLIGHT_COLOR);
-        g.fillRect(frontLeftX + toPixels(MARGIN_IN), 0,
-                toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), toPixels(HLINE_HEIGHT_IN));
+        g.fillRect(pageLeft + toPixels(MARGIN_IN), 0,
+                toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), toPixels(HLINE_HEIGHT_IN + BLEED_IN));
 
         // HLine in middle.
-        int y = toPixels(MIDDLE_HLINE_POS_IN);
+        int y = toPixels(MIDDLE_HLINE_POS_IN + BLEED_IN);
         int itemHeight = toPixels(HLINE_HEIGHT_IN);
         g.setPaint(HIGHLIGHT_COLOR);
-        g.fillRect(frontLeftX + toPixels(MARGIN_IN), y,
+        g.fillRect(pageLeft + toPixels(MARGIN_IN), y,
                 toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), itemHeight);
         y += itemHeight;
 
@@ -107,11 +128,11 @@ public class make_cover {
         int textWidth = (int) textLayout.getBounds().getWidth();
         int textHeight = (int) textLayout.getBounds().getHeight();
         if (true) {
-            justifyText(g, font, BLACK_TEXT_COLOR, "LAWRENCE", frontLeftX + toPixels(MARGIN_IN),
-                frontLeftX + toPixels(PAGE_WIDTH_IN - MARGIN_IN),
+            justifyText(g, font, BLACK_TEXT_COLOR, "LAWRENCE", pageLeft + toPixels(MARGIN_IN),
+                pageLeft + toPixels(PAGE_WIDTH_IN - MARGIN_IN),
                 y + itemHeight/2 + textHeight/2);
         } else {
-            textLayout.draw(g, frontLeftX + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+            textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
                     y + itemHeight/2 + textHeight/2);
         }
         y += itemHeight;
@@ -122,11 +143,11 @@ public class make_cover {
         textWidth = (int) textLayout.getBounds().getWidth();
         textHeight = (int) textLayout.getBounds().getHeight();
         if (true) {
-            justifyText(g, font, BLACK_TEXT_COLOR, "KESTELOOT", frontLeftX + toPixels(MARGIN_IN),
-                frontLeftX + toPixels(PAGE_WIDTH_IN - MARGIN_IN),
+            justifyText(g, font, BLACK_TEXT_COLOR, "KESTELOOT", pageLeft + toPixels(MARGIN_IN),
+                pageLeft + toPixels(PAGE_WIDTH_IN - MARGIN_IN),
                 y + itemHeight/2 + textHeight/2);
         } else {
-            textLayout.draw(g, frontLeftX + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+            textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
                     y + itemHeight/2 + textHeight/2);
         }
         y += itemHeight;
@@ -134,7 +155,7 @@ public class make_cover {
         // Nutshell
         itemHeight = toPixels(NUT_HEIGHT_IN);
         g.setPaint(HIGHLIGHT_COLOR);
-        g.fillRect(frontLeftX + toPixels(MARGIN_IN), y,
+        g.fillRect(pageLeft + toPixels(MARGIN_IN), y,
                 toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), itemHeight);
         font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false,
                 toPixels(NUT_FONT_SIZE_IN));
@@ -143,7 +164,7 @@ public class make_cover {
         textLayout = new TextLayout("IN A NUTSHELL", font, g.getFontRenderContext());
         textWidth = (int) textLayout.getBounds().getWidth();
         textHeight = (int) textLayout.getBounds().getHeight();
-        textLayout.draw(g, frontLeftX + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+        textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
                 y + itemHeight/2 + textHeight/2);
         y += itemHeight;
 
@@ -157,32 +178,138 @@ public class make_cover {
                 font, g.getFontRenderContext());
         textWidth = (int) textLayout.getBounds().getWidth();
         textHeight = (int) textLayout.getBounds().getHeight();
-        textLayout.draw(g, frontLeftX + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+        textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
                 y + itemHeight/2 + textHeight/2);
+        y += itemHeight;
+
+        // Team Ten Press.
+        font = ImageUtils.getFont(Typeface.HELVETICA, true, false, false,
+                toPixels(FRONT_TEAM_TEN_PRESS_FONT_SIZE_IN));
+        g.setColor(BLACK_TEXT_COLOR);
+        g.setFont(font);
+        textLayout = new TextLayout("TEAM TEN PRESS", font, g.getFontRenderContext());
+        textLayout.draw(g, pageLeft + toPixels(MARGIN_IN),
+                toPixels(BLEED_IN + PAGE_HEIGHT_IN - MARGIN_IN));
 
         // ----------------------------------------------------------------------------------
         // Back page
 
+        pageLeft = toPixels(BLEED_IN);
+        y = toPixels(BLEED_IN + MARGIN_IN);
+
+        // Team Ten
+        itemHeight = toPixels(TEAM_TEN_HEIGHT_IN);
+        font = ImageUtils.getFont(Typeface.HELVETICA, true, false, false,
+                toPixels(BACK_TEAM_TEN_FONT_SIZE_IN));
+        g.setColor(BLACK_TEXT_COLOR);
+        g.setFont(font);
+        textLayout = new TextLayout("TEAM TEN PRESS", font, g.getFontRenderContext());
+        textWidth = (int) textLayout.getBounds().getWidth();
+        textHeight = (int) textLayout.getBounds().getHeight();
+        textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+                y + itemHeight/2 + textHeight/2);
+        y += itemHeight;
+
+        // HLine
+        itemHeight = toPixels(HLINE_HEIGHT_IN);
+        g.setPaint(HIGHLIGHT_COLOR);
+        g.fillRect(pageLeft + toPixels(MARGIN_IN), y,
+                toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), itemHeight);
+        y += itemHeight;
+
+        // Title
+        itemHeight = toPixels(BACK_TITLE_HEIGHT_IN);
+        font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false,
+                toPixels(BACK_TITLE_FONT_SIZE_IN));
+        g.setColor(BLACK_TEXT_COLOR);
+        g.setFont(font);
+        textLayout = new TextLayout("Lawrence Kesteloot in a Nutshell",
+                font, g.getFontRenderContext());
+        textHeight = (int) textLayout.getBounds().getHeight();
+        textLayout.draw(g, pageLeft + toPixels(MARGIN_IN), y + itemHeight/2 + textHeight/2);
+        y += itemHeight;
+
         // ----------------------------------------------------------------------------------
         // Spine
+
+        itemHeight = toPixels(SPINE_WIDTH_IN);
+
+        int spineX1 = toPixels(BLEED_IN + PAGE_WIDTH_IN);
+        g.setPaint(HIGHLIGHT_COLOR);
+        g.fillRect(spineX1, 0, itemHeight, toPixels(HEIGHT_IN)); // Full bleed.
+
+        // Rotate the whole thing so we're in the spine's transform. (0,0) is the upper-right
+        // of the spine when the cover is seen normally.
+        AffineTransform affineTransform = g.getTransform();
+        g.translate(spineX1 + itemHeight, 0);
+        g.rotate(Math.PI/2);
+
+        // Black stripe. Extend into the bleed.
+        int x = 0;
+        int itemWidth = toPixels(BLEED_IN + HLINE_HEIGHT_IN);
+        g.setPaint(Color.BLACK);
+        g.fillRect(x, 0, itemWidth, itemHeight);
+        x += itemWidth;
+
+        // Picture.
+        itemWidth = toPixels(0.75);
+        g.setPaint(Color.WHITE);
+        g.fillRect(x, 0, itemWidth, itemHeight);
+        x += itemWidth;
+
+        // Title
+        font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false,
+                toPixels(SPINE_TITLE_FONT_SIZE_IN));
+        g.setColor(WHITE_TEXT_COLOR);
+        g.setFont(font);
+        textLayout = new TextLayout("Lawrence Kesteloot in a Nutshell",
+                font, g.getFontRenderContext());
+        textHeight = (int) textLayout.getBounds().getHeight();
+        textLayout.draw(g, x + toPixels(MARGIN_IN), itemHeight/2 + textHeight/2);
+
+        // Team Ten Press.
+        font = ImageUtils.getFont(Typeface.HELVETICA, true, false, false,
+                toPixels(SPINE_TEAM_TEN_PRESS_FONT_SIZE_IN));
+        g.setFont(font);
+        textLayout = new TextLayout("TEAM TEN", font, g.getFontRenderContext());
+        textWidth = (int) textLayout.getBounds().getWidth();
+        textHeight = (int) textLayout.getBounds().getHeight();
+        itemWidth = toPixels(BLEED_IN + 2*MARGIN_IN) + textWidth;
+        x = toPixels(HEIGHT_IN) - itemWidth;
+        g.setColor(Color.BLACK);
+        g.fillRect(x, 0, itemWidth, itemHeight);
+        g.setColor(WHITE_TEXT_COLOR);
+        int padding = toPixels(0.04);
+        textLayout.draw(g, x + toPixels(MARGIN_IN), itemHeight/2 - padding);
+        int teamTenWidth = textWidth;
+
+        textLayout = new TextLayout("PRESS", font, g.getFontRenderContext());
+        textWidth = (int) textLayout.getBounds().getWidth();
+        textHeight = (int) textLayout.getBounds().getHeight();
+        textLayout.draw(g, x + toPixels(MARGIN_IN) + (teamTenWidth - textWidth)/2,
+                itemHeight/2 + textHeight + padding);
+
+        // Rotate back.
+        g.setTransform(affineTransform);
 
         // ----------------------------------------------------------------------------------
         // Debug
 
-        if (DRAW_SPINE) {
-            g.setColor(DEBUG_COLOR);
-            g.drawRect(toPixels(WIDTH_IN/2 - SPINE_WIDTH_IN/2), 0,
-                    toPixels(SPINE_WIDTH_IN), toPixels(HEIGHT_IN));
-        }
-
         if (DRAW_MARGIN) {
             g.setColor(DEBUG_COLOR);
-            g.drawRect(toPixels(MARGIN_IN), toPixels(MARGIN_IN),
+            g.drawRect(toPixels(BLEED_IN + MARGIN_IN), toPixels(BLEED_IN + MARGIN_IN),
                     toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN),
                     toPixels(PAGE_HEIGHT_IN - 2*MARGIN_IN));
-            g.drawRect(frontLeftX + toPixels(MARGIN_IN), toPixels(MARGIN_IN),
+            g.drawRect(toPixels(BLEED_IN + PAGE_WIDTH_IN + SPINE_WIDTH_IN + MARGIN_IN),
+                    toPixels(BLEED_IN + MARGIN_IN),
                     toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN),
                     toPixels(PAGE_HEIGHT_IN - 2*MARGIN_IN));
+        }
+
+        if (DRAW_BLEED) {
+            g.setColor(DEBUG_COLOR);
+            g.drawRect(toPixels(BLEED_IN), toPixels(BLEED_IN),
+                    toPixels(WIDTH_IN - 2*BLEED_IN), toPixels(HEIGHT_IN - 2*BLEED_IN));
         }
 
         g.dispose();

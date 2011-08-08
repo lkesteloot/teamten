@@ -14,5 +14,8 @@ book.pdf: $(WRITINGS)/book.html $(WRITINGS)/book.css $(WEBSITE)/stylesheet.css \
 cover.png: make_cover Makefile
 	./make_cover cover.png
 
+print.png: make_cover Makefile
+	./make_cover --print print.png
+
 remote:
 	prince -v http://www.teamten.com/lawrence/writings/book.html -o book.pdf
