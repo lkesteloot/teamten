@@ -1,6 +1,6 @@
 #!/usr/bin/env java_launcher
 # vim:ft=java:nospell
-# lib:/home/lk/kiln/teamten/java/dist/teamten.jar
+# lib:../dist/teamten.jar
 
 // Copyright 2011 Lawrence Kesteloot
 
@@ -26,8 +26,8 @@ public class chess {
     private static final boolean CHESS_SERVER = false;
 
     public static void main(String[] args) {
-        Board board = new Board();
-        Game game = new Game(board);
+        final Board board = new Board();
+        final Game game = new Game(board);
 
         if (PLAY_GAME) {
             ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
@@ -49,30 +49,7 @@ public class chess {
         }
 
         if (PLAY_PUZZLE_GAME) {
-            ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
-            ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
-
-            board.initializeEmpty();
-            board.setPiece(Board.getIndex(8, 8), Piece.WHITE_KING);
-            board.setPiece(Board.getIndex(6, 6), Piece.WHITE_ROOK);
-            board.setPiece(Board.getIndex(7, 6), Piece.BLACK_QUEEN);
-            board.setPiece(Board.getIndex(8, 6), Piece.BLACK_KING);
-            board.setPiece(Board.getIndex(7, 5), Piece.BLACK_BISHOP);
-            board.setPiece(Board.getIndex(8, 5), Piece.BLACK_PAWN);
-            board.setPiece(Board.getIndex(8, 4), Piece.WHITE_ROOK);
-            board.setPiece(Board.getIndex(4, 2), Piece.WHITE_QUEEN);
-            board.print("");
-
-            int side = Side.WHITE;
-            while (true) {
-                ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
-                ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
-                if (evaluatedMove.getMove() == null) {
-                    break;
-                }
-                board.print(side == Side.BLACK ? "    " : "");
-                side = Side.getOtherSide(side);
-            }
+            playPuzzleGame();
         }
 
         if (CHECK_TEST) {
@@ -108,6 +85,35 @@ public class chess {
         if (CHESS_SERVER) {
             ChessServer chessServer = new ChessServer();
             chessServer.start();
+        }
+    }
+
+    private static void playPuzzleGame() {
+        // http://www.futilitycloset.com/2011/08/20/two-chess-problems-solution/
+        Board board = Board.parse(
+                "........" +
+                ".pN....." +
+                ".Pb....." +
+                "n.q.n..." +
+                "........" +
+                "PpkpP..Q" +
+                ".N.R...." +
+                "..K.....");
+        Game game = new Game(board);
+        ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
+        ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
+
+        board.print("");
+
+        int side = Side.WHITE;
+        while (true) {
+            ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
+            ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
+            if (evaluatedMove.getMove() == null) {
+                break;
+            }
+            board.print(side == Side.BLACK ? "    " : "");
+            side = Side.getOtherSide(side);
         }
     }
 }

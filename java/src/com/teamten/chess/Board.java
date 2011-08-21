@@ -549,7 +549,7 @@ public class Board {
     public List<Move> generateAllMoves(int side, boolean capturesOnly) {
         List<Move> moveList = new ArrayList<Move>();
 
-        for (int index = 0; index < Board.SIZE*Board.SIZE; index++) {
+        for (int index = 0; index < SIZE*SIZE; index++) {
             Piece piece = getPiece(index);
             if (piece != Piece.EMPTY && piece.getSide() == side) {
                 piece.addMoves(this, index, capturesOnly, moveList);
@@ -627,6 +627,48 @@ public class Board {
         }
 
         board.mSide = (int) (str.charAt(NUM_SQUARES) - '0');
+
+        return board;
+    }
+
+    /**
+     * Parse a board from ASCII. The input in row-major order, from rank 8 to 1
+     * (black side to white side). Whitespace is ignored. Blank squares must
+     * contain a period (.).  White characters are upper case, black lower
+     * case. See PieceType for the letters.
+     *
+     * @throws IllegalArgumentException if the board can't be parsed.
+     */
+    public static Board parse(String str) {
+        Board board = new Board();
+
+        // The specification for the layout of "str" matches the index
+        // we use, so just fill out each piece in index order.
+        int index = 0;
+
+        for (int i = 0; i < str.length(); i++) {
+            char ch = str.charAt(i);
+
+            if (!Character.isWhitespace(ch)) {
+                Piece piece;
+
+                if (ch == '.') {
+                    piece = Piece.EMPTY;
+                } else {
+                    piece = Piece.getPieceForCharacter(ch);
+                }
+
+                board.setPiece(index, piece);
+                index++;
+            }
+        }
+
+        // Quick sanity check.
+        if (index != SIZE*SIZE) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid number of squares (%d instead of %d",
+                        index, SIZE*SIZE));
+        }
 
         return board;
     }
