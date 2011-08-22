@@ -326,11 +326,11 @@ public class TemplateProcessor {
     }
 
     private void startExpression() {
-        mWriter.append(mAppendMethod + "(");
+        mWriter.append(mAppendMethod + "(org.apache.commons.lang3.StringEscapeUtils.escapeHtml3(String.valueOf(");
     }
 
     private void endExpression() {
-        mWriter.append(");\n" + mIndent);
+        mWriter.append(")));\n" + mIndent);
     }
 
     private void startStatement() {
