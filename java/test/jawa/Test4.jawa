@@ -1,0 +1,16 @@
+
+/**
+ * Test of expressions.
+ */
+public class Test4 {
+    public static void main(String[] args) {
+        System.out.println(hello("<b>world</b>"));
+    }
+
+    private static String hello(String name) {
+        // The backtick syntax creates Java code that writes the contents
+        // of the file to a string and returns the string. The template
+        // has access to variables and other symbols visible from here.
+        `test4.html`
+    }
+}
