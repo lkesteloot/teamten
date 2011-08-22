@@ -1,0 +1,18 @@
+#!/bin/bash
+
+export CLASSPATH=".:../../dist/*"
+ant -find build.xml dist
+if [[ $? != 0 ]]; then
+    exit 1
+fi
+
+for N in 1 2 3 4; do
+    java com.teamten.jawa.Jawa Test$N.jawa Test$N.java && \
+        javac Test$N.java && \
+        java Test$N >actual$N.html
+    if diff expected$N.html actual$N.html; then
+        echo "Correct output."
+    else
+        echo "Incorrect output."
+    fi
+done

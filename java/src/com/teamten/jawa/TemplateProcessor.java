@@ -33,8 +33,12 @@ public class TemplateProcessor {
         NORMAL,
         // Was NORMAL, just saw open brace.
         SAW_OPEN_BRACE,
-        // Saw second open brace, now in expression.
+        // Saw second open brace, now in expression head.
+        EXPRESSION_HEAD,
+        // Past (optional) expression head.
         EXPRESSION,
+        // The flag after the colon.
+        EXPRESSION_FLAG,
         // In expression, saw close brace.
         SAW_CLOSE_BRACE,
         // Saw % after open brace, now in statement.
@@ -69,6 +73,15 @@ public class TemplateProcessor {
     private int mPreStatementEnd;
     private int mPostStatementBegin;
     private int mPostStatementEnd;
+    /**
+     * The flag after the colon after the start of an expression, while it's being
+     * parsed.
+     */
+    private String mExpressionFlag = "";
+    /**
+     * Whether the expression we're parsing is raw (should not be escaped).
+     */
+    private boolean mRawExpression;
 
     public TemplateProcessor() {
         setOutputMethod(OutputMethod.STRING_BUILDER);
@@ -203,8 +216,8 @@ public class TemplateProcessor {
             case SAW_OPEN_BRACE:
                 if (ch == '{') {
                     endNormal();
-                    startExpression();
-                    mState = State.EXPRESSION;
+                    mRawExpression = false;
+                    mState = State.EXPRESSION_HEAD;
                 } else if (ch == '%') {
                     if (mPreStatementEnd == -1) {
                         mPreStatementEnd = mWriter.length();
@@ -222,11 +235,46 @@ public class TemplateProcessor {
                 }
                 break;
 
+            case EXPRESSION_HEAD:
+                if (ch == ':') {
+                    mState = State.EXPRESSION_FLAG;
+                    mExpressionFlag = "";
+                } else if (ch == '}') {
+                    mState = State.SAW_CLOSE_BRACE;
+                } else {
+                    // No (more) head.
+                    startExpression();
+                    mWriter.append(ch);
+                    mState = State.EXPRESSION;
+                }
+                break;
+
             case EXPRESSION:
                 if (ch == '}') {
                     mState = State.SAW_CLOSE_BRACE;
                 } else {
                     mWriter.append(ch);
+                }
+                break;
+
+            case EXPRESSION_FLAG:
+                if (Character.isLetterOrDigit(ch)) {
+                    mExpressionFlag += ch;
+                } else if (ch == ':') {
+                    // End of expression, start of new flag.
+                    processExpressionFlag(mExpressionFlag);
+                    mExpressionFlag = "";
+                } else if (Character.isWhitespace(ch)) {
+                    // End of expression head.
+                    processExpressionFlag(mExpressionFlag);
+                    startExpression();
+                    mState = State.EXPRESSION;
+                    mWriter.append(ch);
+                } else {
+                    // XXX Error.
+                    startExpression();
+                    mState = State.EXPRESSION;
+                    System.err.printf("Invalid character %c%n", ch);
                 }
                 break;
 
@@ -326,11 +374,18 @@ public class TemplateProcessor {
     }
 
     private void startExpression() {
-        mWriter.append(mAppendMethod + "(org.apache.commons.lang3.StringEscapeUtils.escapeHtml3(String.valueOf(");
+        mWriter.append(mAppendMethod + "(");
+        if (!mRawExpression) {
+            mWriter.append(
+                    "org.apache.commons.lang3.StringEscapeUtils.escapeHtml3(String.valueOf(");
+        }
     }
 
     private void endExpression() {
-        mWriter.append(")));\n" + mIndent);
+        if (!mRawExpression) {
+            mWriter.append("))");
+        }
+        mWriter.append(");\n" + mIndent);
     }
 
     private void startStatement() {
@@ -339,5 +394,13 @@ public class TemplateProcessor {
 
     private void endStatement() {
         // Nothing.
+    }
+
+    private void processExpressionFlag(String flag) {
+        if (flag.equals("raw")) {
+            mRawExpression = true;
+        } else {
+            System.err.printf("Invalid expression flag \"%s\".%n", flag);
+        }
     }
 }
