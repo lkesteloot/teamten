@@ -2,27 +2,17 @@ Punch list before printing:
 
 - Make a cover page.
     - Illustration:
-        - Ask Cassidy.
+        - Probably just screw around in Photoshop with detect edge, etc.
+        - Or Illustrator.
+        - InkScape?
+            - http://howto.nicubunu.ro/inkscape_face_draw/
         - Make our own crosshatcher?
             - RonJr (YouTube):
                 - Invert, blur, dodge, over original, then desaturate.
     - Get condensed Garamond.
+        - Optional, it look okay now.
     - Get font with nicer kerning (see AW of LAWRENCE).
-    - What is width of spine?
-- Review "Veneer proofs" post. Kinda weak.
-- Java for Everything post:
-    - Has XXX at front.
-    - Re-read and clean up.
-- Look at order of posts.
-    - Chronological?
-    - Most-to-least interesting?
-    - Alternate long and short?
-    - End on strong post.
-- Add dedication?
-- Fix all the layout bugs:
-    - Picking stocks article:
-        - Graph.
-            - Check on web page.
+    - Double-check width of spine
 - Try generating the diagrams at a particular resolution (300 DPI) and
     using prince-specific CSS rules so they don't scale.
 
