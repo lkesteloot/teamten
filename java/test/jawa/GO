@@ -1,7 +1,14 @@
+#!/bin/bash
+
 N=$1
 if [ -z "$N" ]; then
     echo "Usage: GO <N>"
     exit 1
 fi
 export CLASSPATH=".:../../dist/*"
-ant -find build.xml dist && java com.teamten.jawa.Jawa Test$N.jawa Test$N.java && javac Test$N.java && java Test$N
+ant -find build.xml dist && java com.teamten.jawa.Jawa Test$N.jawa Test$N.java && javac Test$N.java && java Test$N >actual$N.html
+if diff expected$N.html actual$N.html; then
+    echo "Correct output."
+else
+    echo "Incorrect output."
+fi
