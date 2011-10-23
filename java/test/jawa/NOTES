@@ -1,8 +1,11 @@
 
 - Consider switching to a parser generator.
     - Options:
-        JavaCC: http://java.net/projects/javacc/
-        ANTLR
+        - JavaCC: http://java.net/projects/javacc/
+        - ANTLR
+            - http://hg.openjdk.java.net/compiler-grammar/compiler-grammar
+            - http://openjdk.java.net/projects/compiler-grammar/
+            - http://openjdk.java.net/projects/compiler-grammar/antlrworks/Java.g
     - Can we still do tricky things like remove blanks?
 
 - Inside {% %} delegate back to Jawa parser since we'll have other things
@@ -53,9 +56,3 @@
 - Provide way to escape all these things like {{.
     - Put backslash in front: \{{, \{%, \{*
     - Use hex code, &x7b;
-
-- Write unit tests for all this.
-    - Provide hooks to submit strings and get strings back.
-
-- How to handle HTML, attribute, and JS escaping?
-    - Default, with way to avoid, or force user to do it?

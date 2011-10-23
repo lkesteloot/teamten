@@ -594,6 +594,16 @@ public class ImageUtils {
     }
 
     /**
+     * Returns the part of the image with the upper-left coordinate at x, y and
+     * of width and height.
+     */
+    public static BufferedImage crop(BufferedImage src, int x, int y, int width, int height) {
+        BufferedImage dest = new BufferedImage(width, height, src.getType());
+        pasteInto(dest, src, -x, -y);
+        return dest;
+    }
+
+    /**
      * Concatenates the images left to right. Images are top-aligned, and the background
      * is initialized to black.
      */

@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <project name="teamten" default="dist">
+    <property environment="env"/>
     <property name="classes.dir" value="classes"/>
     <property name="source.dir" value="src"/>
     <property name="dist.dir" value="dist"/>
     <property name="depend_cache.dir" value="depend_cache"/>
     <property name="lib.dir" value="lib"/>
+    <property name="bin.dir" value="${env.HOME}/home/bin/java_lib"/>
     <!-- This is the published branch with the JavaDoc. Clone the branch to this
     location with this command:
 
@@ -65,6 +67,10 @@
         <copy todir="${dist.dir}">
             <fileset dir="${lib.dir}"/>
         </copy>
+    </target>
+
+    <target name="install" depends="dist">
+        <copy todir="${bin.dir}" file="${dist.dir}/teamten.jar"/>
     </target>
 
     <target name="publish" depends="dist">
