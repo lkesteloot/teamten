@@ -9,8 +9,8 @@ import java.awt.Graphics;
  * The player, its location, velocity, etc.
  */
 public class Player {
-    private static final int WIDTH = 10;
-    private static final int HEIGHT = 10;
+    public static final int WIDTH = 10;
+    public static final int HEIGHT = 10;
 
     // X location of top-left corner.
     private final int mX;

@@ -20,7 +20,7 @@ public class Mario extends JFrame {
     private static final int ANIMATION_MS = 40;
     private World mWorld;
     private WorldDrawer mWorldDrawer;
-    private Input mInput;
+    private volatile Input mInput;
 
     public static void main(String[] args) {
         new Mario();
@@ -28,14 +28,14 @@ public class Mario extends JFrame {
 
     private Mario() {
         Env env = Env.makeEnv();
-        Player player = new Player(Env.WIDTH/2, Env.HEIGHT/2);
+        Player player = new Player((Env.WIDTH - Player.WIDTH)/2, Env.HEIGHT/2);
         mWorld = new World(env, player);
         mWorldDrawer = new WorldDrawer(mWorld);
         mInput = new Input();
 
         makeUi(mWorldDrawer);
         hookUpInput(mWorldDrawer);
-        startTimer();
+        startAnimationTimer();
     }
 
     private void makeUi(WorldDrawer worldDrawer) {
@@ -47,7 +47,7 @@ public class Mario extends JFrame {
         setVisible(true);
     }
 
-    private void startTimer() {
+    private void startAnimationTimer() {
         Timer timer = new Timer(ANIMATION_MS, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -70,6 +70,11 @@ public class Mario extends JFrame {
                 keyActuated(keyEvent, false);
             }
 
+            @Override // KeyListener
+            public void keyTyped(KeyEvent keyEvent) {
+                // Nothing.
+            }
+
             private void keyActuated(KeyEvent keyEvent, boolean pressed) {
                 switch (keyEvent.getKeyCode()) {
                     case KeyEvent.VK_SPACE:
@@ -84,11 +89,6 @@ public class Mario extends JFrame {
                         mInput = mInput.withRightPressed(pressed);
                         break;
                 }
-            }
-
-            @Override // KeyListener
-            public void keyTyped(KeyEvent keyEvent) {
-                // Nothing.
             }
         });
     }
