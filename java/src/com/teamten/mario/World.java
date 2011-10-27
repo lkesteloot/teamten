@@ -17,8 +17,16 @@ public class World {
     }
 
     public void draw(Graphics g) {
-        mEnv.draw(g);
-        mPlayer.draw(g);
+        getEnv().draw(g);
+        getPlayer().draw(g);
+    }
+
+    public Env getEnv() {
+        return mEnv;
+    }
+
+    public Player getPlayer() {
+        return mPlayer;
     }
 
     public World step(Input input) {
@@ -32,6 +40,23 @@ public class World {
             dx += 1;
         }
 
-        return new World(mEnv, mPlayer.move(dx, dy));
+        return new World(getEnv(), getPlayer().move(dx, dy));
+    }
+
+    @Override // Object
+    public int hashCode() {
+        return getEnv().hashCode() + 31*getPlayer().hashCode();
+    }
+
+    @Override // Object
+    public boolean equals(Object other) {
+        if (!(other instanceof World)) {
+            return false;
+        }
+
+        World otherWorld = (World) other;
+
+        return getEnv().equals(otherWorld.getEnv())
+            && getPlayer().equals(otherWorld.getPlayer());
     }
 }

@@ -38,4 +38,26 @@ public class Player {
         g.setColor(Color.GREEN);
         g.fillRect(mX, mY, WIDTH, HEIGHT);
     }
+
+    @Override // Object
+    public int hashCode() {
+        int hashCode = 17;
+
+        hashCode = hashCode*31 + getX();
+        hashCode = hashCode*31 + getY();
+
+        return hashCode;
+    }
+
+    @Override // Object
+    public boolean equals(Object other) {
+        if (!(other instanceof Player)) {
+            return false;
+        }
+
+        Player otherPlayer = (Player) other;
+
+        return getX() == otherPlayer.getX()
+            && getY() == otherPlayer.getY();
+    }
 }

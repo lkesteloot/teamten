@@ -7,12 +7,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
+import java.awt.Point;
 
 /**
  * Draws a World.
  */
 public class WorldDrawer extends Canvas {
     private volatile World mWorld;
+    private double mScale = 1;
+    private double mTx = 0;
+    private double mTy = 0;
 
     public WorldDrawer(World world) {
         mWorld = world;
@@ -21,6 +25,10 @@ public class WorldDrawer extends Canvas {
     public void setWorld(World world) {
         mWorld = world;
         repaint();
+    }
+
+    public void reverseTransform(Point point) {
+        point.setLocation((point.x - mTx)/mScale, (point.y - mTy)/mScale);
     }
 
     @Override // Canvas
@@ -38,22 +46,19 @@ public class WorldDrawer extends Canvas {
         int height = dimension.height;
 
         // Scale graphics to window size.
-        double scale;
-        double tx;
-        double ty;
         if (width*Env.HEIGHT > Env.WIDTH*height) {
             // Window wider than world.
-            scale = (double) height/Env.HEIGHT;
-            tx = (width - Env.WIDTH*scale)/2.0;
-            ty = 0;
+            mScale = (double) height/Env.HEIGHT;
+            mTx = (width - Env.WIDTH*mScale)/2.0;
+            mTy = 0;
         } else {
             // Window taller than world.
-            scale = (double) width/Env.WIDTH;
-            tx = 0;
-            ty = (height - Env.HEIGHT*scale)/2.0;
+            mScale = (double) width/Env.WIDTH;
+            mTx = 0;
+            mTy = (height - Env.HEIGHT*mScale)/2.0;
         }
-        g2.translate(tx, ty);
-        g2.scale(scale, scale);
+        g2.translate(mTx, mTy);
+        g2.scale(mScale, mScale);
 
         // Draw the world.
         world.draw(g);

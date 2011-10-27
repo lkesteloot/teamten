@@ -3,11 +3,12 @@
 package com.teamten.mario;
 
 import java.awt.BorderLayout;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -21,6 +22,8 @@ public class Mario extends JFrame {
     private World mWorld;
     private WorldDrawer mWorldDrawer;
     private volatile Input mInput;
+    private boolean mRunning = true;
+    private final Searcher mSearcher;
 
     public static void main(String[] args) {
         new Mario();
@@ -31,7 +34,8 @@ public class Mario extends JFrame {
         Player player = new Player((Env.WIDTH - Player.WIDTH)/2, Env.HEIGHT/2);
         mWorld = new World(env, player);
         mWorldDrawer = new WorldDrawer(mWorld);
-        mInput = new Input();
+        mInput = Input.NOTHING;
+        mSearcher = new Searcher();
 
         makeUi(mWorldDrawer);
         hookUpInput(mWorldDrawer);
@@ -51,11 +55,26 @@ public class Mario extends JFrame {
         Timer timer = new Timer(ANIMATION_MS, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                mWorld = mWorld.step(mInput);
-                mWorldDrawer.setWorld(mWorld);
+                if (mRunning) {
+                    mWorld = mWorld.step(mInput);
+                    mWorldDrawer.setWorld(mWorld);
+                }
             }
         });
         timer.start();
+    }
+
+    private void takeAutomatedStep() {
+        Point point = getMousePosition();
+        if (point != null) {
+            mWorldDrawer.reverseTransform(point);
+            System.out.printf("%d %d%n", point.x, point.y);
+
+            Input input = mSearcher.findBestMove(mWorld, point);
+
+            mWorld = mWorld.step(input);
+            mWorldDrawer.setWorld(mWorld);
+        }
     }
 
     private void hookUpInput(WorldDrawer worldDrawer) {
@@ -72,7 +91,16 @@ public class Mario extends JFrame {
 
             @Override // KeyListener
             public void keyTyped(KeyEvent keyEvent) {
-                // Nothing.
+                switch (keyEvent.getKeyChar()) {
+                    case 'a':
+                        mRunning = false;
+                        takeAutomatedStep();
+                        break;
+
+                    case 'r':
+                        mRunning = !mRunning;
+                        break;
+                }
             }
 
             private void keyActuated(KeyEvent keyEvent, boolean pressed) {
