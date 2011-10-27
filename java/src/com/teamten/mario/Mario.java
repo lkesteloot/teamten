@@ -23,6 +23,7 @@ public class Mario extends JFrame {
     private WorldDrawer mWorldDrawer;
     private volatile Input mInput;
     private boolean mRunning = true;
+    private boolean mAutomatic = false;
     private final Searcher mSearcher;
 
     public static void main(String[] args) {
@@ -56,8 +57,12 @@ public class Mario extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (mRunning) {
-                    mWorld = mWorld.step(mInput);
-                    mWorldDrawer.setWorld(mWorld);
+                    if (mAutomatic) {
+                        takeAutomatedStep();
+                    } else {
+                        mWorld = mWorld.step(mInput);
+                        mWorldDrawer.setWorld(mWorld);
+                    }
                 }
             }
         });
@@ -68,7 +73,7 @@ public class Mario extends JFrame {
         Point point = getMousePosition();
         if (point != null) {
             mWorldDrawer.reverseTransform(point);
-            System.out.printf("%d %d%n", point.x, point.y);
+            // System.out.printf("%d %d%n", point.x, point.y);
 
             Input input = mSearcher.findBestMove(mWorld, point);
 
@@ -92,13 +97,19 @@ public class Mario extends JFrame {
             @Override // KeyListener
             public void keyTyped(KeyEvent keyEvent) {
                 switch (keyEvent.getKeyChar()) {
-                    case 'a':
+                    case 's':
                         mRunning = false;
                         takeAutomatedStep();
                         break;
 
-                    case 'r':
-                        mRunning = !mRunning;
+                    case 'a':
+                        mRunning = true;
+                        mAutomatic = true;
+                        break;
+
+                    case 'm':
+                        mRunning = true;
+                        mAutomatic = false;
                         break;
                 }
             }

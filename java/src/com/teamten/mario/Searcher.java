@@ -14,6 +14,8 @@ import java.util.PriorityQueue;
  * Implements the A* search algorithm to find the best move.
  */
 public class Searcher {
+    private static final int mDebug = 0;
+
     /**
      * Search node.
      */
@@ -112,7 +114,6 @@ public class Searcher {
         openQueue.add(startNode);
         openSet.put(startNode, startNode);
 
-        System.out.println("Starting search");
         int searchedNodeCount = 0;
         Node bestNode = startNode;
         while (!openQueue.isEmpty()) {
@@ -124,7 +125,9 @@ public class Searcher {
                 // XXX
                 break;
             }
-            System.out.printf("Cost: %f%n", node.getCost());
+            if (mDebug >= 2) {
+                System.out.printf("Cost: %f%n", node.getCost());
+            }
 
             // Generate neighbor nodes.
             List<Node> neighbors = node.makeNeighbors();
@@ -158,7 +161,9 @@ public class Searcher {
             }
         }
 
-        System.out.printf("Searched %d nodes.%n", searchedNodeCount);
+        if (mDebug >= 1) {
+            System.out.printf("Searched %d nodes.%n", searchedNodeCount);
+        }
 
         Input input = Input.NOTHING;
         int pathLength = 0;
@@ -167,7 +172,9 @@ public class Searcher {
             bestNode = bestNode.getParent();
             pathLength++;
         }
-        System.out.printf("Path length: %d%n", pathLength);
+        if (mDebug >= 1) {
+            System.out.printf("Path length: %d%n", pathLength);
+        }
 
         // We didn't actually hit the goal, but this is the best we can do.
         return input;
