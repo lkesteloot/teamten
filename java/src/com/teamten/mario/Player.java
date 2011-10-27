@@ -11,6 +11,7 @@ import java.awt.Graphics;
 public class Player {
     public static final int WIDTH = 10;
     public static final int HEIGHT = 10;
+    public static final int FRICTION = 4;
 
     // X location of top-left corner.
     private final int mX;
@@ -55,12 +56,26 @@ public class Player {
         return Math.hypot(dx, dy);
     }
 
-    public Player move(int dx, int dy) {
+    public Player move(Input input, Env env) {
+        int ax = 0;
+        int ay = 0;
+
+        if (input.isLeftPressed()) {
+            ax -= 1;
+        }
+        if (input.isRightPressed()) {
+            ax += 1;
+        }
+
+        int vx = mVx + ax*VELOCITY_SCALE;
+        int vy = mVy + ay*VELOCITY_SCALE;
+        vx -= Integer.signum(vx)*FRICTION;
+        vy -= Integer.signum(vy)*FRICTION;
+
         return new Player(
                 mX + (int) Math.round((double) mVx/VELOCITY_SCALE),
                 mY + (int) Math.round((double) mVy/VELOCITY_SCALE),
-                (int) Math.round((mVx + dx*VELOCITY_SCALE)*0.90),
-                (int) Math.round((mVy + dy*VELOCITY_SCALE)*0.90));
+                vx, vy);
     }
 
     public void draw(Graphics g) {

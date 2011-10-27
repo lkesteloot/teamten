@@ -30,17 +30,7 @@ public class World {
     }
 
     public World step(Input input) {
-        int dx = 0;
-        int dy = 0;
-
-        if (input.isLeftPressed()) {
-            dx -= 1;
-        }
-        if (input.isRightPressed()) {
-            dx += 1;
-        }
-
-        return new World(getEnv(), getPlayer().move(dx, dy));
+        return new World(getEnv(), getPlayer().move(input, getEnv()));
     }
 
     @Override // Object

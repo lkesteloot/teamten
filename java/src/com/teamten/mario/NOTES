@@ -1,7 +1,6 @@
 
-- Multiplying velocity times 0.90 means it sometimes never stops (try manually).
-- Reducing that to 0.49 means that the search sometimes just hovers.
 - Once saw it hovering with 0.90 too. Too short a search?
+    - Seems to happen if I put the target behind the player's direction.
 - Time the search. If it's small, replace 100 limit with a time limit, maybe 40 ms.
 - Consider writing our own priority queue that's also a hash table.
 
