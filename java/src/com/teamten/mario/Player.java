@@ -30,6 +30,10 @@ public class Player {
         return mY;
     }
 
+    public Player move(int dx, int dy) {
+        return new Player(mX + dx, mY + dy);
+    }
+
     public void draw(Graphics g) {
         g.setColor(Color.GREEN);
         g.fillRect(mX, mY, WIDTH, HEIGHT);
