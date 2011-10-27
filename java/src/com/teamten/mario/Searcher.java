@@ -14,7 +14,7 @@ import java.util.PriorityQueue;
  * Implements the A* search algorithm to find the best move.
  */
 public class Searcher {
-    private static final int mDebug = 2;
+    private static final int mDebug = 0;
 
     /**
      * Search node.
@@ -79,6 +79,7 @@ public class Searcher {
         private List<Node> makeNeighbors() {
             List<Node> neighbors = new ArrayList<Node>();
 
+            /// neighbors.add(makeNeighbor(Input.NOTHING));
             neighbors.add(makeNeighbor(Input.LEFT));
             neighbors.add(makeNeighbor(Input.RIGHT));
 
@@ -88,17 +89,40 @@ public class Searcher {
         private Node makeNeighbor(Input input) {
             World newWorld = getWorld().step(input);
             double distanceTraveled = getWorld().getPlayer().distanceTo(newWorld.getPlayer());
+            distanceTraveled = 1.0; // XXX Now in units of ticks.
             return new Node(newWorld, getPathCost() + distanceTraveled, 0.0, this, input);
         }
 
         /**
-         * Compute the cost of this world relative to the target.
+         * Compute lower bound of cost of getting this world to the target.
          */
         private double estimateCostToTarget(Point target) {
+            // Straight-line distance to target.
+            double distance = getDistanceToTarget(target);
+
+            // Best time to travel distance would be to accelerate for half the distance
+            // and decelerate for the other half. The increase in speed is 1 per tick,
+            // and we're returning the cost in ticks.
+            //
+            // d = 0.5 a t^2
+            // t = sqrt(2 d / a)
+            final double A = 1;
+
+            // XXX Note that this ignores any existing acceleration.
+            double time = 2 * Math.sqrt(distance / A);
+
+            return time;
+        }
+
+        public double getDistanceToTarget(Point target) {
+            // Straight-line distance to target.
             Player player = getWorld().getPlayer();
 
             int dx = target.x - player.getX();
             int dy = target.y - player.getY();
+
+            // XXX Force dy to zero for now since we can't jump.
+            dy = 0;
 
             return Math.hypot(dx, dy);
         }
@@ -145,11 +169,20 @@ public class Searcher {
             // Get the best node.
             Node node = openQueue.poll();
             openSet.remove(node);
+
+            bestNode = node;
+
+            double distance = node.getDistanceToTarget(target);
+            double speed = node.getWorld().getPlayer().getSpeed();
+            if (distance < 1 && speed < 1) {
+                // Done.
+                break;
+            }
+
             closedSet.put(node, node);
-            System.out.printf("Adding %d to closed set (%d)%n", node.getWorld().getPlayer().getX(), node.hashCode());
             searchedNodeCount++;
             if (searchedNodeCount == 100) {
-                // XXX
+                // XXX use time limit instead.
                 break;
             }
             if (mDebug >= 2) {
@@ -160,16 +193,13 @@ public class Searcher {
             List<Node> neighbors = node.makeNeighbors();
             for (Node neighbor : neighbors) {
                 // Skip neighbor if in closed set.
-                System.out.printf("Checking %d in closed set (%d)%n", neighbor.getWorld().getPlayer().getX(), neighbor.hashCode());
                 if (closedSet.containsKey(neighbor)) {
-                    System.out.println("Skipping");
                     continue;
                 }
 
-                bestNode = neighbor;
-
                 // Calculate tentative cost: path + guess
-                double totalCost = neighbor.getPathCost() + neighbor.estimateCostToTarget(target);
+                double estimatedCostToTarget = neighbor.estimateCostToTarget(target);
+                double totalCost = neighbor.getPathCost() + estimatedCostToTarget;
                 neighbor.setTotalCost(totalCost);
 
                 Node existingNeighbor = openSet.get(neighbor);
@@ -199,13 +229,18 @@ public class Searcher {
         int pathLength = 0;
         while (bestNode.getParent() != null) {
             input = bestNode.getInput();
-            System.out.printf("%s (%f %d), ", input, bestNode.getPathCost(),
-                    bestNode.getWorld().getPlayer().getX());
+            if (mDebug >= 1) {
+                System.out.printf("%s (%f %f %d), ",
+                        input,
+                        bestNode.getPathCost(),
+                        bestNode.getTotalCost(),
+                        bestNode.getWorld().getPlayer().getX());
+            }
             bestNode = bestNode.getParent();
             pathLength++;
         }
-        System.out.println();
         if (mDebug >= 1) {
+            System.out.println();
             System.out.printf("Path length: %d%n", pathLength);
         }
 

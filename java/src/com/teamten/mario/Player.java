@@ -20,7 +20,7 @@ public class Player {
     // Velocity times VELOCITY_SCALE.
     private final int mVx;
     private final int mVy;
-    private static final int VELOCITY_SCALE = 100;
+    private static final int VELOCITY_SCALE = 10;
 
     private Player(int x, int y, int vx, int vy) {
         mX = x;
@@ -39,6 +39,13 @@ public class Player {
 
     public int getY() {
         return mY;
+    }
+
+    public double getSpeed() {
+        double vx = (double) mVx / VELOCITY_SCALE;
+        double vy = (double) mVy / VELOCITY_SCALE;
+
+        return Math.hypot(vx, vy);
     }
 
     public double distanceTo(Player other) {
