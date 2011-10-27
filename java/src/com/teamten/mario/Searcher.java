@@ -79,7 +79,8 @@ public class Searcher {
         private List<Node> makeNeighbors() {
             List<Node> neighbors = new ArrayList<Node>();
 
-            /// neighbors.add(makeNeighbor(Input.NOTHING));
+            neighbors.add(makeNeighbor(Input.NOTHING));
+            neighbors.add(makeNeighbor(Input.JUMP));
             neighbors.add(makeNeighbor(Input.LEFT));
             neighbors.add(makeNeighbor(Input.RIGHT));
 
@@ -122,7 +123,7 @@ public class Searcher {
             int dy = target.y - player.getY();
 
             // XXX Force dy to zero for now since we can't jump.
-            dy = 0;
+            /// dy = 0;
 
             return Math.hypot(dx, dy);
         }

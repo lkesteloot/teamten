@@ -27,6 +27,21 @@ public class Env {
         mFloorList.add(floor);
     }
 
+    public boolean isTouchingFloor(Player player) {
+        int floor = HEIGHT - Floor.HEIGHT;
+        return player.getY() + Player.HEIGHT >= floor;
+    }
+
+    public Integer getPushBack(Player player, int x, int y) {
+        int floor = HEIGHT - Floor.HEIGHT;
+        int dy = y + Player.HEIGHT - floor;
+        if (dy >= 0) {
+            return dy;
+        } else {
+            return null;
+        }
+    }
+
     public void draw(Graphics g) {
         g.setColor(Color.GRAY);
         g.fillRect(0, 0, WIDTH, HEIGHT);

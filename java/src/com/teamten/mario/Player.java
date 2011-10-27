@@ -12,6 +12,8 @@ public class Player {
     public static final int WIDTH = 10;
     public static final int HEIGHT = 10;
     public static final int FRICTION = 4;
+    public static final int GRAVITY = 8;
+    public static final int JUMP = 4;
 
     // X location of top-left corner.
     private final int mX;
@@ -57,25 +59,43 @@ public class Player {
     }
 
     public Player move(Input input, Env env) {
+        boolean touchingFloor = env.isTouchingFloor(this);
         int ax = 0;
         int ay = 0;
-
-        if (input.isLeftPressed()) {
-            ax -= 1;
-        }
-        if (input.isRightPressed()) {
-            ax += 1;
+        if (touchingFloor) {
+            if (input.isJumpPressed()) {
+                ay -= JUMP;
+            }
+            if (input.isLeftPressed()) {
+                ax -= 1;
+            }
+            if (input.isRightPressed()) {
+                ax += 1;
+            }
         }
 
         int vx = mVx + ax*VELOCITY_SCALE;
         int vy = mVy + ay*VELOCITY_SCALE;
-        vx -= Integer.signum(vx)*FRICTION;
-        vy -= Integer.signum(vy)*FRICTION;
 
-        return new Player(
-                mX + (int) Math.round((double) mVx/VELOCITY_SCALE),
-                mY + (int) Math.round((double) mVy/VELOCITY_SCALE),
-                vx, vy);
+        if (touchingFloor) {
+            vx -= Integer.signum(vx)*FRICTION;
+        } else {
+            vy += GRAVITY;
+        }
+
+        // Move player by its velocity.
+        int x = mX + (int) Math.round((double) mVx/VELOCITY_SCALE);
+        int y = mY + (int) Math.round((double) mVy/VELOCITY_SCALE);
+
+        Integer pushBack = env.getPushBack(this, x, y);
+        if (pushBack != null) {
+            y -= pushBack.intValue();
+            if (vy > 0) {
+                vy = 0;
+            }
+        }
+
+        return new Player(x, y, vx, vy);
     }
 
     public void draw(Graphics g) {
