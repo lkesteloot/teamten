@@ -14,42 +14,47 @@ import java.util.PriorityQueue;
  * Implements the A* search algorithm to find the best move.
  */
 public class Searcher {
-    private static final int mDebug = 0;
+    private static final int mDebug = 2;
 
     /**
      * Search node.
      */
     private static class Node implements Comparable<Node> {
         private final World mWorld;
-        private double mCost;
+        private double mPathCost;
+        private double mTotalCost;
         private Node mParent;
         private Input mInput;
 
-        private Node(World world, double cost, Node parent, Input input) {
+        private Node(World world, double pathCost, double totalCost, Node parent, Input input) {
             mWorld = world;
-            mCost = cost;
+            mPathCost = pathCost;
+            mTotalCost = totalCost;
             mParent = parent;
             mInput = input;
         }
 
+        /**
+         * Start node.
+         */
         public Node(World world) {
-            this(world, 0.0, null, null);
-        }
-
-        public Node(World world, Node parent, Input input) {
-            this(world, 0.0, parent, input);
+            this(world, 0.0, 0.0, null, null);
         }
 
         public World getWorld() {
             return mWorld;
         }
 
-        public void setCost(double cost) {
-            mCost = cost;
+        public double getPathCost() {
+            return mPathCost;
         }
 
-        public double getCost() {
-            return mCost;
+        public void setTotalCost(double totalCost) {
+            mTotalCost = totalCost;
+        }
+
+        public double getTotalCost() {
+            return mTotalCost;
         }
 
         public void setParent(Node parent) {
@@ -81,12 +86,26 @@ public class Searcher {
         }
 
         private Node makeNeighbor(Input input) {
-            return new Node(getWorld().step(input), this, input);
+            World newWorld = getWorld().step(input);
+            double distanceTraveled = getWorld().getPlayer().distanceTo(newWorld.getPlayer());
+            return new Node(newWorld, getPathCost() + distanceTraveled, 0.0, this, input);
+        }
+
+        /**
+         * Compute the cost of this world relative to the target.
+         */
+        private double estimateCostToTarget(Point target) {
+            Player player = getWorld().getPlayer();
+
+            int dx = target.x - player.getX();
+            int dy = target.y - player.getY();
+
+            return Math.hypot(dx, dy);
         }
 
         @Override // Comparable
         public int compareTo(Node other) {
-            return Double.compare(getCost(), other.getCost());
+            return Double.compare(getTotalCost(), other.getTotalCost());
         }
 
         @Override // Object
@@ -96,7 +115,13 @@ public class Searcher {
 
         @Override // Object
         public boolean equals(Object other) {
-            return mWorld.equals(other);
+            if (!(other instanceof Node)) {
+                return false;
+            }
+
+            Node otherNode = (Node) other;
+
+            return getWorld().equals(otherNode.getWorld());
         }
     }
 
@@ -110,7 +135,7 @@ public class Searcher {
 
         // Start node.
         Node startNode = new Node(world);
-        startNode.setCost(calculateWorldCost(world, target));
+        startNode.setTotalCost(startNode.estimateCostToTarget(target));
         openQueue.add(startNode);
         openSet.put(startNode, startNode);
 
@@ -120,35 +145,40 @@ public class Searcher {
             // Get the best node.
             Node node = openQueue.poll();
             openSet.remove(node);
+            closedSet.put(node, node);
+            System.out.printf("Adding %d to closed set (%d)%n", node.getWorld().getPlayer().getX(), node.hashCode());
             searchedNodeCount++;
             if (searchedNodeCount == 100) {
                 // XXX
                 break;
             }
             if (mDebug >= 2) {
-                System.out.printf("Cost: %f%n", node.getCost());
+                System.out.printf("Cost: %f%n", node.getTotalCost());
             }
 
             // Generate neighbor nodes.
             List<Node> neighbors = node.makeNeighbors();
             for (Node neighbor : neighbors) {
                 // Skip neighbor if in closed set.
+                System.out.printf("Checking %d in closed set (%d)%n", neighbor.getWorld().getPlayer().getX(), neighbor.hashCode());
                 if (closedSet.containsKey(neighbor)) {
+                    System.out.println("Skipping");
                     continue;
                 }
 
                 bestNode = neighbor;
 
-                // Calculate tentative cost: g(node) + guess
-                double cost = calculateWorldCost(node.getWorld(), target);
-                neighbor.setCost(cost);
+                // Calculate tentative cost: path + guess
+                double totalCost = neighbor.getPathCost() + neighbor.estimateCostToTarget(target);
+                neighbor.setTotalCost(totalCost);
 
                 Node existingNeighbor = openSet.get(neighbor);
                 if (existingNeighbor != null) {
-                    if (cost < existingNeighbor.getCost()) {
+                    // See if we've found a better path.
+                    if (neighbor.getPathCost() < existingNeighbor.getPathCost()) {
                         // Remove first.
-                        openQueue.remove(neighbor);  // O(n)
-                        // Put it back with new cost. 
+                        openQueue.remove(existingNeighbor);  // O(n)
+                        // Put it back with new cost, parent, input, etc. 
                         openQueue.add(neighbor);
                         openSet.put(neighbor, neighbor);
                     } else {
@@ -169,26 +199,17 @@ public class Searcher {
         int pathLength = 0;
         while (bestNode.getParent() != null) {
             input = bestNode.getInput();
+            System.out.printf("%s (%f %d), ", input, bestNode.getPathCost(),
+                    bestNode.getWorld().getPlayer().getX());
             bestNode = bestNode.getParent();
             pathLength++;
         }
+        System.out.println();
         if (mDebug >= 1) {
             System.out.printf("Path length: %d%n", pathLength);
         }
 
         // We didn't actually hit the goal, but this is the best we can do.
         return input;
-    }
-
-    /**
-     * Compute the cost of this world relative to the target.
-     */
-    private double calculateWorldCost(World world, Point target) {
-        Player player = world.getPlayer();
-
-        int dx = target.x - player.getX();
-        int dy = target.y - player.getY();
-
-        return Math.hypot(dx, dy);
     }
 }

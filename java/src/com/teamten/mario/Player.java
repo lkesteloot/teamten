@@ -17,9 +17,20 @@ public class Player {
     // Y location of top-left corner;
     private final int mY;
 
-    public Player(int x, int y) {
+    // Velocity times VELOCITY_SCALE.
+    private final int mVx;
+    private final int mVy;
+    private static final int VELOCITY_SCALE = 100;
+
+    private Player(int x, int y, int vx, int vy) {
         mX = x;
         mY = y;
+        mVx = vx;
+        mVy = vy;
+    }
+
+    public Player(int x, int y) {
+        this(x, y, 0, 0);
     }
 
     public int getX() {
@@ -30,8 +41,19 @@ public class Player {
         return mY;
     }
 
+    public double distanceTo(Player other) {
+        int dx = other.getX() - getX();
+        int dy = other.getY() - getY();
+
+        return Math.hypot(dx, dy);
+    }
+
     public Player move(int dx, int dy) {
-        return new Player(mX + dx, mY + dy);
+        return new Player(
+                mX + (int) Math.round((double) mVx/VELOCITY_SCALE),
+                mY + (int) Math.round((double) mVy/VELOCITY_SCALE),
+                (int) Math.round((mVx + dx*VELOCITY_SCALE)*0.90),
+                (int) Math.round((mVy + dy*VELOCITY_SCALE)*0.90));
     }
 
     public void draw(Graphics g) {
@@ -45,6 +67,8 @@ public class Player {
 
         hashCode = hashCode*31 + getX();
         hashCode = hashCode*31 + getY();
+        hashCode = hashCode*31 + mVx;
+        hashCode = hashCode*31 + mVy;
 
         return hashCode;
     }
@@ -58,6 +82,8 @@ public class Player {
         Player otherPlayer = (Player) other;
 
         return getX() == otherPlayer.getX()
-            && getY() == otherPlayer.getY();
+            && getY() == otherPlayer.getY()
+            && mVx == otherPlayer.mVx
+            && mVy == otherPlayer.mVy;
     }
 }

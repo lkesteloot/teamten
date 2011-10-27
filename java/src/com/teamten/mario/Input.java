@@ -43,4 +43,11 @@ public class Input {
     public Input withRightPressed(boolean rightPressed) {
         return new Input(mJumpPressed, mLeftPressed, rightPressed);
     }
+
+    @Override // Object
+    public String toString() {
+        return (isJumpPressed() ? "J" : "")
+            + (isLeftPressed() ? "L" : "")
+            + (isRightPressed() ? "R" : "");
+    }
 }
