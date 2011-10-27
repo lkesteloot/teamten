@@ -84,8 +84,8 @@ public class Player {
         }
 
         // Move player by its velocity.
-        int x = mX + (int) Math.round((double) mVx/VELOCITY_SCALE);
-        int y = mY + (int) Math.round((double) mVy/VELOCITY_SCALE);
+        int x = mX + (int) Math.round((double) vx/VELOCITY_SCALE);
+        int y = mY + (int) Math.round((double) vy/VELOCITY_SCALE);
 
         Integer pushBack = env.getPushBack(this, x, y);
         if (pushBack != null) {
@@ -94,6 +94,9 @@ public class Player {
                 vy = 0;
             }
         }
+
+        System.out.printf("(%d,%d,%d,%d) -> (%d,%d) -> (%d,%d,%d,%d)%n",
+                mX, mY, mVx, mVy, ax, ay, x, y, vx, vy);
 
         return new Player(x, y, vx, vy);
     }

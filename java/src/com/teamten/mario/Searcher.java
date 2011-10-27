@@ -15,6 +15,7 @@ import java.util.PriorityQueue;
  */
 public class Searcher {
     private static final int mDebug = 0;
+    private static final boolean USE_DISTANCE = true;
 
     /**
      * Search node.
@@ -25,20 +26,24 @@ public class Searcher {
         private double mTotalCost;
         private Node mParent;
         private Input mInput;
+        private int mGeneration;
 
-        private Node(World world, double pathCost, double totalCost, Node parent, Input input) {
+        private Node(World world, double pathCost, double totalCost, Node parent, Input input,
+                int generation) {
+
             mWorld = world;
             mPathCost = pathCost;
             mTotalCost = totalCost;
             mParent = parent;
             mInput = input;
+            mGeneration = generation;
         }
 
         /**
          * Start node.
          */
         public Node(World world) {
-            this(world, 0.0, 0.0, null, null);
+            this(world, 0.0, 0.0, null, null, 0);
         }
 
         public World getWorld() {
@@ -89,9 +94,19 @@ public class Searcher {
 
         private Node makeNeighbor(Input input) {
             World newWorld = getWorld().step(input);
-            double distanceTraveled = getWorld().getPlayer().distanceTo(newWorld.getPlayer());
-            distanceTraveled = 1.0; // XXX Now in units of ticks.
-            return new Node(newWorld, getPathCost() + distanceTraveled, 0.0, this, input);
+
+            double travelCost;
+            if (USE_DISTANCE) {
+                travelCost = getWorld().getPlayer().distanceTo(newWorld.getPlayer());
+
+                // Penalize later moves.
+                /// travelCost += mGeneration;
+            } else {
+                travelCost = 1.0; // XXX Now in units of ticks.
+            }
+
+            return new Node(newWorld, getPathCost() + travelCost, 0.0, this,
+                    input, mGeneration + 1);
         }
 
         /**
@@ -101,18 +116,22 @@ public class Searcher {
             // Straight-line distance to target.
             double distance = getDistanceToTarget(target);
 
-            // Best time to travel distance would be to accelerate for half the distance
-            // and decelerate for the other half. The increase in speed is 1 per tick,
-            // and we're returning the cost in ticks.
-            //
-            // d = 0.5 a t^2
-            // t = sqrt(2 d / a)
-            final double A = 1;
+            if (USE_DISTANCE) {
+                return distance;
+            } else {
+                // Best time to travel distance would be to accelerate for half the distance
+                // and decelerate for the other half. The increase in speed is 1 per tick,
+                // and we're returning the cost in ticks.
+                //
+                // d = 0.5 a t^2
+                // t = sqrt(2 d / a)
+                final double A = 1;
 
-            // XXX Note that this ignores any existing acceleration.
-            double time = 2 * Math.sqrt(distance / A);
+                // XXX Note that this ignores any existing acceleration.
+                double time = 2 * Math.sqrt(distance / A);
 
-            return time;
+                return time;
+            }
         }
 
         public double getDistanceToTarget(Point target) {
@@ -122,10 +141,21 @@ public class Searcher {
             int dx = target.x - player.getX();
             int dy = target.y - player.getY();
 
-            // XXX Force dy to zero for now since we can't jump.
-            /// dy = 0;
-
             return Math.hypot(dx, dy);
+        }
+
+        public String getKeySequence() {
+            StringBuilder builder = new StringBuilder();
+
+            Node node = this;
+            while (node.getParent() != null) {
+                builder.append(node.getInput());
+                node = node.getParent();
+            }
+
+            builder.reverse();
+
+            return builder.toString();
         }
 
         @Override // Comparable
@@ -171,7 +201,13 @@ public class Searcher {
             Node node = openQueue.poll();
             openSet.remove(node);
 
-            bestNode = node;
+            System.out.printf("%f %f %s%n",
+                    node.getDistanceToTarget(target),
+                    bestNode.getDistanceToTarget(target),
+                    node.getKeySequence());
+            if (node.getDistanceToTarget(target) < bestNode.getDistanceToTarget(target)) {
+                bestNode = node;
+            }
 
             double distance = node.getDistanceToTarget(target);
             double speed = node.getWorld().getPlayer().getSpeed();
@@ -182,7 +218,7 @@ public class Searcher {
 
             closedSet.put(node, node);
             searchedNodeCount++;
-            if (searchedNodeCount == 100) {
+            if (searchedNodeCount == 10) {
                 // XXX use time limit instead.
                 break;
             }

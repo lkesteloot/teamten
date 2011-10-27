@@ -46,8 +46,12 @@ public class Input {
 
     @Override // Object
     public String toString() {
-        return (isJumpPressed() ? "J" : "")
+        String s = (isJumpPressed() ? "J" : "")
             + (isLeftPressed() ? "L" : "")
             + (isRightPressed() ? "R" : "");
+        if (s.isEmpty()) {
+            s = "_";
+        }
+        return s;
     }
 }
