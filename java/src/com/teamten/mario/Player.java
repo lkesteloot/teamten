@@ -109,7 +109,7 @@ public class Player {
         // Check if we died.
         if (y > Env.HEIGHT*2) {
             x = Env.WIDTH/2;
-            y = Env.HEIGHT/2;
+            y = Env.HEIGHT*1/3;
             vx = 0;
             vy = 0;
         }

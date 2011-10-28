@@ -133,6 +133,7 @@ public class Searcher {
                 // Get rid of this factor, for testing.
                 /// travelCost = 0.0;
 
+                // Make it want to get these sooner.
                 travelCost += 0.1;
             } else {
                 travelCost = 1.0; // XXX Now in units of ticks.
@@ -253,7 +254,7 @@ public class Searcher {
 
             double distance = node.getDistanceToTarget(target);
             double speed = node.getWorld().getPlayer().getSpeed();
-            if (distance < 5 && speed < 100) {
+            if (distance < 5 /* && speed < 1 */) {
                 // Done.
                 break;
             }
