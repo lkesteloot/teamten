@@ -24,10 +24,12 @@ public class Searcher {
     public static class Results {
         private final Input mInput;
         private final List<Point> mPath;
+        private final List<Point> mExplored;
 
-        public Results(Input input, List<Point> path) {
+        public Results(Input input, List<Point> path, List<Point> explored) {
             mInput = input;
             mPath = path;
+            mExplored = explored;
         }
 
         public Input getInput() {
@@ -36,6 +38,10 @@ public class Searcher {
 
         public List<Point> getPath() {
             return mPath;
+        }
+
+        public List<Point> getExplored() {
+            return mExplored;
         }
     }
 
@@ -235,10 +241,12 @@ public class Searcher {
 
         int searchedNodeCount = 0;
         Node bestNode = startNode;
+        List<Point> explored = new ArrayList<Point>();
         while (!openQueue.isEmpty()) {
             // Get the best node.
             Node node = openQueue.poll();
             openSet.remove(node);
+            explored.add(node.getWorld().getPlayer().getPoint());
 
             if (mDebug >= 3) {
                 System.out.printf("Pulled out dist=%f, total=%f (%f + %f), %s%n",
@@ -327,6 +335,6 @@ public class Searcher {
         }
 
         // We didn't actually hit the goal, but this is the best we can do.
-        return new Results(input, path);
+        return new Results(input, path, explored);
     }
 }

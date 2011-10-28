@@ -84,6 +84,7 @@ public class Mario extends JFrame {
 
             mWorld = mWorld.step(results.getInput());
             mWorldDrawer.setPath(results.getPath());
+            mWorldDrawer.setExplored(results.getExplored());
             mWorldDrawer.setTarget(target);
             mWorldDrawer.setWorld(mWorld);
         }

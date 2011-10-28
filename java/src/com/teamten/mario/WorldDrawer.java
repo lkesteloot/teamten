@@ -22,6 +22,7 @@ public class WorldDrawer extends Canvas {
     private double mTx = 0;
     private double mTy = 0;
     private List<Point> mPath = Collections.emptyList();
+    private List<Point> mExplored = Collections.emptyList();
     private Point mTarget = null;
 
     public WorldDrawer(World world) {
@@ -38,6 +39,14 @@ public class WorldDrawer extends Canvas {
      */
     public void setPath(List<Point> path) {
         mPath = path;
+        repaint();
+    }
+
+    /**
+     * Set of points we explored.
+     */
+    public void setExplored(List<Point> explored) {
+        mExplored = explored;
         repaint();
     }
 
@@ -82,6 +91,12 @@ public class WorldDrawer extends Canvas {
         // Draw the world.
         world.draw(g);
 
+        // Draw points we explored.
+        g2.setColor(Color.BLACK);
+        for (Point point : mExplored) {
+            // g2.drawRect(point.x, point.y, 0, 0);
+        }
+
         // Draw debug path.
         Path2D.Double debugShape = new Path2D.Double();
         boolean first = true;
@@ -96,6 +111,7 @@ public class WorldDrawer extends Canvas {
         g2.setColor(Color.RED);
         g2.draw(debugShape);
 
+        // Draw target.
         if (mTarget != null) {
             g2.setColor(Color.WHITE);
             g2.drawArc(mTarget.x - 2, mTarget.y - 2, 4, 4, 0, 360);
