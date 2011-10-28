@@ -3,11 +3,15 @@
 package com.teamten.mario;
 
 import java.awt.Canvas;
+import java.awt.geom.Path2D;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
 import java.awt.Point;
+
+import java.util.List;
+import java.util.Collections;
 
 /**
  * Draws a World.
@@ -17,6 +21,8 @@ public class WorldDrawer extends Canvas {
     private double mScale = 1;
     private double mTx = 0;
     private double mTy = 0;
+    private List<Point> mPath = Collections.emptyList();
+    private Point mTarget = null;
 
     public WorldDrawer(World world) {
         mWorld = world;
@@ -24,6 +30,19 @@ public class WorldDrawer extends Canvas {
 
     public void setWorld(World world) {
         mWorld = world;
+        repaint();
+    }
+
+    /**
+     * Debug path to draw.
+     */
+    public void setPath(List<Point> path) {
+        mPath = path;
+        repaint();
+    }
+
+    public void setTarget(Point target) {
+        mTarget = target;
         repaint();
     }
 
@@ -62,5 +81,24 @@ public class WorldDrawer extends Canvas {
 
         // Draw the world.
         world.draw(g);
+
+        // Draw debug path.
+        Path2D.Double debugShape = new Path2D.Double();
+        boolean first = true;
+        for (Point point : mPath) {
+            if (first) {
+                debugShape.moveTo(point.x, point.y);
+                first = false;
+            } else {
+                debugShape.lineTo(point.x, point.y);
+            }
+        }
+        g2.setColor(Color.RED);
+        g2.draw(debugShape);
+
+        if (mTarget != null) {
+            g2.setColor(Color.WHITE);
+            g2.drawArc(mTarget.x - 2, mTarget.y - 2, 4, 4, 0, 360);
+        }
     }
 }

@@ -4,6 +4,7 @@ package com.teamten.mario;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 
 /**
  * The player, its location, velocity, etc.
@@ -42,6 +43,10 @@ public class Player {
 
     public int getY() {
         return mY;
+    }
+
+    public Point getPoint() {
+        return new Point(mX, mY);
     }
 
     public double getSpeed() {

@@ -71,14 +71,17 @@ public class Mario extends JFrame {
     }
 
     private void takeAutomatedStep() {
-        Point point = getMousePosition();
-        if (point != null) {
-            mWorldDrawer.reverseTransform(point);
-            // System.out.printf("%d %d%n", point.x, point.y);
+        // Use the WorldDrawer's component, not this JPanel's, because the latter includes
+        // the title bar of the window.
+        Point target = mWorldDrawer.getMousePosition();
+        if (target != null) {
+            mWorldDrawer.reverseTransform(target);
 
-            Input input = mSearcher.findBestMove(mWorld, point);
+            Searcher.Results results = mSearcher.findBestMove(mWorld, target);
 
-            mWorld = mWorld.step(input);
+            mWorld = mWorld.step(results.getInput());
+            mWorldDrawer.setPath(results.getPath());
+            mWorldDrawer.setTarget(target);
             mWorldDrawer.setWorld(mWorld);
         }
     }

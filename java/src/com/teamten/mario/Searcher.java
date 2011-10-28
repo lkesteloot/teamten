@@ -16,6 +16,28 @@ import java.util.PriorityQueue;
 public class Searcher {
     private static final int mDebug = 0;
     private static final boolean USE_DISTANCE = true;
+    private static final boolean ALLOW_JUMPING = true;
+
+    /**
+     * Search results.
+     */
+    public static class Results {
+        private final Input mInput;
+        private final List<Point> mPath;
+
+        public Results(Input input, List<Point> path) {
+            mInput = input;
+            mPath = path;
+        }
+
+        public Input getInput() {
+            return mInput;
+        }
+
+        public List<Point> getPath() {
+            return mPath;
+        }
+    }
 
     /**
      * Search node.
@@ -84,8 +106,10 @@ public class Searcher {
         private List<Node> makeNeighbors() {
             List<Node> neighbors = new ArrayList<Node>();
 
-            neighbors.add(makeNeighbor(Input.NOTHING));
-            neighbors.add(makeNeighbor(Input.JUMP));
+            /// neighbors.add(makeNeighbor(Input.NOTHING));
+            if (ALLOW_JUMPING) {
+                neighbors.add(makeNeighbor(Input.JUMP));
+            }
             neighbors.add(makeNeighbor(Input.LEFT));
             neighbors.add(makeNeighbor(Input.RIGHT));
 
@@ -101,6 +125,11 @@ public class Searcher {
 
                 // Penalize later moves.
                 /// travelCost += mGeneration;
+
+                // Get rid of this factor, for testing.
+                /// travelCost = 0.0;
+
+                travelCost += 0.1;
             } else {
                 travelCost = 1.0; // XXX Now in units of ticks.
             }
@@ -180,7 +209,12 @@ public class Searcher {
         }
     }
 
-    public Input findBestMove(World world, Point target) {
+    public Results findBestMove(World world, Point target) {
+        if (!ALLOW_JUMPING) {
+            // 1-D problem.
+            target.y = world.getPlayer().getY();
+        }
+
         // Nodes left to investigate.
         PriorityQueue<Node> openQueue = new PriorityQueue<Node>();
         Map<Node,Node> openSet = new HashMap<Node,Node>();
@@ -201,9 +235,11 @@ public class Searcher {
             Node node = openQueue.poll();
             openSet.remove(node);
 
-            System.out.printf("%f %f %s%n",
+            System.out.printf("Pulled out dist=%f, total=%f (%f + %f), %s%n",
                     node.getDistanceToTarget(target),
-                    bestNode.getDistanceToTarget(target),
+                    node.getTotalCost(),
+                    node.getPathCost(),
+                    node.getTotalCost() - node.getPathCost(),
                     node.getKeySequence());
             if (node.getDistanceToTarget(target) < bestNode.getDistanceToTarget(target)) {
                 bestNode = node;
@@ -211,14 +247,14 @@ public class Searcher {
 
             double distance = node.getDistanceToTarget(target);
             double speed = node.getWorld().getPlayer().getSpeed();
-            if (distance < 1 && speed < 1) {
+            if (distance < 5 && speed < 1) {
                 // Done.
                 break;
             }
 
             closedSet.put(node, node);
             searchedNodeCount++;
-            if (searchedNodeCount == 10) {
+            if (searchedNodeCount == 100) {
                 // XXX use time limit instead.
                 break;
             }
@@ -264,7 +300,9 @@ public class Searcher {
 
         Input input = Input.NOTHING;
         int pathLength = 0;
+        List<Point> path = new ArrayList<Point>();
         while (bestNode.getParent() != null) {
+            path.add(bestNode.getWorld().getPlayer().getPoint());
             input = bestNode.getInput();
             if (mDebug >= 1) {
                 System.out.printf("%s (%f %f %d), ",
@@ -282,6 +320,6 @@ public class Searcher {
         }
 
         // We didn't actually hit the goal, but this is the best we can do.
-        return input;
+        return new Results(input, path);
     }
 }
