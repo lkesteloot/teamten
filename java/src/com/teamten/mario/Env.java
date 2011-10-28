@@ -19,6 +19,10 @@ public class Env {
         Env env = new Env();
 
         env.addFloor(new Floor(0, WIDTH, HEIGHT - Floor.HEIGHT));
+        env.addFloor(new Floor(WIDTH/5, WIDTH/5,
+                    HEIGHT - Floor.HEIGHT - Player.HEIGHT*3/2 - Floor.HEIGHT));
+        env.addFloor(new Floor(WIDTH/5*2, WIDTH/5,
+                    HEIGHT - Floor.HEIGHT - Player.HEIGHT*3/2*2 - Floor.HEIGHT*2));
 
         return env;
     }
@@ -28,18 +32,44 @@ public class Env {
     }
 
     public boolean isTouchingFloor(Player player) {
-        int floor = HEIGHT - Floor.HEIGHT;
-        return player.getY() + Player.HEIGHT >= floor;
+        int playerBottom = player.getY() + Player.HEIGHT - 1;
+
+        for (Floor floor : mFloorList) {
+            if (playerFloorHorizontalOverlap(player.getX(), floor)) {
+                if (playerBottom == floor.getTop() - 1) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
-    public Integer getPushBack(Player player, int x, int y) {
-        int floor = HEIGHT - Floor.HEIGHT;
-        int dy = y + Player.HEIGHT - floor;
-        if (dy >= 0) {
-            return dy;
-        } else {
-            return null;
+    public Integer getPushBack(Player player, int x, int y, int vx, int vy) {
+        for (Floor floor : mFloorList) {
+            if (playerFloorHorizontalOverlap(x, floor)) {
+                if (playerFloorVerticalOverlap(y, floor)) {
+                    if (vy > 0) {
+                        // Going down.
+                        return y + Player.HEIGHT - floor.getTop();
+                    } else {
+                        return y - (floor.getTop() + Floor.HEIGHT);
+                    }
+                }
+            }
         }
+
+        return null;
+    }
+
+    private static boolean playerFloorHorizontalOverlap(int playerX, Floor floor) {
+        return playerX + Player.WIDTH - 1 >= floor.getLeft()
+            && playerX < floor.getLeft() + floor.getWidth() - 1;
+    }
+
+    private static boolean playerFloorVerticalOverlap(int playerY, Floor floor) {
+        return playerY + Player.HEIGHT - 1 >= floor.getTop()
+            && playerY < floor.getTop() + Floor.HEIGHT - 1;
     }
 
     public void draw(Graphics g) {

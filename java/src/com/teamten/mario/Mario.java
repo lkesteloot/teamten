@@ -77,7 +77,10 @@ public class Mario extends JFrame {
         if (target != null) {
             mWorldDrawer.reverseTransform(target);
 
+            long before = System.currentTimeMillis();
             Searcher.Results results = mSearcher.findBestMove(mWorld, target);
+            long after = System.currentTimeMillis();
+            /// System.out.printf("Elapsed: %d ms%n", after - before);
 
             mWorld = mWorld.step(results.getInput());
             mWorldDrawer.setPath(results.getPath());

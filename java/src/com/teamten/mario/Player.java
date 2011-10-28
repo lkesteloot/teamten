@@ -14,7 +14,7 @@ public class Player {
     public static final int HEIGHT = 10;
     public static final int FRICTION = 4;
     public static final int GRAVITY = 8;
-    public static final int JUMP = 4;
+    public static final int JUMP = 6;
 
     // X location of top-left corner.
     private final int mX;
@@ -92,16 +92,27 @@ public class Player {
         int x = mX + (int) Math.round((double) vx/VELOCITY_SCALE);
         int y = mY + (int) Math.round((double) vy/VELOCITY_SCALE);
 
-        Integer pushBack = env.getPushBack(this, x, y);
+        Integer pushBack = env.getPushBack(this, x, y, vx, vy);
         if (pushBack != null) {
-            y -= pushBack.intValue();
-            if (vy > 0) {
+            int dy = pushBack.intValue();
+            y -= dy;
+            if ((vy > 0) == (dy > 0)) {
                 vy = 0;
             }
         }
 
+        /*
         System.out.printf("(%d,%d,%d,%d) -> (%d,%d) -> (%d,%d,%d,%d)%n",
                 mX, mY, mVx, mVy, ax, ay, x, y, vx, vy);
+        */
+
+        // Check if we died.
+        if (y > Env.HEIGHT*2) {
+            x = Env.WIDTH/2;
+            y = Env.HEIGHT/2;
+            vx = 0;
+            vy = 0;
+        }
 
         return new Player(x, y, vx, vy);
     }

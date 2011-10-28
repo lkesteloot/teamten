@@ -106,12 +106,16 @@ public class Searcher {
         private List<Node> makeNeighbors() {
             List<Node> neighbors = new ArrayList<Node>();
 
-            /// neighbors.add(makeNeighbor(Input.NOTHING));
-            if (ALLOW_JUMPING) {
-                neighbors.add(makeNeighbor(Input.JUMP));
+            boolean isTouchingFloor = getWorld().getEnv().isTouchingFloor(getWorld().getPlayer());
+            if (isTouchingFloor) {
+                if (ALLOW_JUMPING) {
+                    neighbors.add(makeNeighbor(Input.JUMP));
+                }
+                neighbors.add(makeNeighbor(Input.LEFT));
+                neighbors.add(makeNeighbor(Input.RIGHT));
+            } else {
+                neighbors.add(makeNeighbor(Input.NOTHING));
             }
-            neighbors.add(makeNeighbor(Input.LEFT));
-            neighbors.add(makeNeighbor(Input.RIGHT));
 
             return neighbors;
         }
@@ -235,26 +239,28 @@ public class Searcher {
             Node node = openQueue.poll();
             openSet.remove(node);
 
-            System.out.printf("Pulled out dist=%f, total=%f (%f + %f), %s%n",
-                    node.getDistanceToTarget(target),
-                    node.getTotalCost(),
-                    node.getPathCost(),
-                    node.getTotalCost() - node.getPathCost(),
-                    node.getKeySequence());
+            if (mDebug >= 3) {
+                System.out.printf("Pulled out dist=%f, total=%f (%f + %f), %s%n",
+                        node.getDistanceToTarget(target),
+                        node.getTotalCost(),
+                        node.getPathCost(),
+                        node.getTotalCost() - node.getPathCost(),
+                        node.getKeySequence());
+            }
             if (node.getDistanceToTarget(target) < bestNode.getDistanceToTarget(target)) {
                 bestNode = node;
             }
 
             double distance = node.getDistanceToTarget(target);
             double speed = node.getWorld().getPlayer().getSpeed();
-            if (distance < 5 && speed < 1) {
+            if (distance < 5 && speed < 100) {
                 // Done.
                 break;
             }
 
             closedSet.put(node, node);
             searchedNodeCount++;
-            if (searchedNodeCount == 100) {
+            if (searchedNodeCount == 50000) {
                 // XXX use time limit instead.
                 break;
             }

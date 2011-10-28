@@ -9,7 +9,7 @@ import java.awt.Graphics;
  * The floor that our character stands on.
  */
 public class Floor {
-    public static final int HEIGHT = 10;
+    public static final int HEIGHT = 8;
 
     // Left coordinate, inclusive.
     private final int mLeft;
@@ -22,6 +22,18 @@ public class Floor {
         mLeft = left;
         mWidth = width;
         mTop = top;
+    }
+
+    public int getLeft() {
+        return mLeft;
+    }
+
+    public int getWidth() {
+        return mWidth;
+    }
+
+    public int getTop() {
+        return mTop;
     }
 
     public void draw(Graphics g) {
