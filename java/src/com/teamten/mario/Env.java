@@ -76,10 +76,11 @@ public class Env {
 
     public void draw(Graphics g) {
         // Sky.
-        for (int y = 0; y < HEIGHT; y++) {
+        int step = 1;
+        for (int y = 0; y < HEIGHT; y += step) {
             int white = DARK_BLUE + y*(LIGHT_BLUE - DARK_BLUE)/(HEIGHT - 1);
-            g.setColor(new Color(white, white, 255));
-            g.fillRect(0, y, WIDTH, 1);
+            g.setColor(new Color(white*6/10, white, 255));
+            g.fillRect(0, y, WIDTH, step + 1);
         }
 
         // Floors.

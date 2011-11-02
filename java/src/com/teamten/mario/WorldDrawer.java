@@ -2,21 +2,24 @@
 
 package com.teamten.mario;
 
+import com.teamten.image.ImageUtils;
+
 import java.awt.Canvas;
-import java.awt.geom.Path2D;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.geom.Path2D;
 
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Draws a World.
  */
 public class WorldDrawer extends Canvas {
+    private static final Color LETTERBOX_COLOR = new Color(20, 20, 20);
     private volatile World mWorld;
     private double mScale = 1;
     private double mTx = 0;
@@ -28,6 +31,7 @@ public class WorldDrawer extends Canvas {
 
     public WorldDrawer(World world) {
         mWorld = world;
+        setBackground(LETTERBOX_COLOR);
     }
 
     public void setWorld(World world) {
@@ -72,6 +76,7 @@ public class WorldDrawer extends Canvas {
 
         // Use fancier graphics.
         Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHints(ImageUtils.getHighQualityRenderingMap());
 
         // Get window dimensions.
         Dimension dimension = getSize();
