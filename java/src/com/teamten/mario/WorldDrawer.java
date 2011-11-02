@@ -24,6 +24,7 @@ public class WorldDrawer extends Canvas {
     private List<Point> mPath = Collections.emptyList();
     private List<Point> mExplored = Collections.emptyList();
     private Point mTarget = null;
+    private double mComputationTime = 0;
 
     public WorldDrawer(World world) {
         mWorld = world;
@@ -37,8 +38,9 @@ public class WorldDrawer extends Canvas {
     /**
      * Debug path to draw.
      */
-    public void setPath(List<Point> path) {
+    public void setPath(List<Point> path, double computationTime) {
         mPath = path;
+        mComputationTime = computationTime;
         repaint();
     }
 
@@ -55,8 +57,11 @@ public class WorldDrawer extends Canvas {
         repaint();
     }
 
-    public void reverseTransform(Point point) {
-        point.setLocation((point.x - mTx)/mScale, (point.y - mTy)/mScale);
+    public Point reverseTransform(Point point) {
+        int x = (int) ((point.x - mTx)/mScale);
+        int y = (int) ((point.y - mTy)/mScale);
+
+        return new Point(x, y);
     }
 
     @Override // Canvas
@@ -108,7 +113,8 @@ public class WorldDrawer extends Canvas {
                 debugShape.lineTo(point.x, point.y);
             }
         }
-        g2.setColor(Color.RED);
+        double red = Math.min(mComputationTime, 1.0);
+        g2.setColor(new Color((float) red, 0.0f, 0.0f));
         g2.draw(debugShape);
 
         // Draw target.

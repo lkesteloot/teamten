@@ -5,7 +5,9 @@ package com.teamten.mario;
 import java.awt.Point;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -22,18 +24,20 @@ public class Searcher {
      * Search results.
      */
     public static class Results {
-        private final Input mInput;
+        private final Deque<Input> mInputs;
         private final List<Point> mPath;
         private final List<Point> mExplored;
+        private final long mElapsed;
 
-        public Results(Input input, List<Point> path, List<Point> explored) {
-            mInput = input;
+        public Results(Deque<Input> inputs, List<Point> path, List<Point> explored, long elapsed) {
+            mInputs = inputs;
             mPath = path;
             mExplored = explored;
+            mElapsed = elapsed;
         }
 
-        public Input getInput() {
-            return mInput;
+        public Deque<Input> getInputs() {
+            return mInputs;
         }
 
         public List<Point> getPath() {
@@ -42,6 +46,10 @@ public class Searcher {
 
         public List<Point> getExplored() {
             return mExplored;
+        }
+
+        public long getElapsed() {
+            return mElapsed;
         }
     }
 
@@ -221,6 +229,8 @@ public class Searcher {
     }
 
     public Results findBestMove(World world, Point target) {
+        long before = System.currentTimeMillis();
+
         if (!ALLOW_JUMPING) {
             // 1-D problem.
             target.y = world.getPlayer().getY();
@@ -313,15 +323,15 @@ public class Searcher {
             System.out.printf("Searched %d nodes.%n", searchedNodeCount);
         }
 
-        Input input = Input.NOTHING;
+        Deque<Input> inputs = new LinkedList<Input>();
         int pathLength = 0;
         List<Point> path = new ArrayList<Point>();
         while (bestNode.getParent() != null) {
             path.add(bestNode.getWorld().getPlayer().getPoint());
-            input = bestNode.getInput();
+            inputs.addFirst(bestNode.getInput());
             if (mDebug >= 1) {
                 System.out.printf("%s (%f %f %d), ",
-                        input,
+                        bestNode.getInput(),
                         bestNode.getPathCost(),
                         bestNode.getTotalCost(),
                         bestNode.getWorld().getPlayer().getX());
@@ -334,7 +344,9 @@ public class Searcher {
             System.out.printf("Path length: %d%n", pathLength);
         }
 
+        long after = System.currentTimeMillis();
+
         // We didn't actually hit the goal, but this is the best we can do.
-        return new Results(input, path, explored);
+        return new Results(inputs, path, explored, after - before);
     }
 }
