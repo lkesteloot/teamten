@@ -11,6 +11,8 @@ import java.awt.Color;
  * The environment (walls, etc.) that our character lives in.
  */
 public class Env {
+    private static final int DARK_BLUE = 50;
+    private static final int LIGHT_BLUE = 150;
     public static final int WIDTH = 200;
     public static final int HEIGHT = 100;
     private final List<Floor> mFloorList = new ArrayList<Floor>();
@@ -73,9 +75,14 @@ public class Env {
     }
 
     public void draw(Graphics g) {
-        g.setColor(Color.GRAY);
-        g.fillRect(0, 0, WIDTH, HEIGHT);
+        // Sky.
+        for (int y = 0; y < HEIGHT; y++) {
+            int white = DARK_BLUE + y*(LIGHT_BLUE - DARK_BLUE)/(HEIGHT - 1);
+            g.setColor(new Color(white, white, 255));
+            g.fillRect(0, y, WIDTH, 1);
+        }
 
+        // Floors.
         for (Floor floor : mFloorList) {
             floor.draw(g);
         }

@@ -10,6 +10,8 @@ import java.awt.Point;
  * The player, its location, velocity, etc.
  */
 public class Player {
+    private static final Color COLOR1 = new Color(50, 220, 50);
+    private static final Color COLOR2 = new Color(255, 255, 255);
     public static final int RADIUS = 5;
     public static final int CIRCUMFERENCE = (int) Math.round(RADIUS*2*Math.PI);
     public static final int FRICTION = 4;
@@ -97,6 +99,7 @@ public class Player {
         int x = mX + dx;
         int y = mY + (int) Math.round((double) vy/VELOCITY_SCALE);
 
+        // Roll the ball.
         int angle = mAngle - 360*dx/CIRCUMFERENCE;
 
         Integer pushBack = env.getPushBack(this, x, y, vx, vy);
@@ -116,7 +119,7 @@ public class Player {
         // Check if we died.
         if (y > Env.HEIGHT) {
             x = Env.WIDTH/2;
-            y = Env.HEIGHT*1/3;
+            y = Env.HEIGHT/3;
             vx = 0;
             vy = 0;
         }
@@ -125,13 +128,11 @@ public class Player {
     }
 
     public void draw(Graphics g) {
-        g.setColor(Color.GREEN);
+        g.setColor(COLOR1);
         g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle, 90);
-        g.setColor(Color.WHITE);
-        g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle + 90, 90);
-        g.setColor(Color.GREEN);
         g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle + 180, 90);
-        g.setColor(Color.WHITE);
+        g.setColor(COLOR2);
+        g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle + 90, 90);
         g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle + 270, 90);
     }
 

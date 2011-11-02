@@ -9,6 +9,7 @@ import java.awt.Graphics;
  * The floor that our character stands on.
  */
 public class Floor {
+    private static final Color COLOR = new Color(130, 80, 0);
     public static final int HEIGHT = 8;
 
     // Left coordinate, inclusive.
@@ -37,7 +38,7 @@ public class Floor {
     }
 
     public void draw(Graphics g) {
-        g.setColor(Color.BLUE);
+        g.setColor(COLOR);
         g.fillRect(mLeft, mTop, mWidth, HEIGHT);
     }
 }
