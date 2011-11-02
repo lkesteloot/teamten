@@ -38,6 +38,7 @@ public class Mario extends JFrame {
     private Deque<Input> mInputs = new LinkedList<Input>();
     private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
     private int mPulledInputs = 0;
+    private boolean mDebug = false;
 
     public static void main(String[] args) {
         new Mario();
@@ -100,8 +101,13 @@ public class Mario extends JFrame {
                                 mPulledInputs--;
                             }
                             mPulledInputs = 0;
-                            mWorldDrawer.setPath(results.getPath(), results.getElapsed()/200.);
-                            mWorldDrawer.setExplored(results.getExplored());
+                            if (mDebug) {
+                                mWorldDrawer.setPath(results.getPath(), results.getElapsed()/200.);
+                                mWorldDrawer.setExplored(results.getExplored());
+                            } else {
+                                mWorldDrawer.setPath(null, 0);
+                                mWorldDrawer.setExplored(null);
+                            }
                             mWorldDrawer.setWorld(mWorld);
                             mResults = null;
                         }
@@ -171,6 +177,10 @@ public class Mario extends JFrame {
                     case 'm':
                         mRunning = true;
                         mAutomatic = false;
+                        break;
+
+                    case 'd':
+                        mDebug = !mDebug;
                         break;
                 }
             }

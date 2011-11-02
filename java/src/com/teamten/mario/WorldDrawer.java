@@ -21,8 +21,8 @@ public class WorldDrawer extends Canvas {
     private double mScale = 1;
     private double mTx = 0;
     private double mTy = 0;
-    private List<Point> mPath = Collections.emptyList();
-    private List<Point> mExplored = Collections.emptyList();
+    private List<Point> mPath = null;
+    private List<Point> mExplored = null;
     private Point mTarget = null;
     private double mComputationTime = 0;
 
@@ -97,25 +97,29 @@ public class WorldDrawer extends Canvas {
         world.draw(g);
 
         // Draw points we explored.
-        g2.setColor(Color.BLACK);
-        for (Point point : mExplored) {
-            // g2.drawRect(point.x, point.y, 0, 0);
+        if (mExplored != null) {
+            g2.setColor(Color.BLACK);
+            for (Point point : mExplored) {
+                // g2.drawRect(point.x, point.y, 0, 0);
+            }
         }
 
         // Draw debug path.
-        Path2D.Double debugShape = new Path2D.Double();
-        boolean first = true;
-        for (Point point : mPath) {
-            if (first) {
-                debugShape.moveTo(point.x, point.y);
-                first = false;
-            } else {
-                debugShape.lineTo(point.x, point.y);
+        if (mPath != null) {
+            Path2D.Double debugShape = new Path2D.Double();
+            boolean first = true;
+            for (Point point : mPath) {
+                if (first) {
+                    debugShape.moveTo(point.x, point.y);
+                    first = false;
+                } else {
+                    debugShape.lineTo(point.x, point.y);
+                }
             }
+            double red = Math.min(mComputationTime, 1.0);
+            g2.setColor(new Color((float) red, 0.0f, 0.0f));
+            g2.draw(debugShape);
         }
-        double red = Math.min(mComputationTime, 1.0);
-        g2.setColor(new Color((float) red, 0.0f, 0.0f));
-        g2.draw(debugShape);
 
         // Draw target.
         if (mTarget != null) {
