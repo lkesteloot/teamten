@@ -46,8 +46,7 @@ public class Mario extends JFrame {
 
     private Mario() {
         Env env = Env.makeEnv();
-        Player player = new Player((Env.WIDTH - Player.WIDTH)/2,
-                Env.HEIGHT - Floor.HEIGHT - Player.HEIGHT);
+        Player player = new Player(Env.WIDTH/2, Env.HEIGHT - Floor.HEIGHT - Player.RADIUS);
         mWorld = new World(env, player);
         mWorldDrawer = new WorldDrawer(mWorld);
         mInput = Input.NOTHING;

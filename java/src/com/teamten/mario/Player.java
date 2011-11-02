@@ -10,8 +10,7 @@ import java.awt.Point;
  * The player, its location, velocity, etc.
  */
 public class Player {
-    public static final int WIDTH = 10;
-    public static final int HEIGHT = 10;
+    public static final int RADIUS = 5;
     public static final int FRICTION = 4;
     public static final int GRAVITY = 8;
     public static final int JUMP = 6;
@@ -119,7 +118,7 @@ public class Player {
 
     public void draw(Graphics g) {
         g.setColor(Color.GREEN);
-        g.fillRect(mX, mY, WIDTH, HEIGHT);
+        g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, 0, 360);
     }
 
     @Override // Object

@@ -20,9 +20,9 @@ public class Env {
 
         env.addFloor(new Floor(0, WIDTH, HEIGHT - Floor.HEIGHT));
         env.addFloor(new Floor(WIDTH/5, WIDTH/5,
-                    HEIGHT - Floor.HEIGHT - Player.HEIGHT*3/2 - Floor.HEIGHT));
+                    HEIGHT - Floor.HEIGHT - Player.RADIUS*3 - Floor.HEIGHT));
         env.addFloor(new Floor(WIDTH/5*2, WIDTH/5,
-                    HEIGHT - Floor.HEIGHT - Player.HEIGHT*3/2*2 - Floor.HEIGHT*2));
+                    HEIGHT - Floor.HEIGHT - Player.RADIUS*3*2 - Floor.HEIGHT*2));
 
         return env;
     }
@@ -32,7 +32,7 @@ public class Env {
     }
 
     public boolean isTouchingFloor(Player player) {
-        int playerBottom = player.getY() + Player.HEIGHT - 1;
+        int playerBottom = player.getY() + Player.RADIUS - 1;
 
         for (Floor floor : mFloorList) {
             if (playerFloorHorizontalOverlap(player.getX(), floor)) {
@@ -51,9 +51,9 @@ public class Env {
                 if (playerFloorVerticalOverlap(y, floor)) {
                     if (vy > 0) {
                         // Going down.
-                        return y + Player.HEIGHT - floor.getTop();
+                        return y + Player.RADIUS - floor.getTop();
                     } else {
-                        return y - (floor.getTop() + Floor.HEIGHT);
+                        return y - Player.RADIUS - (floor.getTop() + Floor.HEIGHT);
                     }
                 }
             }
@@ -63,13 +63,13 @@ public class Env {
     }
 
     private static boolean playerFloorHorizontalOverlap(int playerX, Floor floor) {
-        return playerX + Player.WIDTH - 1 >= floor.getLeft()
-            && playerX < floor.getLeft() + floor.getWidth() - 1;
+        return playerX + Player.RADIUS - 1 >= floor.getLeft()
+            && playerX - Player.RADIUS + 1 < floor.getLeft() + floor.getWidth() - 1;
     }
 
     private static boolean playerFloorVerticalOverlap(int playerY, Floor floor) {
-        return playerY + Player.HEIGHT - 1 >= floor.getTop()
-            && playerY < floor.getTop() + Floor.HEIGHT - 1;
+        return playerY + Player.RADIUS - 1 >= floor.getTop()
+            && playerY - Player.RADIUS + 1 < floor.getTop() + Floor.HEIGHT - 1;
     }
 
     public void draw(Graphics g) {
