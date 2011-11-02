@@ -11,6 +11,7 @@ import java.awt.Point;
  */
 public class Player {
     public static final int RADIUS = 5;
+    public static final int CIRCUMFERENCE = (int) Math.round(RADIUS*2*Math.PI);
     public static final int FRICTION = 4;
     public static final int GRAVITY = 8;
     public static final int JUMP = 6;
@@ -20,20 +21,24 @@ public class Player {
     // Y location of top-left corner;
     private final int mY;
 
+    // Rotation of ball in degrees.
+    private final int mAngle;
+
     // Velocity times VELOCITY_SCALE.
     private final int mVx;
     private final int mVy;
     private static final int VELOCITY_SCALE = 10;
 
-    private Player(int x, int y, int vx, int vy) {
+    private Player(int x, int y, int angle, int vx, int vy) {
         mX = x;
         mY = y;
+        mAngle = angle;
         mVx = vx;
         mVy = vy;
     }
 
     public Player(int x, int y) {
-        this(x, y, 0, 0);
+        this(x, y, 0, 0, 0);
     }
 
     public int getX() {
@@ -88,8 +93,11 @@ public class Player {
         }
 
         // Move player by its velocity.
-        int x = mX + (int) Math.round((double) vx/VELOCITY_SCALE);
+        int dx = (int) Math.round((double) vx/VELOCITY_SCALE);
+        int x = mX + dx;
         int y = mY + (int) Math.round((double) vy/VELOCITY_SCALE);
+
+        int angle = mAngle - 360*dx/CIRCUMFERENCE;
 
         Integer pushBack = env.getPushBack(this, x, y, vx, vy);
         if (pushBack != null) {
@@ -113,12 +121,18 @@ public class Player {
             vy = 0;
         }
 
-        return new Player(x, y, vx, vy);
+        return new Player(x, y, angle, vx, vy);
     }
 
     public void draw(Graphics g) {
         g.setColor(Color.GREEN);
-        g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, 0, 360);
+        g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle, 90);
+        g.setColor(Color.WHITE);
+        g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle + 90, 90);
+        g.setColor(Color.GREEN);
+        g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle + 180, 90);
+        g.setColor(Color.WHITE);
+        g.fillArc(mX - RADIUS, mY - RADIUS, RADIUS*2, RADIUS*2, mAngle + 270, 90);
     }
 
     @Override // Object
