@@ -99,16 +99,28 @@ public class chess {
         ///         "PpkpP..Q" +
         ///         ".N.R...." +
         ///         "..K.....");
+
         // http://www.futilitycloset.com/2011/09/10/black-and-white-14/
+        /// Board board = Board.parse(
+        ///         ".......Q" +
+        ///         ".......b" +
+        ///         ".....p.p" +
+        ///         "........" +
+        ///         ".....NN." +
+        ///         "....KP.." +
+        ///         ".......R" +
+        ///         "......k.");
+
+        // http://www.futilitycloset.com/2011/11/07/black-and-white-18/
         Board board = Board.parse(
-                ".......Q" +
-                ".......b" +
-                ".....p.p" +
                 "........" +
-                ".....NN." +
-                "....KP.." +
-                ".......R" +
-                "......k.");
+                "........" +
+                "........" +
+                "........" +
+                ".......p" +
+                "....PQpp" +
+                "R.....q." +
+                "KR....Bk");
         Game game = new Game(board);
         ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
         ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
