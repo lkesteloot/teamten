@@ -869,6 +869,50 @@ public class ImageUtils {
     }
 
     /**
+     * Sets the image to the grayscale value of each pixel snapped to the nearest
+     * valid value. The alpha is untouched.
+     */
+    public static BufferedImage quantize(BufferedImage image, int[] values) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int pixelCount = width*height;
+        int bytesPerPixel = getBytesPerPixel(image);
+
+        image = copy(image);
+
+        byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+
+        // Create lookup table for snapping.
+        int[] snapValue = new int[256];
+        int k = 0;
+        for (int i = 0; i < values.length - 1; i++) {
+            int average = (values[i] + values[i + 1]) / 2;
+            while (k < average) {
+                snapValue[k++] = values[i];
+            }
+        }
+        while (k < snapValue.length) {
+            snapValue[k++] = values[values.length - 1];
+        }
+
+        // Snap each pixel.
+        int index = 0;
+        for (int i = 0; i < pixelCount; i++) {
+            int gray = (int) data[index + 0] & 0xFF;
+            gray = snapValue[gray];
+
+            data[index + 0] = (byte) gray;
+            data[index + 1] = (byte) gray;
+            data[index + 2] = (byte) gray;
+            // Skip alpha, if any.
+
+            index += bytesPerPixel;
+        }
+
+        return image;
+    }
+
+    /**
      * Returns an image with the color of the main image (which must be BGR) and the
      * alpha of the mask (which must be ABGR, color is ignored). The two images must
      * be the same size.

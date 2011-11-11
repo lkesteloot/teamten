@@ -13,13 +13,10 @@ public class Sketchy {
         image = ImageUtils.toGrayscale(image);
 
         // Blur slightly.
-        BufferedImage edges = ImageUtils.blur(image, 2);
+        image = ImageUtils.blur(image, 2);
 
-        // Find edges.
-        edges = ImageUtils.findEdges(edges);
-
-        // Invert.
-        image = ImageUtils.invert(edges);
+        // Threshold.
+        image = ImageUtils.quantize(image, new int[] { 50, 120, 190, 255 } );
 
         return image;
     }
