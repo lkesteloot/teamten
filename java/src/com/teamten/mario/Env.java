@@ -80,6 +80,8 @@ public class Env {
         for (int y = 0; y < HEIGHT; y += step) {
             int white = DARK_BLUE + y*(LIGHT_BLUE - DARK_BLUE)/(HEIGHT - 1);
             g.setColor(new Color(white*6/10, white, 255));
+
+            // Need to add +1 here because otherwise the anti-aliasing will make it look bad.
             g.fillRect(0, y, WIDTH, step + 1);
         }
 
