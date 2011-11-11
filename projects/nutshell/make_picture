@@ -1,0 +1,52 @@
+#!/usr/bin/env java_launcher
+# vim:ft=java:nospell
+# lib:../../java/dist/teamten.jar
+
+// Copyright 2011 Lawrence Kesteloot
+
+import com.teamten.image.ImageUtils;
+import com.teamten.image.Typeface;
+import com.teamten.image.Sketchy;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.Graphics2D;
+import java.awt.font.GlyphVector;
+import java.awt.font.TextLayout;
+import java.awt.geom.Point2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import java.io.IOException;
+
+/**
+ * Create the cover image for the book "Lawrence Kesteloot in a Nutshell".
+ */
+public class make_picture {
+    private final String mFilename;
+
+    public static void main(String[] args) throws IOException {
+        new make_picture(args).run();
+    }
+
+    private make_picture(String[] args) {
+        if (args.length == 0) {
+            System.err.println("Usage: make_picture filename");
+            System.exit(-1);
+        }
+
+        mFilename = args[0];
+    }
+
+    private void run() throws IOException {
+        String inputFilename = "/Users/lawrence/Dropbox/Photos/Team Ten Photos/Lawrence headshots/LKesteloot_Nov2011_8053.jpg";
+
+        BufferedImage image = ImageUtils.load(inputFilename);
+
+        Sketchy sketchy = new Sketchy();
+        image = sketchy.run(image);
+
+        ImageUtils.save(image, mFilename);
+    }
+}

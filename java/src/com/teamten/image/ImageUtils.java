@@ -11,6 +11,7 @@ import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.awt.image.Kernel;
 
 import java.io.File;
@@ -209,6 +210,23 @@ public class ImageUtils {
         BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), newType);
         pasteInto(dest, src, 0, 0);
         return dest;
+    }
+
+    /**
+     * Return the number of bytes per pixel for this image.
+     *
+     * @throws IllegalArgumentException if the type is not TYPE_3BYTE_BGR or
+     * TYPE_4BYTE_ABGR. Do not expand this set without checking all callers, since
+     * they may be depending on this restricted set.
+     */
+    public static int getBytesPerPixel(BufferedImage image) {
+        if (image.getType() == BufferedImage.TYPE_3BYTE_BGR) {
+            return 3;
+        } else if (image.getType() == BufferedImage.TYPE_4BYTE_ABGR) {
+            return 4;
+        } else {
+            throw new IllegalArgumentException("Image type must be BGR or ABGR");
+        }
     }
 
     /**
@@ -728,6 +746,129 @@ public class ImageUtils {
     }
 
     /**
+     * Converts a color image to grayscale. Keeps the alpha.
+     */
+    public static BufferedImage toGrayscale(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        image = copy(image);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int rgb = image.getRGB(x, y);
+
+                int red = rgb & 0xFF;
+                int green = (rgb >> 8) & 0xFF;
+                int blue = (rgb >> 16) & 0xFF;
+                int alpha = (rgb >> 24) & 0xFF;
+
+                int gray = (red*30 + green*59 + blue*11)/100;
+
+                rgb = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
+
+                image.setRGB(x, y, rgb);
+            }
+        }
+
+        return image;
+    }
+
+    /**
+     * Returns a grayscale image of the edges of the red channel of the input
+     * image. Copies the input alpha channel, if any.
+     */
+    public static BufferedImage findEdges(BufferedImage input) {
+        int width = input.getWidth();
+        int height = input.getHeight();
+        int pixelCount = width*height;
+        int bytesPerPixel = getBytesPerPixel(input);
+
+        BufferedImage output = copy(input);
+
+        byte[] inputData = ((DataBufferByte) input.getRaster().getDataBuffer()).getData();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int rgb = input.getRGB(x, y);
+                int alpha = (rgb >> 24) & 0xFF;
+
+                // 3x3 neighbors in row-major order.
+                byte[] n = getNeighbors(inputData, x, y, width, height, bytesPerPixel);
+
+                // http://www.emanueleferonato.com/2010/10/19/
+                //      image-edge-detection-algorithm-php-version/
+                int gx = n[0]*-1 + n[2] + n[3]*-2 + n[5]*2 + n[6]*-1 + n[8];
+                int gy = n[0]*-1 + n[1]*-2 + n[2]*-1 + n[6] + n[7]*2 + n[8];
+
+                // Use Manhattan distance.
+                if (gx < 0) {
+                    gx = -gx;
+                }
+                if (gy < 0) {
+                    gy = -gy;
+                }
+                int gray = gx + gy;
+
+                rgb = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
+
+                output.setRGB(x, y, rgb);
+            }
+        }
+
+        return output;
+    }
+
+    /**
+     * Return row-major list of neighboring values (3x3). Returns 0 values for off the image.
+     */
+    private static byte[] getNeighbors(byte[] inputData, int cx, int cy,
+            int width, int height, int bytesPerPixel) {
+
+        byte[] neighbors = new byte[9];
+
+        int lowX = Math.max(cx - 1, 0);
+        int lowY = Math.max(cy - 1, 0);
+        int highX = Math.min(cx + 1, width - 1);
+        int highY = Math.min(cy + 1, height - 1);
+
+        for (int y = lowY; y <= highY; y++) {
+            for (int x = lowX; x <= highX; x++) {
+                int index = (y - cy + 1)*3 + (x - cx + 1);
+                neighbors[index] = inputData[(y*width + x)*bytesPerPixel];
+            }
+        }
+
+        return neighbors;
+    }
+
+    /**
+     * Returns an inverted images. The alpha mask is untouched, if it's there.
+     */
+    public static BufferedImage invert(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int pixelCount = width*height;
+        int bytesPerPixel = getBytesPerPixel(image);
+
+        image = copy(image);
+
+        byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+
+        int index = 0;
+        for (int i = 0; i < pixelCount; i++) {
+            data[index + 0] = (byte) (255 - ((int) data[index + 0] & 0xFF));
+            data[index + 1] = (byte) (255 - ((int) data[index + 1] & 0xFF));
+            data[index + 2] = (byte) (255 - ((int) data[index + 2] & 0xFF));
+            // Skip alpha, if any.
+
+            index += bytesPerPixel;
+        }
+
+        return image;
+    }
+
+    /**
      * Returns an image with the color of the main image (which must be BGR) and the
      * alpha of the mask (which must be ABGR, color is ignored). The two images must
      * be the same size.
@@ -881,7 +1022,7 @@ public class ImageUtils {
 
         // I don't know why this happens, and whether it's okay to always go to BGR.
         if (image.getType() == 0) {
-            image = ImageUtils.convertType(image, BufferedImage.TYPE_3BYTE_BGR);
+            image = convertType(image, BufferedImage.TYPE_3BYTE_BGR);
         }
 
         log("Loaded \"%s\" (%dx%d)", filename, image.getWidth(), image.getHeight());
@@ -897,7 +1038,7 @@ public class ImageUtils {
 
         // I don't know why this happens, and whether it's okay to always go to BGR.
         if (image.getType() == 0) {
-            image = ImageUtils.convertType(image, BufferedImage.TYPE_3BYTE_BGR);
+            image = convertType(image, BufferedImage.TYPE_3BYTE_BGR);
         }
 
         log("Loaded input stream (%dx%d)", image.getWidth(), image.getHeight());

@@ -26,18 +26,9 @@ public class StretchOp extends AbstractBufferedImageOp {
 
     @Override // BufferedImageOp
     public BufferedImage filter(BufferedImage src, BufferedImage dest) {
-        int bytesPerPixel;
-
-        if (src.getType() == BufferedImage.TYPE_3BYTE_BGR) {
-            bytesPerPixel = 3;
-        } else if (src.getType() == BufferedImage.TYPE_4BYTE_ABGR) {
-            bytesPerPixel = 4;
-        } else {
-            throw new IllegalArgumentException("Stretched images must be BGR or ABGR");
-        }
-
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
+        int bytesPerPixel = ImageUtils.getBytesPerPixel(src);
 
         // Figure out how much we're scaling. 0.5 means shrinking by half, 2.0 means
         // doubling in size. It's the value you divide the destination pixel
