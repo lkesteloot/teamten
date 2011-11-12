@@ -29,6 +29,14 @@ public class Sketchy {
             int x = i % width;
             int y = i / width;
 
+            // Normalized coordinates.
+            double fx = (double) x / width;
+            double fy = (double) y / width; // Keep aspect ratio.
+
+            // Coons patch.
+            fx += Math.sin(fy*10)*0.05;
+
+            // Get source level.
             int index = i*bytesPerPixel;
             double gray = ((int) data[index] & 0xFF)/255.0;
 
@@ -38,7 +46,7 @@ public class Sketchy {
             gray = Math.max(0, Math.min(1, gray));
 
             // gray = 0..1
-            double value = crosshatch(x, y, gray);
+            double value = crosshatch(fx, fy, gray);
             value = Math.max(0, Math.min(1, value));
 
             byte out = (byte) (int) (value*255.5);
@@ -51,13 +59,13 @@ public class Sketchy {
         return image;
     }
 
-    private double crosshatch(int x, int y, double gray) {
+    private double crosshatch(double x, double y, double gray) {
+        // x,y 0..1 (roughly)
         // gray 0..1
 
-        double offset = 0.5;
-        double scale = 0.5;
+        double t = (x + y)*2881.0/5.0;
 
-        double copperplate = Math.sin((x + y)/5.0)/2.1 + 0.5;
+        double copperplate = Math.sin(t)/2.1 + 0.5;
         // copperplate 0..1
 
         if (gray <= copperplate) {
