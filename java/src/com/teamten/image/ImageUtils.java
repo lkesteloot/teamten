@@ -912,6 +912,59 @@ public class ImageUtils {
         return image;
     }
 
+
+    /**
+     * Sets the image to one of the textures specified depending on the value
+     * of each pixel snapped to the nearest valid value. The alpha is
+     * untouched.
+     */
+    public static BufferedImage quantizeTexture(BufferedImage image, int[] values,
+            BufferedImage[] textures) {
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int pixelCount = width*height;
+        int bytesPerPixel = getBytesPerPixel(image);
+
+        image = copy(image);
+
+        byte[] inputData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        byte[][] texturesData = new byte[textures.length][];
+        for (int i = 0; i < textures.length; i++) {
+            texturesData[i] = ((DataBufferByte) textures[i].getRaster().getDataBuffer()).getData();
+        }
+
+        // Create lookup table for snapping.
+        int[] snapIndex = new int[256];
+        int k = 0;
+        for (int i = 0; i < values.length - 1; i++) {
+            int average = (values[i] + values[i + 1]) / 2;
+            while (k < average) {
+                snapIndex[k++] = i;
+            }
+        }
+        while (k < snapIndex.length) {
+            snapIndex[k++] = values.length - 1;
+        }
+
+        // Snap each pixel.
+        int index = 0;
+        for (int i = 0; i < pixelCount; i++) {
+            int gray = (int) inputData[index] & 0xFF;
+            int textureIndex = snapIndex[gray];
+            byte[] textureData = texturesData[textureIndex];
+
+            inputData[index + 0] = textureData[index + 0];
+            inputData[index + 1] = textureData[index + 1];
+            inputData[index + 2] = textureData[index + 2];
+            // Skip alpha, if any.
+
+            index += bytesPerPixel;
+        }
+
+        return image;
+    }
+
     /**
      * Returns an image with the color of the main image (which must be BGR) and the
      * alpha of the mask (which must be ABGR, color is ignored). The two images must

@@ -41,6 +41,7 @@ public class make_picture {
 
     private void run() throws IOException {
         String inputFilename = "/Users/lawrence/Dropbox/Photos/Team Ten Photos/Lawrence headshots/LKesteloot_Nov2011_8053.jpg";
+        inputFilename = "/Users/lawrence/Dropbox/DrewTemp/LKesteloot_Nov2011_8053_head.jpg";
 
         BufferedImage image = ImageUtils.load(inputFilename);
 
