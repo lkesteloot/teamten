@@ -8,9 +8,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
 /**
- * Turns a photo into a sketchy drawing.
+ * Turns a photo into an engraved drawing.
  */
-public class Sketchy {
+public class Engraver {
     public BufferedImage run(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
@@ -46,7 +46,7 @@ public class Sketchy {
             gray = Math.max(0, Math.min(1, gray));
 
             // gray = 0..1
-            double value = crosshatch(fx, fy, gray);
+            double value = pattern(fx, fy, gray);
             value = Math.max(0, Math.min(1, value));
 
             byte out = (byte) (int) (value*255.5);
@@ -59,7 +59,7 @@ public class Sketchy {
         return image;
     }
 
-    private double crosshatch(double x, double y, double gray) {
+    private double pattern(double x, double y, double gray) {
         // x,y 0..1 (roughly)
         // gray 0..1
 

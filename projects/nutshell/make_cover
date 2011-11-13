@@ -12,12 +12,17 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.font.GlyphVector;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
-import java.awt.geom.Point2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
+
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
 
 /**
  * Create the cover image for the book "Lawrence Kesteloot in a Nutshell".
@@ -45,6 +50,10 @@ public class make_cover {
     private static final double SUBTITLE_HEIGHT_IN = 0.55;
     private static final double TEAM_TEN_HEIGHT_IN = 0.50;
     private static final double BACK_TITLE_HEIGHT_IN = 0.50;
+    private static final double ABOVE_HEAD_MARGIN = 0.25;
+    private static final double BACK_PICTURE_IN = 0.80;
+    private static final double PICTURE_MARGIN_IN = 0.1;
+    private static final double BACK_TITLE_BOTTOM_MARGIN_IN = 0.2;
 
     // Font sizes.
     private static final double NAME_FONT_SIZE_IN = 0.68;
@@ -53,6 +62,7 @@ public class make_cover {
     private static final double FRONT_TEAM_TEN_PRESS_FONT_SIZE_IN = 0.15;
     private static final double BACK_TEAM_TEN_FONT_SIZE_IN = 0.25;
     private static final double BACK_TITLE_FONT_SIZE_IN = 0.25;
+    private static final double BACK_TEXT_FONT_SIZE_IN = 0.15;
     private static final double SPINE_TITLE_FONT_SIZE_IN = 0.30;
     private static final double SPINE_TEAM_TEN_PRESS_FONT_SIZE_IN = 0.10;
 
@@ -99,6 +109,10 @@ public class make_cover {
         BufferedImage image = ImageUtils.make(width, height, BACKGROUND_COLOR);
         Graphics2D g = ImageUtils.createGraphics(image);
 
+        // Load picture, make it square.
+        BufferedImage picture = ImageUtils.load("picture.png");
+        picture = ImageUtils.top(picture, picture.getWidth() * 11/10);
+
         // ----------------------------------------------------------------------------------
         // Front page
 
@@ -107,11 +121,20 @@ public class make_cover {
 
         // HLine on top. Extend into the bleed.
         g.setPaint(HIGHLIGHT_COLOR);
+        int topLineHeight = toPixels(HLINE_HEIGHT_IN + BLEED_IN);
         g.fillRect(pageLeft + toPixels(MARGIN_IN), 0,
-                toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), toPixels(HLINE_HEIGHT_IN + BLEED_IN));
+                toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN), topLineHeight);
+
+        // Picture.
+        int y = toPixels(MIDDLE_HLINE_POS_IN + BLEED_IN);
+        BufferedImage resizedPicture = ImageUtils.resizeToFit(picture,
+                0, y - topLineHeight - toPixels(ABOVE_HEAD_MARGIN));
+        g.drawImage(resizedPicture,
+                pageLeft + toPixels(MARGIN_IN) + toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN)/2
+                - resizedPicture.getWidth()/2,
+                y - resizedPicture.getHeight(), null);
 
         // HLine in middle.
-        int y = toPixels(MIDDLE_HLINE_POS_IN + BLEED_IN);
         int itemHeight = toPixels(HLINE_HEIGHT_IN);
         g.setPaint(HIGHLIGHT_COLOR);
         g.fillRect(pageLeft + toPixels(MARGIN_IN), y,
@@ -227,7 +250,56 @@ public class make_cover {
                 font, g.getFontRenderContext());
         textHeight = (int) textLayout.getBounds().getHeight();
         textLayout.draw(g, pageLeft + toPixels(MARGIN_IN), y + itemHeight/2 + textHeight/2);
-        y += itemHeight;
+        y += itemHeight + toPixels(BACK_TITLE_BOTTOM_MARGIN_IN);
+
+        // Picture
+        resizedPicture = ImageUtils.resizeToFit(picture, toPixels(BACK_PICTURE_IN), 0);
+        resizedPicture = ImageUtils.top(resizedPicture, resizedPicture.getWidth()); // Square.
+        g.drawImage(resizedPicture, pageLeft + toPixels(MARGIN_IN), y, null);
+        g.setColor(BLACK_TEXT_COLOR);
+        g.drawRect(pageLeft + toPixels(MARGIN_IN), y,
+                resizedPicture.getWidth(), resizedPicture.getHeight());
+        int pictureWidthFloat = resizedPicture.getWidth() + toPixels(PICTURE_MARGIN_IN);
+        int pictureHeightFloat = resizedPicture.getHeight() + toPixels(PICTURE_MARGIN_IN);
+        int pictureY = y;
+
+        // Text
+        font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false,
+                toPixels(BACK_TEXT_FONT_SIZE_IN));
+        Font italicFont = ImageUtils.getFont(Typeface.GARAMOND, false, true, false,
+                toPixels(BACK_TEXT_FONT_SIZE_IN));
+        String text = "Lawrence Kesteloot, an author and software developer, has been thinking and writing about technology, philosophy, science, and atheism for the past twenty years. Lawrence Kesteloot in a Nutshell is a collection of Lawrence\u2019s most thought-provoking pieces, including the acclaimed technical short story Coding Machines. For more of Lawrence\u2019s writings, see lawrence.teamten.com.";
+        AttributedString attributedString = new AttributedString(text);
+        attributedString.addAttribute(TextAttribute.FONT, font);
+        attributedString.addAttribute(TextAttribute.FOREGROUND, BLACK_TEXT_COLOR);
+        // Doesn't seem to make a difference:
+        attributedString.addAttribute(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        for (String italicPhrase : new String[] { "Lawrence Kesteloot in a Nutshell",
+            "Coding Machines", "lawrence.teamten.com" }) {
+
+            int beginIndex = text.indexOf(italicPhrase);
+            if (beginIndex == -1) {
+                throw new IllegalStateException("Cannot find phrase \"" + italicPhrase + "\"");
+            }
+            int endIndex = beginIndex + italicPhrase.length();
+            attributedString.addAttribute(TextAttribute.FONT, italicFont, beginIndex, endIndex);
+        }
+        AttributedCharacterIterator styledText = attributedString.getIterator();
+        LineBreakMeasurer lbm = new LineBreakMeasurer(styledText, g.getFontRenderContext());
+        int wrappingWidth = toPixels(PAGE_WIDTH_IN - 2*MARGIN_IN);
+        while (lbm.getPosition() < styledText.getEndIndex()) {
+            int lineWidth = wrappingWidth;
+            int linePos = pageLeft + toPixels(MARGIN_IN);
+            if (y < pictureY + pictureHeightFloat) {
+                lineWidth -= pictureWidthFloat;
+                linePos += pictureWidthFloat;
+            }
+            textLayout = lbm.nextLayout(lineWidth);
+
+            y += textLayout.getAscent();
+            textLayout.draw(g, linePos, y);
+            y += textLayout.getDescent() + textLayout.getLeading();
+        }
 
         // ----------------------------------------------------------------------------------
         // Spine
@@ -252,9 +324,10 @@ public class make_cover {
         x += itemWidth;
 
         // Picture.
-        itemWidth = toPixels(0.75);
-        g.setPaint(Color.WHITE);
-        g.fillRect(x, 0, itemWidth, itemHeight);
+        resizedPicture = ImageUtils.rotate(picture, -90*Math.PI/180, true);
+        resizedPicture = ImageUtils.resizeToFit(resizedPicture, 0, itemHeight);
+        itemWidth = resizedPicture.getWidth();
+        g.drawImage(resizedPicture, x, 0, null);
         x += itemWidth;
 
         // Title

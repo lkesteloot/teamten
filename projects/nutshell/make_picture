@@ -4,9 +4,9 @@
 
 // Copyright 2011 Lawrence Kesteloot
 
+import com.teamten.image.Engraver;
 import com.teamten.image.ImageUtils;
 import com.teamten.image.Typeface;
-import com.teamten.image.Sketchy;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -14,8 +14,8 @@ import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.font.GlyphVector;
 import java.awt.font.TextLayout;
-import java.awt.geom.Point2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
@@ -45,8 +45,8 @@ public class make_picture {
 
         BufferedImage image = ImageUtils.load(inputFilename);
 
-        Sketchy sketchy = new Sketchy();
-        image = sketchy.run(image);
+        Engraver engraver = new Engraver();
+        image = engraver.run(image);
 
         ImageUtils.save(image, mFilename);
     }

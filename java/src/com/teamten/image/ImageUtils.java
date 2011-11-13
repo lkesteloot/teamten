@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -373,6 +374,44 @@ public class ImageUtils {
         DecomposableConvolveOp op = new DecomposableConvolveOp(
                 DecomposableConvolveOp.makeGaussianKernel(radius));
         return op.filter(image, null);
+    }
+
+    /**
+     * Returns a copy of the image, rotated clockwise by "radians" radians.
+     *
+     * @param fitNewImage to make the new image fit the rotate image. Otherwise
+     * the new image is the same size and position as the input image.
+     */
+    public static BufferedImage rotate(BufferedImage image, double radians, boolean fitNewImage) {
+        log("Rotating %d degrees clockwise", (int) (radians*180/Math.PI));
+
+        AffineTransform transform = AffineTransform.getRotateInstance(radians,
+                image.getWidth()/2.0, image.getHeight()/2.0);
+
+        AffineTransformOp op = new AffineTransformOp(transform, getHighQualityRenderingHints());
+
+        int cropWidth;
+        int cropHeight;
+        if (fitNewImage) {
+            // Make sure new image fits bounds of rotated image.
+            Rectangle2D bounds = op.getBounds2D(image);
+            if (bounds.getMinX() != 0 || bounds.getMinY() != 0) {
+                // We need to move the transform so that negative pixels don't get clipped.
+                AffineTransform translate = AffineTransform.getTranslateInstance(
+                        -bounds.getMinX(), -bounds.getMinY());
+                translate.concatenate(transform);
+                transform = translate;
+                op = new AffineTransformOp(transform, getHighQualityRenderingHints());
+            }
+            cropWidth = (int) Math.ceil(bounds.getWidth());
+            cropHeight = (int) Math.ceil(bounds.getHeight());
+        } else {
+            cropWidth = image.getWidth();
+            cropHeight = image.getHeight();
+        }
+
+        return crop(convertType(op.filter(image, null), image.getType()),
+                0, 0, cropWidth, cropHeight);
     }
 
     /**
@@ -1406,13 +1445,13 @@ public class ImageUtils {
 
             case GARAMOND:
                 if (bold && italic) {
-                    throw new IllegalArgumentException("Garamond does not have bold italic");
+                    filename = "fonts/Adobe Garamond Pro Bold Italic.ttf";
                 } else if (bold) {
-                    filename = "fonts/Garamonb.ttf";
+                    filename = "fonts/Adobe Garamond Pro Bold.ttf";
                 } else if (italic) {
-                    filename = "fonts/Garamoni.ttf";
+                    filename = "fonts/Adobe Garamond Pro Italic.ttf";
                 } else {
-                    filename = "fonts/Garamond.ttf";
+                    filename = "fonts/Adobe Garamond Pro.ttf";
                 }
                 break;
 
