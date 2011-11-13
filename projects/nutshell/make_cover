@@ -53,7 +53,7 @@ public class make_cover {
     private static final double ABOVE_HEAD_MARGIN = 0.25;
     private static final double BACK_PICTURE_IN = 0.80;
     private static final double PICTURE_MARGIN_IN = 0.1;
-    private static final double BACK_TITLE_BOTTOM_MARGIN_IN = 0.2;
+    private static final double BACK_TITLE_BOTTOM_MARGIN_IN = 0.1;
 
     // Font sizes.
     private static final double NAME_FONT_SIZE_IN = 0.68;
@@ -300,6 +300,23 @@ public class make_cover {
             textLayout.draw(g, linePos, y);
             y += textLayout.getDescent() + textLayout.getLeading();
         }
+
+        // Visit Team Ten
+        font = ImageUtils.getFont(Typeface.HELVETICA, true, false, false,
+                toPixels(FRONT_TEAM_TEN_PRESS_FONT_SIZE_IN));
+        g.setColor(BLACK_TEXT_COLOR);
+        g.setFont(font);
+        textLayout = new TextLayout("Visit Team Ten on the Web at",
+                font, g.getFontRenderContext());
+        textWidth = (int) textLayout.getBounds().getWidth();
+        textHeight = (int) textLayout.getBounds().getHeight();
+        textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+                toPixels(BLEED_IN + PAGE_HEIGHT_IN - MARGIN_IN) - textHeight*15/10);
+        textLayout = new TextLayout("www.teamten.com", font, g.getFontRenderContext());
+        textWidth = (int) textLayout.getBounds().getWidth();
+        textHeight = (int) textLayout.getBounds().getHeight();
+        textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2,
+                toPixels(BLEED_IN + PAGE_HEIGHT_IN - MARGIN_IN));
 
         // ----------------------------------------------------------------------------------
         // Spine
