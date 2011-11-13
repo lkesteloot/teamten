@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics2D;
+import java.awt.font.GlyphMetrics;
 import java.awt.font.GlyphVector;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
@@ -23,6 +24,9 @@ import java.io.IOException;
 
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Create the cover image for the book "Lawrence Kesteloot in a Nutshell".
@@ -413,9 +417,37 @@ public class make_cover {
             String text, int x1, int x2, int y) {
 
         GlyphVector glyphVector = font.createGlyphVector(g.getFontRenderContext(), text);
-        int textWidth = (int) glyphVector.getLogicalBounds().getWidth();
-        int padding = x2 - x1 - textWidth;
-        double characterPadding = (double) padding / (text.length() - 1);
+        double textWidth = glyphVector.getLogicalBounds().getWidth();
+
+        // Adjust kerning.
+        double adjust = 0;
+        if (text.length() != glyphVector.getNumGlyphs()) {
+            throw new IllegalStateException("Glyph count is unexpected (" +
+                    glyphVector.getNumGlyphs() + " vs. " + text.length() + ")");
+        }
+        Map<String,Double> kerning = new HashMap<String,Double>();
+        kerning.put("LA", -0.00);
+        kerning.put("AW", -0.10);
+        kerning.put("NC", -0.10);
+        kerning.put("CE", -0.05);
+        for (int i = 1; i < glyphVector.getNumGlyphs(); i++) {
+            String pair = text.substring(i - 1, i + 1);
+            Double kern = kerning.get(pair);
+            if (kern != null) {
+                GlyphMetrics glyphMetrics = glyphVector.getGlyphMetrics(i);
+                double delta = glyphMetrics.getAdvanceX()*kern;
+                adjust += delta;
+                textWidth += delta;
+            }
+
+            Point2D p = glyphVector.getGlyphPosition(i);
+            p.setLocation(p.getX() + adjust, p.getY());
+            glyphVector.setGlyphPosition(i, p);
+        }
+
+        // Spread out the letters.
+        double padding = x2 - x1 - textWidth;
+        double characterPadding = padding / (text.length() - 1);
 
         for (int i = 1; i < glyphVector.getNumGlyphs(); i++) {
             Point2D p = glyphVector.getGlyphPosition(i);

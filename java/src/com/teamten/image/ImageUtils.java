@@ -8,6 +8,7 @@ import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
+import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
@@ -20,6 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.text.AttributedCharacterIterator;
+
+import java.util.HashMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1463,11 +1467,20 @@ public class ImageUtils {
 
         InputStream inputStream = ImageUtils.class.getResourceAsStream(filename);
 
+        Font font;
         try {
-            return Font.createFont(Font.TRUETYPE_FONT, inputStream).deriveFont((float) size);
+            font = Font.createFont(Font.TRUETYPE_FONT, inputStream).deriveFont((float) size);
         } finally {
             inputStream.close();
         }
+
+        // Turn on kerning. This doesn't seem to make any difference.
+        Map<AttributedCharacterIterator.Attribute,Object> attributes =
+            new HashMap<AttributedCharacterIterator.Attribute,Object>();
+        attributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        font = font.deriveFont(attributes);
+
+        return font;
     }
 
     /**
