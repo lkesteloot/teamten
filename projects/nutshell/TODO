@@ -1,18 +1,10 @@
 Punch list before printing:
 
 - Make a cover page.
-    - Illustration:
-        - Probably just screw around in Photoshop with detect edge, etc.
-        - Or Illustrator.
-        - InkScape?
-            - http://howto.nicubunu.ro/inkscape_face_draw/
-        - Make our own crosshatcher?
-            - RonJr (YouTube):
-                - Invert, blur, dodge, over original, then desaturate.
-    - Get condensed Garamond.
-        - Optional, it look okay now.
-    - Get font with nicer kerning (see AW of LAWRENCE).
     - Double-check width of spine
+
+Optional for later:
+
 - Try generating the diagrams at a particular resolution (300 DPI) and
     using prince-specific CSS rules so they don't scale.
 

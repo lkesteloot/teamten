@@ -79,7 +79,7 @@ public class make_cover {
 
     // Flags.
     private static final boolean DRAW_MARGIN = false;
-    private static final boolean DRAW_BLEED = true;
+    private static final boolean DRAW_BLEED = false;
 
     private final String mFilename;
     private final int mDpi;
