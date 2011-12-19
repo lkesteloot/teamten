@@ -25,6 +25,20 @@ public class Toy {
         mRadius = radius;
     }
 
+    public boolean isOnPlayer(Player player) {
+        int px = player.getX();
+        int py = player.getY();
+        int pr = player.getSnappedRadius();
+
+        long dx = px - mX;
+        long dy = py - mY;
+        long dr = pr - mRadius;
+        long distSquared = dx*dx + dy*dy;
+        long radiusSquared = dr*dr;
+
+        return distSquared <= radiusSquared + 1;
+    }
+
     public void draw(Graphics g) {
         g.setColor(COLOR);
         g.fillArc(mX - mRadius, mY - mRadius, mRadius*2, mRadius*2, 0, 360);

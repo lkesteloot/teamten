@@ -26,7 +26,10 @@ public class Env {
         env.addFloor(new Floor(WIDTH/5*2, WIDTH/5, HEIGHT - Floor.HEIGHT*7));
 
         int toyRadius = 1;
-        env.addToy(new Toy(WIDTH/10, HEIGHT - Floor.HEIGHT - toyRadius, toyRadius));
+        for (int i = 0; i < 10; i++) {
+            int x = (int) (WIDTH*Math.random());
+            env.addToy(new Toy(x, HEIGHT - Floor.HEIGHT - toyRadius, toyRadius));
+        }
 
         return env;
     }
@@ -37,6 +40,30 @@ public class Env {
 
     private void addToy(Toy toy) {
         mToyList.add(toy);
+    }
+
+    public int getToyIndex(Player player) {
+        for (int i = 0; i < mToyList.size(); i++) {
+            if (mToyList.get(i).isOnPlayer(player)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public Env withoutToy(int index) {
+        Env env = new Env();
+
+        // XXX Inefficient.
+        env.mFloorList.addAll(mFloorList);
+        for (int i = 0; i < mToyList.size(); i++) {
+            if (i != index) {
+                env.addToy(mToyList.get(i));
+            }
+        }
+
+        return env;
     }
 
     public boolean isTouchingFloor(Player player) {

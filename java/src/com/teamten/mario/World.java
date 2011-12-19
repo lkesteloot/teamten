@@ -67,8 +67,14 @@ public class World {
         // Roll the ball.
         int angle = player.getAngle() - 360*dx/player.getCircumference();
 
-        // Increase radius if we rolled.
-        double radius = player.getRealRadius() + Math.abs(dx)/100.0/player.getRealRadius();
+        // Increase radius if we're on toy.
+        double radius = player.getRealRadius();
+        int toyIndex = env.getToyIndex(player);
+        if (toyIndex >= 0) {
+            // Increase area.
+            radius += 1.0/(radius*radius);
+            env = env.withoutToy(toyIndex);
+        }
 
         Integer pushBack = env.getPushBack(player, x, y, vx, vy);
         if (pushBack != null) {
@@ -94,9 +100,8 @@ public class World {
         }
 
         Player newPlayer = new Player(x, y, angle, vx, vy, radius);
-        Env newEnv = env;
 
-        return new World(newEnv, newPlayer);
+        return new World(env, newPlayer);
     }
 
     @Override // Object
