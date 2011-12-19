@@ -8,6 +8,8 @@ import java.awt.Graphics;
  * The environment and the characters within it.
  */
 public class World {
+    public static final int GRAVITY = 8;
+    public static final int FRICTION = 4;
     private final Env mEnv;
     private final Player mPlayer;
 
@@ -30,7 +32,71 @@ public class World {
     }
 
     public World step(Input input) {
-        return new World(getEnv(), getPlayer().move(input, getEnv()));
+        Env env = getEnv();
+        Player player = getPlayer();
+
+        boolean touchingFloor = env.isTouchingFloor(player);
+        int ax = 0;
+        int ay = 0;
+        if (touchingFloor) {
+            if (input.isJumpPressed()) {
+                ay -= Player.JUMP;
+            }
+            if (input.isLeftPressed()) {
+                ax -= 1;
+            }
+            if (input.isRightPressed()) {
+                ax += 1;
+            }
+        }
+
+        int vx = player.getVx() + ax*Player.VELOCITY_SCALE;
+        int vy = player.getVy() + ay*Player.VELOCITY_SCALE;
+
+        if (touchingFloor) {
+            vx -= Integer.signum(vx)*FRICTION;
+        } else {
+            vy += GRAVITY;
+        }
+
+        // Move player by its velocity.
+        int dx = (int) Math.round((double) vx/Player.VELOCITY_SCALE);
+        int x = player.getX() + dx;
+        int y = player.getY() + (int) Math.round((double) vy/Player.VELOCITY_SCALE);
+
+        // Roll the ball.
+        int angle = player.getAngle() - 360*dx/player.getCircumference();
+
+        // Increase radius if we rolled.
+        double radius = player.getRealRadius() + Math.abs(dx)/100.0/player.getRealRadius();
+
+        Integer pushBack = env.getPushBack(player, x, y, vx, vy);
+        if (pushBack != null) {
+            int dy = pushBack.intValue();
+            y -= dy;
+            if ((vy > 0) == (dy > 0)) {
+                vy = 0;
+            }
+        }
+
+        /*
+        System.out.printf("(%d,%d,%d,%d) -> (%d,%d) -> (%d,%d,%d,%d)%n",
+                mX, mY, player.getVx(), mVy, ax, ay, x, y, vx, vy);
+        */
+
+        // Check if we died.
+        if (y > Env.HEIGHT) {
+            x = Env.WIDTH/2;
+            y = Env.HEIGHT/3;
+            vx = 0;
+            vy = 0;
+            radius = Player.INITIAL_RADIUS;
+        }
+
+        Player newPlayer = new Player(x, y, angle, vx, vy, radius);
+        Env newEnv = env;
+
+        return new World(newEnv, newPlayer);
     }
 
     @Override // Object

@@ -16,6 +16,7 @@ public class Env {
     public static final int WIDTH = 200;
     public static final int HEIGHT = 100;
     private final List<Floor> mFloorList = new ArrayList<Floor>();
+    private final List<Toy> mToyList = new ArrayList<Toy>();
 
     public static Env makeEnv() {
         Env env = new Env();
@@ -24,6 +25,9 @@ public class Env {
         env.addFloor(new Floor(WIDTH/5, WIDTH/5, HEIGHT - Floor.HEIGHT*4));
         env.addFloor(new Floor(WIDTH/5*2, WIDTH/5, HEIGHT - Floor.HEIGHT*7));
 
+        int toyRadius = 1;
+        env.addToy(new Toy(WIDTH/10, HEIGHT - Floor.HEIGHT - toyRadius, toyRadius));
+
         return env;
     }
 
@@ -31,11 +35,15 @@ public class Env {
         mFloorList.add(floor);
     }
 
+    private void addToy(Toy toy) {
+        mToyList.add(toy);
+    }
+
     public boolean isTouchingFloor(Player player) {
-        int playerBottom = player.getY() + player.getRadius() - 1;
+        int playerBottom = player.getY() + player.getSnappedRadius() - 1;
 
         for (Floor floor : mFloorList) {
-            if (playerFloorHorizontalOverlap(player.getX(), player.getRadius(), floor)) {
+            if (playerFloorHorizontalOverlap(player.getX(), player.getSnappedRadius(), floor)) {
                 if (playerBottom == floor.getTop() - 1) {
                     return true;
                 }
@@ -47,13 +55,13 @@ public class Env {
 
     public Integer getPushBack(Player player, int x, int y, int vx, int vy) {
         for (Floor floor : mFloorList) {
-            if (playerFloorHorizontalOverlap(x, player.getRadius(), floor)) {
-                if (playerFloorVerticalOverlap(y, player.getRadius(), floor)) {
+            if (playerFloorHorizontalOverlap(x, player.getSnappedRadius(), floor)) {
+                if (playerFloorVerticalOverlap(y, player.getSnappedRadius(), floor)) {
                     if (vy > 0) {
                         // Going down.
-                        return y + player.getRadius() - floor.getTop();
+                        return y + player.getSnappedRadius() - floor.getTop();
                     } else {
-                        return y - player.getRadius() - (floor.getTop() + Floor.HEIGHT);
+                        return y - player.getSnappedRadius() - (floor.getTop() + Floor.HEIGHT);
                     }
                 }
             }
@@ -89,6 +97,11 @@ public class Env {
         // Floors.
         for (Floor floor : mFloorList) {
             floor.draw(g);
+        }
+
+        // Toys.
+        for (Toy toy : mToyList) {
+            toy.draw(g);
         }
     }
 }
