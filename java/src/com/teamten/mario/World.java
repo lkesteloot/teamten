@@ -72,7 +72,8 @@ public class World {
         int toyIndex = env.getToyIndex(player);
         if (toyIndex >= 0) {
             // Increase area.
-            radius += 1.0/(radius*radius);
+            Toy toy = env.getToy(toyIndex);
+            radius += 2.0*toy.getRadius()*toy.getRadius()/(radius*radius);
             env = env.withoutToy(toyIndex);
         }
 

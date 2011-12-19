@@ -25,10 +25,19 @@ public class Toy {
         mRadius = radius;
     }
 
+    public int getRadius() {
+        return mRadius;
+    }
+
     public boolean isOnPlayer(Player player) {
+        // Check that toy isn't too big for player.
+        int pr = player.getSnappedRadius();
+        if (mRadius*2 > pr) {
+            return false;
+        }
+
         int px = player.getX();
         int py = player.getY();
-        int pr = player.getSnappedRadius();
 
         long dx = px - mX;
         long dy = py - mY;

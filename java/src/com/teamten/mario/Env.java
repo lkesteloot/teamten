@@ -2,10 +2,12 @@
 
 package com.teamten.mario;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.awt.Graphics;
 import java.awt.Color;
+import java.awt.Graphics;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * The environment (walls, etc.) that our character lives in.
@@ -25,10 +27,14 @@ public class Env {
         env.addFloor(new Floor(WIDTH/5, WIDTH/5, HEIGHT - Floor.HEIGHT*4));
         env.addFloor(new Floor(WIDTH/5*2, WIDTH/5, HEIGHT - Floor.HEIGHT*7));
 
-        int toyRadius = 1;
-        for (int i = 0; i < 10; i++) {
-            int x = (int) (WIDTH*Math.random());
-            env.addToy(new Toy(x, HEIGHT - Floor.HEIGHT - toyRadius, toyRadius));
+        Random random = new Random();
+        for (int i = 0; i < 20; i++) {
+            int floorIndex = random.nextInt(env.mFloorList.size());
+            Floor floor = env.mFloorList.get(floorIndex);
+
+            int x = floor.getLeft() + random.nextInt(floor.getWidth());
+            int r = (int) (3*Math.pow(Math.random(), 4)) + 1;
+            env.addToy(new Toy(x, floor.getTop() - r, r));
         }
 
         return env;
@@ -42,7 +48,12 @@ public class Env {
         mToyList.add(toy);
     }
 
+    public Toy getToy(int index) {
+        return mToyList.get(index);
+    }
+
     public int getToyIndex(Player player) {
+        // XXX Inefficient. Use space partitioning tree.
         for (int i = 0; i < mToyList.size(); i++) {
             if (mToyList.get(i).isOnPlayer(player)) {
                 return i;
