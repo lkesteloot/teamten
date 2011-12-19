@@ -21,10 +21,8 @@ public class Env {
         Env env = new Env();
 
         env.addFloor(new Floor(0, WIDTH, HEIGHT - Floor.HEIGHT));
-        env.addFloor(new Floor(WIDTH/5, WIDTH/5,
-                    HEIGHT - Floor.HEIGHT - Player.INITIAL_RADIUS*3 - Floor.HEIGHT));
-        env.addFloor(new Floor(WIDTH/5*2, WIDTH/5,
-                    HEIGHT - Floor.HEIGHT - Player.INITIAL_RADIUS*3*2 - Floor.HEIGHT*2));
+        env.addFloor(new Floor(WIDTH/5, WIDTH/5, HEIGHT - Floor.HEIGHT*4));
+        env.addFloor(new Floor(WIDTH/5*2, WIDTH/5, HEIGHT - Floor.HEIGHT*7));
 
         return env;
     }
