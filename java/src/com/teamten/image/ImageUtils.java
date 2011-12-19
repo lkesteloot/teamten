@@ -210,7 +210,8 @@ public class ImageUtils {
      * Return the image with a new type.
      */
     public static BufferedImage convertType(BufferedImage src, int newType) {
-        log("Converting image to type %d (%dx%d)", newType, src.getWidth(), src.getHeight());
+        // Annoying log.
+        /// log("Converting image to type %d (%dx%d)", newType, src.getWidth(), src.getHeight());
 
         BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), newType);
         pasteInto(dest, src, 0, 0);
@@ -387,7 +388,7 @@ public class ImageUtils {
      * the new image is the same size and position as the input image.
      */
     public static BufferedImage rotate(BufferedImage image, double radians, boolean fitNewImage) {
-        log("Rotating %d degrees clockwise", (int) (radians*180/Math.PI));
+        log("Rotating %d degrees clockwise", (int) Math.round(radians*180/Math.PI));
 
         AffineTransform transform = AffineTransform.getRotateInstance(radians,
                 image.getWidth()/2.0, image.getHeight()/2.0);
