@@ -22,9 +22,9 @@ public class Env {
 
         env.addFloor(new Floor(0, WIDTH, HEIGHT - Floor.HEIGHT));
         env.addFloor(new Floor(WIDTH/5, WIDTH/5,
-                    HEIGHT - Floor.HEIGHT - Player.RADIUS*3 - Floor.HEIGHT));
+                    HEIGHT - Floor.HEIGHT - Player.INITIAL_RADIUS*3 - Floor.HEIGHT));
         env.addFloor(new Floor(WIDTH/5*2, WIDTH/5,
-                    HEIGHT - Floor.HEIGHT - Player.RADIUS*3*2 - Floor.HEIGHT*2));
+                    HEIGHT - Floor.HEIGHT - Player.INITIAL_RADIUS*3*2 - Floor.HEIGHT*2));
 
         return env;
     }
@@ -34,10 +34,10 @@ public class Env {
     }
 
     public boolean isTouchingFloor(Player player) {
-        int playerBottom = player.getY() + Player.RADIUS - 1;
+        int playerBottom = player.getY() + player.getRadius() - 1;
 
         for (Floor floor : mFloorList) {
-            if (playerFloorHorizontalOverlap(player.getX(), floor)) {
+            if (playerFloorHorizontalOverlap(player.getX(), player.getRadius(), floor)) {
                 if (playerBottom == floor.getTop() - 1) {
                     return true;
                 }
@@ -49,13 +49,13 @@ public class Env {
 
     public Integer getPushBack(Player player, int x, int y, int vx, int vy) {
         for (Floor floor : mFloorList) {
-            if (playerFloorHorizontalOverlap(x, floor)) {
-                if (playerFloorVerticalOverlap(y, floor)) {
+            if (playerFloorHorizontalOverlap(x, player.getRadius(), floor)) {
+                if (playerFloorVerticalOverlap(y, player.getRadius(), floor)) {
                     if (vy > 0) {
                         // Going down.
-                        return y + Player.RADIUS - floor.getTop();
+                        return y + player.getRadius() - floor.getTop();
                     } else {
-                        return y - Player.RADIUS - (floor.getTop() + Floor.HEIGHT);
+                        return y - player.getRadius() - (floor.getTop() + Floor.HEIGHT);
                     }
                 }
             }
@@ -64,14 +64,17 @@ public class Env {
         return null;
     }
 
-    private static boolean playerFloorHorizontalOverlap(int playerX, Floor floor) {
-        return playerX + Player.RADIUS - 1 >= floor.getLeft()
-            && playerX - Player.RADIUS + 1 < floor.getLeft() + floor.getWidth() - 1;
+    private static boolean playerFloorHorizontalOverlap(int playerX,
+            int playerRadius, Floor floor) {
+
+        return playerX + playerRadius - 1 >= floor.getLeft()
+            && playerX - playerRadius + 1 < floor.getLeft() + floor.getWidth() - 1;
     }
 
-    private static boolean playerFloorVerticalOverlap(int playerY, Floor floor) {
-        return playerY + Player.RADIUS - 1 >= floor.getTop()
-            && playerY - Player.RADIUS + 1 < floor.getTop() + Floor.HEIGHT - 1;
+    private static boolean playerFloorVerticalOverlap(int playerY,
+            int playerRadius, Floor floor) {
+        return playerY + playerRadius - 1 >= floor.getTop()
+            && playerY - playerRadius + 1 < floor.getTop() + Floor.HEIGHT - 1;
     }
 
     public void draw(Graphics g) {

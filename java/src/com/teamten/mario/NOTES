@@ -1,3 +1,7 @@
+To run:
+
+    ant -find build.xml && java -cp ../../../../classes com.teamten.mario.Mario
+
 - Consider writing our own priority queue that's also a hash table.
     - First count the size of queue when removing to determine O(N).
 - Comment all code.
