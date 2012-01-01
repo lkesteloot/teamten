@@ -90,40 +90,40 @@ public class chess {
 
     private static void playPuzzleGame() {
         // http://www.futilitycloset.com/2011/08/20/two-chess-problems-solution/
-        /// Board board = Board.parse(
-        ///         "........" +
-        ///         ".pN....." +
-        ///         ".Pb....." +
-        ///         "n.q.n..." +
-        ///         "........" +
-        ///         "PpkpP..Q" +
-        ///         ".N.R...." +
-        ///         "..K.....");
+        Board board = Board.parse(
+                "........" +
+                ".pN....." +
+                ".Pb....." +
+                "n.q.n..." +
+                "........" +
+                "PpkpP..Q" +
+                ".N.R...." +
+                "..K.....");
 
         // http://www.futilitycloset.com/2011/09/10/black-and-white-14/
-        /// Board board = Board.parse(
-        ///         ".......Q" +
-        ///         ".......b" +
-        ///         ".....p.p" +
-        ///         "........" +
-        ///         ".....NN." +
-        ///         "....KP.." +
-        ///         ".......R" +
-        ///         "......k.");
+        board = Board.parse(
+                ".......Q" +
+                ".......b" +
+                ".....p.p" +
+                "........" +
+                ".....NN." +
+                "....KP.." +
+                ".......R" +
+                "......k.");
 
         // http://www.futilitycloset.com/2011/11/07/black-and-white-18/
-        /// Board board = Board.parse(
-        ///         "........" +
-        ///         "........" +
-        ///         "........" +
-        ///         "........" +
-        ///         ".......p" +
-        ///         "....PQpp" +
-        ///         "R.....q." +
-        ///         "KR....Bk");
+        board = Board.parse(
+                "........" +
+                "........" +
+                "........" +
+                "........" +
+                ".......p" +
+                "....PQpp" +
+                "R.....q." +
+                "KR....Bk");
 
         // http://www.futilitycloset.com/2011/12/18/black-and-white-22/
-        Board board = Board.parse(
+        board = Board.parse(
                 "........" +
                 "........" +
                 "........" +
@@ -132,6 +132,31 @@ public class chess {
                 "........" +
                 "..Q....." +
                 "........");
+
+        // http://www.futilitycloset.com/2011/12/24/black-and-white-23/
+        board = Board.parse(
+                ".......R" +
+                "........" +
+                "........" +
+                "........" +
+                "......pq" +
+                ".......k" +
+                "....Np.r" +
+                ".....KbQ");
+
+        // http://www.futilitycloset.com/2011/12/31/black-and-white-24/
+        board = Board.parse(
+                "...R...K" +
+                "........" +
+                ".....Q.." +
+                "........" +
+                ".....N.." +
+                ".B......" +
+                "..PB...." +
+                ".qbk....");
+
+        // Upper case = white.
+
         Game game = new Game(board);
         ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
         ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
