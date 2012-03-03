@@ -89,6 +89,9 @@ public class chess {
     }
 
     private static void playPuzzleGame() {
+        // Starting side.
+        int side = Side.WHITE;
+
         // http://www.futilitycloset.com/2011/08/20/two-chess-problems-solution/
         Board board = Board.parse(
                 "........" +
@@ -166,6 +169,17 @@ public class chess {
                 ".pN....R" +
                 ".kb....Q");
 
+        // http://www.futilitycloset.com/2012/03/02/black-and-white-33/
+        board = Board.parse(
+                "kr.....R" +
+                "rp......" +
+                "......K." +
+                "........" +
+                "....Q..." +
+                "........" +
+                "........" +
+                "R.......");
+
         // Upper case = white.
 
         Game game = new Game(board);
@@ -174,7 +188,6 @@ public class chess {
 
         board.print("");
 
-        int side = Side.WHITE;
         while (true) {
             ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
             ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
