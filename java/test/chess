@@ -180,6 +180,29 @@ public class chess {
                 "........" +
                 "R.......");
 
+        // http://www.futilitycloset.com/2012/03/23/black-and-white-36/
+        board = Board.parse(
+                "..k..r.r" +
+                "...R.Q.." +
+                "..P....." +
+                "...Pb..." +
+                "........" +
+                ".......P" +
+                "......P." +
+                ".......K");
+
+        /*
+        board = Board.parse(
+                "........" +
+                "........" +
+                "........" +
+                "........" +
+                "........" +
+                "........" +
+                "........" +
+                "........");
+        */
+
         // Upper case = white.
 
         Game game = new Game(board);
