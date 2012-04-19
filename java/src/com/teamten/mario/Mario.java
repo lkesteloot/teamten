@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -30,15 +32,13 @@ public class Mario extends JFrame {
     private World mWorld;
     private WorldDrawer mWorldDrawer;
     private volatile Input mInput;
-    private boolean mRunning = true;
-    private boolean mAutomatic = false;
     private final Searcher mSearcher;
-    private volatile Point mTarget = null;
     private Future<Searcher.Results> mResults = null;
     private Deque<Input> mInputs = new LinkedList<Input>();
     private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
     private int mPulledInputs = 0;
     private boolean mDebug = false;
+    private boolean mMouseDown = false;
 
     public static void main(String[] args) {
         new Mario();
@@ -78,67 +78,80 @@ public class Mario extends JFrame {
         Timer timer = new Timer(ANIMATION_MS, new ActionListener() {
             @Override // ActionListener
             public void actionPerformed(ActionEvent actionEvent) {
-                // Take snapshot of mouse position for computation thread.
-                // Use the WorldDrawer's component, not this JPanel's,
-                // because the latter includes the title bar of the window.
-                Point target = mWorldDrawer.getMousePosition();
-                if (target == null) {
-                    mTarget = null;
-                } else {
-                    mTarget = mWorldDrawer.reverseTransform(target);
-                }
+                Point target;
 
-                mWorldDrawer.setTarget(mTarget);
-
-                if (mRunning || true) {
-                    if (mAutomatic || true) {
-                        if (mResults != null && mResults.isDone()) {
-                            Searcher.Results results;
-                            try {
-                                results = mResults.get();
-                            } catch (Exception e) {
-                                System.out.println(e);
-                                // Various interrupted and execution exceptions.
-                                return;
-                            }
-                            mInputs = results.getInputs();
-                            while (mPulledInputs > 1) {
-                                Input input = mInputs.poll();
-                                /// System.out.println("Proactively pulling: " + input);
-                                mPulledInputs--;
-                            }
-                            mPulledInputs = 0;
-                            if (mDebug) {
-                                mWorldDrawer.setPath(results.getPath(), results.getElapsed()/200.);
-                                mWorldDrawer.setExplored(results.getExplored());
-                            } else {
-                                mWorldDrawer.setPath(null, 0);
-                                mWorldDrawer.setExplored(null);
-                            }
-                            mWorldDrawer.setWorld(mWorld);
-                            mResults = null;
-                        }
-
-                        Input input = mInputs.poll();
-                        if (input == null) {
-                            input = Input.NOTHING;
-                        } else {
-                            /// System.out.println("Pulling: " + input);
-                            mPulledInputs++;
-                        }
-
-                        mWorld = mWorld.step(input);
-
-                        if (mResults == null && mTarget != null) {
-                            mResults = computePath(mTarget, mWorld);
-                        }
+                // The mouse button acts like the touchscreen being tapped.
+                if (mMouseDown) {
+                    // Take snapshot of mouse position for computation thread.
+                    // Use the WorldDrawer's component, not this JPanel's,
+                    // because the latter includes the title bar of the window.
+                    Point componentTarget = mWorldDrawer.getMousePosition();
+                    if (componentTarget == null) {
+                        target = null;
                     } else {
-                        mWorld = mWorld.step(mInput);
+                        target = mWorldDrawer.reverseTransform(componentTarget);
                     }
-                    mWorldDrawer.setWorld(mWorld);
                 } else {
-                    mTarget = null;
+                    target = null;
                 }
+
+                // Draw the target if there is one.
+                mWorldDrawer.setTarget(target);
+
+                // See if we got results from the other thread.
+                if (mResults != null && mResults.isDone()) {
+                    // Get the results from the searcher.
+                    Searcher.Results results;
+                    try {
+                        results = mResults.get();
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        // Various interrupted and execution exceptions.
+                        return;
+                    }
+
+                    // See what the searcher thinks we should do right now and in
+                    // the near future.
+                    mInputs = results.getInputs();
+
+                    // If we missed some frames, skill their inputs.
+                    while (mPulledInputs > 1) {
+                        Input input = mInputs.poll();
+                        mPulledInputs--;
+                    }
+                    mPulledInputs = 0;
+
+                    // Optionally draw the ball's path and other debug info.
+                    if (mDebug) {
+                        mWorldDrawer.setPath(results.getPath(), results.getElapsed()/200.);
+                        mWorldDrawer.setExplored(results.getExplored());
+                    } else {
+                        mWorldDrawer.setPath(null, 0);
+                        mWorldDrawer.setExplored(null);
+                    }
+
+                    // Not sure why we call this.
+                    mWorldDrawer.setWorld(mWorld);
+                    mResults = null;
+                }
+
+                // Get the next thing we should be doing.
+                Input input = mInputs.poll();
+                if (input == null) {
+                    input = Input.NOTHING;
+                } else {
+                    /// System.out.println("Pulling: " + input);
+                    mPulledInputs++;
+                }
+
+                // Run the simulation.
+                mWorld = mWorld.step(input);
+
+                // Compute the best inputs in a different thread.
+                if (mResults == null && target != null) {
+                    mResults = computePath(target, mWorld);
+                }
+                mWorldDrawer.setWorld(mWorld);
             }
         });
         timer.start();
@@ -170,22 +183,6 @@ public class Mario extends JFrame {
             @Override // KeyListener
             public void keyTyped(KeyEvent keyEvent) {
                 switch (keyEvent.getKeyChar()) {
-                    case 's':
-                        mRunning = false;
-                        mAutomatic = false;
-                        computePath(mTarget, mWorld);
-                        break;
-
-                    case 'a':
-                        mRunning = true;
-                        mAutomatic = true;
-                        break;
-
-                    case 'm':
-                        mRunning = true;
-                        mAutomatic = false;
-                        break;
-
                     case 'd':
                         mDebug = !mDebug;
                         break;
@@ -210,6 +207,18 @@ public class Mario extends JFrame {
                         mInput = mInput.withRightPressed(pressed);
                         break;
                 }
+            }
+        });
+
+        worldDrawer.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mMouseDown = true;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mMouseDown = false;
             }
         });
     }
