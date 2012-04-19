@@ -97,7 +97,7 @@ public class World {
             y = Env.HEIGHT/3;
             vx = 0;
             vy = 0;
-            radius = Player.INITIAL_RADIUS;
+            // radius = Player.INITIAL_RADIUS;
         }
 
         Player newPlayer = new Player(x, y, angle, vx, vy, radius);

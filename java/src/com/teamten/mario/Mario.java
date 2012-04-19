@@ -45,9 +45,7 @@ public class Mario extends JFrame {
     }
 
     private Mario() {
-        Env env = Env.makeEnv();
-        Player player = new Player(Env.WIDTH/2, Env.HEIGHT - Floor.HEIGHT - Player.INITIAL_RADIUS);
-        mWorld = new World(env, player);
+        resetGame();
         mWorldDrawer = new WorldDrawer(mWorld);
         mInput = Input.NOTHING;
         mSearcher = new Searcher();
@@ -55,6 +53,16 @@ public class Mario extends JFrame {
         makeUi(mWorldDrawer);
         hookUpInput(mWorldDrawer);
         startAnimationTimer();
+    }
+
+    private void resetGame() {
+        Env env = Env.makeEnv();
+        Player player = new Player(Env.WIDTH/2, Env.HEIGHT - Floor.HEIGHT - Player.INITIAL_RADIUS);
+        mWorld = new World(env, player);
+        if (mWorldDrawer != null) {
+            mWorldDrawer.setWorld(mWorld);
+        }
+        mInput = Input.NOTHING;
     }
 
     private void makeUi(WorldDrawer worldDrawer) {
@@ -180,6 +188,10 @@ public class Mario extends JFrame {
 
                     case 'd':
                         mDebug = !mDebug;
+                        break;
+
+                    case 'x':
+                        resetGame();
                         break;
                 }
             }

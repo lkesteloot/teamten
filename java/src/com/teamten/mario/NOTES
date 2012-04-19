@@ -2,6 +2,7 @@ To run:
 
     ant -find build.xml && java -cp ../../../../classes com.teamten.mario.Mario
 
+- Must push switches or levers to move to next level.
 - Make toys players (or have superclass) so that they can fall and move around.
 - Must take into account env equality when searching.
     - Cache withoutToy() versions for faster equality checks.

@@ -24,11 +24,12 @@ public class Env {
         Env env = new Env();
 
         env.addFloor(new Floor(0, WIDTH, HEIGHT - Floor.HEIGHT));
-        env.addFloor(new Floor(WIDTH/5, WIDTH/5, HEIGHT - Floor.HEIGHT*4));
+        env.addFloor(new Floor(WIDTH/5*1, WIDTH/5, HEIGHT - Floor.HEIGHT*4));
         env.addFloor(new Floor(WIDTH/5*2, WIDTH/5, HEIGHT - Floor.HEIGHT*7));
+        env.addFloor(new Floor(WIDTH/5*3, WIDTH/5, HEIGHT - Floor.HEIGHT*10));
 
         Random random = new Random();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 30; i++) {
             int floorIndex = random.nextInt(env.mFloorList.size());
             Floor floor = env.mFloorList.get(floorIndex);
 
