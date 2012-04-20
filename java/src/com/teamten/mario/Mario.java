@@ -1,4 +1,4 @@
-// Copyright 2011 Lawrence Kesteloot
+// Copyright 2011-2012 Lawrence Kesteloot
 
 package com.teamten.mario;
 
@@ -36,7 +36,14 @@ public class Mario extends JFrame {
     private Future<Searcher.Results> mResults = null;
     private Deque<Input> mInputs = new LinkedList<Input>();
     private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
-    private int mPulledInputs = 0;
+    /**
+     * This represents how late the results are. When we spawn a task to calculate the
+     * path, we reset this to 0. If the results come back by the beginning of the next
+     * frame, then no frames have been skipped and we can use the input list as-is. But
+     * if the results don't come back, then the results are based on old data and we must
+     * keep track of the missed frames so we can skip them in the input queue.
+     */
+    private int mResultDelay = 0;
     private boolean mDebug = false;
     private boolean mMouseDown = false;
 
@@ -114,12 +121,11 @@ public class Mario extends JFrame {
                     // the near future.
                     mInputs = results.getInputs();
 
-                    // If we missed some frames, skill their inputs.
-                    while (mPulledInputs > 1) {
-                        Input input = mInputs.poll();
-                        mPulledInputs--;
+                    // If we missed some frames, skip their inputs.
+                    while (mResultDelay > 0) {
+                        mInputs.poll();
+                        mResultDelay--;
                     }
-                    mPulledInputs = 0;
 
                     // Optionally draw the ball's path and other debug info.
                     if (mDebug) {
@@ -130,8 +136,7 @@ public class Mario extends JFrame {
                         mWorldDrawer.setExplored(null);
                     }
 
-                    // Not sure why we call this.
-                    mWorldDrawer.setWorld(mWorld);
+                    // We've processed these results.
                     mResults = null;
                 }
 
@@ -139,17 +144,18 @@ public class Mario extends JFrame {
                 Input input = mInputs.poll();
                 if (input == null) {
                     input = Input.NOTHING;
-                } else {
-                    /// System.out.println("Pulling: " + input);
-                    mPulledInputs++;
                 }
 
                 // Run the simulation.
                 mWorld = mWorld.step(input);
 
+                // Keep track of how many frames old the results are.
+                mResultDelay++;
+
                 // Compute the best inputs in a different thread.
                 if (mResults == null && target != null) {
                     mResults = computePath(target, mWorld);
+                    mResultDelay = 0;
                 }
                 mWorldDrawer.setWorld(mWorld);
             }

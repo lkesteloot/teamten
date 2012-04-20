@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * The environment (walls, etc.) that our character lives in.
+ * The environment (walls, toys, etc.) that our character lives in.
  */
 public class Env {
     private static final int DARK_BLUE = 50;
