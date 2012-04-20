@@ -46,6 +46,7 @@ public class Mario extends JFrame {
     private int mResultDelay = 0;
     private boolean mDebug = false;
     private boolean mMouseDown = false;
+    private int mLevel = 0;
 
     public static void main(String[] args) {
         new Mario();
@@ -63,7 +64,7 @@ public class Mario extends JFrame {
     }
 
     private void resetGame() {
-        Env env = Env.makeEnv();
+        Env env = Levels.makeLevel(mLevel);
         Player player = new Player(Env.WIDTH/2, Env.HEIGHT - Floor.HEIGHT - Player.INITIAL_RADIUS);
         mWorld = new World(env, player);
         if (mWorldDrawer != null) {
@@ -195,6 +196,20 @@ public class Mario extends JFrame {
 
                     case 'x':
                         resetGame();
+                        break;
+
+                    case '[':
+                        if (mLevel > 0) {
+                            mLevel--;
+                            resetGame();
+                        }
+                        break;
+
+                    case ']':
+                        if (mLevel < Levels.LEVEL_COUNT - 1) {
+                            mLevel++;
+                            resetGame();
+                        }
                         break;
                 }
             }

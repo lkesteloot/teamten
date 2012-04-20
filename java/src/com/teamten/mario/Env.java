@@ -7,7 +7,6 @@ import java.awt.Graphics;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * The environment (walls, toys, etc.) that our character lives in.
@@ -20,32 +19,19 @@ public class Env {
     private final List<Floor> mFloorList = new ArrayList<Floor>();
     private final List<Toy> mToyList = new ArrayList<Toy>();
 
-    public static Env makeEnv() {
-        Env env = new Env();
-
-        env.addFloor(new Floor(0, WIDTH, HEIGHT - Floor.HEIGHT));
-        env.addFloor(new Floor(WIDTH/5*1, WIDTH/5, HEIGHT - Floor.HEIGHT*4));
-        env.addFloor(new Floor(WIDTH/5*2, WIDTH/5, HEIGHT - Floor.HEIGHT*7));
-        env.addFloor(new Floor(WIDTH/5*3, WIDTH/5, HEIGHT - Floor.HEIGHT*10));
-
-        Random random = new Random();
-        for (int i = 0; i < 30; i++) {
-            int floorIndex = random.nextInt(env.mFloorList.size());
-            Floor floor = env.mFloorList.get(floorIndex);
-
-            int x = floor.getLeft() + random.nextInt(floor.getWidth());
-            int r = (int) (3*Math.pow(Math.random(), 4)) + 1;
-            env.addToy(new Toy(x, floor.getTop() - r, r));
-        }
-
-        return env;
-    }
-
-    private void addFloor(Floor floor) {
+    public void addFloor(Floor floor) {
         mFloorList.add(floor);
     }
 
-    private void addToy(Toy toy) {
+    public int getFloorCount() {
+        return mFloorList.size();
+    }
+
+    public Floor getFloor(int index) {
+        return mFloorList.get(index);
+    }
+
+    public void addToy(Toy toy) {
         mToyList.add(toy);
     }
 
