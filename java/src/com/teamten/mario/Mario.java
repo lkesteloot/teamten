@@ -145,13 +145,19 @@ public class Mario extends JFrame {
                 Input input = mInputs.poll();
                 if (input == null) {
                     input = Input.NOTHING;
+                } else {
+                    // Keep track of how many frames old the results are. Only do this if
+                    // we're reading from the input queue. If we're not reading from
+                    // the queue chances are that the ball is sitting still and the
+                    // age of the world doesn't matter.
+
+                    // Disable this. The skipped frames seem to cause more problems than
+                    // they solve.
+                    /// mResultDelay++;
                 }
 
                 // Run the simulation.
                 mWorld = mWorld.step(input);
-
-                // Keep track of how many frames old the results are.
-                mResultDelay++;
 
                 // Compute the best inputs in a different thread.
                 if (mResults == null && target != null) {

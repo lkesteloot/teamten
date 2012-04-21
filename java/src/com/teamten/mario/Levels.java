@@ -31,16 +31,6 @@ public class Levels {
         env.addFloor(new Floor(Env.WIDTH/5*2, Env.WIDTH/5, Env.HEIGHT - Floor.HEIGHT*7));
         env.addFloor(new Floor(Env.WIDTH/5*3, Env.WIDTH/5, Env.HEIGHT - Floor.HEIGHT*10));
 
-        Random random = new Random();
-        for (int i = 0; i < 30; i++) {
-            int floorIndex = random.nextInt(env.getFloorCount());
-            Floor floor = env.getFloor(floorIndex);
-
-            int x = floor.getLeft() + random.nextInt(floor.getWidth());
-            int r = (int) (3*Math.pow(Math.random(), 4)) + 1;
-            env.addToy(new Toy(x, floor.getTop() - r, r));
-        }
-
         return env;
     }
 
@@ -52,6 +42,15 @@ public class Levels {
         env.addFloor(new Floor(Env.WIDTH/5*2, Env.WIDTH/5, Env.HEIGHT - Floor.HEIGHT*7));
         env.addFloor(new Floor(Env.WIDTH/5*3, Env.WIDTH/5, Env.HEIGHT - Floor.HEIGHT*4));
 
+        addToys(env);
+
+        return env;
+    }
+
+    /**
+     * Add toys to a level.
+     */
+    private static void addToys(Env env) {
         Random random = new Random();
         for (int i = 0; i < 30; i++) {
             int floorIndex = random.nextInt(env.getFloorCount());
@@ -61,7 +60,5 @@ public class Levels {
             int r = (int) (3*Math.pow(Math.random(), 4)) + 1;
             env.addToy(new Toy(x, floor.getTop() - r, r));
         }
-
-        return env;
     }
 }
