@@ -124,6 +124,8 @@ public class Searcher {
             if (isTouchingFloor) {
                 if (ALLOW_JUMPING) {
                     neighbors.add(makeNeighbor(Input.JUMP));
+                    neighbors.add(makeNeighbor(Input.LEFT_JUMP));
+                    neighbors.add(makeNeighbor(Input.RIGHT_JUMP));
                 }
                 neighbors.add(makeNeighbor(Input.LEFT));
                 neighbors.add(makeNeighbor(Input.RIGHT));

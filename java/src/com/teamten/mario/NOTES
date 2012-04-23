@@ -2,12 +2,38 @@ To run:
 
     ant -find build.xml && java -cp ../../../../classes com.teamten.mario.Mario
 
-- Must push switches or levers to move to next level.
-- Make toys players (or have superclass) so that they can fall and move around.
-- Must take into account env equality when searching.
-    - Cache withoutToy() versions for faster equality checks.
-- Consider writing our own priority queue that's also a hash table.
-    - First count the size of queue when removing to determine O(N).
-- Comment all code.
-- Fix manual/auto/step states.
-- Draw search space faster.
+- Name ideas:
+    - Ask Milo.
+- Game ideas:
+    - Replace ball with running person.
+        - Fixed speed will greatly improve search speed.
+        - Person is more anthropomorphic than ball.
+        - Have vertical acceleration but no horizontal acceleration.
+    - Must push switches or levers to move to next level.
+    - Make toys players (or have superclass) so that they can fall and move around.
+        - Balls or other players will probably make search intractable.
+    - When picking up balls, can't get through balls that are too big.
+        - They block you.
+        - You push them around.
+    - Make ball destination fixed, goal of player is to stop/help ball by moving environment.
+        - Stop:
+            - Maybe more fun.
+            - How do you get to next level?
+                - Limited time.
+                    - Makes no sense.
+                - Trick into going to wrong place.
+                - No next level, continuous play, just gets harder and harder.
+        - Help:
+            - Move floors to make a path.
+            - Sound pretty boring.
+        - Might be stress-inducing to have to do something, can't just rest.
+        - But maybe more addictive that way.
+    - Have some obstacles/objects not visible to look-ahead search.
+    - Control real ball completely, bad ball is trying to catch up with you.
+- Debt:
+    - Must take into account env equality when searching.
+        - Cache withoutToy() versions for faster equality checks.
+    - Consider writing our own priority queue that's also a hash table.
+        - First count the size of queue when removing to determine O(N).
+    - Comment all code.
+    - Draw search space faster.

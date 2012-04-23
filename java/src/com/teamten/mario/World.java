@@ -10,6 +10,7 @@ import java.awt.Graphics;
 public class World {
     public static final int GRAVITY = 8;
     public static final int FRICTION = 4;
+    private static final boolean IS_PERSON = true;
     private final Env mEnv;
     private final Player mPlayer;
 
@@ -50,11 +51,23 @@ public class World {
             }
         }
 
-        int vx = player.getVx() + ax*Player.VELOCITY_SCALE;
+        int vx;
         int vy = player.getVy() + ay*Player.VELOCITY_SCALE;
 
+        if (IS_PERSON) {
+            if (touchingFloor) {
+                vx = 5*ax*Player.VELOCITY_SCALE;
+            } else {
+                vx = player.getVx();
+            }
+        } else {
+            vx = player.getVx() + ax*Player.VELOCITY_SCALE;
+        }
+
         if (touchingFloor) {
-            vx -= Integer.signum(vx)*FRICTION;
+            if (!IS_PERSON) {
+                vx -= Integer.signum(vx)*FRICTION;
+            }
         } else {
             vy += GRAVITY;
         }

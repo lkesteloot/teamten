@@ -10,6 +10,8 @@ public class Input {
     public static final Input JUMP = new Input(true, false, false);
     public static final Input LEFT = new Input(false, true, false);
     public static final Input RIGHT = new Input(false, false, true);
+    public static final Input LEFT_JUMP = new Input(true, true, false);
+    public static final Input RIGHT_JUMP = new Input(true, false, true);
     private final boolean mJumpPressed;
     private final boolean mLeftPressed;
     private final boolean mRightPressed;

@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class WorldDrawer extends Canvas {
     private static final Color LETTERBOX_COLOR = new Color(20, 20, 20);
+    private static final Color EXPLORED_COLOR = new Color(120, 120, 120);
+    private static final boolean DRAW_EXPLORED = true;
     private volatile World mWorld;
     private double mScale = 1;
     private double mTx = 0;
@@ -102,10 +104,10 @@ public class WorldDrawer extends Canvas {
         world.draw(g);
 
         // Draw points we explored.
-        if (mExplored != null) {
-            g2.setColor(Color.BLACK);
+        if (mExplored != null && DRAW_EXPLORED) {
+            g2.setColor(EXPLORED_COLOR);
             for (Point point : mExplored) {
-                // g2.drawRect(point.x, point.y, 0, 0);
+                g2.drawRect(point.x, point.y, 0, 0);
             }
         }
 
