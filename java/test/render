@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class render {
     public static void main(String[] args) throws IOException, InterruptedException {
-        Renderer renderer = new Renderer();
+        Renderer renderer = new Renderer(1);
         Triangle triangle;
 
         /// renderer.lookAt(Vector.make(0, 0, 200), Vector.make(0, 0, 0));

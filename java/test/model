@@ -35,7 +35,7 @@ public class model {
         BufferedReader reader = new BufferedReader(new InputStreamReader(
                     new GZIPInputStream(new FileInputStream(filename))));
 
-        Renderer renderer = new Renderer();
+        Renderer renderer = new Renderer(1);
         renderer.lookAt(Vector.make(0, 0, 0.3), Vector.make(0, 0, 0));
 
         String line;

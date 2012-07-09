@@ -51,12 +51,13 @@ public class World {
             }
         }
 
+        // Compute new velocity.
         int vx;
         int vy = player.getVy() + ay*Player.VELOCITY_SCALE;
 
         if (IS_PERSON) {
             if (touchingFloor) {
-                vx = 5*ax*Player.VELOCITY_SCALE;
+                vx = 3*ax*Player.VELOCITY_SCALE;
             } else {
                 vx = player.getVx();
             }
@@ -64,6 +65,7 @@ public class World {
             vx = player.getVx() + ax*Player.VELOCITY_SCALE;
         }
 
+        // Friction and gravity.
         if (touchingFloor) {
             if (!IS_PERSON) {
                 vx -= Integer.signum(vx)*FRICTION;
@@ -90,6 +92,7 @@ public class World {
             env = env.withoutToy(toyIndex);
         }
 
+        // Push off the walls and floors.
         Integer pushBack = env.getPushBack(player, x, y, vx, vy);
         if (pushBack != null) {
             int dy = pushBack.intValue();
