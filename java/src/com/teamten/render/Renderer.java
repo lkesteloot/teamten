@@ -185,6 +185,7 @@ public class Renderer {
                                 if (intersection.getTriangle() == null) {
                                     // Background.
                                     color = new Color(1, 0.5, 0.75, 1);
+                                    color = new Color(1, 0, 0, 0);
                                 } else {
                                     color = shade(rayTracer, ray, intersection, debug);
                                 }
