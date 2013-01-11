@@ -36,7 +36,7 @@ public class UrtConnection extends Thread {
     public UrtConnection(Socket socket) {
         mSocket = socket;
         mRenderer = new Renderer(1);
-        mRenderer.lookAt(Vector.make(2, 2, 2), Vector.make(0, 0, 0));
+        mRenderer.lookAt(Vector.make(2, 2, 2), Vector.make(0, 0, 0), null);
     }
 
     @Override
@@ -193,17 +193,19 @@ public class UrtConnection extends Thread {
         z = is.readFloat();
         Vector target = Vector.make(x, y, z);
 
-        System.out.printf("Setting camera to %s to %s%n", eye, target);
-
+        // Up.
         x = is.readFloat();
         y = is.readFloat();
         z = is.readFloat();
+        Vector up = Vector.make(x, y, z);
+
+        System.out.printf("Setting camera to %s to %s%n", eye, target);
 
         is.readFloat();
         is.readFloat();
         is.readInt();
 
-        mRenderer.lookAt(eye, target);
+        mRenderer.lookAt(eye, target, up);
 
         // Invalidate cache.
         mRenderedImage = null;

@@ -56,10 +56,10 @@ public class Renderer {
 
     /**
      * Position the camera at "eye" looking at "target" with "up"
-     * pointing to the Y axis.
+     * either specified or pointing to the Y axis if null.
      */
-    public void lookAt(Vector eye, Vector target) {
-        Vector y = Vector.Y;
+    public void lookAt(Vector eye, Vector target, Vector up) {
+        Vector y = up == null ? Vector.Y : up.normalize();
         Vector z = eye.subtract(target).normalize();
         Vector x = y.cross(z).normalize();
         y = z.cross(x).normalize();
