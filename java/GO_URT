@@ -1,0 +1,2 @@
+ant
+java -cp "dist/*" com.teamten.render.UrtServer
