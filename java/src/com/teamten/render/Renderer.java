@@ -33,9 +33,13 @@ public class Renderer {
     private Matrix mCameraInverse = mCamera.getInverse();
     private AtomicInteger mTriangleIntersectionCount = new AtomicInteger();
     private AtomicInteger mRayCount = new AtomicInteger();
+    private double mHorizontalFov = Math.PI/6;
     private double mVerticalFov = Math.PI/6;
     private final int mSuperSample;
     private boolean mCullBackfacingTriangles = true;
+
+    // Precomputed data:
+    private BoundingBox mBoundingBox = null;
 
     /**
      * Creates a renderer with the specified parameters.
@@ -69,9 +73,10 @@ public class Renderer {
     }
 
     /**
-     * Sets the vertical field of view, top to bottom, in radians.
+     * Sets the full horizontal and vertical field of view in radians.
      */
-    public void setVerticalFov(double verticalFov) {
+    public void setVerticalFov(double horizontalFov, double verticalFov) {
+        mHorizontalFov = horizontalFov;
         mVerticalFov = verticalFov;
     }
 
@@ -90,15 +95,13 @@ public class Renderer {
     }
 
     /**
-     * Generate an image of size width and height.
+     * Precompute various geometry things, like bounding boxes.
      */
-    public BufferedImage render(final int width, final int height) {
-        final BufferedImage image = ImageUtils.makeTransparent(width, height);
-
-        // Prepare the geometry.
-        final BoundingBox boundingBox = new BoundingBox();
+    public void prepareGeometry() {
+        // Add everything to the top bounding box.
+        mBoundingBox = new BoundingBox();
         for (Triangle triangle : mTriangleList) {
-            boundingBox.addTriangle(triangle);
+            mBoundingBox.addTriangle(triangle);
         }
 
         // Break up large triangles because they make it hard to create
@@ -106,15 +109,31 @@ public class Renderer {
         // have the same aspect ratio and continue to cause problems with
         // the bounding boxes.
         if (TESSELATE_RATIO > 0) {
-            boundingBox.breakUpLargeTriangles(TESSELATE_RATIO);
+            mBoundingBox.breakUpLargeTriangles(TESSELATE_RATIO);
         }
 
         // Create the bounding box hierarchy.
         long beforeTime = System.currentTimeMillis();
-        boundingBox.createTree();
+        mBoundingBox.createTree();
         long afterTime = System.currentTimeMillis();
         long createTreeTime = afterTime - beforeTime;
 
+        System.out.printf("Number of initial triangles: %,d%n", mTriangleList.size());
+        System.out.printf("Number of final triangles:   %,d%n",
+                mBoundingBox.getTriangleList().size());
+        System.out.printf("Number of bounding boxes:    %,d%n", mBoundingBox.getDeepChildCount());
+        System.out.printf("Create tree time:            %,d ms%n", createTreeTime);
+    }
+
+    /**
+     * Generate an image of size width and height. U and v are the upper-left corner
+     * of the image on a 0 to 1 scale. Du and dv are the width and height on that same
+     * scale.
+     */
+    public BufferedImage render(final int width, final int height,
+            final float u, final float v,
+            final float du, final float dv) {
+        final BufferedImage image = ImageUtils.makeTransparent(width, height);
         final Vector eye = mCameraInverse.transform(Vector.make(0, 0, 0));
 
         // Create a RayTracer object that shaders can use to trace more rays in
@@ -122,7 +141,7 @@ public class Renderer {
         final RayTracer rayTracer = new RayTracer() {
             @Override // RayTracer
             public Intersection intersect(Vector r0, Vector r, boolean debug) {
-                return Renderer.this.intersect(r0, r, boundingBox, debug);
+                return Renderer.this.intersect(r0, r, mBoundingBox, debug);
             }
 
             @Override // RayTracer
@@ -144,19 +163,22 @@ public class Renderer {
         final AtomicLong previousNotice = new AtomicLong();
         previousNotice.set(beforeRenderTime);
 
-        // Calculate the depth of the initial rays, based on the field of view.
-        final double rayDepth = -height/2.0 / Math.tan(mVerticalFov/2);
+        // Calculate the sides of the full frame based on the FOV and assume a Z component
+        // of 1.
+        final double right = Math.tan(mHorizontalFov/2);
+        final double left = -right;
+        final double top = Math.tan(mVerticalFov/2);
+        final double bottom = -top;
 
         for (int y = 0; y < height; y++) {
             final int finalY = y;
+            final double dy = bottom + (v + dv*y)*(top - bottom);
 
             // Submit entire rows to the executor.
             executorService.submit(new Runnable() {
                 public void run() {
-                    double dy = -(finalY - height/2.0);
-
                     for (int x = 0; x < width; x++) {
-                        double dx = x - width/2.0;
+                        double dx = left + (u + du*x)*(right - left);
 
                         Color pixelColor = Color.BLACK;
 
@@ -164,7 +186,8 @@ public class Renderer {
                             for (int sx = 0; sx < mSuperSample; sx++) {
                                 Vector ray = Vector.make(
                                     dx + (double) sx/mSuperSample,
-                                    dy + (double) sy/mSuperSample, rayDepth);
+                                    dy + (double) sy/mSuperSample,
+                                    -1);
 
                                 // Transform by camera.
                                 ray = mCameraInverse.transform(ray).subtract(eye);
@@ -176,7 +199,7 @@ public class Renderer {
                                 /// debug = x == width/2 && finalY == height*9/10; // Bottom center
 
                                 // Intersect with geometry.
-                                Intersection intersection = intersect(eye, ray, boundingBox, debug);
+                                Intersection intersection = intersect(eye, ray, mBoundingBox, debug);
 
                                 // Determine color of pixel.
                                 Color color;
@@ -223,18 +246,13 @@ public class Renderer {
             Thread.currentThread().interrupt();
         }
 
-        afterTime = System.currentTimeMillis();
+        long afterTime = System.currentTimeMillis();
         long renderTime = afterTime - beforeRenderTime;
 
         System.out.printf("Triangle intersections:      %,d (%.1f per pixel, %.1f per ray)%n",
                 mTriangleIntersectionCount.get(),
                 (double) mTriangleIntersectionCount.get() / width / height,
                 (double) mTriangleIntersectionCount.get() / mRayCount.get());
-        System.out.printf("Number of initial triangles: %,d%n", mTriangleList.size());
-        System.out.printf("Number of final triangles:   %,d%n",
-                boundingBox.getTriangleList().size());
-        System.out.printf("Number of bounding boxes:    %,d%n", boundingBox.getDeepChildCount());
-        System.out.printf("Create tree time:            %,d ms%n", createTreeTime);
         System.out.printf("Render time:                 %,d ms%n", renderTime);
 
         return image;
@@ -249,7 +267,7 @@ public class Renderer {
         Intersection intersection = new Intersection();
 
         if (false) {
-            // Brute force..
+            // Brute force.
             for (Triangle triangle : mTriangleList) {
                 intersectTriangle(r0, r, triangle, intersection, debug);
             }

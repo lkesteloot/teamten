@@ -31,7 +31,7 @@ public class UrtConnection extends Thread {
     private static final int REQUEST_TYPE_SET_CAMERA = 3;
     private final Socket mSocket;
     private final Renderer mRenderer;
-    private BufferedImage mRenderedImage = null;
+    private boolean mGeometryChanged = true;
 
     public UrtConnection(Socket socket) {
         mSocket = socket;
@@ -101,59 +101,38 @@ public class UrtConnection extends Thread {
             System.out.printf("traceTile(%g,%g,%g,%g,%d,%d)%n", u, v, du, dv, w, h);
         }
 
+        if (mGeometryChanged) {
+            // Precompute geometry stuff.
+            mRenderer.prepareGeometry();
+
+            mGeometryChanged = false;
+        }
+
         int elementCount = w*h*3;
         os.writeInt(elementCount*4); // Length
 
-        if (false) {
-            float image[] = new float[elementCount];
-            int index = 0;
-            for (int j = 0; j < h; j++) {
-                for (int i = 0; i < w; i++) {
-                    float ru = u + du*i;
-                    float rv = v + dv*j;
-                    image[index++] = ru;
-                    image[index++] = rv;
-                    image[index++] = 1.0f;
-                }
-            }
+        BufferedImage renderedImage = mRenderer.render(w, h, u, v, du, dv);
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int rgb = renderedImage.getRGB(x, y);
 
-            for (float f : image) {
-                os.writeFloat(f);
-            }
-        } else {
-            if (mRenderedImage == null) {
-                mRenderedImage = mRenderer.render(512, 512);
-                ImageUtils.save(mRenderedImage, "out.png");
-            }
-            int startX = (int) (u*512);
-            int startY = (int) (v*512);
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    int xx = startX + x;
-                    int yy = 511 - (startY + y);
-                    int rgb = mRenderedImage.getRGB(xx, yy);
+                // This seems to be backward.
+                int red = rgb & 0xFF;
+                int green = (rgb >> 8) & 0xFF;
+                int blue = (rgb >> 16) & 0xFF;
 
-                    // This seems to be backward.
-                    int red = rgb & 0xFF;
-                    int green = (rgb >> 8) & 0xFF;
-                    int blue = (rgb >> 16) & 0xFF;
+                float rf = red/255.0f;
+                float gf = green/255.0f;
+                float bf = blue/255.0f;
 
-                    float rf = red/255.0f;
-                    float gf = green/255.0f;
-                    float bf = blue/255.0f;
-
-                    os.writeFloat(rf);
-                    os.writeFloat(gf);
-                    os.writeFloat(bf);
-                }
+                os.writeFloat(rf);
+                os.writeFloat(gf);
+                os.writeFloat(bf);
             }
         }
     }
 
     private void addTriangles(DataInput is, DataOutput os) throws IOException {
-        // Clear old image.
-        mRenderedImage = null;
-
         int maxTriangles = is.readInt();
         int triangleCount = is.readInt();
 
@@ -176,6 +155,8 @@ public class UrtConnection extends Thread {
                 mRenderer.addTriangle(triangle);
             }
         }
+
+        mGeometryChanged = true;
     }
 
     private void setCamera(DataInput is, DataOutput os) throws IOException {
@@ -205,11 +186,8 @@ public class UrtConnection extends Thread {
         float fovYHeight = is.readFloat();
         boolean isPerspective = is.readInt() != 0;
 
-        // Assume that aspect ratio is square and we're doing perspective.
+        // Assume that we're doing perspective.
         mRenderer.lookAt(eye, target, up);
-        mRenderer.setVerticalFov(fovYHeight*Math.PI/180);
-
-        // Invalidate cache.
-        mRenderedImage = null;
+        mRenderer.setVerticalFov(fovXWidth*Math.PI/180, fovYHeight*Math.PI/180);
     }
 }
