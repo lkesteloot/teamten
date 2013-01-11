@@ -201,11 +201,13 @@ public class UrtConnection extends Thread {
 
         System.out.printf("Setting camera to %s to %s%n", eye, target);
 
-        is.readFloat();
-        is.readFloat();
-        is.readInt();
+        float fovXWidth = is.readFloat();
+        float fovYHeight = is.readFloat();
+        boolean isPerspective = is.readInt() != 0;
 
+        // Assume that aspect ratio is square and we're doing perspective.
         mRenderer.lookAt(eye, target, up);
+        mRenderer.setVerticalFov(fovYHeight*Math.PI/180);
 
         // Invalidate cache.
         mRenderedImage = null;

@@ -145,7 +145,7 @@ public class Renderer {
         previousNotice.set(beforeRenderTime);
 
         // Calculate the depth of the initial rays, based on the field of view.
-        final double rayDepth = -height/2.0 / Math.tan(mVerticalFov);
+        final double rayDepth = -height/2.0 / Math.tan(mVerticalFov/2);
 
         for (int y = 0; y < height; y++) {
             final int finalY = y;
