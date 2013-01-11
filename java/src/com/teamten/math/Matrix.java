@@ -11,6 +11,23 @@ import java.util.Arrays;
  * pre-multiplying it: M*v.
  */
 public class Matrix {
+    // Easy-access constants for 4x4 matrices. These numbers are [row,column].
+    private static final int A11 = 0;
+    private static final int A12 = 1;
+    private static final int A13 = 2;
+    private static final int A14 = 3;
+    private static final int A21 = 4;
+    private static final int A22 = 5;
+    private static final int A23 = 6;
+    private static final int A24 = 7;
+    private static final int A31 = 8;
+    private static final int A32 = 9;
+    private static final int A33 = 10;
+    private static final int A34 = 11;
+    private static final int A41 = 12;
+    private static final int A42 = 13;
+    private static final int A43 = 14;
+    private static final int A44 = 15;
     /**
      * Row-major: mValues[row*mColumnCount + column]
      */
@@ -67,7 +84,9 @@ public class Matrix {
     /**
      * Make a 4x4 matrix with the three vectors as the basis vectors:
      * x is the first row, y the second row, and z the third row. The
-     * bottom-right element is 1.
+     * bottom-right element is 1. When a vector is transformed by
+     * this matrix, the input vector will be considered to be in world
+     * space, and the transformed vector will be in the basis space.
      */
     public static Matrix makeWithBasis(Vector x, Vector y, Vector z) {
         double[] values = makeUnitArray(4);
@@ -89,6 +108,17 @@ public class Matrix {
 
         for (int i = 0; i < 3; i++) {
             values[4*i + 3] = t.get(i);
+        }
+
+        return new Matrix(values, 4, 4);
+    }
+
+    /**
+     * Make a 4x4 matrix with the specified numbers in row-major order.
+     */
+    public static Matrix make4x4(double... values) {
+        if (values.length != 16) {
+            throw new IllegalArgumentException("make4x4 must take 16 parameters");
         }
 
         return new Matrix(values, 4, 4);
@@ -333,4 +363,114 @@ public class Matrix {
     private static String getSizeString(int rowCount, int columnCount) {
         return rowCount + "x" + columnCount;
     }
+
+    /**
+     * Returns the inverse of the matrix. Only works on 4x4 matrices.
+     */
+    public Matrix getInverse() {
+        if (getRowCount() != 4 || getColumnCount() != 4) {
+            throw new IllegalStateException("can only invert 4x4 matrices");
+        }
+
+        double det = getDeterminant();
+        if (Math.abs(det) < 1.0e-7) {
+            // warn("matrix may be singular(det=%g)\n", det);
+        }
+
+        det = 1.0/det;
+        Matrix adjoint = getAdjoint();
+
+        // Scale adjoint matrix to get inverse.
+        double[] m = adjoint.mValues;
+        return Matrix.make4x4(
+                m[A11]*det, m[A12]*det, m[A13]*det, m[A14]*det,
+                m[A21]*det, m[A22]*det, m[A23]*det, m[A24]*det,
+                m[A31]*det, m[A32]*det, m[A33]*det, m[A34]*det,
+                m[A41]*det, m[A42]*det, m[A43]*det, m[A44]*det);
+    }
+
+    /**
+     * Returns the determinant of a 2x2 matrix. Doesn't matter which way (row or column)
+     * the numbers are specified.
+     */
+    private static double det2x2(double a1, double a2, double b1, double b2) {
+        return a1*b2 - a2*b1;
+    }
+
+    /**
+     * Returns the determinant of a 3x3 matrix. Doesn't matter which way (row or column)
+     * the numbers are specified.
+     */
+    private static double det3x3(double a1, double a2, double a3,
+            double b1, double b2, double b3,
+            double c1, double c2, double c3)  {
+
+        return a1*det2x2(b2, b3, c2, c3) -
+            b1*det2x2(a2, a3, c2, c3) +
+            c1*det2x2(a2, a3, b2, b3);
+    }
+
+    /**
+     * Returns the determinant of the matrix. Must be a 4x4 matrix.
+     */
+    public double getDeterminant() {
+        if (getRowCount() != 4 || getColumnCount() != 4) {
+            throw new IllegalStateException("can only get determinant of 4x4 matrices");
+        }
+
+        double[] m = mValues;
+
+        return
+            m[A11]*det3x3(m[A22], m[A23], m[A24], m[A32], m[A33], m[A34], m[A42], m[A43], m[A44]) -
+            m[A21]*det3x3(m[A12], m[A13], m[A14], m[A32], m[A33], m[A34], m[A42], m[A43], m[A44]) +
+            m[A31]*det3x3(m[A12], m[A13], m[A14], m[A22], m[A23], m[A24], m[A42], m[A43], m[A44]) -
+            m[A41]*det3x3(m[A12], m[A13], m[A14], m[A22], m[A23], m[A24], m[A32], m[A33], m[A34]);
+    }
+
+    /**
+     * Returns the adjoint matrix.
+     */
+    private Matrix getAdjoint() {
+        double[] m = mValues;
+        double a1 = m[A11];
+        double a2 = m[A12];
+        double a3 = m[A13];
+        double a4 = m[A14];
+        double b1 = m[A21];
+        double b2 = m[A22];
+        double b3 = m[A23];
+        double b4 = m[A24];
+        double c1 = m[A31];
+        double c2 = m[A32];
+        double c3 = m[A33];
+        double c4 = m[A34];
+        double d1 = m[A41];
+        double d2 = m[A42];
+        double d3 = m[A43];
+        double d4 = m[A44];
+
+        // Row and col labeling reversed since we transpose rows and cols.
+        return Matrix.make4x4(
+                det3x3(b2, b3, b4, c2, c3, c4, d2, d3, d4),
+                -det3x3(a2, a3, a4, c2, c3, c4, d2, d3, d4),
+                det3x3(a2, a3, a4, b2, b3, b4, d2, d3, d4),
+                -det3x3(a2, a3, a4, b2, b3, b4, c2, c3, c4),
+
+                -det3x3(b1, b3, b4, c1, c3, c4, d1, d3, d4),
+                det3x3(a1, a3, a4, c1, c3, c4, d1, d3, d4),
+                -det3x3(a1, a3, a4, b1, b3, b4, d1, d3, d4),
+                det3x3(a1, a3, a4, b1, b3, b4, c1, c3, c4),
+
+                det3x3(b1, b2, b4, c1, c2, c4, d1, d2, d4),
+                -det3x3(a1, a2, a4, c1, c2, c4, d1, d2, d4),
+                det3x3(a1, a2, a4, b1, b2, b4, d1, d2, d4),
+                -det3x3(a1, a2, a4, b1, b2, b4, c1, c2, c4),
+
+                -det3x3(b1, b2, b3, c1, c2, c3, d1, d2, d3),
+                det3x3(a1, a2, a3, c1, c2, c3, d1, d2, d3),
+                -det3x3(a1, a2, a3, b1, b2, b3, d1, d2, d3),
+                det3x3(a1, a2, a3, b1, b2, b3, c1, c2, c3)
+                );
+    }
+
 }

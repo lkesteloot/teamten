@@ -25,7 +25,7 @@ public class UrtServer {
         ServerSocket serverSocket = new ServerSocket(port);
 
         // Accept connections.
-        System.out.println("Waiting for connection...");
+        System.out.printf("Waiting for connection on port %d...%n", port);
         while (true) {
             Socket socket = serverSocket.accept();
             System.out.println("Got connection from " + socket.getRemoteSocketAddress());

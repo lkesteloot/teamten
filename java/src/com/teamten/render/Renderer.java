@@ -30,6 +30,7 @@ public class Renderer {
     };
     private Material mMaterial = PhongMaterial.DEFAULT;
     private Matrix mCamera = Matrix.makeUnit(4);
+    private Matrix mCameraInverse = mCamera.getInverse();
     private AtomicInteger mTriangleIntersectionCount = new AtomicInteger();
     private AtomicInteger mRayCount = new AtomicInteger();
     private double mVerticalFov = Math.PI/6;
@@ -64,6 +65,7 @@ public class Renderer {
         y = z.cross(x).normalize();
 
         mCamera = Matrix.makeWithBasis(x, y, z).multiply(Matrix.makeTranslation(eye.negate()));
+        mCameraInverse = mCamera.getInverse();
     }
 
     /**
@@ -84,10 +86,7 @@ public class Renderer {
      * Add a triangle to the geometry being rendered.
      */
     public void addTriangle(Triangle triangle) {
-        // Move to camera space.
-        Triangle transformedTriangle = triangle.transform(mCamera);
-
-        mTriangleList.add(transformedTriangle);
+        mTriangleList.add(triangle);
     }
 
     /**
@@ -116,12 +115,7 @@ public class Renderer {
         long afterTime = System.currentTimeMillis();
         long createTreeTime = afterTime - beforeTime;
 
-        // Transform the lights.
-        for (Light light : mLightList) {
-            light.setCamera(mCamera);
-        }
-
-        final Vector eye = Vector.make(0, 0, 0);
+        final Vector eye = mCameraInverse.transform(Vector.make(0, 0, 0));
 
         // Create a RayTracer object that shaders can use to trace more rays in
         // the scene.
@@ -168,8 +162,12 @@ public class Renderer {
 
                         for (int sy = 0; sy < mSuperSample; sy++) {
                             for (int sx = 0; sx < mSuperSample; sx++) {
-                                Vector ray = Vector.make(dx + (double) sx/mSuperSample,
+                                Vector ray = Vector.make(
+                                    dx + (double) sx/mSuperSample,
                                     dy + (double) sy/mSuperSample, rayDepth);
+
+                                // Transform by camera.
+                                ray = mCameraInverse.transform(ray).subtract(eye);
 
                                 boolean debug = false;
                                 /// debug = x == width/2 && finalY == height/2; // Center

@@ -28,6 +28,7 @@ public class UrtConnection extends Thread {
     private static final boolean DEBUG_PRINT = false;
     private static final int REQUEST_TYPE_TRACE_TILE = 1;
     private static final int REQUEST_TYPE_ADD_TRIANGLES = 2;
+    private static final int REQUEST_TYPE_SET_CAMERA = 3;
     private final Socket mSocket;
     private final Renderer mRenderer;
     private BufferedImage mRenderedImage = null;
@@ -65,6 +66,10 @@ public class UrtConnection extends Thread {
 
                     case REQUEST_TYPE_ADD_TRIANGLES:
                         addTriangles(is, os);
+                        break;
+
+                    case REQUEST_TYPE_SET_CAMERA:
+                        setCamera(is, os);
                         break;
 
                     default:
@@ -171,5 +176,36 @@ public class UrtConnection extends Thread {
                 mRenderer.addTriangle(triangle);
             }
         }
+    }
+
+    private void setCamera(DataInput is, DataOutput os) throws IOException {
+        float x, y, z;
+
+        // Eye.
+        x = is.readFloat();
+        y = is.readFloat();
+        z = is.readFloat();
+        Vector eye = Vector.make(x, y, z);
+
+        // Target.
+        x = is.readFloat();
+        y = is.readFloat();
+        z = is.readFloat();
+        Vector target = Vector.make(x, y, z);
+
+        System.out.printf("Setting camera to %s to %s%n", eye, target);
+
+        x = is.readFloat();
+        y = is.readFloat();
+        z = is.readFloat();
+
+        is.readFloat();
+        is.readFloat();
+        is.readInt();
+
+        mRenderer.lookAt(eye, target);
+
+        // Invalidate cache.
+        mRenderedImage = null;
     }
 }
