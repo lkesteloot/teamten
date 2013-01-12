@@ -20,7 +20,7 @@ public class Triangle {
     private final Vector[] mEdges = new Vector[NUM_VERTICES];
     private final Vector[] mEdgeNormals = new Vector[NUM_VERTICES];
 
-    public Triangle(Vertex ... vertices) {
+    public Triangle(Vertex ... vertices) throws DegenerateTriangleException {
         if (vertices.length != NUM_VERTICES) {
             throw new IllegalArgumentException("Triangles must have three vertices");
         }
@@ -29,19 +29,21 @@ public class Triangle {
             mVertices[i] = vertices[i];
         }
 
-        // Compute secondary information.
-        mNormal = mVertices[1].getPoint().subtract(mVertices[2].getPoint()).
-            cross(mVertices[0].getPoint().subtract(mVertices[1].getPoint())).
-            normalize();
-        mCentroid = mVertices[0].getPoint().add(
-                mVertices[1].getPoint()).add(
-                mVertices[2].getPoint()).multiply(1/3.0);
-
         // Compute edge vectors.
         for (int i = 0; i < NUM_VERTICES; i++) {
             int next = (i + 1) % NUM_VERTICES;
             mEdges[i] = mVertices[next].getPoint().subtract(mVertices[i].getPoint());
         }
+
+        // Compute geometric normal and centroid.
+        try {
+            mNormal = mEdges[1].cross(mEdges[0]).normalize();
+        } catch (IllegalArgumentException e) {
+            throw new DegenerateTriangleException();
+        }
+        mCentroid = mVertices[0].getPoint().add(
+                mVertices[1].getPoint()).add(
+                mVertices[2].getPoint()).multiply(1/3.0);
 
         // Compute edge normals in the plane.
         for (int i = 0; i < NUM_VERTICES; i++) {

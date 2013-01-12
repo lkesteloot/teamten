@@ -156,11 +156,15 @@ public class UrtConnection extends Thread {
             float n3z = is.readFloat();
 
             if (i < triangleCount) {
-                Triangle triangle = new Triangle(
-                        new Vertex(Vector.make(v3x, v3y, v3z), Vector.make(n3x, n3y, n3z)),
-                        new Vertex(Vector.make(v2x, v2y, v2z), Vector.make(n2x, n2y, n2z)),
-                        new Vertex(Vector.make(v1x, v1y, v1z), Vector.make(n1x, n1y, n1z)));
-                mRenderer.addTriangle(triangle);
+                try {
+                    Triangle triangle = new Triangle(
+                            new Vertex(Vector.make(v3x, v3y, v3z), Vector.make(n3x, n3y, n3z)),
+                            new Vertex(Vector.make(v2x, v2y, v2z), Vector.make(n2x, n2y, n2z)),
+                            new Vertex(Vector.make(v1x, v1y, v1z), Vector.make(n1x, n1y, n1z)));
+                    mRenderer.addTriangle(triangle);
+                } catch (DegenerateTriangleException e) {
+                    // Ignore degenerate triangle.
+                }
             }
         }
 
