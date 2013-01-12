@@ -11,7 +11,7 @@ public class PhongMaterial implements Material {
     public static final PhongMaterial DEFAULT = new PhongMaterial(
              new Color(1, 0.0, 0.0, 0.0),
              new Color(1, 0.9, 0.9, 0.9),
-             new Color(1, 0.1, 0.1, 0.1), 10);
+             new Color(1, 0.5, 0.5, 0.5), 100);
     private final Color mAmbientColor;
     private final Color mDiffuseColor;
     private final Color mSpecularColor;
