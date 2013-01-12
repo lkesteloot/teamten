@@ -2,6 +2,8 @@
 
 package com.teamten.render;
 
+import com.teamten.image.ImageUtils;
+
 import java.io.IOException;
 
 import java.net.ServerSocket;
@@ -13,6 +15,9 @@ import java.net.Socket;
 public class UrtServer {
     public static void main(String[] args) throws IOException {
         int port = 12345;
+
+        // Don't log from image library.
+        ImageUtils.PRINT_LOG = false;
 
         if (args.length == 2 && "-port".equals(args[0])) {
             port = Integer.parseInt(args[1]);

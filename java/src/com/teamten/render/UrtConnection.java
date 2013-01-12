@@ -5,7 +5,6 @@ package com.teamten.render;
 import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.io.LittleEndianDataOutputStream;
 
-import com.teamten.image.ImageUtils;
 import com.teamten.math.Vector;
 import com.teamten.render.Renderer;
 import com.teamten.render.Triangle;

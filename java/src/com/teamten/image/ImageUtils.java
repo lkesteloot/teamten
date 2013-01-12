@@ -45,6 +45,7 @@ import org.w3c.dom.Node;
  * Assorted utility methods for transforming images.
  */
 public class ImageUtils {
+    public static boolean PRINT_LOG = true;
     private static final Color TRANSPARENT = new Color(0, 0, 0, 0);
 
     /**
@@ -1488,7 +1489,9 @@ public class ImageUtils {
      * Prints a formatted line to the console.
      */
     private static void log(String format, Object ... args) {
-        System.out.println(String.format(format, args));
+        if (PRINT_LOG) {
+            System.out.println(String.format(format, args));
+        }
     }
 }
 

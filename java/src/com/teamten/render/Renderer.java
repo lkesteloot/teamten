@@ -22,7 +22,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Renderer {
     // Set this to zero because it doesn't appear to help.
-    private final double TESSELATE_RATIO = 0.0;
+    private static final double TESSELATE_RATIO = 0.0;
+    private static final boolean PRINT_RENDER_STATS = false;
     private final List<Triangle> mTriangleList = new ArrayList<Triangle>();
     private final Light[] mLightList = new Light[] {
         new DirectionalLight(Vector.make(0, 1, 0), new Color(1, 0.5, 0.5, 0.5)),
@@ -152,7 +153,9 @@ public class Renderer {
 
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         /// availableProcessors = 1;
-        System.out.println("Parallelizing across " + availableProcessors + " processors");
+        if (PRINT_RENDER_STATS) {
+            System.out.println("Parallelizing across " + availableProcessors + " processors");
+        }
         ExecutorService executorService = Executors.newFixedThreadPool(availableProcessors);
 
         mTriangleIntersectionCount.set(0);
@@ -228,8 +231,11 @@ public class Renderer {
                             int completedRows = completedRowsCount.get();
                             long estimatedTimeLeft = Dates.estimateTimeLeft(beforeRenderTime,
                                     now, completedRows, height);
-                            System.out.printf("Completed %d rows of %d (%s left)%n",
-                                completedRows, height, Dates.durationToString(estimatedTimeLeft));
+                            if (PRINT_RENDER_STATS) {
+                                System.out.printf("Completed %d rows of %d (%s left)%n",
+                                        completedRows, height,
+                                        Dates.durationToString(estimatedTimeLeft));
+                            }
                         }
                     }
 
@@ -249,11 +255,13 @@ public class Renderer {
         long afterTime = System.currentTimeMillis();
         long renderTime = afterTime - beforeRenderTime;
 
-        System.out.printf("Triangle intersections:      %,d (%.1f per pixel, %.1f per ray)%n",
-                mTriangleIntersectionCount.get(),
-                (double) mTriangleIntersectionCount.get() / width / height,
-                (double) mTriangleIntersectionCount.get() / mRayCount.get());
-        System.out.printf("Render time:                 %,d ms%n", renderTime);
+        if (PRINT_RENDER_STATS) {
+            System.out.printf("Triangle intersections:      %,d (%.1f per pixel, %.1f per ray)%n",
+                    mTriangleIntersectionCount.get(),
+                    (double) mTriangleIntersectionCount.get() / width / height,
+                    (double) mTriangleIntersectionCount.get() / mRayCount.get());
+            System.out.printf("Render time:                 %,d ms%n", renderTime);
+        }
 
         return image;
     }
