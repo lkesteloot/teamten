@@ -146,12 +146,21 @@ public class UrtConnection extends Thread {
             float v3x = is.readFloat();
             float v3y = is.readFloat();
             float v3z = is.readFloat();
+            float n1x = is.readFloat();
+            float n1y = is.readFloat();
+            float n1z = is.readFloat();
+            float n2x = is.readFloat();
+            float n2y = is.readFloat();
+            float n2z = is.readFloat();
+            float n3x = is.readFloat();
+            float n3y = is.readFloat();
+            float n3z = is.readFloat();
 
             if (i < triangleCount) {
                 Triangle triangle = new Triangle(
-                    Vector.make(v3x, v3y, v3z),
-                    Vector.make(v2x, v2y, v2z),
-                    Vector.make(v1x, v1y, v1z));
+                        new Vertex(Vector.make(v3x, v3y, v3z), Vector.make(n3x, n3y, n3z)),
+                        new Vertex(Vector.make(v2x, v2y, v2z), Vector.make(n2x, n2y, n2z)),
+                        new Vertex(Vector.make(v1x, v1y, v1z), Vector.make(n1x, n1y, n1z)));
                 mRenderer.addTriangle(triangle);
             }
         }
@@ -188,6 +197,6 @@ public class UrtConnection extends Thread {
 
         // Assume that we're doing perspective.
         mRenderer.lookAt(eye, target, up);
-        mRenderer.setVerticalFov(fovXWidth*Math.PI/180, fovYHeight*Math.PI/180);
+        mRenderer.setFov(fovXWidth*Math.PI/180, fovYHeight*Math.PI/180);
     }
 }

@@ -57,11 +57,32 @@ public class Intersection {
     }
 
     /**
-     * Utility method for getting the normal of the triangle, taking into
-     * account whether it's backfacing.
+     * Utility method for getting the normal of the triangle at the intersection
+     * point (interpolating the vertex normals), taking into account whether it's
+     * backfacing.
      */
     public Vector getNormal() {
-        Vector normal = mTriangle.getNormal();
+        //   0: dot((point - v1), cache->h[1]) / dot((v0 - v1), cache->h[1]);
+        //   1: dot((point - v2), cache->h[2]) / dot((v1 - v2), cache->h[2]);
+        //   2: Different to make 1.
+        // Compute barycentric coordinates.
+        double b[] = new double[Triangle.NUM_VERTICES];
+        for (int i = 0; i < Triangle.NUM_VERTICES; i++) {
+            int next = (i + 1) % Triangle.NUM_VERTICES;
+
+            Vector edgeNormal = mTriangle.getEdgeNormal(next);
+            double numerator = mPoint.subtract(mTriangle.get(next).getPoint()).dot(edgeNormal);
+            double denomenator = mTriangle.getEdge(i).negate().dot(edgeNormal);
+            b[i] = numerator / denomenator;
+        }
+
+        // Normal is weighted average of vertex normals by barycentric coordinates.
+        Vector normal = Vector.make(0, 0, 0);
+        for (int i = 0; i < Triangle.NUM_VERTICES; i++) {
+            normal = normal.add(mTriangle.get(i).getNormal().multiply(b[i]));
+        }
+        normal = normal.normalize();
+
         if (mBackfacing) {
             normal = normal.negate();
         }

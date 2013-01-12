@@ -75,7 +75,7 @@ public class Renderer {
     /**
      * Sets the full horizontal and vertical field of view in radians.
      */
-    public void setVerticalFov(double horizontalFov, double verticalFov) {
+    public void setFov(double horizontalFov, double verticalFov) {
         mHorizontalFov = horizontalFov;
         mVerticalFov = verticalFov;
     }
@@ -296,9 +296,9 @@ public class Renderer {
 
         mTriangleIntersectionCount.incrementAndGet();
 
-        Vector v0 = triangle.get(0);
-        Vector v1 = triangle.get(1);
-        Vector v2 = triangle.get(2);
+        Vector v0 = triangle.get(0).getPoint();
+        Vector v1 = triangle.get(1).getPoint();
+        Vector v2 = triangle.get(2).getPoint();
 
         // Intersect with plane.
         double denom = normal.dot(r);

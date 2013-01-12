@@ -10,19 +10,17 @@ import java.util.List;
 
 /**
  * Represents an immutable triangle in 3D.
- *
- * TODO: We should keep other information with each vertex, including surface
- * normal and color.  Not sure how to do that and keep it immutable. Maybe with
- * a builder? With so few parameters, probably just make a constructor and
- * allow nulls for unused parameters.
  */
 public class Triangle {
     public static final int NUM_VERTICES = 3;
-    private final Vector[] mVertices = new Vector[NUM_VERTICES];
-    private Vector mNormal = null;
-    private Vector mCentroid = null;
+    private final Vertex[] mVertices = new Vertex[NUM_VERTICES];
+    private final Vector mNormal;
+    private final Vector mCentroid;
+    // Edge between index and index - 1.
+    private final Vector[] mEdges = new Vector[NUM_VERTICES];
+    private final Vector[] mEdgeNormals = new Vector[NUM_VERTICES];
 
-    public Triangle(Vector ... vertices) {
+    public Triangle(Vertex ... vertices) {
         if (vertices.length != NUM_VERTICES) {
             throw new IllegalArgumentException("Triangles must have three vertices");
         }
@@ -30,25 +28,31 @@ public class Triangle {
         for (int i = 0; i < NUM_VERTICES; i++) {
             mVertices[i] = vertices[i];
         }
-    }
 
-    /**
-     * Return a new triangle that's been translated by "offset".
-     */
-    public Triangle withOffset(Vector offset) {
-        Vector[] newVertices = new Vector[NUM_VERTICES];
+        // Compute secondary information.
+        mNormal = mVertices[1].getPoint().subtract(mVertices[2].getPoint()).
+            cross(mVertices[0].getPoint().subtract(mVertices[1].getPoint())).
+            normalize();
+        mCentroid = mVertices[0].getPoint().add(
+                mVertices[1].getPoint()).add(
+                mVertices[2].getPoint()).multiply(1/3.0);
 
+        // Compute edge vectors.
         for (int i = 0; i < NUM_VERTICES; i++) {
-            newVertices[i] = mVertices[i].add(offset);
+            int next = (i + 1) % NUM_VERTICES;
+            mEdges[i] = mVertices[next].getPoint().subtract(mVertices[i].getPoint());
         }
 
-        return new Triangle(newVertices);
+        // Compute edge normals in the plane.
+        for (int i = 0; i < NUM_VERTICES; i++) {
+            mEdgeNormals[i] = mNormal.cross(mEdges[i]);
+        }
     }
 
     /**
      * Return vertex at index (0, 1, or 2), with no bounds checking.
      */
-    public Vector get(int index) {
+    public Vertex get(int index) {
         return mVertices[index];
     }
 
@@ -57,28 +61,7 @@ public class Triangle {
      * the vertices are in clockwise order.
      */
     public Vector getNormal() {
-        // Cache the normal.
-        if (mNormal == null) {
-            // Right-hand rule.
-            mNormal = mVertices[1].subtract(mVertices[2]).
-                cross(mVertices[0].subtract(mVertices[1])).
-                normalize();
-        }
-
         return mNormal;
-    }
-
-    /**
-     * Returns this triangle transformed by the 4x4 matrix.
-     */
-    public Triangle transform(Matrix matrix) {
-        Vector[] newVertices = new Vector[NUM_VERTICES];
-
-        for (int i = 0; i < NUM_VERTICES; i++) {
-            newVertices[i] = matrix.transform(mVertices[i]);
-        }
-
-        return new Triangle(newVertices);
     }
 
     /**
@@ -86,12 +69,22 @@ public class Triangle {
      * vertices.
      */
     public Vector getCentroid() {
-        // Cache the centroid.
-        if (mCentroid == null) {
-            mCentroid = mVertices[0].add(mVertices[1]).add(mVertices[2]).multiply(1/3.0);
-        }
-
         return mCentroid;
+    }
+
+    /**
+     * Return the vector from vertex index to index + 1. This is not normalized.
+     */
+    public Vector getEdge(int index) {
+        return mEdges[index];
+    }
+
+    /**
+     * Return a normal to edge from vertex index to index + 1. This is not
+     * normalized.
+     */
+    public Vector getEdgeNormal(int index) {
+        return mEdgeNormals[index];
     }
 
     /**
@@ -102,6 +95,7 @@ public class Triangle {
      * original.
      */
     public List<Triangle> tesselate() {
+        /*
         // Calculate the three midpoints.
         Vector vertex01 = mVertices[0].add(mVertices[1]).multiply(0.5);
         Vector vertex12 = mVertices[1].add(mVertices[2]).multiply(0.5);
@@ -112,6 +106,8 @@ public class Triangle {
                 new Triangle(vertex01, mVertices[1], vertex12),
                 new Triangle(vertex20, vertex12, mVertices[2]),
                 new Triangle(vertex12, vertex20, vertex01));
+        */
+        throw new IllegalStateException("tesselate() not implemented");
     }
 
     @Override // Object

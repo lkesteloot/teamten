@@ -31,7 +31,7 @@ public class BoundingBox {
     public void addTriangle(Triangle triangle) {
         // Go through vertices of triangle.
         for (int i = 0; i < 3; i++) {
-            Vector v = triangle.get(i);
+            Vector v = triangle.get(i).getPoint();
 
             if (mMin == null) {
                 mMin = v;
@@ -220,7 +220,7 @@ public class BoundingBox {
             boolean anyMore = false;
 
             for (int i = 0; i < Triangle.NUM_VERTICES; i++) {
-                double p = triangle.get(i).get(splitDimension);
+                double p = triangle.get(i).getPoint().get(splitDimension);
 
                 if (p <= splitPosition) {
                     anyLess = true;

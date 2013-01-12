@@ -38,8 +38,8 @@ public class AmbientOcclusionMaterial implements Material {
         point = point.add(normal.multiply(0.0001));
 
         // Find one triangle edge.
-        Vector vertex0 = intersection.getTriangle().get(0);
-        Vector vertex1 = intersection.getTriangle().get(1);
+        Vector vertex0 = intersection.getTriangle().get(0).getPoint();
+        Vector vertex1 = intersection.getTriangle().get(1).getPoint();
         Vector edge = vertex1.subtract(vertex0);
 
         // Calculate two vectors for the surface plane. Doesn't matter which
