@@ -1,2 +1,2 @@
 ant
-java -Xmx1024m -cp "dist/*" com.teamten.render.UrtServer
+java -Xmx2048m -cp "dist/*" com.teamten.render.UrtServer
