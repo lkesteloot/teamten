@@ -17,6 +17,7 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Kernel;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,6 +47,8 @@ import org.w3c.dom.Node;
  */
 public class ImageUtils {
     public static boolean PRINT_LOG = true;
+    private static final String FONT_DIR = System.getProperty("user.home") +
+        File.separator + "fonts";
     private static final Color TRANSPARENT = new Color(0, 0, 0, 0);
 
     /**
@@ -1468,6 +1471,37 @@ public class ImageUtils {
         log("Loading font \"%s\"", filename);
 
         InputStream inputStream = ImageUtils.class.getResourceAsStream(filename);
+
+        Font font;
+        try {
+            font = Font.createFont(Font.TRUETYPE_FONT, inputStream).deriveFont((float) size);
+        } finally {
+            inputStream.close();
+        }
+
+        // Turn on kerning. This doesn't seem to make any difference.
+        Map<AttributedCharacterIterator.Attribute,Object> attributes =
+            new HashMap<AttributedCharacterIterator.Attribute,Object>();
+        attributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        font = font.deriveFont(attributes);
+
+        return font;
+    }
+
+    /**
+     * Return a font from the specified filename and size. If the
+     * filename is relative, then it will be relative to $HOME/fonts.
+     */
+    public static Font getFont(String filename, double size)
+        throws FontFormatException, IOException {
+
+        if (!filename.startsWith("/")) {
+            filename = FONT_DIR + File.separator + filename;
+        }
+
+        log("Loading font \"%s\" at size %g", filename, size);
+
+        InputStream inputStream = new FileInputStream(filename);
 
         Font font;
         try {

@@ -13,51 +13,45 @@ import java.io.IOException;
 import java.util.Random;
 
 /**
- * Make a cover for the Graphics Engine book.
+ * Make a business card.
  */
 public class Card {
-    private static final int DPI = 72;          // Screen
-    //// private static final int DPI = 300;         // Print
-    private static final boolean DRAW_SPINE_AND_BLEED = false;
-    private static final double WIDTH_IN = 17.40;
-    private static final double HEIGHT_IN = 11.25;
+    private static final int DPI = 350;
+    private static final boolean DRAW_BLEED = false;
+    private static final double WIDTH_IN = 3.60;
+    private static final double HEIGHT_IN = 2.10;
     private static final Color BACKGROUND_COLOR = new Color(204, 108, 5);
-    private static final double BLEED_IN = 0.125;
-    private static final double SPINE_WIDTH_IN = 0.153;
-    private static final double SPINE_POS_IN = 8.63;
-    private static final Color SPINE_COLOR = Color.GRAY;
-    private static final double MARGIN_IN = 0.5;
-    private static final double RIBBON_TOP_IN = 3;
-    private static final double RIBBON_BOTTOM_IN = 6;
-    private static final double RIBBON_SHADOW_IN = 0.25;
+    private static final double BLEED_IN = 0.05;
+    private static final Color BLEED_COLOR = Color.GRAY;
+    private static final double MARGIN_IN = 0.16;
+    private static final double RIBBON_TOP_IN = 0.5;
+    private static final double RIBBON_BOTTOM_IN = 1.3;
+    private static final double RIBBON_SHADOW_IN = 0.10;
     private static final Color RIBBON_COLOR = new Color(3, 79, 128);
     private static final Color RIBBON_SHADOW_COLOR =
         ImageUtils.interpolateColor(RIBBON_COLOR, Color.BLACK, 0.4);
-    private static final double DIAGRAM_X_IN = 8.8;
-    private static final double DIAGRAM_Y_IN = -1;
+    private static final boolean DRAW_DIAGRAM = true;
+    private static final double DIAGRAM_X_IN = 1.4;
+    private static final double DIAGRAM_Y_IN = -0.2;
     private static final Color DIAGRAM_COLOR = new Color(169, 58, 0);
-    private static final double DIAGRAM_SCALE = 1.3;
-    private static final double TITLE_PT = 240/300.;
-    private static final double TITLE_POS_IN = 4;
-    private static final Color TITLE_TEXT_COLOR = Color.WHITE; // new Color(253, 187, 36);
-    private static final double AUTHOR_PT = 120/300.;
-    private static final double AUTHOR1_POS_IN = 5.05;
-    private static final double AUTHOR2_POS_IN = 5.55;
-    private static final Color AUTHOR_TEXT_COLOR = TITLE_TEXT_COLOR;
-    private static final double BLURB_PT = 60/300.;
-    private static final double BLURB_POS_IN = 3.6;
-    private static final double BLURB_LEADING_IN = 0.32;
-    private static final Color BLURB_TEXT_COLOR = TITLE_TEXT_COLOR;
-    private static final double CODE_PT = 100/300.;
-    private static final double CODE_X_IN = MARGIN_IN*2;
-    private static final double CODE_Y_IN = -0.20;
-    private static final double CODE_LEADING_IN = 0.35;
-    /// private static final Color CODE_TEXT_COLOR = new Color(255, 255, 0, 20);
+    private static final double DIAGRAM_SCALE = 0.3;
+    private static final double PERSON_NAME_PT = 80/300.;
+    private static final double PERSON_NAME_POS_IN = RIBBON_TOP_IN + 0.30;
+    private static final Color PERSON_NAME_TEXT_COLOR = Color.WHITE;
+    private static final double COMPANY_PT = 50/300.;
+    private static final double COMPANY_POS_IN = RIBBON_TOP_IN + 0.515;
+    private static final Color COMPANY_TEXT_COLOR = PERSON_NAME_TEXT_COLOR;
+    private static final double EMAIL_PT = 40/300.;
+    private static final double EMAIL_POS_IN = RIBBON_TOP_IN + 0.70;
+    private static final Color EMAIL_TEXT_COLOR = PERSON_NAME_TEXT_COLOR;
+    private static final double CODE_PT = 0.08;
+    private static final double CODE_X_IN = MARGIN_IN + 0.05;
+    private static final double CODE_Y_IN = -0.00;
+    private static final double CODE_LEADING_IN = 0.11;
     private static final Color CODE_TEXT_COLOR = new Color(0, 0, 0, 20);
-    /// private static final Color CODE_TEXT_COLOR = new Color(214, 130, 20);
-    private static final double GEARS_SCALE = 0.03;
-    private static final double GEARS_OFFSET_X = 16;
-    private static final double GEARS_OFFSET_Y = 4;
+    private static final double GEARS_SCALE = 0.008;
+    private static final double GEARS_OFFSET_X_IN = 3.5;
+    private static final double GEARS_OFFSET_Y_IN = 0.7;
     private static final double GEARS_ROTATE_DEG = 30;
     private static final Color[] GEAR_COLORS = new Color[] {
         new Color(173, 59, 0),
@@ -77,26 +71,22 @@ public class Card {
     private static final int MARGIN = toPixels(MARGIN_IN);
 
     public static void main(String[] args) throws Exception {
+        drawFront();
+        drawBack();
+    }
+
+    private static void drawFront() throws Exception {
         BufferedImage image = ImageUtils.make(WIDTH, HEIGHT, BACKGROUND_COLOR);
 
         // Front.
         Graphics2D g = ImageUtils.createGraphics(image);
 
-        // Gears.
-        drawGears(g, "gears.raw");
-
-        // Assembly language.
-        drawAssembly(g);
-
-        // Diagram.
-        drawDragram(g, "ge.model.png");
-
-        // Texture.
-        drawTexture(g);
+        // Gears, assembly, diagram, and texture.
+        drawBackground(g);
 
         // Ribbon.
         g.setColor(RIBBON_COLOR);
-        int ribbonTop = toPixels(RIBBON_TOP_IN); 
+        int ribbonTop = toPixels(RIBBON_TOP_IN);
         int ribbonBottom = toPixels(RIBBON_BOTTOM_IN);
         g.fillRect(0, ribbonTop, WIDTH, ribbonBottom - ribbonTop);
         int shadowSize = toPixels(RIBBON_SHADOW_IN);
@@ -108,63 +98,115 @@ public class Card {
             g.drawLine(0, ribbonBottom - i, WIDTH, ribbonBottom - i);
         }
 
-        // Title.
-        Font font = ImageUtils.getFont(Typeface.HELVETICA, true, false, false, TITLE_PT*DPI);
-        g.setColor(TITLE_TEXT_COLOR);
+        // Person name.
+        Font font = ImageUtils.getFont(Typeface.HELVETICA, true, false, false, PERSON_NAME_PT*DPI);
+        g.setColor(PERSON_NAME_TEXT_COLOR);
         g.setFont(font);
-        TextLayout textLayout = new TextLayout("Graphics Engine", font, g.getFontRenderContext());
+        TextLayout textLayout = new TextLayout("Lawrence Kesteloot", font, g.getFontRenderContext());
         int width = (int) textLayout.getBounds().getWidth();
-        textLayout.draw(g, WIDTH - MARGIN - width, toPixels(TITLE_POS_IN));
+        textLayout.draw(g, WIDTH - MARGIN - width, toPixels(PERSON_NAME_POS_IN));
 
-        // Authors.
-        font = ImageUtils.getFont(Typeface.HELVETICA, false, false, false, AUTHOR_PT*DPI);
-        g.setColor(AUTHOR_TEXT_COLOR);
+        // Company.
+        font = ImageUtils.getFont("Helvetica Neue LT Std/HelveticaNeueLTStd-Th.otf",
+                COMPANY_PT*DPI);
+        g.setColor(COMPANY_TEXT_COLOR);
         g.setFont(font);
-        textLayout = new TextLayout("Lawrence Kesteloot", font, g.getFontRenderContext());
+        textLayout = new TextLayout("HeadCode", font, g.getFontRenderContext());
         width = (int) textLayout.getBounds().getWidth();
-        textLayout.draw(g, WIDTH - MARGIN - width, toPixels(AUTHOR1_POS_IN));
-        textLayout = new TextLayout("Rob Wheeler", font, g.getFontRenderContext());
-        width = (int) textLayout.getBounds().getWidth();
-        textLayout.draw(g, WIDTH - MARGIN - width, toPixels(AUTHOR2_POS_IN));
+        textLayout.draw(g, WIDTH - MARGIN - width, toPixels(COMPANY_POS_IN));
 
-        // Blurb.
-        String[] blurb =
-            ("This book outlines the design of the Graphics Engine (GE), a chip with an "
-            + "optimized#instruction set for transforming and rasterizing 3-D graphics primitives "
-            + "for low-end#machines. The GE\u2019s design is ideal for home and arcade "
-            + "video game machines.#A general-purpose CPU and the GE share memory for "
-            + "communication: The CPU#calculates the game dynamics and sets up a graphics "
-            + "data structure (a display list of#3-D primitives) that the GE traverses and "
-            + "rasterizes in a pipeline arrangement.#The GE has a RISC core with a back-end "
-            + "specialized for rasterizing triangles.").split("#");
-
-        font = ImageUtils.getFont(Typeface.HELVETICA, false, false, false, BLURB_PT*DPI);
-        g.setColor(BLURB_TEXT_COLOR);
+        // Email address.
+        font = ImageUtils.getFont("Helvetica Neue LT Std/HelveticaNeueLTStd-Th.otf",
+                EMAIL_PT*DPI);
+        g.setColor(EMAIL_TEXT_COLOR);
         g.setFont(font);
-        for (int i = 0; i < blurb.length; i++) {
-            textLayout = new TextLayout(blurb[i], font, g.getFontRenderContext());
-            textLayout.draw(g, MARGIN, toPixels(BLURB_POS_IN + i*BLURB_LEADING_IN));
-        }
+        textLayout = new TextLayout("lk@headcode.com", font, g.getFontRenderContext());
+        width = (int) textLayout.getBounds().getWidth();
+        textLayout.draw(g, WIDTH - MARGIN - width, toPixels(EMAIL_POS_IN));
 
-        if (DRAW_SPINE_AND_BLEED) {
-            g.setColor(SPINE_COLOR);
-
-            // Spine.
-            g.drawRect(toPixels(SPINE_POS_IN), 0, toPixels(SPINE_WIDTH_IN), HEIGHT);
-
-            // Bleed.
-            int bleed = toPixels(BLEED_IN);
-            g.drawRect(bleed, bleed, WIDTH - 2*bleed, HEIGHT - 2*bleed);
-        }
+        // Bleed.
+        drawBleed(g);
 
         g.dispose();
 
-        ImageUtils.save(image, "cover.png");
+        ImageUtils.save(image, "front.png");
+    }
 
-        if (DPI > 72) {
-            image = ImageUtils.scale(image, 72.0 / DPI);
-            ImageUtils.save(image, "cover_small.png");
+    private static void drawBack() throws Exception {
+        // drawBackOption1();
+        drawBackOption2();
+    }
+
+    private static void drawBackOption1() throws Exception {
+        BufferedImage image = ImageUtils.make(WIDTH, HEIGHT, BACKGROUND_COLOR);
+
+        // Front.
+        Graphics2D g = ImageUtils.createGraphics(image);
+
+        // Gears, assembly, diagram, and texture.
+        drawBackground(g);
+
+        // Ribbon.
+        g.setColor(RIBBON_COLOR);
+        int ribbonTop = toPixels(RIBBON_TOP_IN);
+        int ribbonBottom = toPixels(RIBBON_BOTTOM_IN);
+        g.fillRect(0, 0, WIDTH, ribbonTop);
+        g.fillRect(0, ribbonBottom, WIDTH, HEIGHT - ribbonBottom);
+        int shadowSize = toPixels(RIBBON_SHADOW_IN);
+        for (int i = 0; i < shadowSize; i++) {
+            double shadow = (double) i / shadowSize;
+            shadow = Math.pow(shadow, 0.5);
+            g.setColor(ImageUtils.interpolateColor(RIBBON_SHADOW_COLOR, RIBBON_COLOR, shadow));
+            g.drawLine(0, ribbonTop - i, WIDTH, ribbonTop - i);
+            g.drawLine(0, ribbonBottom + i, WIDTH, ribbonBottom + i);
         }
+
+        // Bleed.
+        drawBleed(g);
+
+        g.dispose();
+
+        ImageUtils.save(image, "back.png");
+    }
+
+    private static void drawBackOption2() throws Exception {
+        BufferedImage image = ImageUtils.make(WIDTH, HEIGHT, BACKGROUND_COLOR);
+
+        // Front.
+        Graphics2D g = ImageUtils.createGraphics(image);
+
+        // Background.
+        g.setColor(RIBBON_COLOR);
+        g.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // Gears.
+        drawGears(g, "gears.raw", true);
+
+        // Bleed.
+        drawBleed(g);
+
+        // Flip horizontally to match the front.
+        image = ImageUtils.flipHorizontally(image);
+
+        g.dispose();
+
+        ImageUtils.save(image, "back.png");
+    }
+
+    private static void drawBackground(Graphics2D g) throws Exception {
+        // Gears.
+        drawGears(g, "gears.raw", false);
+
+        // Assembly language.
+        drawAssembly(g);
+
+        // Diagram.
+        if (DRAW_DIAGRAM) {
+            drawDragram(g, "ge.model.png");
+        }
+
+        // Texture.
+        drawTexture(g);
     }
 
     private static void drawAssembly(Graphics2D g) throws Exception {
@@ -216,7 +258,9 @@ public class Card {
         }
     }
 
-    private static void drawGears(Graphics2D g, String filename) throws IOException {
+    private static void drawGears(Graphics2D g, String filename, boolean backgroundOnly)
+        throws IOException {
+
         int colorIndex = 0;
 
         double sin = Math.sin(GEARS_ROTATE_DEG*Math.PI/180);
@@ -229,10 +273,14 @@ public class Card {
                 double ox = Double.parseDouble(fields[1])*GEARS_SCALE;
                 double oy = Double.parseDouble(fields[2])*GEARS_SCALE;
                 double r = Double.parseDouble(fields[3])*GEARS_SCALE;
-                double x = ox*cos + oy*sin + GEARS_OFFSET_X;
-                double y = ox*sin - oy*cos + GEARS_OFFSET_Y;
+                double x = ox*cos + oy*sin + GEARS_OFFSET_X_IN;
+                double y = ox*sin - oy*cos + GEARS_OFFSET_Y_IN;
                 g.setColor(BACKGROUND_COLOR);
-                g.fillArc(toPixels(x - r), toPixels(y - r), toPixels(r*2), toPixels(r*2), 0, 360);
+                if (backgroundOnly) {
+                    g.drawArc(toPixels(x - r), toPixels(y - r), toPixels(r*2), toPixels(r*2), 0, 360);
+                } else {
+                    g.fillArc(toPixels(x - r), toPixels(y - r), toPixels(r*2), toPixels(r*2), 0, 360);
+                }
             } else if (fields[0].equals("polyline")) {
                 int numPoints = (fields.length - 1)/2;
                 int[] x = new int[numPoints];
@@ -241,12 +289,16 @@ public class Card {
                 for (int i = 0; i < numPoints; i++) {
                     double ox = Double.parseDouble(fields[i*2 + 1])*GEARS_SCALE;
                     double oy = Double.parseDouble(fields[i*2 + 2])*GEARS_SCALE;
-                    x[i] = toPixels(ox*cos + oy*sin + GEARS_OFFSET_X);
-                    y[i] = toPixels(ox*sin - oy*cos + GEARS_OFFSET_Y);
+                    x[i] = toPixels(ox*cos + oy*sin + GEARS_OFFSET_X_IN);
+                    y[i] = toPixels(ox*sin - oy*cos + GEARS_OFFSET_Y_IN);
                 }
 
                 g.setColor(GEAR_COLORS[colorIndex++ % GEAR_COLORS.length]);
-                g.fillPolygon(x, y, numPoints);
+                if (backgroundOnly) {
+                    g.drawPolygon(x, y, numPoints);
+                } else {
+                    g.fillPolygon(x, y, numPoints);
+                }
             } else {
                 System.err.printf("Unknown command \"%s\" in raw file %s%n", fields[0], filename);
             }
@@ -261,6 +313,14 @@ public class Card {
                 DIAGRAM_COLOR);
         diagram = ImageUtils.clipToMask(solid, diagram);
         g.drawImage(diagram, toPixels(DIAGRAM_X_IN), toPixels(DIAGRAM_Y_IN), null);
+    }
+
+    private static void drawBleed(Graphics2D g) {
+        if (DRAW_BLEED) {
+            int bleed = toPixels(BLEED_IN);
+            g.setColor(BLEED_COLOR);
+            g.drawRect(bleed, bleed, WIDTH - 2*bleed, HEIGHT - 2*bleed);
+        }
     }
 
     /**
