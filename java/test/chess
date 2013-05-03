@@ -191,6 +191,17 @@ public class chess {
                 "......P." +
                 ".......K");
 
+        // http://www.futilitycloset.com/2013/05/03/black-and-white-94/
+        board = Board.parse(
+                "......Bk" +
+                "......bP" +
+                "......b." +
+                "........" +
+                "...B.K.." +
+                "........" +
+                "........" +
+                "......Q.");
+
         /*
         board = Board.parse(
                 "........" +
