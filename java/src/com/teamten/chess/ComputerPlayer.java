@@ -10,7 +10,7 @@ import java.util.List;
  * Plays chess.
  */
 public class ComputerPlayer {
-    private static final int MAX_DEPTH = 4;
+    private static final int MAX_DEPTH = 6;
     private static final int MAX_QUIESCENCE_DEPTH = MAX_DEPTH*2;
     private final Board mBoard;
     private final Game mGame;

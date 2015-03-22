@@ -202,6 +202,41 @@ public class chess {
                 "........" +
                 "......Q.");
 
+        // http://www.chessmaniac.com/ELORating/ELO_Chess_Rating.shtml, diagram 1
+        board = Board.parse(
+                "r.b...k." +
+                "......p." +
+                "P.n.pr.p" +
+                "q.p....." +
+                ".b.P...." +
+                "..N..N.." +
+                "PP.QBPPP" +
+                "R...K..R");
+        side = Side.BLACK;
+
+        // http://www.chessmaniac.com/ELORating/ELO_Chess_Rating.shtml, diagram 3
+        board = Board.parse(
+                "........" +
+                "...r..p." +
+                "ppPBp.p." +
+                ".k......" +
+                ".n..K..." +
+                "......R." +
+                ".P...P.." +
+                "........");
+        side = Side.BLACK;
+
+        board = Board.parse(
+                "........" +
+                "....kb.p" +
+                "..p.P.pP" +
+                ".pP...P." +
+                ".P...K.." +
+                ".B......" +
+                "........" +
+                "........");
+        side = Side.BLACK;
+
         /*
         board = Board.parse(
                 "........" +
