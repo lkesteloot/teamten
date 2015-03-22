@@ -1,11 +1,8 @@
 // Copyright 2015 Lawrence Kesteloot
 
 import com.teamten.image.ImageUtils;
-import com.teamten.image.Typeface;
 import com.teamten.util.Files;
 import java.awt.Color;
-import java.awt.font.TextLayout;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -20,34 +17,6 @@ public class Card {
     private static final int WIDTH = 1400;
     private static final int HEIGHT = 300;
     private static final Color BACKGROUND_COLOR = new Color(204, 108, 5);
-    private static final double BLEED_IN = 0.05;
-    private static final Color BLEED_COLOR = Color.GRAY;
-    private static final double MARGIN_IN = 0.16;
-    private static final double RIBBON_TOP_IN = 0.5;
-    private static final double RIBBON_BOTTOM_IN = 1.3;
-    private static final double RIBBON_SHADOW_IN = 0.10;
-    private static final Color RIBBON_COLOR = new Color(3, 79, 128);
-    private static final Color RIBBON_SHADOW_COLOR =
-        ImageUtils.interpolateColor(RIBBON_COLOR, Color.BLACK, 0.4);
-    private static final boolean DRAW_DIAGRAM = true;
-    private static final double DIAGRAM_X_IN = 1.4;
-    private static final double DIAGRAM_Y_IN = -0.2;
-    private static final Color DIAGRAM_COLOR = new Color(169, 58, 0);
-    private static final double DIAGRAM_SCALE = 0.3;
-    private static final double PERSON_NAME_PT = 80/300.;
-    private static final double PERSON_NAME_POS_IN = RIBBON_TOP_IN + 0.30;
-    private static final Color PERSON_NAME_TEXT_COLOR = Color.WHITE;
-    private static final double COMPANY_PT = 50/300.;
-    private static final double COMPANY_POS_IN = RIBBON_TOP_IN + 0.515;
-    private static final Color COMPANY_TEXT_COLOR = PERSON_NAME_TEXT_COLOR;
-    private static final double EMAIL_PT = 40/300.;
-    private static final double EMAIL_POS_IN = RIBBON_TOP_IN + 0.70;
-    private static final Color EMAIL_TEXT_COLOR = PERSON_NAME_TEXT_COLOR;
-    private static final double CODE_PT = 0.08;
-    private static final double CODE_X_IN = MARGIN_IN + 0.05;
-    private static final double CODE_Y_IN = -0.00;
-    private static final double CODE_LEADING_IN = 0.11;
-    private static final Color CODE_TEXT_COLOR = new Color(0, 0, 0, 20);
     private static final double GEARS_SCALE = 0.008;
     private static final double GEARS_OFFSET_X_IN = 3.5;
     private static final double GEARS_OFFSET_Y_IN = -0.7;
