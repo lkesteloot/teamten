@@ -568,19 +568,30 @@ public class Board {
             for (int file = 1; file <= SIZE; file++) {
                 Piece piece = getPiece(getIndex(file, rank));
 
+                // Xterm-256 has grayscales from 232 to 255.
+                int backgroundColor;
+                int foregroundColor;
                 char ch;
+                if ((file + rank) % 2 == 0) {
+                    // Dark square.
+                    backgroundColor = 241;
+                } else {
+                    backgroundColor = 243;
+                }
                 if (piece == Piece.EMPTY) {
-                    if ((file + rank) % 2 == 0) {
-                        ch = ' ';
-                    } else {
-                        ch = '.';
-                    }
+                    ch = ' ';
+                    foregroundColor = 255;
                 } else {
                     ch = piece.getCharacter();
+                    if (piece.getSide() == Side.WHITE) {
+                        foregroundColor = 255;
+                    } else {
+                        foregroundColor = 232;
+                    }
                 }
 
-                System.out.print(ch);
-                System.out.print(' ');
+                System.out.printf("%c[48;5;%dm%c[38;5;%dm%c %c[0m",
+                        27, backgroundColor, 27, foregroundColor, ch, 27);
             }
             System.out.println();
         }

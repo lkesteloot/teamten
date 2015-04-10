@@ -70,7 +70,7 @@ public class ComputerPlayer {
 
         long now = System.currentTimeMillis();
         if (now - mTimeOfLastPrint >= 1000) {
-            System.out.println("Considering moves " + allMoves);
+            System.out.printf("Considering moves %s (%.2f)%n", allMoves, alpha);
             mTimeOfLastPrint = now;
         }
 

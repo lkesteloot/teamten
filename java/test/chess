@@ -237,6 +237,19 @@ public class chess {
                 "........");
         side = Side.BLACK;
 
+        // http://i.imgur.com/kSajzIn.jpg
+
+        board = Board.parse(
+                "........" +
+                "....p..." +
+                ".pP....." +
+                "p..P...R" +
+                "...k.K.." +
+                "........" +
+                ".....P.." +
+                "....r...");
+        side = Side.WHITE;
+
         /*
         board = Board.parse(
                 "........" +
@@ -247,6 +260,7 @@ public class chess {
                 "........" +
                 "........" +
                 "........");
+        side = Side.WHITE;
         */
 
         // Upper case = white.
