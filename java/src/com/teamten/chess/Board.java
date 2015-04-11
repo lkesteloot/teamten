@@ -490,6 +490,14 @@ public class Board {
         return attackingIndex;
     }
 
+    public void updateMoveCheckStatus(Move move) {
+        move.applyMove(this);
+        move.setMovingInCheck(getCheckIndex(move.getMovingPiece().getSide()) != -1);
+        move.setOtherInCheck(getCheckIndex(Side.getOtherSide(move.getMovingPiece().getSide())) != -1);
+        move.applyInverseMove(this);
+    }
+
+
     /**
      * This fully checks this move for validity: the side whose turn it is to move,
      * the motion of the piece, and the legality (in check, etc.). This is a

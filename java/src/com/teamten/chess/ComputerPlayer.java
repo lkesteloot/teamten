@@ -4,6 +4,7 @@ package com.teamten.chess;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -87,8 +88,19 @@ public class ComputerPlayer {
         // Generate all moves for this side.
         List<Move> moveList = mBoard.generateAllMoves(side, false);
 
-        // Remove the ones that would put us in check.
-        mBoard.removeIllegalMoves(moveList);
+        // Update all their check status.
+        for (Move move : moveList) {
+            mBoard.updateMoveCheckStatus(move);
+        }
+
+        // Can't put yourself in check.
+        Iterator<Move> itr = moveList.iterator();
+        while (itr.hasNext()) {
+            Move move = itr.next();
+            if (move.isMovingInCheck()) {
+                itr.remove();
+            }
+        }
 
         // If we have no legal moves left, then it's either stalemate or checkmate.
         if (moveList.isEmpty()) {

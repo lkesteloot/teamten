@@ -13,6 +13,17 @@ public class Move {
     private final Piece mMovingPiece;
     private final Piece mCapturedPiece;
     private final Piece mPromotedPiece;
+    /**
+     * Whether the moving side is in check after this move.
+     */
+    private boolean mMovingInCheck;
+    /**
+     * Whether the non-moving side is in check after this move.
+     */
+    private boolean mOtherInCheck;
+    /**
+     * XXX Remove. Redundant with mOtherInCheck.
+     */
     private boolean mCheck;
 
     /**
@@ -97,6 +108,22 @@ public class Move {
      */
     public void setCheck(boolean check) {
         mCheck = check;
+    }
+
+    public void setMovingInCheck(boolean movingInCheck) {
+        mMovingInCheck = movingInCheck;
+    }
+
+    public boolean isMovingInCheck() {
+        return mMovingInCheck;
+    }
+
+    public void setOtherInCheck(boolean otherInCheck) {
+        mOtherInCheck = otherInCheck;
+    }
+
+    public boolean isOtherInCheck() {
+        return mOtherInCheck;
     }
 
     /**
@@ -229,7 +256,19 @@ public class Move {
             int v2 = p2 == Piece.EMPTY ? 0 : p2.getPieceType().getValue();
 
             // Highest values first.
-            return v2 - v1;
+            if (v2 != v1) {
+                return v2 - v1;
+            }
+
+            // Checks first.
+            if (m1.isOtherInCheck() && !m2.isOtherInCheck()) {
+                return -1;
+            } else if (!m1.isOtherInCheck() && m2.isOtherInCheck()) {
+                return 1;
+            }
+
+            // Tie.
+            return 0;
         }
     };
 

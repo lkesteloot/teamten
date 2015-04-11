@@ -11,4 +11,5 @@
     - Able to play without randomness.
     - Test how long it takes to play a game. Perhaps start part-way through.
 - Add iterative deepening.
+- Sort promotions higher.
 
