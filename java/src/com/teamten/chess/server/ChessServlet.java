@@ -95,11 +95,11 @@ public class ChessServlet extends HttpServlet {
                         if (move.getMovingPiece().getSide() == Side.WHITE) {
                             builder.append(moveNumber);
                             builder.append(". ");
-                            builder.append(move.getFigurineAlgebraicNotation());
+                            builder.append(move.getAlgebraicNotation(true));
                             builder.append(" ");
                         } else {
                             moveNumber++;
-                            builder.append(move.getFigurineAlgebraicNotation());
+                            builder.append(move.getAlgebraicNotation(true));
                             builder.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
                         }
                     }
@@ -359,10 +359,10 @@ public class ChessServlet extends HttpServlet {
                     Move move = game.getMove(i);
                     if (i % 2 == 0) {
                         writer.printf("<tr><td class='number'>%d.</td><td class='white'>%s</td>%n",
-                                i/2 + 1, move.getFigurineAlgebraicNotation());
+                                i/2 + 1, move.getAlgebraicNotation(true));
                     } else {
                         writer.printf("<td class='black'>%s</td></tr>%n",
-                                move.getFigurineAlgebraicNotation());
+                                move.getAlgebraicNotation(true));
                     }
                         }
                 writer.println("</table>"); // Game

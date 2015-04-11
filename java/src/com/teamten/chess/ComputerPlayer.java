@@ -46,8 +46,18 @@ public class ComputerPlayer {
                     Side.toString(mSide), move, evaluatedMove.mScore,
                     afterTime - beforeTime, mMovesConsidered);
             System.out.print("Principal variation:");
+            int side = mSide;
             for (EvaluatedMove e = evaluatedMove; e != null && e.mMove != null; e = e.mNextMove) {
-                System.out.print(" " + e.mMove);
+                int backgroundColor = 243;
+                int foregroundColor;
+                if (side == Side.WHITE) {
+                    foregroundColor = 255;
+                } else {
+                    foregroundColor = 232;
+                }
+                System.out.printf(" %c[48;5;%dm%c[38;5;%dm %s %c[0m",
+                        27, backgroundColor, 27, foregroundColor, e.mMove, 27);
+                side = Side.getOtherSide(side);
             }
             System.out.println();
             mGame.addMove(move);
@@ -69,7 +79,7 @@ public class ComputerPlayer {
         }
 
         long now = System.currentTimeMillis();
-        if (now - mTimeOfLastPrint >= 1000) {
+        if (false && now - mTimeOfLastPrint >= 1000) {
             System.out.printf("Considering moves %s (%.2f)%n", allMoves, alpha);
             mTimeOfLastPrint = now;
         }

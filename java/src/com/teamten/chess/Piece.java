@@ -55,6 +55,13 @@ public class Piece {
     }
 
     /**
+     * Return the character that can be used to represent this piece in Algebraic Notation.
+     */
+    public char getAlgebraicCharacter() {
+        return Character.toUpperCase(mPieceType.getCharacter());
+    }
+
+    /**
      * Returns the char for the Unicode character.
      *
      * See http://en.wikipedia.org/wiki/Chess_symbols_in_Unicode

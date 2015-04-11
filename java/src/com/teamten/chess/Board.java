@@ -562,11 +562,12 @@ public class Board {
     /**
      * Prints the board to the terminal with each line having the specified indent.
      */
-    public void print(String indent) {
+    public void print(String indent, Move move) {
         for (int rank = SIZE; rank >= 1; rank--) {
             System.out.print(indent);
             for (int file = 1; file <= SIZE; file++) {
-                Piece piece = getPiece(getIndex(file, rank));
+                int index = getIndex(file, rank);
+                Piece piece = getPiece(index);
 
                 // Xterm-256 has grayscales from 232 to 255.
                 int backgroundColor;
@@ -576,13 +577,23 @@ public class Board {
                     // Dark square.
                     backgroundColor = 241;
                 } else {
+                    // Light square.
                     backgroundColor = 243;
+                }
+                if (move != null) {
+                    if (move.getFromIndex() == index) {
+                        // Dark red.
+                        backgroundColor = 88;
+                    } else if (move.getToIndex() == index) {
+                        // Dark green.
+                        backgroundColor = 34;
+                    }
                 }
                 if (piece == Piece.EMPTY) {
                     ch = ' ';
                     foregroundColor = 255;
                 } else {
-                    ch = piece.getCharacter();
+                    ch = piece.getUnicodeCharacter();
                     if (piece.getSide() == Side.WHITE) {
                         foregroundColor = 255;
                     } else {

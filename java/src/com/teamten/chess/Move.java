@@ -129,12 +129,13 @@ public class Move {
     }
 
     /**
-     * Return the HTML for the Figuring Algebraic Notation, which is Algebraic Notation
-     * (Ke5, etc.) but with a drawing instead of a piece name.
+     * Return the Algebraic Notation.
      *
      * See http://en.wikipedia.org/wiki/Algebraic_Chess_Notation
+     * 
+     * @param useFigurine if true, uses the HTML for a drawing instead of a piece name.
      */
-    public String getFigurineAlgebraicNotation() {
+    public String getAlgebraicNotation(boolean useFigurine) {
         StringBuilder builder = new StringBuilder();
 
         if (mMovingPiece.getPieceType() == PieceType.PAWN) {
@@ -142,7 +143,14 @@ public class Move {
                 builder.append(Board.getFileLetter(mFromIndex));
             }
         } else {
-            builder.append(mMovingPiece.getHtmlCharacter());
+            if (useFigurine) {
+                builder.append(mMovingPiece.getHtmlCharacter());
+            } else {
+                // Doesn't display well in iTerm, it's wider than a letter:
+                /// builder.append(mMovingPiece.getUnicodeCharacter());
+
+                builder.append(mMovingPiece.getAlgebraicCharacter());
+            }
         }
 
         // Here we're supposed to put file and/or rank of moving piece if it's
@@ -171,6 +179,8 @@ public class Move {
 
     @Override // Object
     public String toString() {
+        return getAlgebraicNotation(false);
+        /*
         StringBuilder builder = new StringBuilder();
 
         builder.append(Board.getPosition(mFromIndex));
@@ -187,6 +197,7 @@ public class Move {
         }
 
         return builder.toString();
+        */
     }
 
     @Override // Object

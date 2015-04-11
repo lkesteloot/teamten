@@ -21,8 +21,8 @@ import com.teamten.chess.server.ChessServer;
 public class chess {
     private static final boolean CHECK_TEST = false;
     private static final boolean PROMOTION_TEST = false;
-    private static final boolean PLAY_GAME = false;
-    private static final boolean PLAY_PUZZLE_GAME = true;
+    private static final boolean PLAY_GAME = true;
+    private static final boolean PLAY_PUZZLE_GAME = false;
     private static final boolean CHESS_SERVER = false;
 
     public static void main(String[] args) {
@@ -34,16 +34,17 @@ public class chess {
             ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
 
             board.initializeTraditionalChess();
-            board.print("");
+            board.print("", null);
 
             int side = Side.WHITE;
             while (true) {
                 ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
                 ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
-                if (evaluatedMove.getMove() == null) {
+                Move move = evaluatedMove.getMove();
+                if (move == null) {
                     break;
                 }
-                board.print(side == Side.BLACK ? "    " : "");
+                board.print(side == Side.BLACK ? "    " : "", move);
                 side = Side.getOtherSide(side);
             }
         }
@@ -59,13 +60,13 @@ public class chess {
             board.setPiece(index, piece);
             board.setPiece(Board.getIndex(6, 7), Piece.BLACK_QUEEN);
             board.setPiece(Board.getIndex(3, 5), Piece.WHITE_KNIGHT);
-            board.print("");
+            board.print("", null);
             List<Move> moveList = new ArrayList<Move>();
             piece.addMoves(board, index, false, moveList);
             board.removeIllegalMoves(moveList);
             for (Move move : moveList) {
                 game.addMove(move);
-                board.print("    ");
+                board.print("    ", move);
 
                 game.undoMove();
             }
@@ -76,10 +77,10 @@ public class chess {
             board.setPiece(Board.getIndex(4, 6), Piece.WHITE_PAWN);
             board.setPiece(Board.getIndex(1, 1), Piece.WHITE_KING);
             board.setPiece(Board.getIndex(1, 8), Piece.BLACK_KING);
-            board.print("");
+            board.print("", null);
             ComputerPlayer computerPlayer = new ComputerPlayer(board, game, Side.WHITE);
             computerPlayer.makeMove();
-            board.print("");
+            board.print("", null);
         }
 
         if (CHESS_SERVER) {
@@ -269,15 +270,16 @@ public class chess {
         ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
         ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
 
-        board.print("");
+        board.print("", null);
 
         while (true) {
             ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
             ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
-            if (evaluatedMove.getMove() == null) {
+            Move move = evaluatedMove.getMove();
+            if (move == null) {
                 break;
             }
-            board.print(side == Side.BLACK ? "    " : "");
+            board.print(side == Side.BLACK ? "    " : "", move);
             side = Side.getOtherSide(side);
         }
     }
