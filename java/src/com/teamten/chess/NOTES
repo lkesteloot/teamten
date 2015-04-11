@@ -1,0 +1,14 @@
+
+- Look through saved screenshots, make FEN regression tests for each.
+    - 4Q3/7P/8/8/8/2k3PK/8/3q4 w KQkq - 1 2
+- Log all games to a file.
+    - Include all moves and full FEN board position for each move.
+    - PGN?
+- Turn the program into a server. This will allow us to:
+    - Play with any UI.
+    - Play different versions against each other.
+- Set up more robust testing of time.
+    - Able to play without randomness.
+    - Test how long it takes to play a game. Perhaps start part-way through.
+- Add iterative deepening.
+

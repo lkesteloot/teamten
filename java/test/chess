@@ -33,11 +33,18 @@ public class chess {
             ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
             ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
 
-            board.initializeTraditionalChess();
+            System.out.println(args.length);
+            if (args.length == 6) {
+                // Ew.
+                board.initializeWithFen(args[0] + " " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + " " + args[5]);
+            } else {
+                board.initializeTraditionalChess();
+            }
             board.print("", null);
 
             int side = Side.WHITE;
             while (true) {
+                System.out.println(board);
                 ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
                 ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
                 Move move = evaluatedMove.getMove();

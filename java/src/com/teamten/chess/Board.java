@@ -47,6 +47,48 @@ public class Board {
     private final int[] mNumPieces = new int[2];
 
     /**
+     * Parse FEN notation.
+     *
+     * https://chessprogramming.wikispaces.com/Forsyth-Edwards+Notation
+     *
+     * @throws IllegalArgumentException if the FEN string is invalid.
+     */
+    public void initializeWithFen(String fen) {
+        String[] fields = fen.split(" ");
+        if (fields.length != 6) {
+            throw new IllegalArgumentException("FEN string must have four fields");
+        }
+
+        int index = 0;
+        for (int i = 0; i < fields[0].length(); i++) {
+            char ch = fields[0].charAt(i);
+            if (ch == '/') {
+                // Ignore.
+            } else if (ch >= '1' && ch <= '8') {
+                int skipped = ch - '0';
+                for (int j = 0; j < skipped; j++) {
+                    setPiece(index, Piece.EMPTY);
+                    index++;
+                }
+            } else {
+                // Throws if not valid character.
+                Piece piece = Piece.getPieceForCharacter(ch);
+                setPiece(index, piece);
+                index++;
+            }
+        }
+        if (index != NUM_SQUARES) {
+            throw new IllegalArgumentException("Wrong number of pieces");
+        }
+
+        if (fields[1].equals("w")) {
+            mSide = Side.WHITE;
+        } else {
+            mSide = Side.BLACK;
+        }
+    }
+
+    /**
      * Clears the board.
      */
     public void initializeEmpty() {
@@ -607,6 +649,51 @@ public class Board {
             System.out.println();
         }
         System.out.println("---------------");
+    }
+
+    /**
+     * Returns a FEN version of the board.
+     *
+     * https://chessprogramming.wikispaces.com/Forsyth-Edwards+Notation
+     */
+    @Override // Object
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        int skipped = 0;
+        for (int index = 0; index < NUM_SQUARES; index++) {
+            Piece piece = getPiece(index);
+            if (piece == Piece.EMPTY) {
+                skipped++;
+            } else {
+                if (skipped > 0) {
+                    builder.append(skipped);
+                    skipped = 0;
+                }
+                builder.append(piece.getCharacter());
+            }
+
+            if ((index + 1) % SIZE == 0) {
+                if (skipped > 0) {
+                    builder.append(skipped);
+                    skipped = 0;
+                }
+                if (index < NUM_SQUARES - 1) {
+                    builder.append('/');
+                }
+            }
+        }
+
+        if (getSide() == Side.WHITE) {
+            builder.append(" w");
+        } else {
+            builder.append(" b");
+        }
+
+        // We don't support the rest.
+        builder.append(" - - 0 0");
+
+        return builder.toString();
     }
 
     /**
