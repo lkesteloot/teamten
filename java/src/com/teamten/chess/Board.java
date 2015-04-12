@@ -634,6 +634,9 @@ public class Board {
                     if (move.getFromIndex() == index) {
                         // Dark red.
                         backgroundColor = 88;
+
+                        // Actually two greens work fine.
+                        backgroundColor = 34;
                     } else if (move.getToIndex() == index) {
                         // Dark green.
                         backgroundColor = 34;

@@ -1,15 +1,20 @@
 
-- Look through saved screenshots, make FEN regression tests for each.
-    - 4Q3/7P/8/8/8/2k3PK/8/3q4 w KQkq - 1 2
-- Log all games to a file.
-    - Include all moves and full FEN board position for each move.
-    - PGN?
 - Turn the program into a server. This will allow us to:
     - Play with any UI.
     - Play different versions against each other.
+- Find way to play different versions against one another.
+    - Make client that connects to two servers and plays them.
+    - Make infrastructure to clone new repo at two different GIT versions, compile, and run.
+- Look through saved screenshots, make FEN regression tests for each.
+    - Really slow end-of-game when mate is in sight. Why is it so slow? A-B cutoff not working?
+    - 4Q3/7P/8/8/8/2k3PK/8/3q4 w KQkq - 1 2
 - Set up more robust testing of time.
     - Able to play without randomness.
     - Test how long it takes to play a game. Perhaps start part-way through.
 - Add iterative deepening.
 - Sort promotions higher.
+
+Good references:
+
+- http://www.frayn.net/beowulf/theory.html
 

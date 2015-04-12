@@ -2,6 +2,9 @@
 
 package com.teamten.chess;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 import java.util.Stack;
 
 /**
@@ -125,5 +128,38 @@ public class Game {
         }
 
         return game;
+    }
+
+    public void writePgn(String filename) {
+        PrintWriter w;
+
+        try {
+            w = new PrintWriter(filename);
+        } catch (FileNotFoundException e) {
+            System.out.println("Cannot write to " + filename + " (" + e + ")");
+            return;
+        }
+
+        w.printf("[Event \"Private match\"]%n");
+        w.printf("[Site \"San Francisco, CA USA\"]%n");
+        w.printf("[Date \"????.??.??\"]%n");
+        w.printf("[Round \"01\"]%n");
+        w.printf("[White \"Computer\"]%n");
+        w.printf("[Black \"Computer\"]%n");
+        w.printf("[Result \"*\"]%n");
+        w.printf("%n");
+
+        int ply = 0;
+        for (Move move : mMoveList) {
+            if (ply % 2 == 0) {
+                w.printf("%d. ", ply / 2 + 1);
+            }
+            w.printf("%s ", move);
+            ply++;
+        }
+
+        w.printf("%n");
+
+        w.close();
     }
 }
