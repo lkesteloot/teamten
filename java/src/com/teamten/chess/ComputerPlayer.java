@@ -17,7 +17,7 @@ public class ComputerPlayer {
     private final Game mGame;
     private final int mSide;
     private long mTimeOfLastPrint;
-    private int mMovesConsidered;
+    private long mMovesConsidered;
 
     /**
      * Create a player for a side in a game.
@@ -28,43 +28,28 @@ public class ComputerPlayer {
         mSide = side;
     }
 
+    public int getSide() {
+        return mSide;
+    }
+
     /**
      * Makes a move on this board. Returns the move made along with a linked list of
      * the principal variation.
      */
-    public EvaluatedMove makeMove() {
+    public Result makeMove() {
         long beforeTime = System.currentTimeMillis();
         mTimeOfLastPrint = beforeTime;
         mMovesConsidered = 0;
         EvaluatedMove evaluatedMove = getBestMove(0.0, 0, mSide, new ArrayList<Move>(),
                 -10000, 10000, false, false, 1);
-        if (evaluatedMove.mMove == null) {
-            System.out.println(Side.toString(mSide) + " cannot move, end of game");
-        } else {
-            long afterTime = System.currentTimeMillis();
-            Move move = evaluatedMove.mMove;
-            System.out.printf("%s makes move %s with score %f (%d ms, %,d moves considered)%n",
-                    Side.toString(mSide), move, evaluatedMove.mScore,
-                    afterTime - beforeTime, mMovesConsidered);
-            System.out.print("Principal variation:");
-            int side = mSide;
-            for (EvaluatedMove e = evaluatedMove; e != null && e.mMove != null; e = e.mNextMove) {
-                int backgroundColor = 243;
-                int foregroundColor;
-                if (side == Side.WHITE) {
-                    foregroundColor = 255;
-                } else {
-                    foregroundColor = 232;
-                }
-                System.out.printf(" %c[48;5;%dm%c[38;5;%dm %s %c[0m",
-                        27, backgroundColor, 27, foregroundColor, e.mMove, 27);
-                side = Side.getOtherSide(side);
-            }
-            System.out.println();
+
+        Move move = evaluatedMove.getMove();
+        if (move != null) {
             mGame.addMove(move);
         }
+        long afterTime = System.currentTimeMillis();
 
-        return evaluatedMove;
+        return new Result(evaluatedMove, afterTime - beforeTime, mMovesConsidered);
     }
 
     /**
@@ -235,6 +220,21 @@ public class ComputerPlayer {
 
         public EvaluatedMove getNextMove() {
             return mNextMove;
+        }
+    }
+
+    /**
+     * Stores the result of the computer's move.
+     */
+    public class Result {
+        public final EvaluatedMove mEvaluatedMove;
+        public final long mElapsedTime;
+        public final long mMovesConsidered;
+
+        public Result(EvaluatedMove evaluatedMove, long elapsedTime, long movesConsidered) {
+            mEvaluatedMove = evaluatedMove;
+            mElapsedTime = elapsedTime;
+            mMovesConsidered = movesConsidered;
         }
     }
 }

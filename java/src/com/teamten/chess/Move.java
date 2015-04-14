@@ -46,8 +46,7 @@ public class Move {
      * determined by the board. Pawns are not promoted.
      */
     public static Move make(Board board, int fromIndex, int toIndex) {
-        return new Move(fromIndex, toIndex, board.getPiece(fromIndex), board.getPiece(toIndex),
-                Piece.EMPTY);
+        return makePromotion(board, fromIndex, toIndex, Piece.EMPTY);
     }
 
     /**
@@ -59,6 +58,40 @@ public class Move {
 
         return new Move(fromIndex, toIndex, board.getPiece(fromIndex), board.getPiece(toIndex),
                 promotedPiece);
+    }
+
+    /**
+     * Parse an long algebraic notation (LAN).
+     *
+     * @throws IllegalArgumentException if the string is not in LAN.
+     */
+    public static Move parseLongAlgebraicNotation(Board board, String lan) {
+        if (lan.equals("0000")) {
+            // Null move. We don't handle this yet.
+            throw new IllegalArgumentException("Can't yet handle null move");
+        }
+
+        if (lan.length() < 4) {
+            throw new IllegalArgumentException("Move too short");
+        }
+
+        int fromIndex = Board.fromPosition(lan.substring(0, 2));
+        int toIndex = Board.fromPosition(lan.substring(2, 4));
+
+        Piece promotedPiece = Piece.EMPTY;
+        if (lan.length() == 5) {
+            if (lan.charAt(4) == 'q') {
+                if (board.getSide() == Side.WHITE) {
+                    promotedPiece = Piece.WHITE_QUEEN;
+                } else {
+                    promotedPiece = Piece.BLACK_QUEEN;
+                }
+            } else {
+                throw new IllegalArgumentException("Can't handle non-queen promotion");
+            }
+        }
+
+        return makePromotion(board, fromIndex, toIndex, promotedPiece);
     }
 
     /**
@@ -199,6 +232,21 @@ public class Move {
 
         if (mCheck) {
             builder.append("+");
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * Return the long algebraic notation for the move, e.g., "e2e4" or "b7b8q".
+     */
+    public String getLongAlgebraicNotation() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(Board.getPosition(mFromIndex));
+        builder.append(Board.getPosition(mToIndex));
+        if (mPromotedPiece != Piece.EMPTY) {
+            builder.append(Character.toLowerCase(mPromotedPiece.getPieceType().getCharacter()));
         }
 
         return builder.toString();

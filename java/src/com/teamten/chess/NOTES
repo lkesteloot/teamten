@@ -1,7 +1,29 @@
 
 - Turn the program into a server. This will allow us to:
+    - Use UCI.
+    - In XBoard:
+        - Specify full path of executable. CWD is not what you specify.
+        - Check UCI.
     - Play with any UI.
     - Play different versions against each other.
+    - Protocols:
+        - XBoard:
+            - http://www.gnu.org/software/xboard/engine-intf.html
+            - http://en.wikipedia.org/wiki/Chess_Engine_Communication_Protocol
+            - See XBoard* in Downloads.
+        - UCI:
+            - http://en.wikipedia.org/wiki/Universal_Chess_Interface
+            - http://wbec-ridderkerk.nl/html/UCIProtocol.html
+            - http://download.shredderchess.com/div/uci.zip
+                - See "engine-interface.txt" in Downloads folder.
+            - Newer.
+            - Supported by XBoard (despite the FAQ saying no).
+    - User interfaces:
+        - XChess.
+            - Java.
+            - Crashes on startup. Expects gnuchess to be installed.
+            - No documentation.
+            - See xchess-0.03-bin in Downloads.
 - Find way to play different versions against one another.
     - Make client that connects to two servers and plays them.
     - Make infrastructure to clone new repo at two different GIT versions, compile, and run.

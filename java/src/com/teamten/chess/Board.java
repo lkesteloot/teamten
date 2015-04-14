@@ -2,6 +2,8 @@
 
 package com.teamten.chess;
 
+import java.io.PrintStream;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -612,9 +614,9 @@ public class Board {
     /**
      * Prints the board to the terminal with each line having the specified indent.
      */
-    public void print(String indent, Move move) {
+    public void print(PrintStream out, String indent, Move move) {
         for (int rank = SIZE; rank >= 1; rank--) {
-            System.out.print(indent);
+            out.print(indent);
             for (int file = 1; file <= SIZE; file++) {
                 int index = getIndex(file, rank);
                 Piece piece = getPiece(index);
@@ -654,12 +656,12 @@ public class Board {
                     }
                 }
 
-                System.out.printf("%c[48;5;%dm%c[38;5;%dm%c %c[0m",
+                out.printf("%c[48;5;%dm%c[38;5;%dm%c %c[0m",
                         27, backgroundColor, 27, foregroundColor, ch, 27);
             }
-            System.out.println();
+            out.println();
         }
-        System.out.println("---------------");
+        out.println("---------------");
     }
 
     /**

@@ -39,19 +39,19 @@ public class chess {
             } else {
                 board.initializeTraditionalChess();
             }
-            board.print("", null);
+            board.print(System.out, "", null);
 
             int side = Side.WHITE;
             while (true) {
                 System.out.println(board);
                 ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
-                ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
+                ComputerPlayer.EvaluatedMove evaluatedMove = makePlayerMove(player);
                 game.writePgn("game.pgn");
                 Move move = evaluatedMove.getMove();
                 if (move == null) {
                     break;
                 }
-                board.print(side == Side.BLACK ? "    " : "", move);
+                board.print(System.out, side == Side.BLACK ? "    " : "", move);
                 side = Side.getOtherSide(side);
             }
         }
@@ -67,13 +67,13 @@ public class chess {
             board.setPiece(index, piece);
             board.setPiece(Board.getIndex(6, 7), Piece.BLACK_QUEEN);
             board.setPiece(Board.getIndex(3, 5), Piece.WHITE_KNIGHT);
-            board.print("", null);
+            board.print(System.out, "", null);
             List<Move> moveList = new ArrayList<Move>();
             piece.addMoves(board, index, false, moveList);
             board.removeIllegalMoves(moveList);
             for (Move move : moveList) {
                 game.addMove(move);
-                board.print("    ", move);
+                board.print(System.out, "    ", move);
 
                 game.undoMove();
             }
@@ -84,10 +84,10 @@ public class chess {
             board.setPiece(Board.getIndex(4, 6), Piece.WHITE_PAWN);
             board.setPiece(Board.getIndex(1, 1), Piece.WHITE_KING);
             board.setPiece(Board.getIndex(1, 8), Piece.BLACK_KING);
-            board.print("", null);
+            board.print(System.out, "", null);
             ComputerPlayer computerPlayer = new ComputerPlayer(board, game, Side.WHITE);
-            computerPlayer.makeMove();
-            board.print("", null);
+            makePlayerMove(computerPlayer);
+            board.print(System.out, "", null);
         }
 
         if (CHESS_SERVER) {
@@ -277,17 +277,49 @@ public class chess {
         ComputerPlayer whitePlayer = new ComputerPlayer(board, game, Side.WHITE);
         ComputerPlayer blackPlayer = new ComputerPlayer(board, game, Side.BLACK);
 
-        board.print("", null);
+        board.print(System.out, "", null);
 
         while (true) {
             ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
-            ComputerPlayer.EvaluatedMove evaluatedMove = player.makeMove();
+            ComputerPlayer.EvaluatedMove evaluatedMove = makePlayerMove(player);
             Move move = evaluatedMove.getMove();
             if (move == null) {
                 break;
             }
-            board.print(side == Side.BLACK ? "    " : "", move);
+            board.print(System.out, side == Side.BLACK ? "    " : "", move);
             side = Side.getOtherSide(side);
         }
+    }
+
+    private static ComputerPlayer.EvaluatedMove makePlayerMove(ComputerPlayer computerPlayer) {
+        ComputerPlayer.Result result = computerPlayer.makeMove();
+        ComputerPlayer.EvaluatedMove evaluatedMove = result.mEvaluatedMove;
+        int side = computerPlayer.getSide();
+
+        Move move = evaluatedMove.getMove();
+        if (move == null) {
+            System.out.println(Side.toString(side) + " cannot move, end of game");
+        } else {
+            System.out.printf("%s makes move %s with score %f (%d ms, %,d moves considered)%n",
+                    Side.toString(side), move, evaluatedMove.getScore(),
+                    result.mElapsedTime, result.mMovesConsidered);
+
+            System.out.print("Principal variation:");
+            for (ComputerPlayer.EvaluatedMove e = evaluatedMove; e != null && e.getMove() != null; e = e.getNextMove()) {
+                int backgroundColor = 243;
+                int foregroundColor;
+                if (side == Side.WHITE) {
+                    foregroundColor = 255;
+                } else {
+                    foregroundColor = 232;
+                }
+                System.out.printf(" %c[48;5;%dm%c[38;5;%dm %s %c[0m",
+                        27, backgroundColor, 27, foregroundColor, e.getMove(), 27);
+                side = Side.getOtherSide(side);
+            }
+            System.out.println();
+        }
+
+        return evaluatedMove;
     }
 }
