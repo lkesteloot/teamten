@@ -25,6 +25,13 @@ public class Move {
      * XXX Remove. Redundant with mOtherInCheck.
      */
     private boolean mCheck;
+    /**
+     * How many moves since the last capture or pawn move in this game. If this is
+     * a capture or pawn move, then the value is 0. If this is the first move of
+     * the game (and it's not a pawn move or capture), then the value is 1. The value
+     * of -1 means "unknown".
+     */
+    private int mMovesSinceCapture;
 
     /**
      * Create a new move.
@@ -39,6 +46,13 @@ public class Move {
         mMovingPiece = movingPiece;
         mCapturedPiece = capturedPiece;
         mPromotedPiece = promotedPiece;
+
+        if (capturedPiece != Piece.EMPTY || movingPiece.getPieceType() == PieceType.PAWN) {
+            mMovesSinceCapture = 0;
+        } else {
+            // Unknown, we don't have access to the game history. Will be filled in later.
+            mMovesSinceCapture = -1;
+        }
     }
 
     /**
@@ -157,6 +171,14 @@ public class Move {
 
     public boolean isOtherInCheck() {
         return mOtherInCheck;
+    }
+
+    public int getMovesSinceCapture() {
+        return mMovesSinceCapture;
+    }
+
+    public void setMovesSinceCapture(int movesSinceCapture) {
+        mMovesSinceCapture = movesSinceCapture;
     }
 
     /**

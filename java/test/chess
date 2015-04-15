@@ -51,6 +51,10 @@ public class chess {
                 if (move == null) {
                     break;
                 }
+                if (game.isDrawFrom50MoveRule()) {
+                    System.out.println("Game is drawn from 50-move-rule");
+                    break;
+                }
                 board.print(System.out, side == Side.BLACK ? "    " : "", move);
                 side = Side.getOtherSide(side);
             }
@@ -284,6 +288,10 @@ public class chess {
             ComputerPlayer.EvaluatedMove evaluatedMove = makePlayerMove(player);
             Move move = evaluatedMove.getMove();
             if (move == null) {
+                break;
+            }
+            if (game.isDrawFrom50MoveRule()) {
+                System.out.println("Game is drawn from 50-move-rule");
                 break;
             }
             board.print(System.out, side == Side.BLACK ? "    " : "", move);

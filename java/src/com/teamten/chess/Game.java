@@ -44,6 +44,20 @@ public class Game {
      * Adds a new move at the end of this game.
      */
     public void addMove(Move move) {
+        // Set moves since capture if unknown, since that would mean that
+        // it's not itself a capture or pawn move.
+        if (move.getMovesSinceCapture() == -1) {
+            int movesSinceCapture;
+
+            if (mMoveList.empty()) {
+                movesSinceCapture = 1;
+            } else {
+                movesSinceCapture = mMoveList.peek().getMovesSinceCapture() + 1;
+            }
+
+            move.setMovesSinceCapture(movesSinceCapture);
+        }
+
         mRedoList.clear();
         mMoveList.push(move);
         move.applyMove(mBoard);
@@ -161,5 +175,15 @@ public class Game {
         w.printf("%n");
 
         w.close();
+    }
+
+    /**
+     * Whether this game can be drawn from the 50-rule-move.
+     *
+     * http://en.wikipedia.org/wiki/Fifty-move_rule
+     */
+    public boolean isDrawFrom50MoveRule() {
+        // 100 because we're actually counting plys.
+        return !mMoveList.empty() && mMoveList.peek().getMovesSinceCapture() > 100;
     }
 }
