@@ -1,4 +1,7 @@
 
+- Add iterative deepening.
+    - If interrupted search found a result and it's greater than previous alpha, pick it.
+    - Support movetime parameter of go command.
 - Find way to play different versions against one another.
     - Given two git revisions (tags, etc.):
         - Also support "current" to mean the normal tree.
@@ -20,8 +23,6 @@
 - Modify UCI to be multi-threaded.
     - Pass along info as it's happening.
     - Allow stop command.
-- Add iterative deepening.
-    - Support movetime parameter of go command.
 - Look through saved screenshots, make FEN regression tests for each.
     - Really slow end-of-game when mate is in sight. Why is it so slow? A-B cutoff not working?
     - 4Q3/7P/8/8/8/2k3PK/8/3q4 w KQkq - 1 2

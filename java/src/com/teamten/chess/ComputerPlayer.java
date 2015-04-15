@@ -11,13 +11,12 @@ import java.util.List;
  * Plays chess.
  */
 public class ComputerPlayer {
-    private static final int MAX_DEPTH = 6;
-    private static final int MAX_QUIESCENCE_DEPTH = MAX_DEPTH*2;
     private final Board mBoard;
     private final Game mGame;
     private final int mSide;
     private long mTimeOfLastPrint;
     private long mMovesConsidered;
+    private long mStopTime;
 
     /**
      * Create a player for a side in a game.
@@ -38,36 +37,69 @@ public class ComputerPlayer {
      */
     public Result makeMove() {
         long beforeTime = System.currentTimeMillis();
+        long moveTime = 2000;
         mTimeOfLastPrint = beforeTime;
         mMovesConsidered = 0;
-        EvaluatedMove evaluatedMove = getBestMove(0.0, 0, mSide, new ArrayList<Move>(),
-                -10000, 10000, false, false, 1);
+        mStopTime = beforeTime + moveTime;
+        EvaluatedMove bestEvaluatedMove = null;
 
-        Move move = evaluatedMove.getMove();
+        int maxDepth = 2;
+        while (true) {
+            EvaluatedMove evaluatedMove = getBestMove(0.0, 0, maxDepth, mSide,
+                    new ArrayList<Move>(), -10000, 10000, false, false, 1);
+
+            long now = System.currentTimeMillis();
+            System.out.println(maxDepth + " " + (now - beforeTime));
+            if (now >= mStopTime || evaluatedMove == null || evaluatedMove.getMove() == null) {
+                break;
+            }
+
+            bestEvaluatedMove = evaluatedMove;
+
+            maxDepth++;
+        }
+
+        if (bestEvaluatedMove == null) {
+            // Can't really happen, it means that even at minimal depth we ran out
+            // of time. I suppose we could have been passed a very short time window,
+            // like when we're running out of time. We should force the minimal depth
+            // search to always complete.
+            bestEvaluatedMove = new EvaluatedMove(null, 0, null);
+        }
+
+        Move move = bestEvaluatedMove.getMove();
         if (move != null) {
             mGame.addMove(move);
         }
         long afterTime = System.currentTimeMillis();
 
-        return new Result(evaluatedMove, afterTime - beforeTime, mMovesConsidered);
+        return new Result(bestEvaluatedMove, afterTime - beforeTime, mMovesConsidered);
     }
 
     /**
      * Make a move for this particular side.
      */
-    private EvaluatedMove getBestMove(double boardValue, int depth, int side, List<Move> allMoves,
-            double alpha, double beta, boolean noisyMove, boolean noisyCheckMove, int color) {
+    private EvaluatedMove getBestMove(double boardValue, int depth, int maxDepth, int side,
+            List<Move> allMoves, double alpha, double beta, boolean noisyMove,
+            boolean noisyCheckMove, int color) {
 
         // Cap the search at a depth, unless the last move is noisy.
         // See http://en.wikipedia.org/wiki/Quiescence_search
-        if (depth >= MAX_DEPTH && (!noisyMove || depth >= MAX_QUIESCENCE_DEPTH)) {
+        if (depth >= maxDepth && (!noisyMove || depth >= maxDepth*2)) {
             return new EvaluatedMove(null, color*boardValue, null);
         }
 
-        long now = System.currentTimeMillis();
-        if (false && now - mTimeOfLastPrint >= 1000) {
-            System.out.printf("Considering moves %s (%.2f)%n", allMoves, alpha);
-            mTimeOfLastPrint = now;
+        if (mMovesConsidered % 10000 == 0) {
+            long now = System.currentTimeMillis();
+            if (now > mStopTime) {
+                // Return an error, we know nothing about this node.
+                return null;
+            }
+
+            if (false && now - mTimeOfLastPrint >= 1000) {
+                System.out.printf("Considering moves %s (%.2f)%n", allMoves, alpha);
+                mTimeOfLastPrint = now;
+            }
         }
 
         // Generate all moves for this side.
@@ -152,12 +184,16 @@ public class ComputerPlayer {
                 noisyMove = true;
                 checkMove = true;
             }
-            EvaluatedMove subEvaluatedMove = getBestMove(moveBoardValue, depth + 1,
+            EvaluatedMove subEvaluatedMove = getBestMove(moveBoardValue, depth + 1, maxDepth,
                     Side.getOtherSide(side), allMoves, -beta, -alpha, noisyMove, checkMove,
                     -color);
+            mGame.undoMove();
+            if (subEvaluatedMove == null) {
+                // Out of time.
+                return null;
+            }
             // A good score for them is a bad score for us.
             double moveAlpha = -subEvaluatedMove.mScore;
-            mGame.undoMove();
 
             /// System.out.println("Move " + move + " has score " + score);
 
