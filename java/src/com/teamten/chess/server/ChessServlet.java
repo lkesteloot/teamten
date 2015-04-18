@@ -76,7 +76,7 @@ public class ChessServlet extends HttpServlet {
             if (command.equals("computerMove")) {
                 // Have computer make a move.
                 ComputerPlayer player = new ComputerPlayer(board, game, board.getSide());
-                ComputerPlayer.Result result = player.makeMove();
+                ComputerPlayer.Result result = player.makeMove(2000);
                 ComputerPlayer.EvaluatedMove evaluatedMove = result.mEvaluatedMove;
                 if (evaluatedMove.getMove() == null) {
                     message = "Cannot move";

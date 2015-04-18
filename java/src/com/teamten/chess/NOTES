@@ -1,22 +1,23 @@
 
-- Add iterative deepening.
-    - If interrupted search found a result and it's greater than previous alpha, pick it.
-    - Support movetime parameter of go command.
 - Find way to play different versions against one another.
     - Given two git revisions (tags, etc.):
-        - Also support "current" to mean the normal tree.
+        * Also support "current" to mean the normal tree.
         - Clean out tmp directory.
         - For each:
             - git clone $HOME/teamten.
             - git checkout REF
             - ant
-            - Run chessuci script, connecting to stdin and stdout.
+            * Run chessuci script, connecting to stdin and stdout.
         - Play N games.
-            - Alternate moves.
-            - Use movetime to set time limit.
-            - Keep track of game state.
+            * Alternate moves.
+            * Use movetime to set time limit.
+            * Keep track of game state.
+            - Detect stalemates, checkmates, and draws.
             - Save everything in log as games play.
         - Write summary (wins, losses, draws).
+- Add iterative deepening.
+    - If interrupted search found a result and it's greater than previous alpha, pick it.
+    - Support movetime parameter of go command.
 - Log files clash.
     - Log everything to a single file? 
     - Different files by timestamp and PID?
@@ -35,4 +36,5 @@
 Good references:
 
 - http://www.frayn.net/beowulf/theory.html
+- http://www.chess.com/blog/zaifrun/creating-a-chess-engine-part-4---position-evaluation
 

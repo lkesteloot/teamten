@@ -35,9 +35,8 @@ public class ComputerPlayer {
      * Makes a move on this board. Returns the move made along with a linked list of
      * the principal variation.
      */
-    public Result makeMove() {
+    public Result makeMove(long moveTime) {
         long beforeTime = System.currentTimeMillis();
-        long moveTime = 2000;
         mTimeOfLastPrint = beforeTime;
         mMovesConsidered = 0;
         mStopTime = beforeTime + moveTime;

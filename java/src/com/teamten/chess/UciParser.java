@@ -83,10 +83,22 @@ public class UciParser {
                 }
             }
         } else if (command.equals("go")) {
-            // Ignore sub-commands.
+            long moveTime = 5000; // XXX
+
+            // Parse sub-commands.
+            int i = 1;
+            while (i < fields.length) {
+                if (fields[i].equals("movetime")) {
+                    i++;
+                    moveTime = Long.parseLong(fields[i]);
+                } else {
+                    System.err.println("Unknown sub-command of go: " + fields[i]);
+                }
+                i++;
+            }
 
             ComputerPlayer player = new ComputerPlayer(mBoard, mGame, mBoard.getSide());
-            ComputerPlayer.Result result = player.makeMove();
+            ComputerPlayer.Result result = player.makeMove(moveTime);
             ComputerPlayer.EvaluatedMove evaluatedMove = result.mEvaluatedMove;
             Move move = evaluatedMove.getMove();
             if (move == null) {
