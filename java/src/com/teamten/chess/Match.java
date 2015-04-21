@@ -42,7 +42,10 @@ public class Match {
 
         // Play an even number of games, keeping track of statistics.
         long beforeMatch = System.currentTimeMillis();
-        for (int i = 0; i < 1; i++) {
+        int GAME_COUNT = 50;
+        for (int i = 0; i < GAME_COUNT; i++) {
+            System.err.println("-----------------------------------------------------------------");
+            System.err.printf("Starting game %d of %d.%n", i + 1, GAME_COUNT);
             boolean swap = (i % 2) != 0;
             Player[] playingPlayers = swap ? getSwapped(players) : players;
 
@@ -51,8 +54,8 @@ public class Match {
             long afterGame = System.currentTimeMillis();
             if (winner == -1) {
                 System.err.println("Game is a draw");
-                playingPlayers[0].scoreDraw(swap ? Side.BLACK : Side.WHITE);
-                playingPlayers[1].scoreDraw(swap ? Side.WHITE : Side.BLACK);
+                playingPlayers[0].scoreDraw(Side.WHITE);
+                playingPlayers[1].scoreDraw(Side.BLACK);
             } else {
                 System.err.println(Side.toString(winner) + " wins");
                 int loser = Side.getOtherSide(winner);
@@ -69,15 +72,18 @@ public class Match {
                     players[i].getScoreBreakdown());
             players[i].quit();
         }
-        System.err.printf("Match took %s.%n", getElapsedTime(beforeMatch, afterMatch));
+        System.err.printf("Match of %d games took %s.%n",
+                GAME_COUNT, getElapsedTime(beforeMatch, afterMatch));
     }
 
     private static String getElapsedTime(long before, long after) {
         long seconds = (after - before + 500) / 1000;
         long minutes = seconds / 60;
+        long hours = minutes / 60;
         seconds -= minutes * 60;
+        minutes -= hours * 60;
 
-        return String.format("%d:%02d", minutes, seconds);
+        return String.format("%d:%02d:%02d", hours, minutes, seconds);
     }
 
     /**
@@ -254,7 +260,7 @@ public class Match {
             mWriter.println();
 
             // Ask for move.
-            mWriter.println("go movetime 1000");
+            mWriter.println("go movetime 2000");
 
             // Wait for move.
             while (true) {

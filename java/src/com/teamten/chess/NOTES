@@ -39,3 +39,12 @@ Good references:
 - http://www.frayn.net/beowulf/theory.html
 - http://www.chess.com/blog/zaifrun/creating-a-chess-engine-part-4---position-evaluation
 
+Match results:
+
+- d1152a6f0 vs d1152a6f0, 2015/04/21, 50 games, 2000ms moves.
+    Score for player 0: 26.5 (Wins: 9/13, Losses: 11/8, Draws: 9/0)
+    Score for player 1: 23.5 (Wins: 8/11, Losses: 13/9, Draws: 0/9)
+    Match took 273:29.
+    Why are draws so lobsided? [Fixed]
+    Why are wins mostly for Black? Wasn't happening with 1000ms moves.
+
