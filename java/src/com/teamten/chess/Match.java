@@ -42,7 +42,7 @@ public class Match {
 
         // Play an even number of games, keeping track of statistics.
         long beforeMatch = System.currentTimeMillis();
-        int GAME_COUNT = 50;
+        int GAME_COUNT = 10;
         for (int i = 0; i < GAME_COUNT; i++) {
             System.err.println("-----------------------------------------------------------------");
             System.err.printf("Starting game %d of %d.%n", i + 1, GAME_COUNT);
@@ -187,11 +187,14 @@ public class Match {
         }
 
         public String getScoreBreakdown() {
-            return String.format("Wins: %d/%d, Losses: %d/%d, Draws: %d/%d",
+            return String.format("Wins: %d (%d,%d), Losses: %d (%d,%d), Draws: %d (%d,%d)",
+                    mWinCount[Side.WHITE] + mWinCount[Side.BLACK],
                     mWinCount[Side.WHITE],
                     mWinCount[Side.BLACK],
+                    mLossCount[Side.WHITE] + mLossCount[Side.BLACK],
                     mLossCount[Side.WHITE],
                     mLossCount[Side.BLACK],
+                    mDrawCount[Side.WHITE] + mDrawCount[Side.BLACK],
                     mDrawCount[Side.WHITE],
                     mDrawCount[Side.BLACK]);
         }
