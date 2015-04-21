@@ -101,22 +101,8 @@ public class ComputerPlayer {
             }
         }
 
-        // Generate all moves for this side.
-        List<Move> moveList = mBoard.generateAllMoves(side, false);
-
-        // Update all their check status.
-        for (Move move : moveList) {
-            mBoard.updateMoveCheckStatus(move);
-        }
-
-        // Can't put yourself in check.
-        Iterator<Move> itr = moveList.iterator();
-        while (itr.hasNext()) {
-            Move move = itr.next();
-            if (move.isMovingInCheck()) {
-                itr.remove();
-            }
-        }
+        // Generate all legal moves for this side.
+        List<Move> moveList = mBoard.generateAllLegalMoves(side);
 
         // If we have no legal moves left, then it's either stalemate or checkmate.
         if (moveList.isEmpty()) {

@@ -8,13 +8,14 @@
             - git checkout REF
             - ant
             * Run chessuci script, connecting to stdin and stdout.
-        - Play N games.
+======> - Play N games or for N minutes (e.g., overnight).
             * Alternate moves.
             * Use movetime to set time limit.
             * Keep track of game state.
-            - Detect stalemates, checkmates, and draws.
-            - Save everything in log as games play.
-        - Write summary (wins, losses, draws).
+            * Detect stalemates, checkmates, and draws.
+                * Don't ask for move in those cases.
+==========> - Save everything in log as games play. Also write summary.
+        * Write summary (wins, losses, draws).
 - Add iterative deepening.
     - If interrupted search found a result and it's greater than previous alpha, pick it.
     - Support movetime parameter of go command.

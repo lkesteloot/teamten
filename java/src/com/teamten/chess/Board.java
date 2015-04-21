@@ -612,6 +612,31 @@ public class Board {
     }
 
     /**
+     * Like generateAllMoves() but only generates moves that wouldn't put us in check.
+     * Also updates the Move objects' check status.
+     */
+    public List<Move> generateAllLegalMoves(int side) {
+        // Generate all moves for this side.
+        List<Move> moveList = generateAllMoves(side, false);
+
+        // Update all their check status.
+        for (Move move : moveList) {
+            updateMoveCheckStatus(move);
+        }
+
+        // Can't put yourself in check.
+        Iterator<Move> itr = moveList.iterator();
+        while (itr.hasNext()) {
+            Move move = itr.next();
+            if (move.isMovingInCheck()) {
+                itr.remove();
+            }
+        }
+
+        return moveList;
+    }
+
+    /**
      * Prints the board to the terminal with each line having the specified indent.
      */
     public void print(PrintStream out, String indent, Move move) {

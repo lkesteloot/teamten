@@ -8,58 +8,131 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import java.util.List;
+
 /**
  * Plays two versions of our chess program against one another.
  */
 public class Match {
-    private final Player[] mPlayers;
-    private final Board mBoard;
-    private final Game mGame;
+    private final String[] mGitRevisions;
 
     private Match(String[] gitRevisions) {
-        mPlayers = new Player[2];
-        mBoard = new Board();
-        mGame = new Game(mBoard);
-        mBoard.initializeTraditionalChess();
-
-        for (int i = 0; i < 2; i++) {
-            mPlayers[i] = new Player(gitRevisions[i]);
-        }
+        mGitRevisions = gitRevisions;
     }
 
     private void start() {
+        Player[] players = new Player[2];
+
+        for (int i = 0; i < 2; i++) {
+            players[i] = new Player(mGitRevisions[i]);
+        }
+
         // Set up.
         for (int i = 0; i < 2; i++) {
-            boolean successful = mPlayers[i].start();
+            boolean successful = players[i].start();
             if (!successful) {
                 return;
             }
 
-            successful = mPlayers[i].startUci();
+            successful = players[i].startUci();
             if (!successful) {
                 return;
             }
+        }
 
-            mPlayers[i].newGame();
+        // Play an even number of games, keeping track of statistics.
+        long beforeMatch = System.currentTimeMillis();
+        for (int i = 0; i < 1; i++) {
+            boolean swap = (i % 2) != 0;
+            Player[] playingPlayers = swap ? getSwapped(players) : players;
+
+            long beforeGame = System.currentTimeMillis();
+            int winner = playGame(playingPlayers);
+            long afterGame = System.currentTimeMillis();
+            if (winner == -1) {
+                System.err.println("Game is a draw");
+                playingPlayers[0].scoreDraw(swap ? Side.BLACK : Side.WHITE);
+                playingPlayers[1].scoreDraw(swap ? Side.WHITE : Side.BLACK);
+            } else {
+                System.err.println(Side.toString(winner) + " wins");
+                int loser = Side.getOtherSide(winner);
+                playingPlayers[winner].scoreWin(winner);
+                playingPlayers[loser].scoreLoss(loser);
+            }
+            System.err.printf("Game took %s.%n", getElapsedTime(beforeGame, afterGame));
+        }
+        long afterMatch = System.currentTimeMillis();
+
+        // Shut down.
+        for (int i = 0; i < 2; i++) {
+            System.err.printf("Score for player %d: %.1f (%s)%n", i, players[i].getScore(),
+                    players[i].getScoreBreakdown());
+            players[i].quit();
+        }
+        System.err.printf("Match took %s.%n", getElapsedTime(beforeMatch, afterMatch));
+    }
+
+    private static String getElapsedTime(long before, long after) {
+        long seconds = (after - before + 500) / 1000;
+        long minutes = seconds / 60;
+        seconds -= minutes * 60;
+
+        return String.format("%d:%02d", minutes, seconds);
+    }
+
+    /**
+     * Returns the winning side, or -1 if it's a draw.
+     */
+    private int playGame(Player[] players) {
+        Board board = new Board();
+        Game game = new Game(board);
+
+        // Set up.
+        board.initializeTraditionalChess();
+        for (int i = 0; i < 2; i++) {
+            players[i].newGame();
         }
 
         // Play game.
         int sideToPlay = 0;
         while (true) {
-            Move move = mPlayers[sideToPlay].computeMove(mGame);
-            if (move == null) {
-                break;
+            // Generate all legal moves for this side.
+            List<Move> moveList = board.generateAllLegalMoves(sideToPlay);
+
+            // If we have no legal moves left, then it's either stalemate or checkmate.
+            if (moveList.isEmpty()) {
+                if (board.getCheckIndex(sideToPlay) != -1) {
+                    // Checkmate.
+                    return Side.getOtherSide(sideToPlay);
+                } else {
+                    // Stalemate.
+                    return -1;
+                }
             }
-            mGame.addMove(move);
-            mBoard.print(System.out, "", move);
+
+            // See if it's a draw.
+            if (game.isDrawFrom50MoveRule()) {
+                return -1;
+            }
+
+            Move move = players[sideToPlay].computeMove(game);
+            if (move == null) {
+                // This is an error. We should ourselves have detected that there
+                // were no moves to play.
+                throw new IllegalStateException("Player return no move");
+            }
+            game.addMove(move);
+            board.print(System.out, "", move);
 
             sideToPlay = 1 - sideToPlay;
         }
+    }
 
-        // Shut down.
-        for (int i = 0; i < 2; i++) {
-            mPlayers[i].quit();
-        }
+    /**
+     * Return a new array with the two elements swapped.
+     */
+    private static Player[] getSwapped(Player[] players) {
+        return new Player[]{ players[1], players[0] };
     }
 
     // --------------------------------------------------------------------------------
@@ -81,10 +154,40 @@ public class Match {
         private Process mProcess;
         private PrintWriter mWriter;
         private BufferedReader mReader;
+        private int[] mDrawCount = new int[2];
+        private int[] mWinCount = new int[2];
+        private int[] mLossCount = new int[2];
 
         public Player(String gitRevision) {
             mGitRevision = gitRevision;
             mDir = new File("/Users/lk/teamten/java/test");
+        }
+
+        public double getScore() {
+            return mWinCount[Side.WHITE] + mWinCount[Side.BLACK] +
+                (mDrawCount[Side.WHITE] + mDrawCount[Side.BLACK])*0.5;
+        }
+
+        public void scoreDraw(int asSide) {
+            mDrawCount[asSide]++;
+        }
+
+        public void scoreWin(int asSide) {
+            mWinCount[asSide]++;
+        }
+
+        public void scoreLoss(int asSide) {
+            mLossCount[asSide]++;
+        }
+
+        public String getScoreBreakdown() {
+            return String.format("Wins: %d/%d, Losses: %d/%d, Draws: %d/%d",
+                    mWinCount[Side.WHITE],
+                    mWinCount[Side.BLACK],
+                    mLossCount[Side.WHITE],
+                    mLossCount[Side.BLACK],
+                    mDrawCount[Side.WHITE],
+                    mDrawCount[Side.BLACK]);
         }
 
         public boolean start() {
