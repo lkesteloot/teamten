@@ -2,13 +2,13 @@
 - Find way to play different versions against one another.
     - Given two git revisions (tags, etc.):
         * Also support "current" to mean the normal tree.
-        - Clean out tmp directory.
-        - For each:
-            - git clone $HOME/teamten.
-            - git checkout REF
-            - ant
+        * Clean out tmp directory.
+        * For each:
+            * git clone $HOME/teamten.
+            * git checkout REF
+            * ant
             * Run chessuci script, connecting to stdin and stdout.
-======> - Play N games or for N minutes (e.g., overnight).
+        * Play N games or for N minutes (e.g., overnight).
             * Alternate moves.
             * Use movetime to set time limit.
             * Keep track of game state.

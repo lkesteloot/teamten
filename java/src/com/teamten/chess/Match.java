@@ -10,21 +10,24 @@ import java.io.PrintWriter;
 
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Plays two versions of our chess program against one another.
  */
 public class Match {
-    private final String[] mGitRevisions;
+    private static final File TMP_DIRECTORY = new File("/tmp/chess");
 
-    private Match(String[] gitRevisions) {
-        mGitRevisions = gitRevisions;
-    }
+    private void start(String[] gitRevisions) {
+        // Delete our temporary directory.
+        FileUtils.deleteQuietly(TMP_DIRECTORY);
+        TMP_DIRECTORY.mkdirs();
 
-    private void start() {
         Player[] players = new Player[2];
 
         for (int i = 0; i < 2; i++) {
-            players[i] = new Player(mGitRevisions[i]);
+            players[i] = new Player(TMP_DIRECTORY, gitRevisions[i]);
         }
 
         // Set up.
@@ -149,12 +152,13 @@ public class Match {
             System.exit(1);
         }
 
-        new Match(args).start();
+        new Match().start(args);
     }
 
     // --------------------------------------------------------------------------------
 
     private static class Player {
+        private static final File GIT_ROOT = new File("/Users/lk/teamten");
         private final String mGitRevision;
         private final File mDir;
         private Process mProcess;
@@ -164,9 +168,21 @@ public class Match {
         private int[] mWinCount = new int[2];
         private int[] mLossCount = new int[2];
 
-        public Player(String gitRevision) {
+        public Player(File tmpDir, String gitRevision) {
             mGitRevision = gitRevision;
-            mDir = new File("/Users/lk/teamten/java/test");
+
+            File rootDir;
+
+            if (gitRevision.equals("current")) {
+                rootDir = GIT_ROOT;
+            } else {
+                rootDir = new File(tmpDir, gitRevision);
+                runProgram(tmpDir, "git", "clone", GIT_ROOT.toString(), gitRevision);
+                runProgram(rootDir, "git", "checkout", gitRevision);
+                runProgram(new File(rootDir, "java"), "ant");
+            }
+
+            mDir = new File(rootDir, "java/test");
         }
 
         public double getScore() {
@@ -316,6 +332,25 @@ public class Match {
             }
 
             return line;
+        }
+
+        private static void runProgram(File dir, String ... args) {
+            String line = StringUtils.join(args, ' ');
+            System.err.println("Running " + line);
+
+            try {
+                Process process = new ProcessBuilder((String[]) args).directory(dir).start();
+
+                int status = process.waitFor();
+                if (status != 0) {
+                    throw new IllegalStateException("Got exit code " + status + " running " + line);
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("Got exception running " + line + " (" + e + ")");
+            } catch (InterruptedException e) {
+                // Shutting down program, probably.
+                return;
+            }
         }
     }
 }
