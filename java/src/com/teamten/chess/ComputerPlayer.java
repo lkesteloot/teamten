@@ -150,15 +150,16 @@ public class ComputerPlayer {
                 if (move.getMovingPiece().getPieceType() == PieceType.PAWN) {
                     moveBoardValue += color*0.3;
                 }
-            } else {
-                // Account for control of the center (by any piece).
-                if (Board.isCenterSquare(move.getFromIndex())) {
-                    moveBoardValue -= color*0.1;
-                }
-                if (Board.isCenterSquare(move.getToIndex())) {
-                    moveBoardValue += color*0.1;
-                }
             }
+
+            // Add board position.
+            double beforePosition = move.getMovingPiece().getPieceType().getPositionBonus(
+                    move.getFromIndex());
+            double afterPosition = move.getMovingPiece().getPieceType().getPositionBonus(
+                    move.getToIndex());
+            double capturedPosition = move.getCapturedPiece() == Piece.EMPTY ? 0 :
+                move.getCapturedPiece().getPieceType().getPositionBonus(move.getToIndex());
+            moveBoardValue += color*(afterPosition - beforePosition + capturedPosition);
 
             // Add a bit of randomness to break ties.
             moveBoardValue += Math.random()*0.001;

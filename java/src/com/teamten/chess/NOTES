@@ -1,6 +1,8 @@
 
-- Add iterative deepening.
-    - If interrupted search found a result and it's greater than previous alpha, pick it.
+- Add more positional support.
+- Surface exceptions in sub-processes.
+    - Read from stderr, especially after problem.
+- If interrupted search found a result and it's greater than previous alpha, pick it.
 - Modify UCI to be multi-threaded.
     - Pass along info as it's happening.
     - Allow stop command.
@@ -13,6 +15,7 @@ Good references:
 
 - http://www.frayn.net/beowulf/theory.html
 - http://www.chess.com/blog/zaifrun/creating-a-chess-engine-part-4---position-evaluation
+- http://www.chessbin.com/post/chess-board-evaluation.aspx
 
 Match results:
 

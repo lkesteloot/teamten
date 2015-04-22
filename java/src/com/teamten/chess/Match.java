@@ -21,8 +21,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Match {
     private static final File TMP_DIRECTORY = new File("/tmp/chess");
-    private static final int GAME_COUNT = 2;
-    private static final long MOVE_TIME = 300;
+    private static final int GAME_COUNT = 30;
+    private static final long MOVE_TIME = 5000;
 
     private void start(String[] gitRevisions) {
         PrintStream log;

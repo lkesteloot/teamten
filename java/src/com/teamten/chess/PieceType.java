@@ -11,6 +11,17 @@ import java.util.List;
  */
 public abstract class PieceType {
     public static final PieceType PAWN = new PieceType('p', 5, 1) {
+        private final int[] POSITION_BONUS = new int[]{
+             0,  0,  0,  0,  0,  0,  0,  0,
+            50, 50, 50, 50, 50, 50, 50, 50,
+            10, 10, 20, 30, 30, 20, 10, 10,
+             5,  5, 10, 27, 27, 10,  5,  5,
+             0,  0,  0, 25, 25,  0,  0,  0,
+             5, -5,-10,  0,  0,-10, -5,  5,
+             5, 10, 10,-25,-25, 10, 10,  5,
+             0,  0,  0,  0,  0,  0,  0,  0
+        };
+
         @Override // PieceType
         public void addMoves(Board board, int index, int side, boolean capturesOnly,
                 List<Move> moveList) {
@@ -69,8 +80,24 @@ public abstract class PieceType {
         public String toString() {
             return "pawn";
         }
+
+        @Override // PieceType
+        public double getPositionBonus(int index) {
+            return POSITION_BONUS[index]/100.0;
+        }
     };
     public static final PieceType BISHOP = new PieceType('b', 3, 3) {
+        private final int[] POSITION_BONUS = new int[]{
+            -20,-10,-10,-10,-10,-10,-10,-20,
+            -10,  0,  0,  0,  0,  0,  0,-10,
+            -10,  0,  5, 10, 10,  5,  0,-10,
+            -10,  5,  5, 10, 10,  5,  5,-10,
+            -10,  0, 10, 10, 10, 10,  0,-10,
+            -10, 10, 10, 10, 10, 10, 10,-10,
+            -10,  5,  0,  0,  0,  0,  5,-10,
+            -20,-10,-40,-10,-10,-40,-10,-20,
+        };
+
         // Pair of numbers to provide the four directions, starting up-right
         // and going clockwise.
         private final int[] FILE_DELTAS = new int[] { 1, 1, -1, -1 };
@@ -88,8 +115,24 @@ public abstract class PieceType {
         public String toString() {
             return "bishop";
         }
+
+        @Override // PieceType
+        public double getPositionBonus(int index) {
+            return POSITION_BONUS[index]/100.0;
+        }
     };
     public static final PieceType KNIGHT = new PieceType('n', 4, 3) {
+        private final int[] POSITION_BONUS = new int[]{
+            -50,-40,-30,-30,-30,-30,-40,-50,
+            -40,-20,  0,  0,  0,  0,-20,-40,
+            -30,  0, 10, 15, 15, 10,  0,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  0, 15, 20, 20, 15,  0,-30,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -40,-20,  0,  5,  5,  0,-20,-40,
+            -50,-40,-20,-30,-30,-20,-40,-50,
+        };
+
         // Pair of numbers to provide the eight directions, starting up-right
         // and going clockwise.
         private final int[] FILE_DELTAS = new int[] { 1, 2, 2, 1, -1, -2, -2, -1 };
@@ -106,6 +149,11 @@ public abstract class PieceType {
         @Override // Object
         public String toString() {
             return "knight";
+        }
+
+        @Override // PieceType
+        public double getPositionBonus(int index) {
+            return POSITION_BONUS[index]/100.0;
         }
     };
     public static final PieceType ROOK = new PieceType('r', 2, 5) {
@@ -204,6 +252,14 @@ public abstract class PieceType {
      */
     public abstract void addMoves(Board board, int index, int side, boolean capturesOnly,
             List<Move> moveList);
+
+    /**
+     * Return the position bonus, as a double where 1 means a pawn value.
+     */
+    public double getPositionBonus(int index) {
+        // Default implementation. Subclass can override.
+        return 0;
+    }
 
     /**
      * Adds the moves of a piece that can slide in any number of directions.
