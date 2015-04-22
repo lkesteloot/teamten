@@ -3,14 +3,18 @@
 package com.teamten.chess;
 
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 
+import java.text.SimpleDateFormat;
+
+import java.util.Date;
 import java.util.Stack;
 
 /**
  * Records an entire game.
  */
 public class Game {
+    private static final SimpleDateFormat PGN_DATE_FORMAT = new SimpleDateFormat("yyyy.MM.dd");
     private final Stack<Move> mMoveList = new Stack<Move>();
     private final Stack<Move> mRedoList = new Stack<Move>();
     private final Board mBoard;
@@ -144,23 +148,29 @@ public class Game {
         return game;
     }
 
-    public void writePgn(String filename) {
-        PrintWriter w;
+    public void writePgn(String filename, int winningSide, int round) {
+        PrintStream w;
 
         try {
-            w = new PrintWriter(filename);
+            w = new PrintStream(filename);
         } catch (FileNotFoundException e) {
             System.out.println("Cannot write to " + filename + " (" + e + ")");
             return;
         }
 
+        writePgn(w, winningSide, round);
+
+        w.close();
+    }
+
+    public void writePgn(PrintStream w, int winningSide, int round) {
         w.printf("[Event \"Private match\"]%n");
         w.printf("[Site \"San Francisco, CA USA\"]%n");
-        w.printf("[Date \"????.??.??\"]%n");
-        w.printf("[Round \"01\"]%n");
+        w.printf("[Date \"%s\"]%n", PGN_DATE_FORMAT.format(new Date()));
+        w.printf("[Round \"%d\"]%n", round);
         w.printf("[White \"Computer\"]%n");
         w.printf("[Black \"Computer\"]%n");
-        w.printf("[Result \"*\"]%n");
+        w.printf("[Result \"%s\"]%n", Side.toPgnNotation(winningSide));
         w.printf("%n");
 
         int ply = 0;
@@ -172,9 +182,11 @@ public class Game {
             ply++;
         }
 
-        w.printf("%n");
+        if (winningSide != Side.IN_PROGRESS) {
+            w.printf("%s", Side.toPgnNotation(winningSide));
+        }
 
-        w.close();
+        w.printf("%n%n");
     }
 
     /**

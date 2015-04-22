@@ -233,13 +233,14 @@ public class Move {
 
                 builder.append(mMovingPiece.getAlgebraicCharacter());
             }
-        }
 
-        // Here we're supposed to put file and/or rank of moving piece if it's
-        // ambiguous, but knowing whether it's ambiguous is a lot of work to do
-        // when generating pieces, and it's too late when displaying them. If we
-        // really want this we'll need to explicitly calculate this info when a
-        // move is going to be displayed.
+            // Here we're supposed to put file and/or rank of moving piece if it's
+            // ambiguous, but knowing whether it's ambiguous is a lot of work to do
+            // when generating pieces, and it's too late when displaying them. If we
+            // really want this we'll need to explicitly calculate this info when a
+            // move is going to be displayed.
+            builder.append(Board.getPosition(mFromIndex));
+        }
 
         if (mCapturedPiece != Piece.EMPTY) {
             builder.append('x');

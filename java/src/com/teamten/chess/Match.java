@@ -4,8 +4,10 @@ package com.teamten.chess;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import java.util.List;
@@ -20,6 +22,14 @@ public class Match {
     private static final File TMP_DIRECTORY = new File("/tmp/chess");
 
     private void start(String[] gitRevisions) {
+        PrintStream log;
+        try {
+            log = new PrintStream(new FileOutputStream("match.log"), true);
+        } catch (IOException e) {
+            System.err.println("Cannot create log file: " + e);
+            return;
+        }
+
         // Delete our temporary directory.
         FileUtils.deleteQuietly(TMP_DIRECTORY);
         TMP_DIRECTORY.mkdirs();
@@ -47,36 +57,38 @@ public class Match {
         long beforeMatch = System.currentTimeMillis();
         int GAME_COUNT = 10;
         for (int i = 0; i < GAME_COUNT; i++) {
-            System.err.println("-----------------------------------------------------------------");
-            System.err.printf("Starting game %d of %d.%n", i + 1, GAME_COUNT);
+            log(log, "-----------------------------------------------------------------%n");
+            log(log, "Starting game %d of %d.%n", i + 1, GAME_COUNT);
             boolean swap = (i % 2) != 0;
             Player[] playingPlayers = swap ? getSwapped(players) : players;
 
             long beforeGame = System.currentTimeMillis();
-            int winner = playGame(playingPlayers);
+            int winner = playGame(playingPlayers, log, i + 1);
             long afterGame = System.currentTimeMillis();
-            if (winner == -1) {
-                System.err.println("Game is a draw");
+            if (winner == Side.DRAW) {
+                log(log, "Game is a draw.%n");
                 playingPlayers[0].scoreDraw(Side.WHITE);
                 playingPlayers[1].scoreDraw(Side.BLACK);
             } else {
-                System.err.println(Side.toString(winner) + " wins");
+                log(log, Side.toString(winner) + " wins.%n");
                 int loser = Side.getOtherSide(winner);
                 playingPlayers[winner].scoreWin(winner);
                 playingPlayers[loser].scoreLoss(loser);
             }
-            System.err.printf("Game took %s.%n", getElapsedTime(beforeGame, afterGame));
+            log(log, "Game took %s.%n", getElapsedTime(beforeGame, afterGame));
         }
         long afterMatch = System.currentTimeMillis();
 
         // Shut down.
         for (int i = 0; i < 2; i++) {
-            System.err.printf("Score for player %d: %.1f (%s)%n", i, players[i].getScore(),
-                    players[i].getScoreBreakdown());
+            log(log, "Player %d: %.1f, %s, %s%n", i, players[i].getScore(),
+                    players[i].getScoreBreakdown(), players[i].getGitRevision());
             players[i].quit();
         }
-        System.err.printf("Match of %d games took %s.%n",
+        log(log, "Match of %d games took %s.%n",
                 GAME_COUNT, getElapsedTime(beforeMatch, afterMatch));
+
+        log.close();
     }
 
     private static String getElapsedTime(long before, long after) {
@@ -90,9 +102,17 @@ public class Match {
     }
 
     /**
-     * Returns the winning side, or -1 if it's a draw.
+     * Print both to stderr and to our log file.
      */
-    private int playGame(Player[] players) {
+    private static void log(PrintStream log, String format, Object ... args) {
+        System.err.printf(format, (Object[]) args);
+        log.printf(format, (Object[]) args);
+    }
+
+    /**
+     * Returns the winning side, or Side.DRAW if it's a draw.
+     */
+    private int playGame(Player[] players, PrintStream log, int round) {
         Board board = new Board();
         Game game = new Game(board);
 
@@ -104,6 +124,7 @@ public class Match {
 
         // Play game.
         int sideToPlay = 0;
+        int winner;
         while (true) {
             // Generate all legal moves for this side.
             List<Move> moveList = board.generateAllLegalMoves(sideToPlay);
@@ -112,16 +133,19 @@ public class Match {
             if (moveList.isEmpty()) {
                 if (board.getCheckIndex(sideToPlay) != -1) {
                     // Checkmate.
-                    return Side.getOtherSide(sideToPlay);
+                    winner = Side.getOtherSide(sideToPlay);
+                    break;
                 } else {
                     // Stalemate.
-                    return -1;
+                    winner = Side.DRAW;
+                    break;
                 }
             }
 
             // See if it's a draw.
             if (game.isDrawFrom50MoveRule()) {
-                return -1;
+                winner = Side.DRAW;
+                break;
             }
 
             Move move = players[sideToPlay].computeMove(game);
@@ -135,6 +159,11 @@ public class Match {
 
             sideToPlay = 1 - sideToPlay;
         }
+
+        game.writePgn(log, winner, round);
+        log.flush();
+
+        return winner;
     }
 
     /**
@@ -183,6 +212,10 @@ public class Match {
             }
 
             mDir = new File(rootDir, "java/test");
+        }
+
+        public String getGitRevision() {
+            return mGitRevision;
         }
 
         public double getScore() {
@@ -237,7 +270,6 @@ public class Match {
                     return false;
                 }
 
-                System.err.println(line);
                 if (line.equals("uciok")) {
                     break;
                 }
@@ -259,7 +291,6 @@ public class Match {
                     return;
                 }
 
-                System.err.println(line);
                 if (line.equals("readyok")) {
                     break;
                 }
@@ -279,7 +310,7 @@ public class Match {
             mWriter.println();
 
             // Ask for move.
-            mWriter.println("go movetime 2000");
+            mWriter.println("go movetime 300");
 
             // Wait for move.
             while (true) {
@@ -288,7 +319,6 @@ public class Match {
                     return null;
                 }
 
-                System.err.println(line);
                 if (line.startsWith("bestmove ")) {
                     line = line.substring(9);
                     Move move = Move.parseLongAlgebraicNotation(game.getBoard(), line);
@@ -304,7 +334,6 @@ public class Match {
 
         public void finish() {
             if (mProcess != null) {
-                System.err.println("Finishing " + mGitRevision);
                 try {
                     mProcess.waitFor();
                 } catch (InterruptedException e) {
@@ -336,7 +365,6 @@ public class Match {
 
         private static void runProgram(File dir, String ... args) {
             String line = StringUtils.join(args, ' ');
-            System.err.println("Running " + line);
 
             try {
                 Process process = new ProcessBuilder((String[]) args).directory(dir).start();

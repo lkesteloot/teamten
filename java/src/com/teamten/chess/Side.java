@@ -9,6 +9,9 @@ package com.teamten.chess;
 public class Side {
     public static final int WHITE = 0;
     public static final int BLACK = 1;
+    // Pseudo-sides for game results. Not all functions of this class support these.
+    public static final int DRAW = 2;
+    public static final int IN_PROGRESS = 3;
 
     private Side() {
         // Can't instantiate.
@@ -46,10 +49,41 @@ public class Side {
      * Returns a string version of the side ("White" or "Black").
      */
     public static String toString(int side) {
-        if (side == WHITE) {
-            return "White";
-        } else {
-            return "Black";
+        switch (side) {
+            case WHITE:
+                return "White";
+
+            case BLACK:
+                return "Black";
+
+            case DRAW:
+                return "Draw";
+
+            case IN_PROGRESS:
+                return "In progress";
         }
+
+        return "?";
+    }
+
+    /**
+     * Get the PGN notation for which side won.
+     */
+    public static String toPgnNotation(int side) {
+        switch (side) {
+            case WHITE:
+                return "1-0";
+
+            case BLACK:
+                return "0-1";
+
+            case DRAW:
+                return "1/2-1/2";
+
+            case IN_PROGRESS:
+                return "*";
+        }
+
+        return "?";
     }
 }
