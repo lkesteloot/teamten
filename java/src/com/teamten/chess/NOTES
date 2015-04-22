@@ -1,37 +1,12 @@
 
-- Find way to play different versions against one another.
-    - Given two git revisions (tags, etc.):
-        * Also support "current" to mean the normal tree.
-        * Clean out tmp directory.
-        * For each:
-            * git clone $HOME/teamten.
-            * git checkout REF
-            * ant
-            * Run chessuci script, connecting to stdin and stdout.
-        * Play N games or for N minutes (e.g., overnight).
-            * Alternate moves.
-            * Use movetime to set time limit.
-            * Keep track of game state.
-            * Detect stalemates, checkmates, and draws.
-                * Don't ask for move in those cases.
-==========> - Save everything in log as games play. Also write summary.
-        * Write summary (wins, losses, draws).
 - Add iterative deepening.
     - If interrupted search found a result and it's greater than previous alpha, pick it.
-    - Support movetime parameter of go command.
-- Log files clash.
-    - Log everything to a single file? 
-    - Different files by timestamp and PID?
 - Modify UCI to be multi-threaded.
     - Pass along info as it's happening.
     - Allow stop command.
 - Look through saved screenshots, make FEN regression tests for each.
     - Really slow end-of-game when mate is in sight. Why is it so slow? A-B cutoff not working?
     - 4Q3/7P/8/8/8/2k3PK/8/3q4 w KQkq - 1 2
-- Set up more robust testing of time.
-    - Able to play without randomness.
-    - Test how long it takes to play a game. Perhaps start part-way through.
-- Add iterative deepening.
 - Sort promotions higher.
 
 Good references:

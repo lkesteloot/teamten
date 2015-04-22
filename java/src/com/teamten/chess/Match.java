@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -20,6 +21,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Match {
     private static final File TMP_DIRECTORY = new File("/tmp/chess");
+    private static final int GAME_COUNT = 2;
+    private static final long MOVE_TIME = 300;
 
     private void start(String[] gitRevisions) {
         PrintStream log;
@@ -29,6 +32,7 @@ public class Match {
             System.err.println("Cannot create log file: " + e);
             return;
         }
+        log(log, "%s%n", new Date());
 
         // Delete our temporary directory.
         FileUtils.deleteQuietly(TMP_DIRECTORY);
@@ -37,6 +41,7 @@ public class Match {
         Player[] players = new Player[2];
 
         for (int i = 0; i < 2; i++) {
+            log(log, "Player %d: %s%n", i, gitRevisions[i]);
             players[i] = new Player(TMP_DIRECTORY, gitRevisions[i]);
         }
 
@@ -55,7 +60,6 @@ public class Match {
 
         // Play an even number of games, keeping track of statistics.
         long beforeMatch = System.currentTimeMillis();
-        int GAME_COUNT = 10;
         for (int i = 0; i < GAME_COUNT; i++) {
             log(log, "-----------------------------------------------------------------%n");
             log(log, "Starting game %d of %d.%n", i + 1, GAME_COUNT);
@@ -310,7 +314,7 @@ public class Match {
             mWriter.println();
 
             // Ask for move.
-            mWriter.println("go movetime 300");
+            mWriter.println("go movetime " + MOVE_TIME);
 
             // Wait for move.
             while (true) {
