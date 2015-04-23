@@ -1,7 +1,5 @@
 
 - Why do we have "color" in search?
-- Put githash in PGN.
-- Add more positional support.
 - Surface exceptions in sub-processes.
     - Read from stderr, especially after problem.
 - If interrupted search found a result and it's greater than previous alpha, pick it.
@@ -31,3 +29,5 @@ Match results:
 Tags:
 
 - chess1: Initial version, alpha-beta, no positional bonus.
+- chess2: Add better piece position eval function. Not much improvement.
+

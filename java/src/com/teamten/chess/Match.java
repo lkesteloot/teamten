@@ -25,7 +25,7 @@ public class Match {
     private static final File TMP_DIRECTORY = new File("/tmp/chess");
     private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd.HH-mm");
     private static final int GAME_COUNT = 10;
-    private static final long MOVE_TIME = 5000;
+    private static final long MOVE_TIME = 2000;
 
     private void start(String[] gitRevisions) {
         PrintStream log;

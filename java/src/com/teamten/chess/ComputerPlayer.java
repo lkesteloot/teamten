@@ -148,6 +148,13 @@ public class ComputerPlayer {
                 noisyMove = true;
             }
 
+            if (mBoard.isEndGame()) {
+                // Advance pawns in endgame.
+                if (move.getMovingPiece().getPieceType() == PieceType.PAWN) {
+                    moveBoardValue += color*0.3;
+                }
+            }
+
             // Add board position.
             double fromBonus = move.getMovingPiece().getPositionBonus(move.getFromIndex());
             double toBonus = move.getMovingPiece().getPositionBonus(move.getToIndex());
