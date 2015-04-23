@@ -77,6 +77,9 @@ public class ComputerPlayer {
 
     /**
      * Make a move for this particular side.
+     *
+     * @param color is 1 for the top-level side being moved, -1 for the other
+     * side. This is not related to "side".
      */
     private EvaluatedMove getBestMove(double boardValue, int depth, int maxDepth, int side,
             List<Move> allMoves, double alpha, double beta, boolean noisyMove,
@@ -145,24 +148,14 @@ public class ComputerPlayer {
                 noisyMove = true;
             }
 
-            if (mBoard.isEndGame()) {
-                // Advance pawns in endgame.
-                if (move.getMovingPiece().getPieceType() == PieceType.PAWN) {
-                    moveBoardValue += color*0.3;
-                }
-            }
-
             // Add board position.
-            double beforePosition = move.getMovingPiece().getPieceType().getPositionBonus(
-                    move.getFromIndex());
-            double afterPosition = move.getMovingPiece().getPieceType().getPositionBonus(
-                    move.getToIndex());
-            double capturedPosition = move.getCapturedPiece() == Piece.EMPTY ? 0 :
-                move.getCapturedPiece().getPieceType().getPositionBonus(move.getToIndex());
-            moveBoardValue += color*(afterPosition - beforePosition + capturedPosition);
+            double fromBonus = move.getMovingPiece().getPositionBonus(move.getFromIndex());
+            double toBonus = move.getMovingPiece().getPositionBonus(move.getToIndex());
+            double capBonus = move.getCapturedPiece().getPositionBonus(move.getToIndex());
+            moveBoardValue += color*(toBonus - fromBonus + capBonus);
 
             // Add a bit of randomness to break ties.
-            moveBoardValue += Math.random()*0.001;
+            moveBoardValue += Math.random()*0.001 - 0.0005;
 
             mGame.addMove(move);
             boolean checkMove = false;

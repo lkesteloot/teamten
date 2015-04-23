@@ -1,4 +1,6 @@
 
+- Why do we have "color" in search?
+- Put githash in PGN.
 - Add more positional support.
 - Surface exceptions in sub-processes.
     - Read from stderr, especially after problem.
@@ -26,3 +28,6 @@ Match results:
     Why are draws so lobsided? [Fixed]
     Why are wins mostly for Black? Wasn't happening with 1000ms moves.
 
+Tags:
+
+- chess1: Initial version, alpha-beta, no positional bonus.

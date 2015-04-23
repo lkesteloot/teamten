@@ -148,7 +148,7 @@ public class Game {
         return game;
     }
 
-    public void writePgn(String filename, int winningSide, int round) {
+    public void writePgn(String filename, int winningSide, int round, String whitePlayer, String blackPlayer) {
         PrintStream w;
 
         try {
@@ -158,18 +158,18 @@ public class Game {
             return;
         }
 
-        writePgn(w, winningSide, round);
+        writePgn(w, winningSide, round, whitePlayer, blackPlayer);
 
         w.close();
     }
 
-    public void writePgn(PrintStream w, int winningSide, int round) {
+    public void writePgn(PrintStream w, int winningSide, int round, String whitePlayer, String blackPlayer) {
         w.printf("[Event \"Private match\"]%n");
         w.printf("[Site \"San Francisco, CA USA\"]%n");
         w.printf("[Date \"%s\"]%n", PGN_DATE_FORMAT.format(new Date()));
         w.printf("[Round \"%d\"]%n", round);
-        w.printf("[White \"Computer\"]%n");
-        w.printf("[Black \"Computer\"]%n");
+        w.printf("[White \"%s\"]%n", whitePlayer);
+        w.printf("[Black \"%s\"]%n", blackPlayer);
         w.printf("[Result \"%s\"]%n", Side.toPgnNotation(winningSide));
         w.printf("%n");
 

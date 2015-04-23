@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
+import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.List;
 
@@ -21,13 +23,15 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Match {
     private static final File TMP_DIRECTORY = new File("/tmp/chess");
-    private static final int GAME_COUNT = 30;
+    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd.HH-mm");
+    private static final int GAME_COUNT = 10;
     private static final long MOVE_TIME = 5000;
 
     private void start(String[] gitRevisions) {
         PrintStream log;
         try {
-            log = new PrintStream(new FileOutputStream("match.log"), true);
+            String logFilename = "match." + LOG_DATE_FORMAT.format(new Date()) + ".log";
+            log = new PrintStream(new FileOutputStream(logFilename), true);
         } catch (IOException e) {
             System.err.println("Cannot create log file: " + e);
             return;
@@ -80,13 +84,17 @@ public class Match {
                 playingPlayers[loser].scoreLoss(loser);
             }
             log(log, "Game took %s.%n", getElapsedTime(beforeGame, afterGame));
+
+            //  Dump statistics.
+            for (int j = 0; j < 2; j++) {
+                log(log, "Player %d: %.1f, %s, %s%n", j, players[j].getScore(),
+                        players[j].getScoreBreakdown(), players[j].getGitRevision());
+            }
         }
         long afterMatch = System.currentTimeMillis();
 
         // Shut down.
         for (int i = 0; i < 2; i++) {
-            log(log, "Player %d: %.1f, %s, %s%n", i, players[i].getScore(),
-                    players[i].getScoreBreakdown(), players[i].getGitRevision());
             players[i].quit();
         }
         log(log, "Match of %d games took %s.%n",
@@ -164,7 +172,7 @@ public class Match {
             sideToPlay = 1 - sideToPlay;
         }
 
-        game.writePgn(log, winner, round);
+        game.writePgn(log, winner, round, players[0].getGitRevision(), players[1].getGitRevision());
         log.flush();
 
         return winner;

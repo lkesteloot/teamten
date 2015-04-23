@@ -48,6 +48,23 @@ public class Piece {
     }
 
     /**
+     * Return the position bonus for this piece at this location.
+     */
+    public double getPositionBonus(int index) {
+        if (mPieceType == null) {
+            // Convenience so we can call this on EMPTY.
+            return 0;
+        } else {
+            if (mSide == Side.BLACK) {
+                // Piece types are from white's point of view. Note that this depends
+                // on the position bonus to be left-right symmetric.
+                index = Board.NUM_SQUARES - 1 - index;
+            }
+            return mPieceType.getPositionBonus(index);
+        }
+    }
+
+    /**
      * Return the character that can be used to represent this piece in ASCII mode.
      */
     public char getCharacter() {

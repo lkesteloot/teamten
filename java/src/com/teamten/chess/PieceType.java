@@ -254,7 +254,8 @@ public abstract class PieceType {
             List<Move> moveList);
 
     /**
-     * Return the position bonus, as a double where 1 means a pawn value.
+     * Return the position bonus, as a double where 1 means a pawn value. Index is 
+     * from white's point of view. (It assumes this is a white piece.)
      */
     public double getPositionBonus(int index) {
         // Default implementation. Subclass can override.
