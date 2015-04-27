@@ -1,5 +1,18 @@
 
-- Why do we have "color" in search?
+- Where this stands now:
+    - Chess program understands UCI protocol.
+    - The "match" script runs two git versions against one another.
+        - % cd test
+        - % ant -f .. && ./match chess1 chess2
+    - Configure the length of matches and moves in Match.java.
+    - I tried adding some things in chess2 and chess3 that should have improved play
+        quite a bit, but made little difference in matches. This made me wonder how hard
+        it'll be in general to test new changes.
+- What to do next:
+    - I don't quite understand the alpha-beta function as I've written it.
+        - Why do we have "color" in search?
+    - In iterative deepening, pass on PV to subsequent passes.
+    - Add transposition table.
 - Surface exceptions in sub-processes.
     - Read from stderr, especially after problem.
 - If interrupted search found a result and it's greater than previous alpha, pick it.
@@ -30,4 +43,5 @@ Tags:
 
 - chess1: Initial version, alpha-beta, no positional bonus.
 - chess2: Add better piece position eval function. Not much improvement.
+- chess3: Advance pawns in endgame. Not sure this is good. Might be regression.
 
