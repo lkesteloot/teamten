@@ -21,8 +21,8 @@ import com.teamten.chess.server.ChessServer;
 public class chess {
     private static final boolean CHECK_TEST = false;
     private static final boolean PROMOTION_TEST = false;
-    private static final boolean PLAY_GAME = true;
-    private static final boolean PLAY_PUZZLE_GAME = false;
+    private static final boolean PLAY_GAME = false;
+    private static final boolean PLAY_PUZZLE_GAME = true;
     private static final boolean CHESS_SERVER = false;
 
     public static void main(String[] args) {
@@ -46,7 +46,7 @@ public class chess {
                 System.out.println(board);
                 ComputerPlayer player = side == Side.WHITE ? whitePlayer : blackPlayer;
                 ComputerPlayer.EvaluatedMove evaluatedMove = makePlayerMove(player);
-                game.writePgn("game.pgn", Side.IN_PROGRESS, 0);
+                game.writePgn("game.pgn", Side.IN_PROGRESS, 0, "computer1", "computer2");
                 Move move = evaluatedMove.getMove();
                 if (move == null) {
                     break;
@@ -262,6 +262,18 @@ public class chess {
                 "....r...");
         side = Side.WHITE;
 
+        // https://plus.google.com/u/0/+Chessendgames/posts/7aLW4hER7JC
+        board = Board.parse(
+                "k....n.." +
+                "..Q....." +
+                "..K....." +
+                "...B...." +
+                ".q......" +
+                "........" +
+                "........" +
+                "........");
+        side = Side.WHITE;
+
         /*
         board = Board.parse(
                 "........" +
@@ -300,7 +312,7 @@ public class chess {
     }
 
     private static ComputerPlayer.EvaluatedMove makePlayerMove(ComputerPlayer computerPlayer) {
-        ComputerPlayer.Result result = computerPlayer.makeMove(2000);
+        ComputerPlayer.Result result = computerPlayer.makeMove(200000);
         ComputerPlayer.EvaluatedMove evaluatedMove = result.mEvaluatedMove;
         int side = computerPlayer.getSide();
 

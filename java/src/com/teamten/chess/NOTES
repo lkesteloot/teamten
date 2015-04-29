@@ -9,6 +9,10 @@
         quite a bit, but made little difference in matches. This made me wonder how hard
         it'll be in general to test new changes.
 - What to do next:
+    - We generate all moves, then weed out the illegal ones (puts in in check), then
+        try them. But alpha-beta cutoff probably gets rid of a bunch of them and
+        we needlessly checked for legality. Just do it inside the loop. The profiler
+        said that half the time was spent checking legality here.
     - I don't quite understand the alpha-beta function as I've written it.
         - Why do we have "color" in search?
     - In iterative deepening, pass on PV to subsequent passes.
