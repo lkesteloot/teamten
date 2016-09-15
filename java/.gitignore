@@ -1,4 +1,2 @@
-classes
-dist
-depend_cache
 .gradle
+/build
