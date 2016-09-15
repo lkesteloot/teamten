@@ -274,6 +274,17 @@ public class chess {
                 "........");
         side = Side.WHITE;
 
+        board = Board.parse(
+                "...RN..." +
+                "r....p.p" +
+                "......p." +
+                ".....k.." +
+                "p...R..." +
+                "....P.K." +
+                ".....P.P" +
+                "r.......");
+        side = Side.WHITE;
+
         /*
         board = Board.parse(
                 "........" +
@@ -312,7 +323,7 @@ public class chess {
     }
 
     private static ComputerPlayer.EvaluatedMove makePlayerMove(ComputerPlayer computerPlayer) {
-        ComputerPlayer.Result result = computerPlayer.makeMove(200000);
+        ComputerPlayer.Result result = computerPlayer.makeMove(20000);
         ComputerPlayer.EvaluatedMove evaluatedMove = result.mEvaluatedMove;
         int side = computerPlayer.getSide();
 
