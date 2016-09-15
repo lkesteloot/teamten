@@ -1,2 +1,0 @@
-ant
-java -Xmx2048m -cp "dist/*" com.teamten.render.UrtServer
