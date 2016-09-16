@@ -19,6 +19,10 @@ public class Block {
         return mBlockType;
     }
 
+    public List<Span> getSpans() {
+        return mSpans;
+    }
+
     public void addSpan(Span span) {
         mSpans.add(span);
     }
@@ -29,7 +33,8 @@ public class Block {
             return "No spans";
         } else {
             String first = mSpans.get(0).getText();
-            return String.format("%d spans, starting with: %s ...", mSpans.size(),
+            return String.format("%s, %d spans, starting with: %s ...",
+                    mBlockType, mSpans.size(),
                     first.substring(0, Math.min(1000, first.length())));
         }
     }

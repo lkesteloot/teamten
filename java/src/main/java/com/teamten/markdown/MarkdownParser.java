@@ -31,7 +31,7 @@ public class MarkdownParser {
     }
 
     public Doc parse(InputStream inputStream) throws IOException {
-        String contents = IOUtils.toString(inputStream);
+        String contents = IOUtils.toString(inputStream, "UTF-8");
 
         // Our document.
         Doc doc = new Doc();
@@ -53,7 +53,6 @@ public class MarkdownParser {
             } else {
                 blockType = BlockType.BODY;
             }
-
 
             // Remove newlines.
             Iterable<String> lines = LINE_SPLITTER.split(chunk);

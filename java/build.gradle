@@ -63,4 +63,10 @@ task parseMarkdown(type:JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     args 'foo.md'
 }
+task typeset(type:JavaExec) {
+    main = 'com.teamten.typeset.Typesetter'
+    classpath = sourceSets.main.runtimeClasspath
+    args 'foo.md'
+    args 'foo.pdf'
+}
 
