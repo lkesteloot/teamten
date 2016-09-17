@@ -39,6 +39,11 @@ public class HyphenDictionaryTest {
         // No hyphenation at first.
         checkHyphenation(d, "successivement", "successivement");
 
+        // Matches file.
+        d.setLeftHyphenMin(2);
+        d.setRightHyphenMin(2);
+
+        // Add necessary patterns. Get these by turning on mFragmentMapDebug.
         d.addPattern(".s4");
         d.addPattern("1su");
         d.addPattern("1ce");
@@ -49,6 +54,19 @@ public class HyphenDictionaryTest {
 
         // Now should work.
         checkHyphenation(d, "successivement", "suc", "ces", "si", "ve", "ment");
+
+        // With punctuation.
+        checkHyphenation(d, ":successivement!", ":suc", "ces", "si", "ve", "ment!");
+
+        // Try mins.
+        d.setLeftHyphenMin(3);
+        d.setRightHyphenMin(4);
+        checkHyphenation(d, "successivement", "suc", "ces", "si", "ve", "ment");
+
+        // Try mins.
+        d.setLeftHyphenMin(4);
+        d.setRightHyphenMin(5);
+        checkHyphenation(d, "successivement", "succes", "si", "vement");
     }
 
     private void checkHyphenation(HyphenDictionary d, String word, String ... expectedFragments) {

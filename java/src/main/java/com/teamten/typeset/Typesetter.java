@@ -94,14 +94,7 @@ public class Typesetter {
                 word = word.replace("\u00A0", " ");
 
                 List<String> fragments = hyphenDictionary.hyphenate(word);
-                System.out.printf("%-25s: ", word);
-                for (int j = 0; j < fragments.size(); j++) {
-                    if (j > 0) {
-                        System.out.print("-");
-                    }
-                    System.out.print(fragments.get(j));
-                }
-                System.out.println();
+                System.out.printf("%-25s: %s%n", word, HyphenDictionary.segmentsToString(fragments));
 
                 elements.add(new Box(getTextWidth(font, fontSize, word), word));
                 if (isLastWord) {

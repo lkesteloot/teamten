@@ -1,16 +1,18 @@
 
 package com.teamten.hyphen;
 
-import java.util.Arrays;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A TeX-style hyphen dictionary.
@@ -18,6 +20,7 @@ import java.io.IOException;
 public class HyphenDictionary {
     private static final Splitter FIELD_SPLITTER = Splitter.on(" ").
         omitEmptyStrings().trimResults();
+    private static final Joiner HYPHEN_JOINER = Joiner.on("-").skipNulls();
     // Descent defaults.
     private int mLeftHyphenMin = 2;
     private int mRightHyphenMin = 3;
@@ -62,21 +65,27 @@ public class HyphenDictionary {
                             case "LEFTHYPHENMIN":
                                 setLeftHyphenMin(Integer.parseInt(fields.get(1)));
                                 break;
+
                             case "RIGHTHYPHENMIN":
                                 setRightHyphenMin(Integer.parseInt(fields.get(1)));
                                 break;
+
                             case "COMPOUNDLEFTHYPHENMIN":
                                 setCompoundLeftHyphenMin(Integer.parseInt(fields.get(1)));
                                 break;
+
                             case "COMPOUNDRIGHTHYPHENMIN":
                                 setCompoundRightHyphenMin(Integer.parseInt(fields.get(1)));
                                 break;
+
                             case "UTF-8":
                                 // Good.
                                 break;
+
                             case "NEXTLEVEL":
                                 started = true;
                                 break;
+
                             default:
                                 throw new IOException("Invalid hyphen header: " + fields.get(0));
                         }
@@ -98,18 +107,30 @@ public class HyphenDictionary {
         }
     }
 
+    /**
+     * Minimum number of letters in first fragment.
+     */
     void setLeftHyphenMin(int leftHyphenMin) {
         mLeftHyphenMin = leftHyphenMin;
     }
 
+    /**
+     * Minimum number of letters in last fragment.
+     */
     void setRightHyphenMin(int rightHyphenMin) {
         mRightHyphenMin = rightHyphenMin;
     }
 
+    /**
+     * I don't know what this should affect.
+     */
     void setCompoundLeftHyphenMin(int compoundLeftHyphenMin) {
         mCompoundLeftHyphenMin = compoundLeftHyphenMin;
     }
 
+    /**
+     * I don't know what this should affect.
+     */
     void setCompoundRightHyphenMin(int compoundRightHyphenMin) {
         mCompoundRightHyphenMin = compoundRightHyphenMin;
     }
@@ -239,5 +260,11 @@ public class HyphenDictionary {
 
         return builder.toString();
     }
-}
 
+    /**
+     * Takes a list of segments and return them separated by hyphens.
+     */
+    public static String segmentsToString(List<String> segments) {
+        return HYPHEN_JOINER.join(segments);
+    }
+}
