@@ -12,6 +12,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import com.teamten.hyphen.HyphenDictionary;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -45,6 +46,8 @@ public class Typesetter {
 
         PDPageContentStream contents = null;
         float y = 0;
+
+        HyphenDictionary hyphenDictionary = HyphenDictionary.fromDic("hyph_fr.dic");
 
         for (Block block : doc.getBlocks()) {
             PDFont font;
@@ -89,6 +92,16 @@ public class Typesetter {
                 // XXX not right, should be glue (preceded by penalty 1000) so
                 // that it will stretch.
                 word = word.replace("\u00A0", " ");
+
+                List<String> fragments = hyphenDictionary.hyphenate(word);
+                System.out.printf("%-25s: ", word);
+                for (int j = 0; j < fragments.size(); j++) {
+                    if (j > 0) {
+                        System.out.print("-");
+                    }
+                    System.out.print(fragments.get(j));
+                }
+                System.out.println();
 
                 elements.add(new Box(getTextWidth(font, fontSize, word), word));
                 if (isLastWord) {

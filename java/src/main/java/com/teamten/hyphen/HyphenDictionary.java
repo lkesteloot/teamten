@@ -1,0 +1,219 @@
+
+package com.teamten.hyphen;
+
+import java.util.Arrays;
+import com.google.common.base.Splitter;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+/**
+ * A TeX-style hyphen dictionary.
+ */
+public class HyphenDictionary {
+    private static final Splitter FIELD_SPLITTER = Splitter.on(" ").
+        omitEmptyStrings().trimResults();
+    // Descent defaults.
+    private int mLeftHyphenMin = 2;
+    private int mRightHyphenMin = 3;
+    private int mCompoundLeftHyphenMin = 2;
+    private int mCompoundRightHyphenMin = 3;
+    private Map<String,String> mFragmentMap = new HashMap<>();
+
+    private HyphenDictionary() {
+        // Use factories.
+    }
+
+    /**
+     * Reads a .dic file for the hyphenation rules.
+     */
+    public static HyphenDictionary fromDic(String filename) throws IOException {
+        HyphenDictionary dic = new HyphenDictionary();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(filename), "UTF-8"));
+        dic.read(reader);
+        reader.close();
+        return dic;
+    }
+
+    private void read(BufferedReader reader) throws IOException {
+        boolean started = false;
+        String line;
+        while ((line = reader.readLine()) != null) {
+            line = line.trim();
+
+            if (line.startsWith("%") || line.isEmpty()) {
+                // Comment
+            } else {
+                if (started) {
+                    // Body.
+                    String key = removeDigits(line);
+                    String value = removeNonDigits(line);
+                    mFragmentMap.put(key, value);
+                } else {
+                    // Header.
+                    List<String> fields = FIELD_SPLITTER.splitToList(line);
+                    if (!fields.isEmpty()) {
+                        switch (fields.get(0)) {
+                            case "LEFTHYPHENMIN":
+                                mLeftHyphenMin = Integer.parseInt(fields.get(1));
+                                break;
+                            case "RIGHTHYPHENMIN":
+                                mRightHyphenMin = Integer.parseInt(fields.get(1));
+                                break;
+                            case "COMPOUNDLEFTHYPHENMIN":
+                                mCompoundLeftHyphenMin = Integer.parseInt(fields.get(1));
+                                break;
+                            case "COMPOUNDRIGHTHYPHENMIN":
+                                mCompoundRightHyphenMin = Integer.parseInt(fields.get(1));
+                                break;
+                            case "UTF-8":
+                                // Good.
+                                break;
+                            case "NEXTLEVEL":
+                                started = true;
+                                break;
+                            default:
+                                throw new IOException("Invalid hyphen header: " + fields.get(0));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public List<String> hyphenate(String word) {
+        // Strip non-alphabetic prefix.
+        String prefix = null;
+        for (int i = 0; i < word.length(); i++) {
+            if (Character.isLetter(word.charAt(i))) {
+                prefix = word.substring(0, i);
+                word = word.substring(i);
+                break;
+            }
+        }
+        if (prefix == null) {
+            // All punctuation.
+            return Arrays.asList(word);
+        }
+
+        // Strip non-alphabetic suffix.
+        String suffix = null;
+        for (int i = word.length(); i > 0; i--) {
+            if (Character.isLetter(word.charAt(i - 1))) {
+                suffix = word.substring(i);
+                word = word.substring(0, i);
+                break;
+            }
+        }
+        if (suffix == null) {
+            // All punctuation. Shouldn't happen since we handled this above.
+            return Arrays.asList(word);
+        }
+
+        // XXX for already-hyphenated words, split and recurse.
+
+        // Make a sequence of possible cut points.
+        char[] cutPoints = new char[word.length() + 1];
+        for (int i = 0; i < cutPoints.length; i++) {
+            cutPoints[i] = '0';
+        }
+
+        // Add fake periods to represent begin and end.
+        word = "." + word + ".";
+
+        // Find all sub-sequences.
+        for (int seqLength = 1; seqLength <= word.length(); seqLength++) {
+            for (int start = 0; start <= word.length() - seqLength; start++) {
+                String seq = word.substring(start, start + seqLength);
+                String value = mFragmentMap.get(seq.toLowerCase());
+                if (value != null) {
+                    /// System.out.printf("%s: %s %s %d %d%n", word, seq, value, start, seqLength);
+                    int offset = seq.startsWith(".") ? 0 : -1;
+                    for (int i = 0; i < value.length(); i++) {
+                        char c = value.charAt(i);
+                        if (c > cutPoints[start + i + offset]) {
+                            cutPoints[start + i + offset] = c;
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+. s u c-c e s-s i-v e-m e n t .
+ 1 4 0 1 0 0 1 0 1 0 1 0 0 0 0
+ */
+
+        /// System.out.printf("%s: %s%n", word, new String(cutPoints));
+
+        // Prevent hyphens at start and end of word.
+        for (int i = 0; i < mLeftHyphenMin && i < cutPoints.length; i++) {
+            cutPoints[i] = 0;
+        }
+        for (int i = 0; i < mRightHyphenMin && i < cutPoints.length; i++) {
+            cutPoints[cutPoints.length - 1 - i] = 0;
+        }
+
+        // Remove fake periods.
+        word = word.substring(1, word.length() - 1);
+
+        // Find odd numbers and splice there.
+        List<String> segments = new ArrayList<>();
+        int lastStart = 0;
+        for (int i = 0; i < cutPoints.length; i++) {
+            if (cutPoints[i] % 2 != 0) {
+                segments.add(word.substring(lastStart, i));
+                lastStart = i;
+            }
+        }
+        if (lastStart < word.length()) {
+            segments.add(word.substring(lastStart));
+        }
+
+        // Re-attach prefix and suffix.
+        segments.set(0, prefix + segments.get(0));
+        segments.set(segments.size() - 1, segments.get(segments.size() - 1) + suffix);
+
+        return segments;
+    }
+
+    /* package */ static String removeDigits(String line) {
+        // XXX Precompile this.
+        return line.replaceAll("[0-9]", "");
+    }
+
+    /* package */ static String removeNonDigits(String line) {
+        StringBuilder builder = new StringBuilder(line);
+
+        // Delete periods, they don't affect this operation.
+        if (builder.length() > 0 && builder.charAt(0) == '.') {
+            builder.deleteCharAt(0);
+        }
+        if (builder.length() > 0 && builder.charAt(builder.length() - 1) == '.') {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+
+        // Insert missing zeros.
+        for (int i = 0; i <= builder.length(); i += 2) {
+            if (i == builder.length() || !Character.isDigit(builder.charAt(i))) {
+                builder.insert(i, '0');
+            }
+        }
+
+        // Now remove the characters.
+        for (int i = builder.length() - 1; i >= 0; i--) {
+            if (!Character.isDigit(builder.charAt(i))) {
+                builder.deleteCharAt(i);
+            }
+        }
+
+        return builder.toString();
+    }
+}
+
