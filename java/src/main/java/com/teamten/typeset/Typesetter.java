@@ -39,22 +39,13 @@ public class Typesetter {
     public PDDocument typeset(Doc doc) throws IOException {
         PDDocument pdf = new PDDocument();
 
-        PDPage page = new PDPage();
-        pdf.addPage(page);
-
         float pageWidth = 6*DPI;
         float pageHeight = 9*DPI;
         float pageMargin = 1*DPI;
-        page.setMediaBox(new PDRectangle(pageWidth, pageHeight));
 
-        PDPageContentStream contents = new PDPageContentStream(pdf, page);
+        PDPageContentStream contents = null;
+        float y = 0;
 
-        // Draw the margins.
-        contents.addRect(pageMargin, pageMargin, pageWidth - 2*pageMargin, pageHeight - 2*pageMargin);
-        contents.setStrokingColor(0.8);
-        contents.stroke();
-
-        float y = pageHeight - pageMargin;
         for (Block block : doc.getBlocks()) {
             PDFont font;
             float fontSize;
@@ -120,7 +111,9 @@ public class Typesetter {
 
                 if (element instanceof Box) {
                     Box box = (Box) element;
+                    /*
                     System.out.printf("%g + %g > %g (%s)%n", lineWidth, box.getWidth(), maxLineWidth, box.getText());
+                    */
                     if (lineWidth + box.getWidth() > maxLineWidth && lastBreakable != -1) {
                         breaks.add(lastBreakable);
                         i = lastBreakable;
@@ -159,6 +152,24 @@ public class Typesetter {
                 y -= leading;
                 float x = pageMargin;
 
+                if (contents == null || y < pageMargin) {
+                    if (contents != null) {
+                        contents.close();
+                    }
+
+                    PDPage page = new PDPage();
+                    pdf.addPage(page);
+                    page.setMediaBox(new PDRectangle(pageWidth, pageHeight));
+                    contents = new PDPageContentStream(pdf, page);
+
+                    // Draw the margins.
+                    contents.addRect(pageMargin, pageMargin, pageWidth - 2*pageMargin, pageHeight - 2*pageMargin);
+                    contents.setStrokingColor(0.8);
+                    contents.stroke();
+
+                    y = pageHeight - pageMargin - leading;
+                }
+
                 for (int i = lineStart; i < lineEnd; i++) {
                     Element element = elements.get(i);
 
@@ -182,7 +193,9 @@ public class Typesetter {
             y -= interParagraphSpacing;
         }
 
-        contents.close();
+        if (contents != null) {
+            contents.close();
+        }
 
         return pdf;
     }
