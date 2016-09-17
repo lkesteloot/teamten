@@ -50,6 +50,9 @@ public class MarkdownParser {
             } else if (chunk.startsWith("## ")) {
                 chunk = chunk.substring(2).trim();
                 blockType = BlockType.CHAPTER_HEADER;
+            } else if (chunk.equals("/bye")) {
+                // For testing.
+                break;
             } else {
                 blockType = BlockType.BODY;
             }

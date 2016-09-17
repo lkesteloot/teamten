@@ -23,7 +23,7 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-servlet:7.1.6.v20100715'
     // Was in our lib tree but apparently not used:
     /// compile 'org.eclipse.jetty:jetty-servlets:7.1.6.v20100715'
-    compile 'com.google.guava:guava:13.0.1'
+    compile 'com.google.guava:guava:15.0'
     // Also in our lib tree was iText-5.0.2, apparently not used. 
     compile 'org.apache.pdfbox:pdfbox:2.0.0'
 
