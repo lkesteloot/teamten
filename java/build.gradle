@@ -69,4 +69,9 @@ task typeset(type:JavaExec) {
     args 'foo.md'
     args 'foo.pdf'
 }
+task pdftest(type:JavaExec) {
+    main = 'com.teamten.typeset.PdfTest'
+    classpath = sourceSets.main.runtimeClasspath
+    args 'foo.pdf'
+}
 

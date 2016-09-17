@@ -6,6 +6,7 @@ import com.teamten.markdown.Block;
 import com.teamten.markdown.Doc;
 import com.teamten.markdown.MarkdownParser;
 import com.teamten.markdown.Span;
+import com.teamten.markdown.BlockType;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -49,6 +50,8 @@ public class Typesetter {
 
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromDic("hyph_fr.dic");
 
+        BlockType previousBlockType = null;
+
         for (Block block : doc.getBlocks()) {
             PDFont font;
             float fontSize;
@@ -59,7 +62,7 @@ public class Typesetter {
                 default:
                     font = PDType1Font.TIMES_ROMAN;
                     fontSize = 11;
-                    indentFirstLine = true;
+                    indentFirstLine = previousBlockType == BlockType.BODY;
                     break;
 
                 case PART_HEADER:
@@ -74,94 +77,19 @@ public class Typesetter {
             }
 
             float leading = fontSize*1.4f;
-            float interParagraphSpacing = leading/3;
+            float interParagraphSpacing = leading/4;
             float firstLineSpacing = indentFirstLine ? fontSize*2 : 0;
-
-            float spaceWidth = getTextWidth(font, fontSize, " ");
-            float hyphenWidth = getTextWidth(font, fontSize, "-");
 
             Span span = block.getSpans().get(0);
             String text = span.getText();
             List<String> words = WORD_SPLITTER.splitToList(text);
-            List<Element> elements = new ArrayList<>();
 
-            // Convert words to elements (boxes and glue).
-            elements.add(new Glue(firstLineSpacing, getLastElement(elements)));
-            for (int i = 0; i < words.size(); i++) {
-                String word = words.get(i);
-                boolean isLastWord = i == words.size() - 1;
-
-                // Replace non-break space with normal space for rendering.
-                // XXX not right, should be glue (preceded by penalty 1000) so
-                // that it will stretch.
-                word = word.replace("\u00A0", " ");
-
-                List<String> fragments = hyphenDictionary.hyphenate(word);
-                System.out.printf("%-25s: %s%n", word, HyphenDictionary.segmentsToString(fragments));
-
-                for (int j = 0; j < fragments.size(); j++) {
-                    String fragment = fragments.get(j);
-                    elements.add(new Box(getTextWidth(font, fontSize, fragment), fragment));
-                    if (j < fragments.size() - 1) {
-                        elements.add(new Penalty(hyphenWidth, Penalty.HYPHEN));
-                    }
-                }
-
-                if (isLastWord) {
-                    elements.add(new Glue(0, getLastElement(elements)));
-                    elements.add(new Penalty(0, -Penalty.INFINITY));
-                } else {
-                    elements.add(new Glue(spaceWidth, getLastElement(elements)));
-                }
-            }
+            // Convert words to elements (boxes, glue, and penalty).
+            List<Element> elements = wordsToElements(words, font, fontSize, firstLineSpacing, hyphenDictionary);
 
             // Figure out where the breaks are. These are indices of "elements"
             // that should be replaced with a line break.
-            List<Integer> breaks = new ArrayList<>();
-
-            // Fit elements into lines.
-            float lineWidth = 0;
-            float maxLineWidth = pageWidth - 2*pageMargin;
-            int lastBreakable = -1;
-            for (int i = 0; i < elements.size(); i++) {
-                Element element = elements.get(i);
-
-                if (element instanceof Box) {
-                    Box box = (Box) element;
-                    /*
-                    System.out.printf("%g + %g > %g (%s)%n", lineWidth, box.getWidth(), maxLineWidth, box.getText());
-                    */
-                    if (lineWidth + box.getWidth() > maxLineWidth && lastBreakable != -1) {
-                        breaks.add(lastBreakable);
-                        i = lastBreakable;
-                        lastBreakable = -1;
-                        lineWidth = 0;
-                    } else {
-                        lineWidth += box.getWidth();
-                    }
-                } else if (element instanceof Glue) {
-                    Glue glue = (Glue) element;
-                    // XXX wrong, should be able to break here.
-                    if (lineWidth + glue.getWidth() > maxLineWidth && lastBreakable != -1 && false) {
-                        breaks.add(lastBreakable);
-                        lastBreakable = -1;
-                        lineWidth = 0;
-                    } else {
-                        lineWidth += glue.getWidth();
-                    }
-                } else if (element instanceof Penalty) {
-                    Penalty penalty = (Penalty) element;
-                    if (penalty.getPenalty() == -Penalty.INFINITY) {
-                        breaks.add(i);
-                        lastBreakable = -1;
-                        lineWidth = 0;
-                    }
-                }
-
-                if (element.canBreakLine(lineWidth, maxLineWidth)) {
-                    lastBreakable = i;
-                }
-            }
+            List<Integer> breaks = elementsToBreaks(elements, pageWidth, pageMargin);
 
             // Draw the words.
             int lineStart = 0;
@@ -229,6 +157,7 @@ public class Typesetter {
             }
 
             y -= interParagraphSpacing;
+            previousBlockType = block.getBlockType();
         }
 
         if (contents != null) {
@@ -236,6 +165,107 @@ public class Typesetter {
         }
 
         return pdf;
+    }
+
+    /**
+     * Convert words to elements (boxes, glue, and penalty).
+     */
+    private List<Element> wordsToElements(List<String> words, PDFont font, float fontSize,
+            float firstLineSpacing, HyphenDictionary hyphenDictionary) throws IOException {
+
+        List<Element> elements = new ArrayList<>();
+
+        float spaceWidth = getTextWidth(font, fontSize, " ");
+        float hyphenWidth = getTextWidth(font, fontSize, "-");
+
+        if (firstLineSpacing != 0) {
+            elements.add(new Glue(firstLineSpacing, getLastElement(elements)));
+        }
+        for (int i = 0; i < words.size(); i++) {
+            String word = words.get(i);
+            boolean isLastWord = i == words.size() - 1;
+
+            // Replace non-break space with normal space for rendering.
+            // XXX not right, should be glue (preceded by penalty 1000) so
+            // that it will stretch.
+            word = word.replace("\u00A0", " ");
+
+            // Hyphenate the word. XXX Here we should split the word if it
+            // includes punctuation like m-dashes, etc.
+            List<String> fragments = hyphenDictionary.hyphenate(word);
+            /// System.out.printf("%-25s: %s%n", word, HyphenDictionary.segmentsToString(fragments));
+
+            // Add the fragments, separated by penalties.
+            for (int j = 0; j < fragments.size(); j++) {
+                String fragment = fragments.get(j);
+                elements.add(new Box(getTextWidth(font, fontSize, fragment), fragment));
+                if (j < fragments.size() - 1) {
+                    elements.add(new Penalty(hyphenWidth, Penalty.HYPHEN));
+                }
+            }
+
+            if (isLastWord) {
+                // End of paragraph.
+                elements.add(new Glue(0, getLastElement(elements)));
+                elements.add(new Penalty(0, -Penalty.INFINITY));
+            } else {
+                // Space between words.
+                elements.add(new Glue(spaceWidth, getLastElement(elements)));
+            }
+        }
+
+        return elements;
+    }
+
+    private List<Integer> elementsToBreaks(List<Element> elements, float pageWidth, float pageMargin) {
+
+        List<Integer> breaks = new ArrayList<>();
+
+        // Fit elements into lines.
+        float lineWidth = 0;
+        float maxLineWidth = pageWidth - 2*pageMargin;
+        int lastBreakable = -1;
+        for (int i = 0; i < elements.size(); i++) {
+            Element element = elements.get(i);
+
+            if (element instanceof Box) {
+                Box box = (Box) element;
+                /*
+                System.out.printf("%g + %g > %g (%s)%n", lineWidth, box.getWidth(), maxLineWidth, box.getText());
+                */
+                if (lineWidth + box.getWidth() > maxLineWidth && lastBreakable != -1) {
+                    breaks.add(lastBreakable);
+                    i = lastBreakable;
+                    lastBreakable = -1;
+                    lineWidth = 0;
+                } else {
+                    lineWidth += box.getWidth();
+                }
+            } else if (element instanceof Glue) {
+                Glue glue = (Glue) element;
+                // XXX wrong, should be able to break here.
+                if (lineWidth + glue.getWidth() > maxLineWidth && lastBreakable != -1 && false) {
+                    breaks.add(lastBreakable);
+                    lastBreakable = -1;
+                    lineWidth = 0;
+                } else {
+                    lineWidth += glue.getWidth();
+                }
+            } else if (element instanceof Penalty) {
+                Penalty penalty = (Penalty) element;
+                if (penalty.getPenalty() == -Penalty.INFINITY) {
+                    breaks.add(i);
+                    lastBreakable = -1;
+                    lineWidth = 0;
+                }
+            }
+
+            if (element.canBreakLine(lineWidth, maxLineWidth)) {
+                lastBreakable = i;
+            }
+        }
+
+        return breaks;
     }
 
     private static Element getLastElement(List<Element> elements) {
