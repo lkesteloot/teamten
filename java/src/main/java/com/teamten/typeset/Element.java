@@ -8,5 +8,5 @@ public abstract class Element {
     /**
      * Whether this element can be replaced with a line break.
      */
-    public abstract boolean canBreakLine();
+    public abstract boolean canBreakLine(float lineWidth, float maxLineWidth);
 }

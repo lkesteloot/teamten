@@ -22,7 +22,7 @@ public class Box extends Element {
     }
 
     @Override
-    public boolean canBreakLine() {
+    public boolean canBreakLine(float lineWidth, float maxLineWidth) {
         return false;
     }
 }

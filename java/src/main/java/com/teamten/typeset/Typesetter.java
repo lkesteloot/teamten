@@ -77,6 +77,9 @@ public class Typesetter {
             float interParagraphSpacing = leading/3;
             float firstLineSpacing = indentFirstLine ? fontSize*2 : 0;
 
+            float spaceWidth = getTextWidth(font, fontSize, " ");
+            float hyphenWidth = getTextWidth(font, fontSize, "-");
+
             Span span = block.getSpans().get(0);
             String text = span.getText();
             List<String> words = WORD_SPLITTER.splitToList(text);
@@ -96,12 +99,19 @@ public class Typesetter {
                 List<String> fragments = hyphenDictionary.hyphenate(word);
                 System.out.printf("%-25s: %s%n", word, HyphenDictionary.segmentsToString(fragments));
 
-                elements.add(new Box(getTextWidth(font, fontSize, word), word));
+                for (int j = 0; j < fragments.size(); j++) {
+                    String fragment = fragments.get(j);
+                    elements.add(new Box(getTextWidth(font, fontSize, fragment), fragment));
+                    if (j < fragments.size() - 1) {
+                        elements.add(new Penalty(hyphenWidth, Penalty.HYPHEN));
+                    }
+                }
+
                 if (isLastWord) {
                     elements.add(new Glue(0, getLastElement(elements)));
                     elements.add(new Penalty(0, -Penalty.INFINITY));
                 } else {
-                    elements.add(new Glue(getTextWidth(font, fontSize, " "), getLastElement(elements)));
+                    elements.add(new Glue(spaceWidth, getLastElement(elements)));
                 }
             }
 
@@ -109,6 +119,7 @@ public class Typesetter {
             // that should be replaced with a line break.
             List<Integer> breaks = new ArrayList<>();
 
+            // Fit elements into lines.
             float lineWidth = 0;
             float maxLineWidth = pageWidth - 2*pageMargin;
             int lastBreakable = -1;
@@ -147,7 +158,7 @@ public class Typesetter {
                     }
                 }
 
-                if (element.canBreakLine()) {
+                if (element.canBreakLine(lineWidth, maxLineWidth)) {
                     lastBreakable = i;
                 }
             }
@@ -192,6 +203,27 @@ public class Typesetter {
                         x += glue.getWidth();
                     }
                 }
+
+                // XXX Ugh, is there a better way to do this?
+                if (lineEnd < elements.size()) {
+                    Element element = elements.get(lineEnd);
+                    if (element instanceof Penalty) {
+                        Penalty penalty = (Penalty) element;
+                        // XXX not correct if last word already ends with hyphen.
+                        // In that case, make the penalty's width 0 above.
+                        if (penalty.getPenalty() != -Penalty.INFINITY &&
+                                penalty.getPenalty() != 0) {
+
+                            contents.beginText();
+                            contents.setFont(font, fontSize);
+                            contents.newLineAtOffset(x, y);
+                            contents.showText("-");
+                            contents.endText();
+                            x += penalty.getWidth();
+                        }
+                    }
+                }
+
 
                 lineStart = lineEnd + 1;
             }

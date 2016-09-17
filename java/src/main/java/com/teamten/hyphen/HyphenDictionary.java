@@ -135,6 +135,12 @@ public class HyphenDictionary {
         mCompoundRightHyphenMin = compoundRightHyphenMin;
     }
 
+    /**
+     * Hyphenate the specified word, returning a list of word fragments between
+     * which hyphenation can happen. Note that if the word already contains a hyphen,
+     * it will show up at the end of one of the fragments. Don't add another hyphen
+     * after that.
+     */
     public List<String> hyphenate(String word) {
         // Strip non-alphabetic prefix.
         String prefix = null;
@@ -164,8 +170,6 @@ public class HyphenDictionary {
             return Arrays.asList(word);
         }
 
-        // XXX for already-hyphenated words, split and recurse.
-
         // Make a sequence of possible cut points.
         char[] cutPoints = new char[word.length() + 1];
         for (int i = 0; i < cutPoints.length; i++) {
@@ -184,7 +188,11 @@ public class HyphenDictionary {
                 String value = mFragmentMap.get(seq.toLowerCase());
                 if (value != null) {
                     /// System.out.printf("%s: %s %s %s %d %d%n", word, seq, value, mFragmentMapDebug.get(seq.toLowerCase()), start, seqLength);
+
+                    // At the beginning of the word we don't count the period.
                     int offset = seq.startsWith(".") ? 0 : -1;
+
+                    // Find the max of the new hints and the existing ones.
                     for (int i = 0; i < value.length(); i++) {
                         char c = value.charAt(i);
                         if (c > cutPoints[start + i + offset]) {

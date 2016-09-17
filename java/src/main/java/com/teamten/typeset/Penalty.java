@@ -6,6 +6,7 @@ package com.teamten.typeset;
  */
 public class Penalty extends Element {
     public static final int INFINITY = 1000;
+    public static final int HYPHEN = 100;
     private final float mWidth;
     private final int mPenalty;
 
@@ -23,7 +24,14 @@ public class Penalty extends Element {
     }
 
     @Override
-    public boolean canBreakLine() {
-        return mPenalty < INFINITY;
+    public boolean canBreakLine(float lineWidth, float maxLineWidth) {
+        if (mPenalty == INFINITY) {
+            return false;
+        } else if (mPenalty == -INFINITY) {
+            return true;
+        } else {
+            // Only if we can fit on the line (e.g., the hyphen).
+            return lineWidth + mWidth <= maxLineWidth;
+        }
     }
 }
