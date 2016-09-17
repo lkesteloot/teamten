@@ -42,9 +42,9 @@ public class Typesetter {
         PDPage page = new PDPage();
         pdf.addPage(page);
 
-        int pageWidth = 6*DPI;
-        int pageHeight = 9*DPI;
-        int pageMargin = 1*DPI;
+        float pageWidth = 6*DPI;
+        float pageHeight = 9*DPI;
+        float pageMargin = 1*DPI;
         page.setMediaBox(new PDRectangle(pageWidth, pageHeight));
 
         PDPageContentStream contents = new PDPageContentStream(pdf, page);
@@ -58,12 +58,14 @@ public class Typesetter {
         for (Block block : doc.getBlocks()) {
             PDFont font;
             float fontSize;
+            boolean indentFirstLine = false;
 
             switch (block.getBlockType()) {
                 case BODY:
                 default:
                     font = PDType1Font.TIMES_ROMAN;
-                    fontSize = 12;
+                    fontSize = 11;
+                    indentFirstLine = true;
                     break;
 
                 case PART_HEADER:
@@ -78,12 +80,16 @@ public class Typesetter {
             }
 
             float leading = fontSize*1.4f;
+            float interParagraphSpacing = leading/3;
+            float firstLineSpacing = indentFirstLine ? fontSize*2 : 0;
 
             Span span = block.getSpans().get(0);
             String text = span.getText();
             List<String> words = WORD_SPLITTER.splitToList(text);
             List<Element> elements = new ArrayList<>();
 
+            // Convert words to elements (boxes and glue).
+            elements.add(new Glue(firstLineSpacing, getLastElement(elements)));
             for (int i = 0; i < words.size(); i++) {
                 String word = words.get(i);
                 boolean isLastWord = i == words.size() - 1;
@@ -172,6 +178,8 @@ public class Typesetter {
 
                 lineStart = lineEnd + 1;
             }
+
+            y -= interParagraphSpacing;
         }
 
         contents.close();
