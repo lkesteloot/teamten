@@ -24,8 +24,9 @@ public class HyphenDictionary {
     private int mCompoundLeftHyphenMin = 2;
     private int mCompoundRightHyphenMin = 3;
     private Map<String,String> mFragmentMap = new HashMap<>();
+    private Map<String,String> mFragmentMapDebug = new HashMap<>();
 
-    private HyphenDictionary() {
+    HyphenDictionary() {
         // Use factories.
     }
 
@@ -52,25 +53,23 @@ public class HyphenDictionary {
             } else {
                 if (started) {
                     // Body.
-                    String key = removeDigits(line);
-                    String value = removeNonDigits(line);
-                    mFragmentMap.put(key, value);
+                    addPattern(line);
                 } else {
                     // Header.
                     List<String> fields = FIELD_SPLITTER.splitToList(line);
                     if (!fields.isEmpty()) {
                         switch (fields.get(0)) {
                             case "LEFTHYPHENMIN":
-                                mLeftHyphenMin = Integer.parseInt(fields.get(1));
+                                setLeftHyphenMin(Integer.parseInt(fields.get(1)));
                                 break;
                             case "RIGHTHYPHENMIN":
-                                mRightHyphenMin = Integer.parseInt(fields.get(1));
+                                setRightHyphenMin(Integer.parseInt(fields.get(1)));
                                 break;
                             case "COMPOUNDLEFTHYPHENMIN":
-                                mCompoundLeftHyphenMin = Integer.parseInt(fields.get(1));
+                                setCompoundLeftHyphenMin(Integer.parseInt(fields.get(1)));
                                 break;
                             case "COMPOUNDRIGHTHYPHENMIN":
-                                mCompoundRightHyphenMin = Integer.parseInt(fields.get(1));
+                                setCompoundRightHyphenMin(Integer.parseInt(fields.get(1)));
                                 break;
                             case "UTF-8":
                                 // Good.
@@ -85,6 +84,34 @@ public class HyphenDictionary {
                 }
             }
         }
+    }
+
+    /**
+     * Add a TeX pattern to the map.
+     */
+    void addPattern(String pattern) {
+        String key = removeDigits(pattern);
+        String value = removeNonDigits(pattern);
+        mFragmentMap.put(key, value);
+        if (mFragmentMapDebug != null) {
+            mFragmentMapDebug.put(key, pattern);
+        }
+    }
+
+    void setLeftHyphenMin(int leftHyphenMin) {
+        mLeftHyphenMin = leftHyphenMin;
+    }
+
+    void setRightHyphenMin(int rightHyphenMin) {
+        mRightHyphenMin = rightHyphenMin;
+    }
+
+    void setCompoundLeftHyphenMin(int compoundLeftHyphenMin) {
+        mCompoundLeftHyphenMin = compoundLeftHyphenMin;
+    }
+
+    void setCompoundRightHyphenMin(int compoundRightHyphenMin) {
+        mCompoundRightHyphenMin = compoundRightHyphenMin;
     }
 
     public List<String> hyphenate(String word) {
@@ -131,9 +158,11 @@ public class HyphenDictionary {
         for (int seqLength = 1; seqLength <= word.length(); seqLength++) {
             for (int start = 0; start <= word.length() - seqLength; start++) {
                 String seq = word.substring(start, start + seqLength);
+                // XXX The french dictionary has both straight apostrophes and curved ones,
+                // and is not consistent in which they use. Should normalize.
                 String value = mFragmentMap.get(seq.toLowerCase());
                 if (value != null) {
-                    /// System.out.printf("%s: %s %s %d %d%n", word, seq, value, start, seqLength);
+                    /// System.out.printf("%s: %s %s %s %d %d%n", word, seq, value, mFragmentMapDebug.get(seq.toLowerCase()), start, seqLength);
                     int offset = seq.startsWith(".") ? 0 : -1;
                     for (int i = 0; i < value.length(); i++) {
                         char c = value.charAt(i);
@@ -144,11 +173,6 @@ public class HyphenDictionary {
                 }
             }
         }
-
-        /*
-. s u c-c e s-s i-v e-m e n t .
- 1 4 0 1 0 0 1 0 1 0 1 0 0 0 0
- */
 
         /// System.out.printf("%s: %s%n", word, new String(cutPoints));
 

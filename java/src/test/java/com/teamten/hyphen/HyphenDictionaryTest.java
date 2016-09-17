@@ -3,6 +3,8 @@ package com.teamten.hyphen;
 
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 /**
@@ -28,6 +30,32 @@ public class HyphenDictionaryTest {
         assertEquals("removeNonDigits", "0230", HyphenDictionary.removeNonDigits(".a2b3c"));
         assertEquals("removeNonDigits", "0230", HyphenDictionary.removeNonDigits("a2b3c."));
         assertEquals("removeNonDigits", "0230", HyphenDictionary.removeNonDigits(".a2b3c."));
+    }
+
+    @Test
+    public void testHyphenation() {
+        HyphenDictionary d = new HyphenDictionary();
+
+        // No hyphenation at first.
+        checkHyphenation(d, "successivement", "successivement");
+
+        d.addPattern(".s4");
+        d.addPattern("1su");
+        d.addPattern("1ce");
+        d.addPattern("1si");
+        d.addPattern("1ve");
+        d.addPattern("1me");
+        d.addPattern(".1su");
+
+        // Now should work.
+        checkHyphenation(d, "successivement", "suc", "ces", "si", "ve", "ment");
+    }
+
+    private void checkHyphenation(HyphenDictionary d, String word, String ... expectedFragments) {
+        List<String> actualFragments = d.hyphenate(word);
+
+        assertArrayEquals("word " + word + " failed", expectedFragments,
+                actualFragments.toArray());
     }
 }
 
