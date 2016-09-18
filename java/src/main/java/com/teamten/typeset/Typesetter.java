@@ -28,6 +28,7 @@ public class Typesetter {
     private static final int DPI = 72;
     private static final Splitter WORD_SPLITTER = Splitter.on(" ").
         omitEmptyStrings().trimResults();
+    private static final boolean DRAW_MARGINS = true;
 
     public static void main(String[] args) throws IOException {
         InputStream inputStream = new FileInputStream(args[0]);
@@ -97,7 +98,14 @@ public class Typesetter {
                 y -= leading;
                 float x = pageMargin;
 
+                // Skip lineStart over glues and non-forcing penalties here.
+                while (lineStart < lineEnd && skipElementAtStartOfLine(elements.get(lineStart))) {
+                    lineStart++;
+                }
+
+                // Perhaps start a new page.
                 if (contents == null || y < pageMargin) {
+                    // Start new page.
                     if (contents != null) {
                         contents.close();
                     }
@@ -107,14 +115,18 @@ public class Typesetter {
                     page.setMediaBox(new PDRectangle(pageWidth, pageHeight));
                     contents = new PDPageContentStream(pdf, page);
 
-                    // Draw the margins.
-                    contents.addRect(pageMargin, pageMargin, pageWidth - 2*pageMargin, pageHeight - 2*pageMargin);
-                    contents.setStrokingColor(0.8);
-                    contents.stroke();
+                    // Draw the margins for debugging.
+                    if (DRAW_MARGINS) {
+                        contents.addRect(pageMargin, pageMargin, pageWidth - 2*pageMargin, pageHeight - 2*pageMargin);
+                        contents.setStrokingColor(0.9);
+                        contents.stroke();
+                    }
 
+                    // Start at top of page.
                     y = pageHeight - pageMargin - leading;
                 }
 
+                // Draw each word on this line.
                 for (int i = lineStart; i < lineEnd; i++) {
                     Element element = elements.get(i);
 
@@ -151,7 +163,6 @@ public class Typesetter {
                         }
                     }
                 }
-
 
                 lineStart = lineEnd + 1;
             }
@@ -254,6 +265,7 @@ public class Typesetter {
             } else if (element instanceof Penalty) {
                 Penalty penalty = (Penalty) element;
                 if (penalty.getPenalty() == -Penalty.INFINITY) {
+                    // Always include forcing penalties.
                     breaks.add(i);
                     lastBreakable = -1;
                     lineWidth = 0;
@@ -272,8 +284,28 @@ public class Typesetter {
         return elements.isEmpty() ? null : elements.get(elements.size() - 1);
     }
 
-    private float getTextWidth(PDFont font, float fontSize, String text) throws IOException {
+    private static float getTextWidth(PDFont font, float fontSize, String text) throws IOException {
         return font.getStringWidth(text) / 1000 * fontSize;
+    }
+
+    /**
+     * Returns whether this elements should be skipped if at the start of a line.
+     * Basically we skip white-space and non-forcing penalties.
+     */
+    private static boolean skipElementAtStartOfLine(Element element) {
+        if (element instanceof Box) {
+            // Never skip boxes.
+            return false;
+        }
+
+        if (element instanceof Penalty) {
+            // Skip penalties except for forcing ones (end of paragraph).
+            Penalty penalty = (Penalty) element;
+            return penalty.getPenalty() != -Penalty.INFINITY;
+        }
+
+        // Skip the rest.
+        return true;
     }
 }
 
