@@ -29,6 +29,10 @@ public class Ligatures {
         MULTI_TO_SINGLE_CHAR.put("fl", '\uFB02');
         MULTI_TO_SINGLE_CHAR.put("ffi", '\uFB03');
         MULTI_TO_SINGLE_CHAR.put("ffl", '\uFB04');
+
+        // Not sure I like these. The source document could just have the Unicode values.
+        MULTI_TO_SINGLE_CHAR.put("--", '\u2013');
+        MULTI_TO_SINGLE_CHAR.put("---", '\u2014');
     }
 
     /**
