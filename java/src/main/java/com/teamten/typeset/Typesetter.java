@@ -55,7 +55,7 @@ public class Typesetter {
         PDPageContentStream contents = null;
         float y = 0;
 
-        HyphenDictionary hyphenDictionary = HyphenDictionary.fromDic("hyph_fr.dic");
+        HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
 
         BlockType previousBlockType = null;
 

@@ -5,8 +5,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,12 +34,23 @@ public class HyphenDictionary {
     }
 
     /**
-     * Reads a .dic file for the hyphenation rules.
+     * Reads a .dic file from a resource. Use e.g., "fr" for language.
      */
-    public static HyphenDictionary fromDic(String filename) throws IOException {
+    public static HyphenDictionary fromResource(String language) throws IOException {
+        String filename = "hyph_" + language + ".dic";
+
+        // In the same resource directory as this class.
+        InputStream inputStream = HyphenDictionary.class.getResourceAsStream(filename);
+
+        return fromInputStream(inputStream);
+    }
+
+    /**
+     * Reads a .dic file from an input stream.
+     */
+    private static HyphenDictionary fromInputStream(InputStream inputStream) throws IOException {
         HyphenDictionary dic = new HyphenDictionary();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(filename), "UTF-8"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
         dic.read(reader);
         reader.close();
         return dic;
