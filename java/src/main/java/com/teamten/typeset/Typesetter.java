@@ -2,19 +2,20 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Splitter;
+import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
+import com.teamten.markdown.BlockType;
 import com.teamten.markdown.Doc;
 import com.teamten.markdown.MarkdownParser;
 import com.teamten.markdown.Span;
-import com.teamten.markdown.BlockType;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import com.teamten.hyphen.HyphenDictionary;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,9 +43,14 @@ public class Typesetter {
     public PDDocument typeset(Doc doc) throws IOException {
         PDDocument pdf = new PDDocument();
 
+        // XXX Load these values from the document header.
         float pageWidth = 6*DPI;
         float pageHeight = 9*DPI;
         float pageMargin = 1*DPI;
+
+        // Load fonts we'll need. Don't use the built-in fonts, they don't have ligatures.
+        Font regularFont = new Font(pdf, "Times New Roman.ttf");
+        Font boldFont = new Font(pdf, "Times New Roman Bold.ttf");
 
         PDPageContentStream contents = null;
         float y = 0;
@@ -54,25 +60,25 @@ public class Typesetter {
         BlockType previousBlockType = null;
 
         for (Block block : doc.getBlocks()) {
-            PDFont font;
+            Font font;
             float fontSize;
             boolean indentFirstLine = false;
 
             switch (block.getBlockType()) {
                 case BODY:
                 default:
-                    font = PDType1Font.TIMES_ROMAN;
+                    font = regularFont;
                     fontSize = 11;
                     indentFirstLine = previousBlockType == BlockType.BODY;
                     break;
 
                 case PART_HEADER:
-                    font = PDType1Font.TIMES_BOLD;
+                    font = boldFont;
                     fontSize = 36;
                     break;
 
                 case CHAPTER_HEADER:
-                    font = PDType1Font.TIMES_BOLD;
+                    font = boldFont;
                     fontSize = 24;
                     break;
             }
@@ -133,7 +139,7 @@ public class Typesetter {
                     if (element instanceof Box) {
                         Box box = (Box) element;
                         contents.beginText();
-                        contents.setFont(font, fontSize);
+                        contents.setFont(font.getPdFont(), fontSize);
                         contents.newLineAtOffset(x, y);
                         contents.showText(box.getText());
                         contents.endText();
@@ -155,7 +161,7 @@ public class Typesetter {
                                 penalty.getPenalty() != 0) {
 
                             contents.beginText();
-                            contents.setFont(font, fontSize);
+                            contents.setFont(font.getPdFont(), fontSize);
                             contents.newLineAtOffset(x, y);
                             contents.showText("-");
                             contents.endText();
@@ -181,13 +187,13 @@ public class Typesetter {
     /**
      * Convert words to elements (boxes, glue, and penalty).
      */
-    private List<Element> wordsToElements(List<String> words, PDFont font, float fontSize,
+    private List<Element> wordsToElements(List<String> words, Font font, float fontSize,
             float firstLineSpacing, HyphenDictionary hyphenDictionary) throws IOException {
 
         List<Element> elements = new ArrayList<>();
 
-        float spaceWidth = getTextWidth(font, fontSize, " ");
-        float hyphenWidth = getTextWidth(font, fontSize, "-");
+        float spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
+        float hyphenWidth = getTextWidth(font.getPdFont(), fontSize, "-");
 
         if (firstLineSpacing != 0) {
             elements.add(new Glue(firstLineSpacing, getLastElement(elements)));
@@ -195,6 +201,9 @@ public class Typesetter {
         for (int i = 0; i < words.size(); i++) {
             String word = words.get(i);
             boolean isLastWord = i == words.size() - 1;
+
+            // Add ligatures.
+            word = font.transformLigatures(word);
 
             // Replace non-break space with normal space for rendering.
             // XXX not right, should be glue (preceded by penalty 1000) so
@@ -209,7 +218,7 @@ public class Typesetter {
             // Add the fragments, separated by penalties.
             for (int j = 0; j < fragments.size(); j++) {
                 String fragment = fragments.get(j);
-                elements.add(new Box(getTextWidth(font, fontSize, fragment), fragment));
+                elements.add(new Box(getTextWidth(font.getPdFont(), fontSize, fragment), fragment));
                 if (j < fragments.size() - 1) {
                     elements.add(new Penalty(hyphenWidth, Penalty.HYPHEN));
                 }
