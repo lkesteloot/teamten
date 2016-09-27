@@ -1,38 +1,32 @@
 
 package com.teamten.typeset;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
- * Manages all ligature information.
+ * Manages all ligature information for a particular font.
  */
 public class Ligatures {
-    private static final BiMap<String,Character> MULTI_TO_SINGLE_CHAR = HashBiMap.create();
-    private final BiMap<String,Character> mMultiToSingleChar = HashBiMap.create();
-    private final BiMap<String,String> mMultiToSingleString = HashBiMap.create();
-    private final List<Map.Entry<String,String>> mOrderedList = new ArrayList<>();
+    private static final List<Ligature> FULL_LIST = new ArrayList<>();
+    private final List<Ligature> mOrderedList;
 
     static {
         // All the ligatures we want to handle. There are many more, but some don't apply
         // in all cases.
         // https://en.wikipedia.org/wiki/Typographic_ligature
-        MULTI_TO_SINGLE_CHAR.put("ff", '\uFB00');
-        MULTI_TO_SINGLE_CHAR.put("fi", '\uFB01');
-        MULTI_TO_SINGLE_CHAR.put("fl", '\uFB02');
-        MULTI_TO_SINGLE_CHAR.put("ffi", '\uFB03');
-        MULTI_TO_SINGLE_CHAR.put("ffl", '\uFB04');
+        FULL_LIST.add(new Ligature("ff", '\uFB00'));
+        FULL_LIST.add(new Ligature("fi", '\uFB01'));
+        FULL_LIST.add(new Ligature("fl", '\uFB02'));
+        FULL_LIST.add(new Ligature("ffi", '\uFB03'));
+        FULL_LIST.add(new Ligature("ffl", '\uFB04'));
 
-        // Not sure I like these. The source document could just have the Unicode values.
-        MULTI_TO_SINGLE_CHAR.put("--", '\u2013');
-        MULTI_TO_SINGLE_CHAR.put("---", '\u2014');
+        // Not sure I like these. The source document could just have the Unicode values,
+        // though that wouldn't be the right width in a fixed-width editor like vi.
+        FULL_LIST.add(new Ligature("--", '\u2013'));
+        FULL_LIST.add(new Ligature("---", '\u2014'));
     }
 
     /**
@@ -42,37 +36,21 @@ public class Ligatures {
      * the font.
      */
     public Ligatures(Predicate<Character> isCharInFont) {
-        for (Map.Entry<String,Character> entry : MULTI_TO_SINGLE_CHAR.entrySet()) {
-            String multi = entry.getKey();
-            Character single = entry.getValue();
-
+        mOrderedList = FULL_LIST.stream()
             // If it's in the font, add it to our map.
-            if (isCharInFont.test(single)) {
-                mMultiToSingleChar.put(multi, single);
-
-                // Convert to the string map.
-                String singleString = single.toString();
-                mMultiToSingleString.put(multi, singleString);
-
-                // Add to the ordered list.
-                mOrderedList.add(new SimpleImmutableEntry<String,String>(multi, singleString));
-            }
-        }
-
-        // Sort the ordered list by decreasing size of multi, so that "ffi" is done before "fi".
-        Collections.sort(mOrderedList, (a, b) ->
-                -Integer.compare(a.getKey().length(), b.getKey().length()));
+            .filter(ligature -> isCharInFont.test(ligature.getSingleChar()))
+            // Sort the ordered list by decreasing size of multi, so that "ffi" is
+            // done before "fi".
+            .sorted((a, b) -> -Integer.compare(a.getMulti().length(), b.getMulti().length()))
+            .collect(Collectors.toList());
     }
 
     /**
      * Converts all ligatures to their Unicode characters.
      */
     public String transform(String s) {
-        for (Map.Entry<String,String> entry : mOrderedList) {
-            String multi = entry.getKey();
-            String single = entry.getValue();
-
-            s = s.replace(multi, single);
+        for (Ligature ligature : mOrderedList) {
+            s = ligature.replace(s);
         }
 
         return s;
