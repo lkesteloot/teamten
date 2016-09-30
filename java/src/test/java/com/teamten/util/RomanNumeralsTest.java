@@ -1,28 +1,28 @@
 
-package com.teamten.typeset;
+package com.teamten.util;
 
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 /**
- * Test the Page class.
+ * Test the RomanNumerals class.
  */
-public class PageTest {
+public class RomanNumeralsTest {
     @Test
     public void testRomanNumerals() {
-        assertEquals("i", Page.toRomanNumerals(1));
-        assertEquals("ii", Page.toRomanNumerals(2));
-        assertEquals("iii", Page.toRomanNumerals(3));
-        assertEquals("iv", Page.toRomanNumerals(4));
-        assertEquals("v", Page.toRomanNumerals(5));
-        assertEquals("vi", Page.toRomanNumerals(6));
-        assertEquals("vii", Page.toRomanNumerals(7));
-        assertEquals("viii", Page.toRomanNumerals(8));
-        assertEquals("ix", Page.toRomanNumerals(9));
-        assertEquals("x", Page.toRomanNumerals(10));
-        assertEquals("-xi", Page.toRomanNumerals(-11));
-        assertEquals("mmmmmmmmmmmm", Page.toRomanNumerals(12000));
+        assertEquals("i", RomanNumerals.toString(1));
+        assertEquals("ii", RomanNumerals.toString(2));
+        assertEquals("iii", RomanNumerals.toString(3));
+        assertEquals("iv", RomanNumerals.toString(4));
+        assertEquals("v", RomanNumerals.toString(5));
+        assertEquals("vi", RomanNumerals.toString(6));
+        assertEquals("vii", RomanNumerals.toString(7));
+        assertEquals("viii", RomanNumerals.toString(8));
+        assertEquals("ix", RomanNumerals.toString(9));
+        assertEquals("x", RomanNumerals.toString(10));
+        assertEquals("-xi", RomanNumerals.toString(-11));
+        assertEquals("mmmmmmmmmmmm", RomanNumerals.toString(12000));
     }
 }
 
