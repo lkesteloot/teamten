@@ -81,6 +81,9 @@ public enum SpaceUnit {
             // our units start with an "e".
             if (ch == '-' || Character.isDigit((char) ch) || ch == 'e' || ch == 'E' || ch == '.') {
                 sb.append((char) ch);
+            } else {
+                // End of double.
+                break;
             }
         }
 
