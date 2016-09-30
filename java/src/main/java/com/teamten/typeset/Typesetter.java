@@ -26,6 +26,9 @@ import java.util.List;
  * Converts a document to a PDF.
  */
 public class Typesetter {
+    private static final File FONT_DIR = new File("/Library/Fonts");
+    private static final File SYSTEM_FONT_DIR = new File("/System/Library/Fonts");
+    private static final File MY_FONT_DIR = new File("/Users/lk/Dropbox/Personal/Fonts");
     private static final int DPI = 72;
     private static final Splitter WORD_SPLITTER = Splitter.on(" ").
         omitEmptyStrings().trimResults();
@@ -49,8 +52,9 @@ public class Typesetter {
         float pageMargin = 1*DPI;
 
         // Load fonts we'll need. Don't use the built-in fonts, they don't have ligatures.
-        Font regularFont = new Font(pdf, "Times New Roman.ttf");
-        Font boldFont = new Font(pdf, "Times New Roman Bold.ttf");
+        Font regularFont = new Font(pdf, new File(FONT_DIR, "Times New Roman.ttf"));
+        Font boldFont = new Font(pdf, new File(FONT_DIR, "Times New Roman Bold.ttf"));
+        boldFont = new Font(pdf, new File(MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf"));
 
         PDPageContentStream contents = null;
         float y = 0;
@@ -63,6 +67,7 @@ public class Typesetter {
             Font font;
             float fontSize;
             boolean indentFirstLine = false;
+            boolean allCaps = false;
 
             switch (block.getBlockType()) {
                 case BODY:
@@ -74,12 +79,14 @@ public class Typesetter {
 
                 case PART_HEADER:
                     font = boldFont;
-                    fontSize = 36;
+                    fontSize = 18;
+                    allCaps = true;
                     break;
 
                 case CHAPTER_HEADER:
                     font = boldFont;
-                    fontSize = 24;
+                    fontSize = 11;
+                    allCaps = true;
                     break;
             }
 
@@ -89,6 +96,9 @@ public class Typesetter {
 
             Span span = block.getSpans().get(0);
             String text = span.getText();
+            if (allCaps) {
+                text = text.toUpperCase();
+            }
             List<String> words = WORD_SPLITTER.splitToList(text);
 
             // Convert words to elements (boxes, glue, and penalty).
@@ -196,7 +206,7 @@ public class Typesetter {
         float hyphenWidth = getTextWidth(font.getPdFont(), fontSize, "-");
 
         if (firstLineSpacing != 0) {
-            elements.add(new Glue(firstLineSpacing, getLastElement(elements)));
+            elements.add(new Box(firstLineSpacing, ""));
         }
         for (int i = 0; i < words.size(); i++) {
             String word = words.get(i);

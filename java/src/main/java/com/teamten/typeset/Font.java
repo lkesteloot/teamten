@@ -18,7 +18,6 @@ import java.io.IOException;
  * Wrapper around a PDFBOX font.
  */
 public class Font {
-    private static final File FONT_DIR = new File("/Library/Fonts");
     private static final TTFParser TTF_PARSER = new TTFParser(true);
     private final PDFont mPdFont;
     private final KerningSubtable mKerningSubtable;
@@ -26,8 +25,8 @@ public class Font {
     private final int mUnitsPerEm;
     private final Ligatures mLigatures;
 
-    public Font(PDDocument pdf, String filename) throws IOException {
-        TrueTypeFont ttf = TTF_PARSER.parse(new File(FONT_DIR, filename));
+    public Font(PDDocument pdf, File file) throws IOException {
+        TrueTypeFont ttf = TTF_PARSER.parse(file);
         mPdFont = PDType0Font.load(pdf, ttf, false);
         KerningTable kerningTable = ttf.getKerning();
         if (kerningTable == null) {

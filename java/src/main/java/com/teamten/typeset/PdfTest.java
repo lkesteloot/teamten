@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -21,7 +22,7 @@ public class PdfTest {
         PDPageContentStream contents = new PDPageContentStream(pdf, page);
 
         String text = "The quick Va Vo Vu V. brown fox jumps over the lazy AV dog.";
-        Font font = new Font(pdf, "Times New Roman.ttf");
+        Font font = new Font(pdf, new File("/Library/Fonts/Times New Roman.ttf"));
         float fontSize = 14;
 
         // All together.
