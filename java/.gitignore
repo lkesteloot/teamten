@@ -3,3 +3,5 @@
 /repo
 *.pdf
 *.md
+/libs/fontbox-2.0.0.jar
+/libs/pdfbox-2.0.0.jar
