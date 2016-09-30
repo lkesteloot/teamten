@@ -6,7 +6,7 @@ import com.teamten.util.RomanNumerals;
 /**
  * Represents an immutable page number, either in Roman or Arabic numerals.
  */
-public class Page {
+public class PageNumber {
     private final int mNumber;
     private final boolean mIsRomanNumeral;
 
@@ -15,7 +15,7 @@ public class Page {
      *
      * @throws IllegalArgumentException if the page number is not positive.
      */
-    public Page(int number, boolean isRomanNumeral) {
+    public PageNumber(int number, boolean isRomanNumeral) {
         mNumber = number;
         mIsRomanNumeral = isRomanNumeral;
 
@@ -38,8 +38,8 @@ public class Page {
     /**
      * Return the subsequent page.
      */
-    public Page getNextPage() {
-        return new Page(mNumber + 1, mIsRomanNumeral);
+    public PageNumber getNextPage() {
+        return new PageNumber(mNumber + 1, mIsRomanNumeral);
     }
 }
 
