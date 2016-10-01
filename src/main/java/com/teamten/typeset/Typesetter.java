@@ -88,8 +88,8 @@ public class Typesetter {
                     break;
             }
 
-            float leading = fontSize * 1.4f;
-            float interParagraphSpacing = leading / 4;
+            long leading = SpaceUnit.PT.toSp(fontSize * 1.4f);
+            long interParagraphSpacing = leading / 4;
             long firstLineSpacing = SpaceUnit.PT.toSp(indentFirstLine ? fontSize * 2 : 0);
             long spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
             // Roughly copy TeX:
@@ -127,9 +127,11 @@ public class Typesetter {
             }
 
             // Add a forced break at the end of the paragraph.
+            horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
             horizontalList.addElement(new Penalty(-Penalty.INFINITY));
 
             horizontalList.format(verticalList, pageWidth - 2*pageMargin);
+            verticalList.addElement(new Glue(interParagraphSpacing, 0, 0, false));
             previousBlockType = block.getBlockType();
         }
 

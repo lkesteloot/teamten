@@ -66,6 +66,7 @@ public class HorizontalList {
             Breakpoint bestNextBreakpoint = null;
             long bestBadness = Long.MAX_VALUE;
             double bestRatio = 0;
+            boolean bestRatioIsInfinite = false;
             for (int nextBreak = thisBreak + 1; nextBreak < breakpoints.size(); nextBreak++) {
                 Breakpoint nextBreakpoint = breakpoints.get(nextBreak);
                 int nextIndex = nextBreakpoint.getIndex();
@@ -74,9 +75,8 @@ public class HorizontalList {
                 // Find the sum of all the elements in that line. Also compute the total stretch and shrink
                 // for the glue in that line.
                 long width = 0;
-                long glueWidth = 0;
-                long stretch = 0;
-                long shrink = 0;
+                Glue.ExpandabilitySum stretch = new Glue.ExpandabilitySum();
+                Glue.ExpandabilitySum shrink = new Glue.ExpandabilitySum();
 
                 for (int i = thisIndex; i < nextIndex; i++) {
                     Element element = mElements.get(i);
@@ -85,9 +85,8 @@ public class HorizontalList {
 
                     if (element instanceof Glue) {
                         Glue glue = (Glue) element;
-                        glueWidth += glue.getWidth();
-                        stretch += glue.getStretch();
-                        shrink += glue.getShrink();
+                        stretch.add(glue.getStretch());
+                        shrink.add(glue.getShrink());
                     }
                 }
 
@@ -99,34 +98,50 @@ public class HorizontalList {
 
                 // See whether we're short or long.
                 double ratio;
+                boolean ratioIsInfinite;
                 if (difference > 0) {
                     // Our line is short. Compute how much we'd have to stretch.
-                    if (stretch > 0) {
-                        ratio = difference / (double) stretch;
+                    if (stretch.getAmount() > 0) {
+                        ratio = difference / (double) stretch.getAmount();
+                        ratioIsInfinite = stretch.isInfinite();
                     } else {
                         // There's no glue to stretch.
                         ratio = Penalty.INFINITY;
+                        ratioIsInfinite = false;
                     }
                 } else if (difference < 0) {
                     // Our line is long. Compute how much we'd have to shrink.
-                    if (shrink > 0) {
+                    if (shrink.getAmount() > 0) {
                         // This will be negative.
-                        ratio = difference / (double) shrink;
+                        ratio = difference / (double) shrink.getAmount();
+                        ratioIsInfinite = shrink.isInfinite();
                     } else {
                         // There's no glue to shrink.
                         ratio = Penalty.INFINITY;
+                        ratioIsInfinite = false;
                     }
                 } else {
                     // Our line is just right, there's no extra badness.
                     ratio = 0;
+                    ratioIsInfinite = false;
                 }
 
                 // See if the ratio is acceptable.
                 if (ratio < -1) {
                     // Can't shrink past maximum shrinkage.
                 } else {
-                    // Factor the ratio into the badness.
-                    badness += 100 * Math.pow(Math.abs(ratio), 3);
+                    if (ratio == Penalty.INFINITY) {
+                        // Didn't find any place to stretch or shrink. Keep it anyway, but penalize it.
+                        badness += Penalty.INFINITY*10; // TODO
+                        ratio = 0;
+                        System.out.println("Overfull hbox!"); // TODO
+                    } else if (ratioIsInfinite) {
+                        // Don't penalize for infinite stretch or shrink.
+                    } else {
+                        // Factor the ratio into the badness.
+                        badness += 100 * Math.pow(Math.abs(ratio), 3);
+
+                    }
 
                     // Add the badness for the paragraph starting at the next breakpoint.
                     badness += nextBreakpoint.getBadness();
@@ -135,6 +150,7 @@ public class HorizontalList {
                         bestNextBreakpoint = nextBreakpoint;
                         bestBadness = badness;
                         bestRatio = ratio;
+                        bestRatioIsInfinite = ratioIsInfinite;
                     }
                 }
             }
@@ -144,6 +160,7 @@ public class HorizontalList {
                 thisBreakpoint.setBadness(bestBadness);
                 thisBreakpoint.setNextBreakpoint(bestNextBreakpoint);
                 thisBreakpoint.setRatio(bestRatio);
+                thisBreakpoint.setRatioIsInfinite(bestRatioIsInfinite);
             }
         }
 
@@ -166,10 +183,9 @@ public class HorizontalList {
                     double ratio = thisBreakpoint.getRatio();
 
                     long glueSize = glue.getSize();
-                    if (ratio >= 0) {
-                        glueSize += (long) (glue.getStretch() * ratio);
-                    } else {
-                        glueSize += (long) (glue.getShrink() * ratio);
+                    Glue.Expandability expandability = ratio >= 0 ? glue.getStretch() : glue.getShrink();
+                    if (expandability.isInfinite() == thisBreakpoint.isRatioIsInfinite()) {
+                        glueSize += (long) (expandability.getAmount() * ratio);
                     }
                     element = new Glue(glueSize, 0, 0, true);
                 }
@@ -194,6 +210,7 @@ public class HorizontalList {
         private long mBadness;
         private Breakpoint mNextBreakpoint;
         private double mRatio;
+        private boolean mRatioIsInfinite;
 
         private Breakpoint(int index, long penalty) {
             mIndex = index;
@@ -202,6 +219,7 @@ public class HorizontalList {
             mBadness = 0;
             mNextBreakpoint = null;
             mRatio = 0;
+            mRatioIsInfinite = false;
         }
 
         /**
@@ -272,6 +290,20 @@ public class HorizontalList {
          */
         public void setRatio(double ratio) {
             mRatio = ratio;
+        }
+
+        /**
+         * Whether the ratio is for infinite glue only.
+         */
+        public boolean isRatioIsInfinite() {
+            return mRatioIsInfinite;
+        }
+
+        /**
+         * Set whether the ratio is for infinite glue only.
+         */
+        public void setRatioIsInfinite(boolean ratioIsInfinite) {
+            mRatioIsInfinite = ratioIsInfinite;
         }
     }
 }
