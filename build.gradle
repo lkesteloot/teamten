@@ -79,3 +79,7 @@ task simple(type:JavaExec) {
     args 'simple.md'
     args 'foo.pdf'
 }
+task mario(type:JavaExec) {
+    main = 'com.teamten.mario.Mario'
+    classpath = sourceSets.main.runtimeClasspath
+}
