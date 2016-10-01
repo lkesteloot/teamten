@@ -1,10 +1,14 @@
 
 package com.teamten.typeset;
 
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+
+import java.io.IOException;
+
 /**
- * Represents a 2D box of something, like a word or an image.
+ * Represents a 2D box of something, like a word or an image. Can be used by itself to make an empty space.
  */
-public abstract class Box extends NonDiscardableElement {
+public class Box extends NonDiscardableElement {
     private final long mWidth;
     private final long mHeight;
     private final long mDepth;
@@ -43,6 +47,16 @@ public abstract class Box extends NonDiscardableElement {
     @Override
     public long getDepth() {
         return mDepth;
+    }
+
+    @Override
+    public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
+        return mWidth;
+    }
+
+    @Override
+    public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
+        return mHeight + mDepth;
     }
 
     /**

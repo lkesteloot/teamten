@@ -2,6 +2,7 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.PeekingIterator;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
@@ -89,7 +90,7 @@ public class Typesetter {
 
             float leading = fontSize * 1.4f;
             float interParagraphSpacing = leading / 4;
-            float firstLineSpacing = indentFirstLine ? fontSize * 2 : 0;
+            long firstLineSpacing = SpaceUnit.PT.toSp(indentFirstLine ? fontSize * 2 : 0);
             long spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
             // Roughly copy TeX:
             Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
@@ -100,24 +101,36 @@ public class Typesetter {
                 text = text.toUpperCase();
             }
 
+            if (firstLineSpacing != 0) {
+                horizontalList.addElement(new Box(firstLineSpacing, 0, 0));
+            }
+
             for (int i = 0; i < text.length(); ) {
                 int ch = text.codePointAt(i);
 
                 if (ch == ' ') {
+                    horizontalList.addElement(spaceGlue);
+                } else if (ch == '\u00A0') {
+                    // Non-break space. Precede with infinite penalty.
+                    horizontalList.addElement(new Penalty(Penalty.INFINITY));
                     horizontalList.addElement(spaceGlue);
                 } else {
                     int[] codePoints = new int[1];
                     codePoints[0] = ch;
                     String s = new String(codePoints, 0, 1);
                     long width = getTextWidth(font.getPdFont(), fontSize, s);
-                    horizontalList.addElement(new Text(font, fontSize, s, width, 655350, 0)); // TODO
+                    horizontalList.addElement(new Text(font, fontSize, s, width, 983025, 0)); // TODO
                 }
 
                 // Advance to the next code point.
                 i += Character.charCount(ch);
             }
 
-            horizontalList.format(verticalList);
+            // Add a forced break at the end of the paragraph.
+            horizontalList.addElement(new Penalty(-Penalty.INFINITY));
+
+            horizontalList.format(verticalList, pageWidth - 2*pageMargin);
+            previousBlockType = block.getBlockType();
         }
 
         List<Page> pages = verticalList.generatePages();
