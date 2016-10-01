@@ -11,6 +11,9 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import java.io.File;
 import java.io.IOException;
 
+import static com.teamten.typeset.SpaceUnit.PT;
+import static com.teamten.typeset.SpaceUnit.SP;
+
 /**
  * Utility class for testing PDF things.
  */
@@ -26,47 +29,47 @@ public class PdfTest {
         float fontSize = 14;
 
         // All together.
-        float y = 700;
+        long y = PT.toSp(700);
         contents.beginText();
         contents.setFont(font.getPdFont(), fontSize);
-        contents.newLineAtOffset(100, y);
+        contents.newLineAtOffset(100, PT.fromSpAsFloat(y));
         contents.showText(text);
         contents.endText();
 
         // Separately.
-        float x = 100;
-        y -= 15;
+        long x = PT.toSp(100);
+        y -= PT.toSp(15);
         for (int i = 0; i < text.length(); i++) {
             String letter = text.substring(i, i + 1);
 
             contents.beginText();
             contents.setFont(font.getPdFont(), fontSize);
-            contents.newLineAtOffset(x, y);
+            contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
             contents.showText(letter);
             contents.endText();
 
-            x += font.getPdFont().getStringWidth(letter) / 1000 * fontSize;
+            x += PT.toSp(font.getPdFont().getStringWidth(letter) / 1000 * fontSize);
         }
 
         // With kerning.
-        x = 100;
-        y -= 15;
+        x = PT.toSp(100);
+        y -= PT.toSp(15);
         char previousCh = 0;
         for (int i = 0; i < text.length(); i++) {
             String letter = text.substring(i, i + 1);
             char ch = letter.charAt(0);
 
             if (previousCh != 0) {
-                x += font.getKerning(previousCh, ch) / 1000 * fontSize;
+                x += font.getKerning(previousCh, ch, fontSize);
             }
 
             contents.beginText();
             contents.setFont(font.getPdFont(), fontSize);
-            contents.newLineAtOffset(x, y);
+            contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
             contents.showText(letter);
             contents.endText();
 
-            x += font.getPdFont().getStringWidth(letter) / 1000 * fontSize;
+            x += PT.toSp(font.getPdFont().getStringWidth(letter) / 1000 * fontSize);
 
             previousCh = ch;
         }

@@ -14,6 +14,8 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import java.io.File;
 import java.io.IOException;
 
+import static com.teamten.typeset.SpaceUnit.PT;
+
 /**
  * Wrapper around a PDFBOX font.
  */
@@ -26,8 +28,11 @@ public class Font {
     private final Ligatures mLigatures;
 
     public Font(PDDocument pdf, File file) throws IOException {
+        // Load the font.
         TrueTypeFont ttf = TTF_PARSER.parse(file);
         mPdFont = PDType0Font.load(pdf, ttf, false);
+
+        // Load the kerning table.
         KerningTable kerningTable = ttf.getKerning();
         if (kerningTable == null) {
             mKerningSubtable = null;
@@ -35,9 +40,11 @@ public class Font {
             mKerningSubtable = kerningTable.getHorizontalKerningSubtable();
         }
 
+        // Load the map from Unicode to glyph ID. We need the glyph ID when looking up the kerning info.
         CmapTable cmap = ttf.getCmap();
         mCmapSubtable = cmap.getSubtable(CmapTable.PLATFORM_UNICODE, CmapTable.ENCODING_UNICODE_2_0_BMP);
 
+        // The kerning numbers are given in these units.
         mUnitsPerEm = ttf.getUnitsPerEm();
 
         // Make a table of ligatures that only include the ones in this font.
@@ -52,13 +59,15 @@ public class Font {
     }
 
     /**
-     * Get the kerning between the two characters. The result is in the same units.
-     * as PDFont.getStringWidth().
+     * Get the kerning between the two code points. The result is in scaled points.
+     *
+     * @param fontSize the size of the font in points.
      */
-    public float getKerning(char leftChar, char rightChar) {
+    public long getKerning(int leftChar, int rightChar, double fontSize) {
         int leftGlyph = mCmapSubtable.getGlyphId(leftChar);
         int rightGlyph = mCmapSubtable.getGlyphId(rightChar);
-        return mKerningSubtable.getKerning(leftGlyph, rightGlyph) * 1000f / mUnitsPerEm;
+
+        return PT.toSp(mKerningSubtable.getKerning(leftGlyph, rightGlyph) * fontSize / mUnitsPerEm);
     }
 
     public String transformLigatures(String s) {

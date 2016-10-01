@@ -134,6 +134,7 @@ public class Typesetter {
                 // on the fly while we're rolling through code points.
                 text = font.transformLigatures(text);
 
+                int previousCh = 0;
                 for (int i = 0; i < text.length(); ) {
                     int ch = text.codePointAt(i);
 
@@ -144,6 +145,12 @@ public class Typesetter {
                         horizontalList.addElement(new Penalty(Penalty.INFINITY));
                         horizontalList.addElement(spaceGlue);
                     } else {
+                        // See if we need to kern.
+                        long kerning = font.getKerning(previousCh, ch, fontSize);
+                        if (kerning != 0) {
+                            horizontalList.addElement(new Kern(kerning, true));
+                        }
+
                         int[] codePoints = new int[1];
                         codePoints[0] = ch;
                         String s = new String(codePoints, 0, 1);
@@ -153,6 +160,7 @@ public class Typesetter {
 
                     // Advance to the next code point.
                     i += Character.charCount(ch);
+                    previousCh = ch;
                 }
             }
 
