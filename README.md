@@ -1,8 +1,8 @@
 This is my main Java library. It contains some utility classes,
 some applications, and some one-off projects.
 
-* **chess**: A chess-playing program. See the driver in `test/chess` with test
-  puzzles. It's pretty weak, but still beats me handily.
+* **chess**: A chess-playing program. See the driver in `scripts/chess` with
+  test puzzles. It's pretty weak, but still beats me handily.
 
 * **hyphen**: A library for hyphenating words. Uses the TeX hyphenation file
   format.
@@ -35,4 +35,9 @@ some applications, and some one-off projects.
   parser to a PDF. Uses a TeX-like typesetting algorithm.
 
 * **util**: A set of utility classes.
+
+The `scripts` directory is a set of Java programs that can be run using my
+`java_launcher` script. This script compiles and caches the class file, making
+it pretty easy to write short single-file Java programs without the overhead of
+a build script.
 
