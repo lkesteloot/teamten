@@ -14,12 +14,34 @@ public class VerticalList {
         mElements.add(element);
     }
 
-    public List<Page> generatePages() {
-        List<Page> pages = new ArrayList<>();
+    public List<Page> generatePages(long boxHeight) {
+        // List of indices in mElements where each page starts.
+        List<Integer> pageStartIndices = new ArrayList<>();
 
-        // Put everything on one page.
-        Page page = new Page(mElements);
-        pages.add(page);
+        // Greedily look for places to break pages.
+        long total = 0;
+        for (int i = 0; i < mElements.size(); i++) {
+            Element element = mElements.get(i);
+            long elementSize = element.getHeight() + element.getDepth();
+
+            if (i == 0 || total + elementSize > boxHeight) {
+                pageStartIndices.add(i);
+                total = 0;
+            }
+
+            total += elementSize;
+        }
+        pageStartIndices.add(mElements.size());
+
+        // Create the pages.
+        List<Page> pages = new ArrayList<>(pageStartIndices.size() - 1);
+        for (int i = 0; i < pageStartIndices.size() - 1; i++) {
+            int thisElement = pageStartIndices.get(i);
+            int nextElement = pageStartIndices.get(i + 1);
+
+            Page page = new Page(mElements.subList(thisElement, nextElement));
+            pages.add(page);
+        }
 
         return pages;
     }

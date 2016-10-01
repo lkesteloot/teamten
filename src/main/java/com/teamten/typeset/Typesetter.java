@@ -31,7 +31,7 @@ public class Typesetter {
     private static final File MY_FONT_DIR = new File("/Users/lk/Dropbox/Personal/Fonts");
     private static final Splitter WORD_SPLITTER = Splitter.on(" ").
         omitEmptyStrings().trimResults();
-    private static final boolean DRAW_MARGINS = true;
+    private static final boolean DRAW_MARGINS = false;
 
     public static void main(String[] args) throws IOException {
         InputStream inputStream = new FileInputStream(args[0]);
@@ -135,7 +135,7 @@ public class Typesetter {
             previousBlockType = block.getBlockType();
         }
 
-        List<Page> pages = verticalList.generatePages();
+        List<Page> pages = verticalList.generatePages(pageHeight - 2*pageMargin);
 
         // Generate each page.
         for (Page page : pages) {

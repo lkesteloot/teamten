@@ -134,7 +134,7 @@ public class HorizontalList {
                         // Didn't find any place to stretch or shrink. Keep it anyway, but penalize it.
                         badness += Penalty.INFINITY*10; // TODO
                         ratio = 0;
-                        System.out.println("Overfull hbox!"); // TODO
+                        // System.out.println("Overfull hbox!"); // TODO
                     } else if (ratioIsInfinite) {
                         // Don't penalize for infinite stretch or shrink.
                     } else {
