@@ -65,6 +65,9 @@ public class Typesetter {
             float fontSize;
             boolean indentFirstLine = false;
             boolean allCaps = false;
+            boolean center = false;
+            long marginTop = 0;
+            long marginBottom = 0;
             HorizontalList horizontalList = new HorizontalList();
 
             switch (block.getBlockType()) {
@@ -77,8 +80,12 @@ public class Typesetter {
 
                 case PART_HEADER:
                     font = boldFont;
-                    fontSize = 18;
+                    font = regularFont;
+                    fontSize = 36;
                     allCaps = true;
+                    // center = true;
+                    marginTop = SpaceUnit.IN.toSp(1);
+                    marginBottom = SpaceUnit.IN.toSp(2);
                     break;
 
                 case CHAPTER_HEADER:
@@ -99,6 +106,14 @@ public class Typesetter {
             String text = span.getText();
             if (allCaps) {
                 text = text.toUpperCase();
+            }
+
+            if (marginTop != 0) {
+                verticalList.addElement(new Glue(marginTop, 0, 0, false));
+            }
+
+            if (center) {
+                horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
             }
 
             if (firstLineSpacing != 0) {
@@ -131,6 +146,9 @@ public class Typesetter {
             horizontalList.addElement(new Penalty(-Penalty.INFINITY));
 
             horizontalList.format(verticalList, pageWidth - 2*pageMargin);
+            if (marginBottom != 0) {
+                verticalList.addElement(new Glue(marginBottom, 0, 0, false));
+            }
             verticalList.addElement(new Glue(interParagraphSpacing, 0, 0, false));
             previousBlockType = block.getBlockType();
         }

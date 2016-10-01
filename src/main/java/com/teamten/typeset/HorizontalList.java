@@ -49,8 +49,10 @@ public class HorizontalList {
             int nextIndex = breakpointIndex + 1 < breakpoints.size() ?
                     breakpoints.get(breakpointIndex + 1).getIndex() : mElements.size();
 
-            // See where the line would start by skipping discardable elements.
-            while (index < nextIndex && mElements.get(index) instanceof DiscardableElement) {
+            // See where the line would start by skipping discardable elements. Don't do this on the very
+            // first breakpoint, since we'll want to keep glue at the front of the line that might be needed
+            // to center it.
+            while (breakpointIndex != 0 && index < nextIndex && mElements.get(index) instanceof DiscardableElement) {
                 index++;
             }
             breakpoint.setStartIndex(index);
