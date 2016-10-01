@@ -1,37 +1,49 @@
 
 package com.teamten.typeset;
 
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+
+import java.io.IOException;
+
 /**
  * A location where the line can be broken, but with a penalty.
  */
-public class Penalty extends Element {
-    public static final int INFINITY = 1000;
-    public static final int HYPHEN = 100;
-    private final float mWidth;
-    private final int mPenalty;
+public class Penalty extends DiscardableElement {
+    public static final long INFINITY = 10000;
+    private final long mPenalty;
 
-    public Penalty(float width, int penalty) {
-        mWidth = width;
+    public Penalty(long penalty) {
         mPenalty = penalty;
     }
 
-    public float getWidth() {
-        return mWidth;
-    }
-
-    public int getPenalty() {
+    public long getPenalty() {
         return mPenalty;
     }
 
     @Override
-    public boolean canBreakLine(float lineWidth, float maxLineWidth) {
-        if (mPenalty == INFINITY) {
-            return false;
-        } else if (mPenalty == -INFINITY) {
-            return true;
-        } else {
-            // Only if we can fit on the line (e.g., the hyphen).
-            return lineWidth + mWidth <= maxLineWidth;
-        }
+    public long getWidth() {
+        return 0;
+    }
+
+    @Override
+    public long getHeight() {
+        return 0;
+    }
+
+    @Override
+    public long getDepth() {
+        return 0;
+    }
+
+    @Override
+    public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
+        // Nothing to do.
+        return 0;
+    }
+
+    @Override
+    public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
+        // Nothing to do.
+        return 0;
     }
 }

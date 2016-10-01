@@ -60,6 +60,13 @@ public enum SpaceUnit {
     }
 
     /**
+     * Convert from SP to this unit. This is a convenience method because many methods in pdfbox take floats.
+     */
+    public float fromSpAsFloat(double sp) {
+        return (float) (sp/mSp);
+    }
+
+    /**
      * Parse a distance, such as "2in", "3.5 in", or "-2 mm". The number must be
      * parsable as a (possibly signed) double. The unit must be one of the ones
      * from this class, in upper or lower case, preceded by optional whitespace.

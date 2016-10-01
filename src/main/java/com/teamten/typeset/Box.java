@@ -4,25 +4,59 @@ package com.teamten.typeset;
 /**
  * Represents a 2D box of something, like a word or an image.
  */
-public class Box extends Element {
-    private final float mWidth;
-    private final String mText;
+public abstract class Box extends NonDiscardableElement {
+    private final long mWidth;
+    private final long mHeight;
+    private final long mDepth;
 
-    public Box(float width, String text) {
+    public Box(long width, long height, long depth) {
         mWidth = width;
-        mText = text;
+        mHeight = height;
+        mDepth = depth;
     }
 
-    public float getWidth() {
+    protected Box(BoxDimensions boxDimensions) {
+        mWidth = boxDimensions.mWidth;
+        mHeight = boxDimensions.mHeight;
+        mDepth = boxDimensions.mDepth;
+    }
+
+    /**
+     * The width (horizontally) of this box.
+     */
+    @Override
+    public long getWidth() {
         return mWidth;
     }
 
-    public String getText() {
-        return mText;
+    /**
+     * The distance from the baseline to the top of the box.
+     */
+    @Override
+    public long getHeight() {
+        return mHeight;
     }
 
+    /**
+     * The distance from the baseline to the bottom of the box.
+     */
     @Override
-    public boolean canBreakLine(float lineWidth, float maxLineWidth) {
-        return false;
+    public long getDepth() {
+        return mDepth;
+    }
+
+    /**
+     * So we can have a one-arg constructor.
+     */
+    protected static class BoxDimensions {
+        private final long mWidth;
+        private final long mHeight;
+        private final long mDepth;
+
+        public BoxDimensions(long width, long height, long depth) {
+            mWidth = width;
+            mHeight = height;
+            mDepth = depth;
+        }
     }
 }

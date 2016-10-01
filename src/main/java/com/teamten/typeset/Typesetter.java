@@ -13,7 +13,6 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +28,6 @@ public class Typesetter {
     private static final File FONT_DIR = new File("/Library/Fonts");
     private static final File SYSTEM_FONT_DIR = new File("/System/Library/Fonts");
     private static final File MY_FONT_DIR = new File("/Users/lk/Dropbox/Personal/Fonts");
-    private static final int DPI = 72;
     private static final Splitter WORD_SPLITTER = Splitter.on(" ").
         omitEmptyStrings().trimResults();
     private static final boolean DRAW_MARGINS = true;
@@ -44,30 +42,29 @@ public class Typesetter {
     }
 
     public PDDocument typeset(Doc doc) throws IOException {
-        PDDocument pdf = new PDDocument();
+        PDDocument pdDoc = new PDDocument();
 
         // XXX Load these values from the document header.
-        float pageWidth = 6*DPI;
-        float pageHeight = 9*DPI;
-        float pageMargin = 1*DPI;
+        long pageWidth = SpaceUnit.IN.toSp(6);
+        long pageHeight = SpaceUnit.IN.toSp(9);
+        long pageMargin = SpaceUnit.IN.toSp(1);
 
         // Load fonts we'll need. Don't use the built-in fonts, they don't have ligatures.
-        Font regularFont = new Font(pdf, new File(FONT_DIR, "Times New Roman.ttf"));
-        Font boldFont = new Font(pdf, new File(FONT_DIR, "Times New Roman Bold.ttf"));
-        boldFont = new Font(pdf, new File(MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf"));
-
-        PDPageContentStream contents = null;
-        float y = 0;
+        Font regularFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman.ttf"));
+        Font boldFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Bold.ttf"));
+        boldFont = new Font(pdDoc, new File(MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf"));
 
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
 
-        BlockType previousBlockType = null;
+        VerticalList verticalList = new VerticalList();
 
+        BlockType previousBlockType = null;
         for (Block block : doc.getBlocks()) {
             Font font;
             float fontSize;
             boolean indentFirstLine = false;
             boolean allCaps = false;
+            HorizontalList horizontalList = new HorizontalList();
 
             switch (block.getBlockType()) {
                 case BODY:
@@ -90,20 +87,75 @@ public class Typesetter {
                     break;
             }
 
-            float leading = fontSize*1.4f;
-            float interParagraphSpacing = leading/4;
-            float firstLineSpacing = indentFirstLine ? fontSize*2 : 0;
+            float leading = fontSize * 1.4f;
+            float interParagraphSpacing = leading / 4;
+            float firstLineSpacing = indentFirstLine ? fontSize * 2 : 0;
+            long spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
+            // Roughly copy TeX:
+            Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
 
             Span span = block.getSpans().get(0);
             String text = span.getText();
             if (allCaps) {
                 text = text.toUpperCase();
             }
-            List<String> words = WORD_SPLITTER.splitToList(text);
 
-            // Convert words to elements (boxes, glue, and penalty).
-            List<Element> elements = wordsToElements(words, font, fontSize, firstLineSpacing, hyphenDictionary);
+            for (int i = 0; i < text.length(); ) {
+                int ch = text.codePointAt(i);
 
+                if (ch == ' ') {
+                    horizontalList.addElement(spaceGlue);
+                } else {
+                    int[] codePoints = new int[1];
+                    codePoints[0] = ch;
+                    String s = new String(codePoints, 0, 1);
+                    long width = getTextWidth(font.getPdFont(), fontSize, s);
+                    horizontalList.addElement(new Text(font, fontSize, s, width, 655350, 0)); // TODO
+                }
+
+                // Advance to the next code point.
+                i += Character.charCount(ch);
+            }
+
+            horizontalList.format(verticalList);
+        }
+
+        List<Page> pages = verticalList.generatePages();
+
+        // Generate each page.
+        for (Page page : pages) {
+            PDPage pdPage = new PDPage();
+            pdDoc.addPage(pdPage);
+            pdPage.setMediaBox(new PDRectangle(
+                    SpaceUnit.PT.fromSpAsFloat(pageWidth),
+                    SpaceUnit.PT.fromSpAsFloat(pageHeight)));
+
+            PDPageContentStream contents = new PDPageContentStream(pdDoc, pdPage);
+
+            // Draw the margins for debugging.
+            if (DRAW_MARGINS) {
+                contents.addRect(SpaceUnit.PT.fromSpAsFloat(pageMargin),
+                        SpaceUnit.PT.fromSpAsFloat(pageMargin),
+                        SpaceUnit.PT.fromSpAsFloat(pageWidth - 2*pageMargin),
+                        SpaceUnit.PT.fromSpAsFloat(pageHeight - 2*pageMargin));
+                contents.setStrokingColor(0.9);
+                contents.stroke();
+            }
+
+            // Start at top of page.
+            long y = pageHeight - pageMargin;
+
+            // Lay out each element in the page.
+            for (Element element : page.getElements()) {
+                long advanceY = element.layOutVertically(pageMargin, y, contents);
+
+                y -= advanceY;
+            }
+
+            contents.close();
+        }
+
+        /*
             // Figure out where the breaks are. These are indices of "elements"
             // that should be replaced with a line break.
             List<Integer> breaks = elementsToBreaks(elements, pageWidth, pageMargin);
@@ -121,25 +173,6 @@ public class Typesetter {
 
                 // Perhaps start a new page.
                 if (contents == null || y < pageMargin) {
-                    // Start new page.
-                    if (contents != null) {
-                        contents.close();
-                    }
-
-                    PDPage page = new PDPage();
-                    pdf.addPage(page);
-                    page.setMediaBox(new PDRectangle(pageWidth, pageHeight));
-                    contents = new PDPageContentStream(pdf, page);
-
-                    // Draw the margins for debugging.
-                    if (DRAW_MARGINS) {
-                        contents.addRect(pageMargin, pageMargin, pageWidth - 2*pageMargin, pageHeight - 2*pageMargin);
-                        contents.setStrokingColor(0.9);
-                        contents.stroke();
-                    }
-
-                    // Start at top of page.
-                    y = pageHeight - pageMargin - leading;
                 }
 
                 // Draw each word on this line.
@@ -190,15 +223,17 @@ public class Typesetter {
         if (contents != null) {
             contents.close();
         }
+        */
 
-        return pdf;
+        return pdDoc;
     }
 
     /**
      * Convert words to elements (boxes, glue, and penalty).
      */
+    /*
     private List<Element> wordsToElements(List<String> words, Font font, float fontSize,
-            float firstLineSpacing, HyphenDictionary hyphenDictionary) throws IOException {
+                                          long firstLineSpacing, HyphenDictionary hyphenDictionary) throws IOException {
 
         List<Element> elements = new ArrayList<>();
 
@@ -227,7 +262,7 @@ public class Typesetter {
 
             // Add the fragments, separated by penalties.
             for (int j = 0; j < fragments.size(); j++) {
-                String fragment = fragments.get(j);
+                long fragment = fragments.get(j);
                 elements.add(new Box(getTextWidth(font.getPdFont(), fontSize, fragment), fragment));
                 if (j < fragments.size() - 1) {
                     elements.add(new Penalty(hyphenWidth, Penalty.HYPHEN));
@@ -260,9 +295,7 @@ public class Typesetter {
 
             if (element instanceof Box) {
                 Box box = (Box) element;
-                /*
-                System.out.printf("%g + %g > %g (%s)%n", lineWidth, box.getWidth(), maxLineWidth, box.getText());
-                */
+                //System.out.printf("%g + %g > %g (%s)%n", lineWidth, box.getWidth(), maxLineWidth, box.getText());
                 if (lineWidth + box.getWidth() > maxLineWidth && lastBreakable != -1) {
                     breaks.add(lastBreakable);
                     i = lastBreakable;
@@ -298,13 +331,17 @@ public class Typesetter {
 
         return breaks;
     }
+    */
 
     private static Element getLastElement(List<Element> elements) {
         return elements.isEmpty() ? null : elements.get(elements.size() - 1);
     }
 
-    private static float getTextWidth(PDFont font, float fontSize, String text) throws IOException {
-        return font.getStringWidth(text) / 1000 * fontSize;
+    /**
+     * Returns the width of the text in scaled points.
+     */
+    private static long getTextWidth(PDFont font, float fontSize, String text) throws IOException {
+        return SpaceUnit.PT.toSp(font.getStringWidth(text) / 1000 * fontSize);
     }
 
     /**
