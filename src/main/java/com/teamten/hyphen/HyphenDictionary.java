@@ -56,6 +56,9 @@ public class HyphenDictionary {
         return dic;
     }
 
+    /**
+     * Read the dictionary from the reader.
+     */
     private void read(BufferedReader reader) throws IOException {
         boolean started = false;
         String line;
@@ -98,7 +101,7 @@ public class HyphenDictionary {
                                 break;
 
                             default:
-                                throw new IOException("Invalid hyphen header: " + fields.get(0));
+                                throw new IOException("Invalid hyphen dictionary header: " + fields.get(0));
                         }
                     }
                 }
@@ -194,7 +197,7 @@ public class HyphenDictionary {
         for (int seqLength = 1; seqLength <= word.length(); seqLength++) {
             for (int start = 0; start <= word.length() - seqLength; start++) {
                 String seq = word.substring(start, start + seqLength);
-                // XXX The french dictionary has both straight apostrophes and curved ones,
+                // TODO The french dictionary has both straight apostrophes and curved ones,
                 // and is not consistent in which they use. Should normalize.
                 String value = mFragmentMap.get(seq.toLowerCase());
                 if (value != null) {
@@ -216,7 +219,7 @@ public class HyphenDictionary {
 
         /// System.out.printf("%s: %s%n", word, new String(cutPoints));
 
-        // Prevent hyphens at start and end of word.
+        // Prevent hyphenation at start and end of word.
         for (int i = 0; i < mLeftHyphenMin && i < cutPoints.length; i++) {
             cutPoints[i] = 0;
         }

@@ -16,6 +16,7 @@ public class MarkdownParser {
     private enum ParserState {
         START_OF_LINE,
         IN_LINE,
+        SKIP_WHITESPACE,
         COMMENT,
     }
 
@@ -67,7 +68,21 @@ public class MarkdownParser {
                     if (ch == '\n') {
                         state = ParserState.START_OF_LINE;
                         builder.append(' ');
+                    } else if (Character.isWhitespace(ch)) {
+                        state = ParserState.SKIP_WHITESPACE;
+                        builder.append(' ');
                     } else {
+                        builder.append(ch);
+                    }
+                    break;
+
+                case SKIP_WHITESPACE:
+                    if (ch == '\n') {
+                        state = ParserState.START_OF_LINE;
+                    } else if (Character.isWhitespace(ch)) {
+                        // Skip.
+                    } else {
+                        state = ParserState.IN_LINE;
                         builder.append(ch);
                     }
                     break;
