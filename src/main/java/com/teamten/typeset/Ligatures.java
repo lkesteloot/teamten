@@ -35,7 +35,7 @@ public class Ligatures {
      * @param isCharInFont return true if the Unicode character (e.g., \uFB01) is in
      * the font.
      */
-    public Ligatures(Predicate<Character> isCharInFont) {
+    public Ligatures(Predicate<Integer> isCharInFont) {
         mOrderedList = FULL_LIST.stream()
             // If it's in the font, add it to our map.
             .filter(ligature -> isCharInFont.test(ligature.getSingleChar()))

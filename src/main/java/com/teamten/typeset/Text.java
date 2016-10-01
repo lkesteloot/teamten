@@ -4,6 +4,8 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
 
+import static com.teamten.typeset.SpaceUnit.PT;
+
 /**
  * A sequence of characters.
  */
@@ -23,7 +25,7 @@ public class Text extends Box {
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
         contents.beginText();
         contents.setFont(mFont.getPdFont(), mFontSize);
-        contents.newLineAtOffset(SpaceUnit.PT.fromSpAsFloat(x), SpaceUnit.PT.fromSpAsFloat(y));
+        contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
         contents.showText(mText);
         contents.endText();
 

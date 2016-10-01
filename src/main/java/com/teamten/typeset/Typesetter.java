@@ -2,7 +2,6 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.PeekingIterator;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
@@ -19,8 +18,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.teamten.typeset.SpaceUnit.IN;
+import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * Converts a document to a PDF.
@@ -46,9 +47,9 @@ public class Typesetter {
         PDDocument pdDoc = new PDDocument();
 
         // XXX Load these values from the document header.
-        long pageWidth = SpaceUnit.IN.toSp(6);
-        long pageHeight = SpaceUnit.IN.toSp(9);
-        long pageMargin = SpaceUnit.IN.toSp(1);
+        long pageWidth = IN.toSp(6);
+        long pageHeight = IN.toSp(9);
+        long pageMargin = IN.toSp(1);
 
         // Load fonts we'll need. Don't use the built-in fonts, they don't have ligatures.
         Font regularFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman.ttf"));
@@ -84,8 +85,8 @@ public class Typesetter {
                     fontSize = 36;
                     allCaps = true;
                     // center = true;
-                    marginTop = SpaceUnit.IN.toSp(1);
-                    marginBottom = SpaceUnit.IN.toSp(2);
+                    marginTop = IN.toSp(1);
+                    marginBottom = IN.toSp(2);
                     break;
 
                 case CHAPTER_HEADER:
@@ -95,9 +96,9 @@ public class Typesetter {
                     break;
             }
 
-            long leading = SpaceUnit.PT.toSp(fontSize * 1.4f);
+            long leading = PT.toSp(fontSize * 1.4f);
             long interParagraphSpacing = leading / 4;
-            long firstLineSpacing = SpaceUnit.PT.toSp(indentFirstLine ? fontSize * 2 : 0);
+            long firstLineSpacing = PT.toSp(indentFirstLine ? fontSize * 2 : 0);
             long spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
             // Roughly copy TeX:
             Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
@@ -120,6 +121,10 @@ public class Typesetter {
                 horizontalList.addElement(new Box(firstLineSpacing, 0, 0));
             }
 
+            // Replace ligatures with Unicode values. TODO Not sure if we want to do this here with strings or
+            // on the fly while we're rolling through code points.
+            text = font.transformLigatures(text);
+
             for (int i = 0; i < text.length(); ) {
                 int ch = text.codePointAt(i);
 
@@ -134,7 +139,7 @@ public class Typesetter {
                     codePoints[0] = ch;
                     String s = new String(codePoints, 0, 1);
                     long width = getTextWidth(font.getPdFont(), fontSize, s);
-                    horizontalList.addElement(new Text(font, fontSize, s, width, 983025, 0)); // TODO
+                    horizontalList.addElement(new Text(font, fontSize, s, width, PT.toSp(15), 0)); // TODO
                 }
 
                 // Advance to the next code point.
@@ -160,17 +165,17 @@ public class Typesetter {
             PDPage pdPage = new PDPage();
             pdDoc.addPage(pdPage);
             pdPage.setMediaBox(new PDRectangle(
-                    SpaceUnit.PT.fromSpAsFloat(pageWidth),
-                    SpaceUnit.PT.fromSpAsFloat(pageHeight)));
+                    PT.fromSpAsFloat(pageWidth),
+                    PT.fromSpAsFloat(pageHeight)));
 
             PDPageContentStream contents = new PDPageContentStream(pdDoc, pdPage);
 
             // Draw the margins for debugging.
             if (DRAW_MARGINS) {
-                contents.addRect(SpaceUnit.PT.fromSpAsFloat(pageMargin),
-                        SpaceUnit.PT.fromSpAsFloat(pageMargin),
-                        SpaceUnit.PT.fromSpAsFloat(pageWidth - 2*pageMargin),
-                        SpaceUnit.PT.fromSpAsFloat(pageHeight - 2*pageMargin));
+                contents.addRect(PT.fromSpAsFloat(pageMargin),
+                        PT.fromSpAsFloat(pageMargin),
+                        PT.fromSpAsFloat(pageWidth - 2*pageMargin),
+                        PT.fromSpAsFloat(pageHeight - 2*pageMargin));
                 contents.setStrokingColor(0.9);
                 contents.stroke();
             }
@@ -187,76 +192,6 @@ public class Typesetter {
 
             contents.close();
         }
-
-        /*
-            // Figure out where the breaks are. These are indices of "elements"
-            // that should be replaced with a line break.
-            List<Integer> breaks = elementsToBreaks(elements, pageWidth, pageMargin);
-
-            // Draw the words.
-            int lineStart = 0;
-            for (int lineEnd : breaks) {
-                y -= leading;
-                float x = pageMargin;
-
-                // Skip lineStart over glues and non-forcing penalties here.
-                while (lineStart < lineEnd && skipElementAtStartOfLine(elements.get(lineStart))) {
-                    lineStart++;
-                }
-
-                // Perhaps start a new page.
-                if (contents == null || y < pageMargin) {
-                }
-
-                // Draw each word on this line.
-                for (int i = lineStart; i < lineEnd; i++) {
-                    Element element = elements.get(i);
-
-                    if (element instanceof Box) {
-                        Box box = (Box) element;
-                        contents.beginText();
-                        contents.setFont(font.getPdFont(), fontSize);
-                        contents.newLineAtOffset(x, y);
-                        contents.showText(box.getText());
-                        contents.endText();
-                        x += box.getWidth();
-                    } else if (element instanceof Glue) {
-                        Glue glue = (Glue) element;
-                        x += glue.getWidth();
-                    }
-                }
-
-                // XXX Ugh, is there a better way to do this?
-                if (lineEnd < elements.size()) {
-                    Element element = elements.get(lineEnd);
-                    if (element instanceof Penalty) {
-                        Penalty penalty = (Penalty) element;
-                        // XXX not correct if last word already ends with hyphen.
-                        // In that case, make the penalty's width 0 above.
-                        if (penalty.getPenalty() != -Penalty.INFINITY &&
-                                penalty.getPenalty() != 0) {
-
-                            contents.beginText();
-                            contents.setFont(font.getPdFont(), fontSize);
-                            contents.newLineAtOffset(x, y);
-                            contents.showText("-");
-                            contents.endText();
-                            x += penalty.getWidth();
-                        }
-                    }
-                }
-
-                lineStart = lineEnd + 1;
-            }
-
-            y -= interParagraphSpacing;
-            previousBlockType = block.getBlockType();
-        }
-
-        if (contents != null) {
-            contents.close();
-        }
-        */
 
         return pdDoc;
     }
@@ -315,55 +250,6 @@ public class Typesetter {
         return elements;
     }
 
-    private List<Integer> elementsToBreaks(List<Element> elements, float pageWidth, float pageMargin) {
-
-        List<Integer> breaks = new ArrayList<>();
-
-        // Fit elements into lines.
-        float lineWidth = 0;
-        float maxLineWidth = pageWidth - 2*pageMargin;
-        int lastBreakable = -1;
-        for (int i = 0; i < elements.size(); i++) {
-            Element element = elements.get(i);
-
-            if (element instanceof Box) {
-                Box box = (Box) element;
-                //System.out.printf("%g + %g > %g (%s)%n", lineWidth, box.getWidth(), maxLineWidth, box.getText());
-                if (lineWidth + box.getWidth() > maxLineWidth && lastBreakable != -1) {
-                    breaks.add(lastBreakable);
-                    i = lastBreakable;
-                    lastBreakable = -1;
-                    lineWidth = 0;
-                } else {
-                    lineWidth += box.getWidth();
-                }
-            } else if (element instanceof Glue) {
-                Glue glue = (Glue) element;
-                // XXX wrong, should be able to break here.
-                if (lineWidth + glue.getWidth() > maxLineWidth && lastBreakable != -1 && false) {
-                    breaks.add(lastBreakable);
-                    lastBreakable = -1;
-                    lineWidth = 0;
-                } else {
-                    lineWidth += glue.getWidth();
-                }
-            } else if (element instanceof Penalty) {
-                Penalty penalty = (Penalty) element;
-                if (penalty.getPenalty() == -Penalty.INFINITY) {
-                    // Always include forcing penalties.
-                    breaks.add(i);
-                    lastBreakable = -1;
-                    lineWidth = 0;
-                }
-            }
-
-            if (element.canBreakLine(lineWidth, maxLineWidth)) {
-                lastBreakable = i;
-            }
-        }
-
-        return breaks;
-    }
     */
 
     private static Element getLastElement(List<Element> elements) {
@@ -374,7 +260,7 @@ public class Typesetter {
      * Returns the width of the text in scaled points.
      */
     private static long getTextWidth(PDFont font, float fontSize, String text) throws IOException {
-        return SpaceUnit.PT.toSp(font.getStringWidth(text) / 1000 * fontSize);
+        return PT.toSp(font.getStringWidth(text) / 1000 * fontSize);
     }
 
     /**

@@ -7,11 +7,13 @@ package com.teamten.typeset;
 public class Ligature {
     private final String mMulti;
     private final String mSingleString;
-    private final char mSingleChar;
+    private final int mSingleChar;
 
-    public Ligature(String multi, char singleChar) {
+    public Ligature(String multi, int singleChar) {
         mMulti = multi;
-        mSingleString = String.valueOf(singleChar);
+        int[] codePoints = new int[1];
+        codePoints[0] = singleChar;
+        mSingleString = new String(codePoints, 0, 1);
         mSingleChar = singleChar;
     }
 
@@ -30,9 +32,9 @@ public class Ligature {
     }
 
     /**
-     * The single-character version of the ligature (e.g., "ﬁ"), as a character.
+     * The single-character version of the ligature (e.g., "ﬁ"), as a code point.
      */
-    public char getSingleChar() {
+    public int getSingleChar() {
         return mSingleChar;
     }
 
