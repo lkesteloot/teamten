@@ -8,13 +8,13 @@ import com.teamten.markdown.BlockType;
 import com.teamten.markdown.Doc;
 import com.teamten.markdown.MarkdownParser;
 import com.teamten.markdown.Span;
+import com.teamten.typeset.FontManager.FontName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,9 +27,6 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * Converts a document to a PDF.
  */
 public class Typesetter {
-    private static final File FONT_DIR = new File("/Library/Fonts");
-    private static final File SYSTEM_FONT_DIR = new File("/System/Library/Fonts");
-    private static final File MY_FONT_DIR = new File("/Users/lk/Dropbox/Personal/Fonts");
     private static final Splitter WORD_SPLITTER = Splitter.on(" ").
         omitEmptyStrings().trimResults();
     private static final boolean DRAW_MARGINS = false;
@@ -45,19 +42,12 @@ public class Typesetter {
 
     public PDDocument typeset(Doc doc) throws IOException {
         PDDocument pdDoc = new PDDocument();
+        FontManager fontManager = new FontManager(pdDoc);
 
         // XXX Load these values from the document header.
         long pageWidth = IN.toSp(6);
         long pageHeight = IN.toSp(9);
         long pageMargin = IN.toSp(1);
-
-        // Load fonts we'll need. Don't use the built-in fonts, they don't have ligatures.
-        Font romanFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman.ttf"));
-        Font italicFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Italic.ttf"));
-        Font boldRomanFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Bold.ttf"));
-        Font boldItalicFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Bold Italic.ttf"));
-        // Font boldFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Bold.ttf"));
-        // boldFont = new Font(pdDoc, new File(MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf"));
 
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
 
@@ -78,15 +68,15 @@ public class Typesetter {
             switch (block.getBlockType()) {
                 case BODY:
                 default:
-                    spanRomanFont = romanFont;
-                    spanItalicFont = italicFont;
+                    spanRomanFont = fontManager.get(FontName.TIMES_NEW_ROMAN);
+                    spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
                     fontSize = 11;
                     indentFirstLine = previousBlockType == BlockType.BODY;
                     break;
 
                 case PART_HEADER:
-                    spanRomanFont = romanFont;
-                    spanItalicFont = italicFont;
+                    spanRomanFont = fontManager.get(FontName.TIMES_NEW_ROMAN);
+                    spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
                     fontSize = 36;
                     allCaps = true;
                     // center = true;
@@ -95,8 +85,8 @@ public class Typesetter {
                     break;
 
                 case CHAPTER_HEADER:
-                    spanRomanFont = romanFont;
-                    spanItalicFont = italicFont;
+                    spanRomanFont = fontManager.get(FontName.TIMES_NEW_ROMAN);
+                    spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
                     fontSize = 11;
                     allCaps = true;
                     break;
@@ -151,6 +141,8 @@ public class Typesetter {
                             horizontalList.addElement(new Kern(kerning, true));
                         }
 
+                        // Add the single character as a text node. TODO this make for a large PDF since each
+                        // character is individually placed. Combine consecutive characters into text blocks.
                         int[] codePoints = new int[1];
                         codePoints[0] = ch;
                         String s = new String(codePoints, 0, 1);
