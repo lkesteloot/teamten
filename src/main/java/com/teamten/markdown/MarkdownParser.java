@@ -37,9 +37,11 @@ public class MarkdownParser {
         Doc doc = new Doc();
 
         ParserState state = ParserState.START_OF_LINE;
-        StringBuilder builder = new StringBuilder();
+        BlockType blockType = BlockType.BODY;
+        Block.Builder builder = null;
+        boolean isItalic = false;
         int chOrEof;
-        parsingLoop: while ((chOrEof = reader.read()) != -1) {
+        while ((chOrEof = reader.read()) != -1) {
             char ch = (char) chOrEof;
 
             /// System.out.printf("%d (%c) %s %s%n", chOrEof, ch, state, builder);
@@ -50,16 +52,24 @@ public class MarkdownParser {
                     } else if (ch == '%') {
                         // Comment, skip rest of line.
                         state = ParserState.COMMENT;
+                    } else if (builder == null && ch == '#' && blockType == BlockType.BODY) {
+                        blockType = BlockType.PART_HEADER;
+                    } else if (builder == null && ch == '#' && blockType == BlockType.PART_HEADER) {
+                        blockType = BlockType.CHAPTER_HEADER;
+                    } else if (ch == '*') {
+                        isItalic = true;
                     } else if (ch == '\n') {
                         // Blank line, end of chunk.
-                        if (builder.length() > 0) {
-                            boolean continueProcessing = emitBlock(doc, builder);
-                            if (!continueProcessing) {
-                                break parsingLoop;
-                            }
+                        if (builder != null && !builder.isEmpty()) {
+                            doc.addBlock(builder.build());
+                            builder = null;
+                            blockType = BlockType.BODY;
                         }
                     } else {
-                        builder.append(ch);
+                        if (builder == null) {
+                            builder = new Block.Builder(blockType);
+                        }
+                        builder.add(ch, isItalic);
                         state = ParserState.IN_LINE;
                     }
                     break;
@@ -67,12 +77,14 @@ public class MarkdownParser {
                 case IN_LINE:
                     if (ch == '\n') {
                         state = ParserState.START_OF_LINE;
-                        builder.append(' ');
+                        builder.add(' ', isItalic);
                     } else if (Character.isWhitespace(ch)) {
                         state = ParserState.SKIP_WHITESPACE;
-                        builder.append(' ');
+                        builder.add(' ', isItalic);
+                    } else if (ch == '*') {
+                        isItalic = !isItalic;
                     } else {
-                        builder.append(ch);
+                        builder.add(ch, isItalic);
                     }
                     break;
 
@@ -81,9 +93,12 @@ public class MarkdownParser {
                         state = ParserState.START_OF_LINE;
                     } else if (Character.isWhitespace(ch)) {
                         // Skip.
+                    } else if (ch == '*') {
+                        state = ParserState.IN_LINE;
+                        isItalic = !isItalic;
                     } else {
                         state = ParserState.IN_LINE;
-                        builder.append(ch);
+                        builder.add(ch, isItalic);
                     }
                     break;
 
@@ -99,50 +114,11 @@ public class MarkdownParser {
         }
 
         // Final block.
-        if (builder.length() > 0) {
-            emitBlock(doc, builder);
+        if (builder != null && !builder.isEmpty()) {
+            doc.addBlock(builder.build());
+            builder = null;
         }
 
         return doc;
-    }
-
-    /**
-     * Add the chunk (paragraph) as a block to the document.
-     *
-     * @return whether to continue processing.
-     */
-    private boolean emitBlock(Doc doc, StringBuilder builder) {
-        // Extract the text from the builder.
-        String chunk = builder.toString().trim();
-        builder.setLength(0);
-
-        // Skip empty blocks. These can happen after the file header, etc.
-        if (chunk.isEmpty()) {
-            return true;
-        }
-
-        BlockType blockType;
-
-        // Figure out type of block.
-        if (chunk.startsWith("# ")) {
-            chunk = chunk.substring(1).trim();
-            blockType = BlockType.PART_HEADER;
-        } else if (chunk.startsWith("## ")) {
-            chunk = chunk.substring(2).trim();
-            blockType = BlockType.CHAPTER_HEADER;
-        } else if (chunk.equals("/bye")) {
-            // Terminate processing; for testing.
-            return false;
-        } else {
-            blockType = BlockType.BODY;
-        }
-
-        // Create DOM.
-        Span span = new Span(chunk);
-        Block block = new Block(blockType);
-        block.addSpan(span);
-        doc.addBlock(block);
-
-        return true;
     }
 }

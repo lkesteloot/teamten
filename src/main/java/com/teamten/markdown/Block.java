@@ -38,4 +38,58 @@ public class Block {
                     first.substring(0, Math.min(1000, first.length())));
         }
     }
+
+    /**
+     * Builds a Block one character at a time.
+     */
+    public static class Builder {
+        private final Block mBlock;
+        private final StringBuilder mStringBuilder = new StringBuilder();
+        private boolean mIsItalic;
+
+        public Builder(BlockType blockType) {
+            mBlock = new Block(blockType);
+        }
+
+        /**
+         * Add the character to the block.
+         * @param ch the character to add.
+         * @param isItalic whether the character should be displayed in italics.
+         */
+        public void add(char ch, boolean isItalic) {
+            if (isItalic != mIsItalic) {
+                emitSpan();
+                mIsItalic = isItalic;
+            }
+
+            mStringBuilder.append(ch);
+        }
+
+        /**
+         * Returns whether any characters have been added so far.
+         */
+        public boolean isEmpty() {
+            return mBlock.getSpans().isEmpty() && mStringBuilder.length() == 0;
+        }
+
+        /**
+         * Builds the block and returns it. Do not call this more than once for a given builder.
+         */
+        public Block build() {
+            emitSpan();
+            return mBlock;
+        }
+
+        /**
+         * Possibly emit span, if we have characters accumulated up.
+         */
+        private void emitSpan() {
+            if (mStringBuilder.length() > 0) {
+                Span span = new Span(mStringBuilder.toString(), mIsItalic);
+                mStringBuilder.setLength(0);
+                mBlock.addSpan(span);
+            }
+        }
+
+    }
 }

@@ -52,9 +52,12 @@ public class Typesetter {
         long pageMargin = IN.toSp(1);
 
         // Load fonts we'll need. Don't use the built-in fonts, they don't have ligatures.
-        Font regularFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman.ttf"));
-        Font boldFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Bold.ttf"));
-        boldFont = new Font(pdDoc, new File(MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf"));
+        Font romanFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman.ttf"));
+        Font italicFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Italic.ttf"));
+        Font boldRomanFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Bold.ttf"));
+        Font boldItalicFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Bold Italic.ttf"));
+        // Font boldFont = new Font(pdDoc, new File(FONT_DIR, "Times New Roman Bold.ttf"));
+        // boldFont = new Font(pdDoc, new File(MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf"));
 
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
 
@@ -62,7 +65,8 @@ public class Typesetter {
 
         BlockType previousBlockType = null;
         for (Block block : doc.getBlocks()) {
-            Font font;
+            Font spanRomanFont;
+            Font spanItalicFont;
             float fontSize;
             boolean indentFirstLine = false;
             boolean allCaps = false;
@@ -74,14 +78,15 @@ public class Typesetter {
             switch (block.getBlockType()) {
                 case BODY:
                 default:
-                    font = regularFont;
+                    spanRomanFont = romanFont;
+                    spanItalicFont = italicFont;
                     fontSize = 11;
                     indentFirstLine = previousBlockType == BlockType.BODY;
                     break;
 
                 case PART_HEADER:
-                    font = boldFont;
-                    font = regularFont;
+                    spanRomanFont = romanFont;
+                    spanItalicFont = italicFont;
                     fontSize = 36;
                     allCaps = true;
                     // center = true;
@@ -90,7 +95,8 @@ public class Typesetter {
                     break;
 
                 case CHAPTER_HEADER:
-                    font = boldFont;
+                    spanRomanFont = romanFont;
+                    spanItalicFont = italicFont;
                     fontSize = 11;
                     allCaps = true;
                     break;
@@ -99,15 +105,6 @@ public class Typesetter {
             long leading = PT.toSp(fontSize * 1.4f);
             long interParagraphSpacing = leading / 4;
             long firstLineSpacing = PT.toSp(indentFirstLine ? fontSize * 2 : 0);
-            long spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
-            // Roughly copy TeX:
-            Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
-
-            Span span = block.getSpans().get(0);
-            String text = span.getText();
-            if (allCaps) {
-                text = text.toUpperCase();
-            }
 
             if (marginTop != 0) {
                 verticalList.addElement(new Glue(marginTop, 0, 0, false));
@@ -121,29 +118,42 @@ public class Typesetter {
                 horizontalList.addElement(new Box(firstLineSpacing, 0, 0));
             }
 
-            // Replace ligatures with Unicode values. TODO Not sure if we want to do this here with strings or
-            // on the fly while we're rolling through code points.
-            text = font.transformLigatures(text);
+            for (Span span : block.getSpans()) {
+                Font font = span.isItalic() ? spanItalicFont : spanRomanFont;
 
-            for (int i = 0; i < text.length(); ) {
-                int ch = text.codePointAt(i);
+                long spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
+                // Roughly copy TeX:
+                Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
 
-                if (ch == ' ') {
-                    horizontalList.addElement(spaceGlue);
-                } else if (ch == '\u00A0') {
-                    // Non-break space. Precede with infinite penalty.
-                    horizontalList.addElement(new Penalty(Penalty.INFINITY));
-                    horizontalList.addElement(spaceGlue);
-                } else {
-                    int[] codePoints = new int[1];
-                    codePoints[0] = ch;
-                    String s = new String(codePoints, 0, 1);
-                    long width = getTextWidth(font.getPdFont(), fontSize, s);
-                    horizontalList.addElement(new Text(font, fontSize, s, width, PT.toSp(15), 0)); // TODO
+                String text = span.getText();
+                if (allCaps) {
+                    text = text.toUpperCase();
                 }
 
-                // Advance to the next code point.
-                i += Character.charCount(ch);
+                // Replace ligatures with Unicode values. TODO Not sure if we want to do this here with strings or
+                // on the fly while we're rolling through code points.
+                text = font.transformLigatures(text);
+
+                for (int i = 0; i < text.length(); ) {
+                    int ch = text.codePointAt(i);
+
+                    if (ch == ' ') {
+                        horizontalList.addElement(spaceGlue);
+                    } else if (ch == '\u00A0') {
+                        // Non-break space. Precede with infinite penalty.
+                        horizontalList.addElement(new Penalty(Penalty.INFINITY));
+                        horizontalList.addElement(spaceGlue);
+                    } else {
+                        int[] codePoints = new int[1];
+                        codePoints[0] = ch;
+                        String s = new String(codePoints, 0, 1);
+                        long width = getTextWidth(font.getPdFont(), fontSize, s);
+                        horizontalList.addElement(new Text(font, fontSize, s, width, PT.toSp(15), 0)); // TODO
+                    }
+
+                    // Advance to the next code point.
+                    i += Character.charCount(ch);
+                }
             }
 
             // Add a forced break at the end of the paragraph.

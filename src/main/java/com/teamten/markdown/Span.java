@@ -6,12 +6,18 @@ package com.teamten.markdown;
  */
 public class Span {
     private final String mText;
+    private final boolean mIsItalic;
 
-    public Span(String text) {
+    public Span(String text, boolean isItalic) {
         mText = text;
+        mIsItalic = isItalic;
     }
 
     public String getText() {
         return mText;
+    }
+
+    public boolean isItalic() {
+        return mIsItalic;
     }
 }
