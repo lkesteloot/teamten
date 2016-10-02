@@ -13,7 +13,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.PDFont;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -111,7 +110,7 @@ public class Typesetter {
             for (Span span : block.getSpans()) {
                 Font font = span.isItalic() ? spanItalicFont : spanRomanFont;
 
-                long spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
+                long spaceWidth = font.getTextWidth(fontSize, " ");
                 // Roughly copy TeX:
                 Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
 
@@ -146,7 +145,7 @@ public class Typesetter {
                         int[] codePoints = new int[1];
                         codePoints[0] = ch;
                         String s = new String(codePoints, 0, 1);
-                        long width = getTextWidth(font.getPdFont(), fontSize, s);
+                        long width = font.getTextWidth(fontSize, s);
                         horizontalList.addElement(new Text(font, fontSize, s, width, PT.toSp(15), 0)); // TODO
                     }
 
@@ -160,6 +159,7 @@ public class Typesetter {
             horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
             horizontalList.addElement(new Penalty(-Penalty.INFINITY));
 
+            // Break the horizontal list into HBox elements, adding them to the vertical list.
             horizontalList.format(verticalList, pageWidth - 2*pageMargin);
             if (marginBottom != 0) {
                 verticalList.addElement(new Glue(marginBottom, 0, 0, false));
@@ -264,13 +264,6 @@ public class Typesetter {
 
     private static Element getLastElement(List<Element> elements) {
         return elements.isEmpty() ? null : elements.get(elements.size() - 1);
-    }
-
-    /**
-     * Returns the width of the text in scaled points.
-     */
-    private static long getTextWidth(PDFont font, float fontSize, String text) throws IOException {
-        return PT.toSp(font.getStringWidth(text) / 1000 * fontSize);
     }
 
     /**

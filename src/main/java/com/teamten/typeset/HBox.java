@@ -3,6 +3,7 @@ package com.teamten.typeset;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +46,17 @@ public class HBox extends Box {
         return getHeight() + getDepth();
     }
 
+    @Override
+    public void println(PrintStream stream, String indent) {
+        stream.println(indent + "HBox " + getDimensionString() + ":");
+        for (Element element : mElements) {
+            element.println(stream, indent + "    ");
+        }
+    }
+
+    /**
+     * Computes the sum of the elements widths and the max of the height and depth.
+     */
     private static BoxDimensions determineBoxDimensions(List<Element> elements) {
         long boxWidth = 0;
         long boxHeight = 0;
@@ -55,7 +67,7 @@ public class HBox extends Box {
             long height = element.getHeight();
             long depth = element.getDepth();
 
-            boxWidth = Math.max(boxWidth, width);
+            boxWidth += width;
             boxHeight = Math.max(boxHeight, height);
             boxDepth = Math.max(boxDepth, depth);
         }

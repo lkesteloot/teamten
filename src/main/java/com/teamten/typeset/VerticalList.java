@@ -7,9 +7,10 @@ import java.util.List;
  * Accumulates elements in a vertical list until the document is finished, at which point a list of
  * pages is generated.
  */
-public class VerticalList {
+public class VerticalList implements ElementSink {
     private final List<Element> mElements = new ArrayList<>();
 
+    @Override
     public void addElement(Element element) {
         mElements.add(element);
     }

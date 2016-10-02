@@ -8,9 +8,10 @@ import java.util.List;
  * Accumulates elements in a horizontal list until a paragraph is finished, at which point a list of
  * elements is generated and added to a vertical list.
  */
-public class HorizontalList {
+public class HorizontalList implements ElementSink {
     private final List<Element> mElements = new ArrayList<>();
 
+    @Override
     public void addElement(Element element) {
         mElements.add(element);
     }
@@ -18,7 +19,7 @@ public class HorizontalList {
     /**
      * Format the horizontal list and add the elements to the vertical list.
      */
-    public void format(VerticalList verticalList, long lineWidth) {
+    public void format(ElementSink verticalList, long lineWidth) {
         // Find all the places that we could break a line.
         List<Breakpoint> breakpoints = new ArrayList<>();
 

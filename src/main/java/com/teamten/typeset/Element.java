@@ -4,6 +4,7 @@ package com.teamten.typeset;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * An element that can be stacked horizontally to make a line.
@@ -43,4 +44,13 @@ public abstract class Element {
      * @return how much to move down afterward.
      */
     public abstract long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException;
+
+    /**
+     * Pretty prints the element to the PrintWriter with the given indent. The method must print its own newline.
+     */
+    public void println(PrintStream stream, String indent) {
+        // Default implementation just uses toString().
+        stream.print(indent);
+        stream.println(toString());
+    }
 }

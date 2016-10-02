@@ -4,6 +4,9 @@ package com.teamten.typeset;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
+import java.io.PrintStream;
+
+import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * Whitespace that has a default width but can be shrunk or stretched.
@@ -89,6 +92,12 @@ public class Glue extends DiscardableElement {
         return mSize;
     }
 
+    @Override
+    public void println(PrintStream stream, String indent) {
+        stream.printf("%s%s glue: %.1fpt%s%s%n", indent, mIsHorizontal ? "Horizontal" : "Vertical",
+                PT.fromSp(mSize), mStretch.toString("+"), mShrink.toString("-"));
+    }
+
     public static class Expandability {
         private final long mAmount;
         private final boolean mIsInfinite;
@@ -110,6 +119,14 @@ public class Glue extends DiscardableElement {
          */
         public boolean isInfinite() {
             return mIsInfinite;
+        }
+
+        public String toString(String prefix) {
+            if (mAmount == 0) {
+                return "";
+            } else {
+                return String.format("%s%.1f%s", prefix, PT.fromSp(mAmount), mIsInfinite ? "inf" : "pt");
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 
 package com.teamten.typeset;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.fontbox.ttf.CmapSubtable;
 import org.apache.fontbox.ttf.CmapTable;
 import org.apache.fontbox.ttf.KerningSubtable;
@@ -21,6 +22,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class Font {
     private static final TTFParser TTF_PARSER = new TTFParser(true);
+    private final File mFile;
     private final PDFont mPdFont;
     private final KerningSubtable mKerningSubtable;
     private final CmapSubtable mCmapSubtable;
@@ -28,6 +30,8 @@ public class Font {
     private final Ligatures mLigatures;
 
     public Font(PDDocument pdf, File file) throws IOException {
+        mFile = file;
+
         // Load the font.
         TrueTypeFont ttf = TTF_PARSER.parse(file);
         mPdFont = PDType0Font.load(pdf, ttf, false);
@@ -72,5 +76,20 @@ public class Font {
 
     public String transformLigatures(String s) {
         return mLigatures.transform(s);
+    }
+
+    /**
+     * Returns the width of the text in scaled points.
+     */
+    public long getTextWidth(float fontSize, String text) throws IOException {
+        return PT.toSp(mPdFont.getStringWidth(text) / 1000 * fontSize);
+    }
+
+    /**
+     * The basename ("Times New Roman") of the font filename.
+     */
+    @Override
+    public String toString() {
+        return FilenameUtils.getBaseName(mFile.getName());
     }
 }

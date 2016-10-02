@@ -3,6 +3,7 @@ package com.teamten.typeset;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import static com.teamten.typeset.SpaceUnit.PT;
 
@@ -36,5 +37,10 @@ public class Text extends Box {
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
         // Text must always be in an HBox.
         throw new IllegalStateException("text should be not laid out vertically");
+    }
+
+    @Override
+    public void println(PrintStream stream, String indent) {
+        stream.printf("%sText %s: “%s” in %.0fpt %s%n", indent, getDimensionString(), mText, mFontSize, mFont);
     }
 }

@@ -5,6 +5,8 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
 
+import static com.teamten.typeset.SpaceUnit.PT;
+
 /**
  * Represents a 2D box of something, like a word or an image. Can be used by itself to make an empty space.
  */
@@ -57,6 +59,14 @@ public class Box extends NonDiscardableElement {
     @Override
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
         return mHeight + mDepth;
+    }
+
+    /**
+     * A string that specifies the three dimensions of the box.
+     */
+
+    protected String getDimensionString() {
+        return String.format("(%.1fpt, %.1fpt, %.1fpt)", PT.fromSp(mWidth), PT.fromSp(mHeight), PT.fromSp(mDepth));
     }
 
     /**
