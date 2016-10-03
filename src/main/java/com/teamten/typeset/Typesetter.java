@@ -91,9 +91,12 @@ public class Typesetter {
                     break;
             }
 
-            long leading = PT.toSp(fontSize * 1.4f);
+            long leading = PT.toSp(fontSize * 1.2f);
             long interParagraphSpacing = leading / 4;
             long firstLineSpacing = PT.toSp(indentFirstLine ? fontSize * 2 : 0);
+
+            // Set the distance between baselines based on the paragraph's main font.
+            verticalList.setBaselineSkip(leading);
 
             if (marginTop != 0) {
                 verticalList.addElement(new Glue(marginTop, 0, 0, false));

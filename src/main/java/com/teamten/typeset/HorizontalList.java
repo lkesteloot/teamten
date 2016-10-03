@@ -31,11 +31,13 @@ public class HorizontalList implements ElementSink {
             Element previousElement = i == 0 ? null : mElements.get(i - 1);
 
             if (element instanceof Penalty) {
+                // Can break at penalties as long as they're not positive infinity.
                 Penalty penalty = (Penalty) element;
                 if (penalty.getPenalty() != Penalty.INFINITY) {
                     breakpoints.add(new Breakpoint(i, penalty.getPenalty()));
                 }
-            } else if (element instanceof Glue && previousElement instanceof Box) {
+            } else if (element instanceof Glue && previousElement instanceof NonDiscardableElement) {
+                // Can break at glues that preceded by non-discardable elements.
                 breakpoints.add(new Breakpoint(i, 0));
             }
         }
