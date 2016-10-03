@@ -22,8 +22,6 @@ public class HorizontalListTest {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new FontManager(pdDoc);
 
-        long lineWidth = IN.toSp(5);
-
         Font font = fontManager.get(FontManager.FontName.TIMES_NEW_ROMAN);
         float fontSize = 11;
 
@@ -36,7 +34,7 @@ public class HorizontalListTest {
         horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
         horizontalList.addElement(new Penalty(-Penalty.INFINITY));
 
-        horizontalList.format(verticalList, lineWidth);
+        horizontalList.format(verticalList, IN.toSp(5));
 
         verticalList.assertSize(1);
         verticalList.println();
@@ -65,8 +63,8 @@ public class HorizontalListTest {
          * Print the whole vertical list, for debugging.
          */
         public void println() {
+            System.out.println("Vertical list:");
             for (int i = 0; i < mElements.size(); i++) {
-                System.out.printf("%d:%n", i);
                 mElements.get(i).println(System.out, "    ");
             }
         }

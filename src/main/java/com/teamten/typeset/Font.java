@@ -4,6 +4,8 @@ package com.teamten.typeset;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.fontbox.ttf.CmapSubtable;
 import org.apache.fontbox.ttf.CmapTable;
+import org.apache.fontbox.ttf.GlyphData;
+import org.apache.fontbox.ttf.GlyphTable;
 import org.apache.fontbox.ttf.KerningSubtable;
 import org.apache.fontbox.ttf.KerningTable;
 import org.apache.fontbox.ttf.TTFParser;
@@ -26,6 +28,7 @@ public class Font {
     private final PDFont mPdFont;
     private final KerningSubtable mKerningSubtable;
     private final CmapSubtable mCmapSubtable;
+    private final GlyphTable mGlyphTable;
     private final int mUnitsPerEm;
     private final Ligatures mLigatures;
 
@@ -53,6 +56,9 @@ public class Font {
 
         // Make a table of ligatures that only include the ones in this font.
         mLigatures = new Ligatures(ch -> mCmapSubtable.getGlyphId(ch) != 0);
+
+        // Get the table of glyphs that'll give us the metrics for each glyph.
+        mGlyphTable = ttf.getGlyph();
     }
 
     /**
@@ -79,8 +85,10 @@ public class Font {
     }
 
     /**
-     * Returns the width of the text in scaled points.
+     * Returns the width of the text in scaled points. Does not take kerning into account.
+     * TODO delete.
      */
+    @Deprecated
     public long getTextWidth(float fontSize, String text) throws IOException {
         return PT.toSp(mPdFont.getStringWidth(text) / 1000 * fontSize);
     }
@@ -91,5 +99,67 @@ public class Font {
     @Override
     public String toString() {
         return FilenameUtils.getBaseName(mFile.getName());
+    }
+
+    /**
+     * Return the size of a code point in the specified font size.
+     */
+    public Metrics getCharacterMetrics(int ch, float fontSize) throws IOException {
+        int glyphId = mCmapSubtable.getGlyphId(ch);
+
+        // Width we can get directly.
+        long width = PT.toSp(mPdFont.getWidth(glyphId) / 1000 * fontSize);
+
+        // Height and depth we get from the glyph data.
+        GlyphData glyphData = mGlyphTable.getGlyph(glyphId);
+
+        long height;
+        long depth;
+        if (glyphData == null) {
+            // No glyph, probably a space.
+            height = 0;
+            depth = 0;
+        } else {
+            height = Math.max(PT.toSp(glyphData.getYMaximum() * fontSize / mUnitsPerEm), 0);
+            depth = Math.max(-PT.toSp(glyphData.getYMinimum() * fontSize / mUnitsPerEm), 0);
+        }
+
+        return new Metrics(width, height, depth);
+    }
+
+    /**
+     * The metrics for a character or text, in scaled points.
+     */
+    public static class Metrics {
+        private final long mWidth;
+        private final long mHeight;
+        private final long mDepth;
+
+        public Metrics(long width, long height, long depth) {
+            mWidth = width;
+            mHeight = height;
+            mDepth = depth;
+        }
+
+        public long getWidth() {
+            return mWidth;
+        }
+
+        public long getHeight() {
+            return mHeight;
+        }
+
+        public long getDepth() {
+            return mDepth;
+        }
+
+        @Override
+        public String toString() {
+            return "Metrics{" +
+                    "mWidth=" + mWidth +
+                    ", mHeight=" + mHeight +
+                    ", mDepth=" + mDepth +
+                    '}';
+        }
     }
 }

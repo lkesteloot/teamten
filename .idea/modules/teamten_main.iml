@@ -15,7 +15,9 @@
           <root url="jar://$MODULE_DIR$/../../libs/pdfbox-2.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../libs/pdfbox-2.0.0-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">

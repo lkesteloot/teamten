@@ -110,7 +110,7 @@ public class Typesetter {
             for (Span span : block.getSpans()) {
                 Font font = span.isItalic() ? spanItalicFont : spanRomanFont;
 
-                long spaceWidth = font.getTextWidth(fontSize, " ");
+                long spaceWidth = font.getCharacterMetrics(' ', fontSize).getWidth();
                 // Roughly copy TeX:
                 Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
 
@@ -140,13 +140,14 @@ public class Typesetter {
                             horizontalList.addElement(new Kern(kerning, true));
                         }
 
-                        // Add the single character as a text node. TODO this make for a large PDF since each
+                        // Add the single character as a text node. TODO this makes for a large PDF since each
                         // character is individually placed. Combine consecutive characters into text blocks.
                         int[] codePoints = new int[1];
                         codePoints[0] = ch;
                         String s = new String(codePoints, 0, 1);
+                        Font.Metrics metrics = font.getCharacterMetrics(ch, fontSize);
                         long width = font.getTextWidth(fontSize, s);
-                        horizontalList.addElement(new Text(font, fontSize, s, width, PT.toSp(15), 0)); // TODO
+                        horizontalList.addElement(new Text(font, fontSize, s, metrics.getWidth(), metrics.getHeight(), metrics.getDepth()));
                     }
 
                     // Advance to the next code point.

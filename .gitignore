@@ -3,8 +3,8 @@
 /repo
 *.pdf
 *.md
-/libs/fontbox-2.0.0.jar
-/libs/pdfbox-2.0.0.jar
+/libs/fontbox-*.jar
+/libs/pdfbox-*.jar
 
 # For IDEA:
 /.idea/workspace.xml
