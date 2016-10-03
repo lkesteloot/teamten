@@ -17,6 +17,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.teamten.typeset.SpaceUnit.IN;
@@ -28,7 +29,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
 public class Typesetter {
     private static final Splitter WORD_SPLITTER = Splitter.on(" ").
         omitEmptyStrings().trimResults();
-    private static final boolean DRAW_MARGINS = false;
+    private static final boolean DRAW_MARGINS = true;
 
     public static void main(String[] args) throws IOException {
         InputStream inputStream = new FileInputStream(args[0]);
@@ -172,10 +173,17 @@ public class Typesetter {
             previousBlockType = block.getBlockType();
         }
 
-        List<Page> pages = verticalList.generatePages(pageHeight - 2*pageMargin);
+        // Add a final infinite glue at the bottom.
+        verticalList.addElement(new Glue(0, 1, true, 0, false, false));
+
+        // And a forced page break.
+        verticalList.addElement(new Penalty(-Penalty.INFINITY));
+
+        List<VBox> pages = new ArrayList<>();
+        verticalList.format(ElementSink.listSink(pages, VBox.class), pageHeight - 2*pageMargin);
 
         // Generate each page.
-        for (Page page : pages) {
+        for (VBox page : pages) {
             PDPage pdPage = new PDPage();
             pdDoc.addPage(pdPage);
             pdPage.setMediaBox(new PDRectangle(
@@ -212,6 +220,7 @@ public class Typesetter {
 
     /**
      * Convert words to elements (boxes, glue, and penalty).
+     * TODO delete
      */
     /*
     private List<Element> wordsToElements(List<String> words, Font font, float fontSize,

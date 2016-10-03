@@ -7,10 +7,9 @@ import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * Accumulates elements in a vertical list until the document is finished, at which point a list of
- * pages is generated.
+ * pages (type VBox) is generated.
  */
-public class VerticalList implements ElementSink {
-    private final List<Element> mElements = new ArrayList<>();
+public class VerticalList extends ElementList {
     /**
      * The depth of the last box that was added.
      */
@@ -22,11 +21,11 @@ public class VerticalList implements ElementSink {
         // Add glue just before boxes so that the baselines are the right distance apart.
         if (element instanceof Box) {
             long skip = Math.max(0, mBaselineSkip - mPreviousDepth - element.getHeight());
-            mElements.add(new Glue(skip, 0, 0, false));
+            super.addElement(new Glue(skip, 0, 0, false));
             mPreviousDepth = element.getDepth();
         }
 
-        mElements.add(element);
+        super.addElement(element);
     }
 
     /**
@@ -37,10 +36,16 @@ public class VerticalList implements ElementSink {
         mBaselineSkip = baselineSkip;
     }
 
+    @Override
+    protected Box makeOutputBox(List<Element> elements) {
+        return new VBox(elements);
+    }
+
     /**
      * Group elements vertically into pages, each of verticalSize height.
      */
-    public List<Page> generatePages(long verticalSize) {
+    /*
+    public List<VBox> generatePages(long verticalSize) {
         // List of indices in mElements where each page starts.
         List<Integer> pageStartIndices = new ArrayList<>();
 
@@ -62,15 +67,16 @@ public class VerticalList implements ElementSink {
         pageStartIndices.add(mElements.size());
 
         // Create the pages.
-        List<Page> pages = new ArrayList<>(pageStartIndices.size() - 1);
+        List<VBox> pages = new ArrayList<>(pageStartIndices.size() - 1);
         for (int i = 0; i < pageStartIndices.size() - 1; i++) {
             int thisElement = pageStartIndices.get(i);
             int nextElement = pageStartIndices.get(i + 1);
 
-            Page page = new Page(mElements.subList(thisElement, nextElement));
+            VBox page = new VBox(mElements.subList(thisElement, nextElement));
             pages.add(page);
         }
 
         return pages;
     }
+    */
 }
