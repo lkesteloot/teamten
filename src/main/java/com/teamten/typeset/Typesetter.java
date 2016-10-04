@@ -49,6 +49,18 @@ public class Typesetter {
         long pageHeight = IN.toSp(9);
         long pageMargin = IN.toSp(1);
 
+        VerticalList verticalList = docToVerticalList(doc, fontManager, pageWidth, pageMargin);
+
+        // Add the vertical list to the PDF.
+        addVerticalListToPdf(verticalList, pdDoc, pageWidth, pageHeight, pageMargin);
+
+        return pdDoc;
+    }
+
+    /**
+     * Converts a DOM document to a vertical list.
+     */
+    private VerticalList docToVerticalList(Doc doc, FontManager fontManager, long pageWidth, long pageMargin) throws IOException {
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
 
         VerticalList verticalList = new VerticalList();
@@ -93,7 +105,7 @@ public class Typesetter {
             }
 
             long leading = PT.toSp(fontSize * 1.2f);
-            long interParagraphSpacing = 0; // leading / 4;
+            long interParagraphSpacing = 0;
             long firstLineSpacing = PT.toSp(indentFirstLine ? fontSize * 2 : 0);
 
             // Set the distance between baselines based on the paragraph's main font.
@@ -107,13 +119,16 @@ public class Typesetter {
                 horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
             }
 
+            // Paragraph indent.
             if (firstLineSpacing != 0) {
                 horizontalList.addElement(new Box(firstLineSpacing, 0, 0));
             }
 
+            // Each span in the paragraph.
             for (Span span : block.getSpans()) {
                 Font font = span.isItalic() ? spanItalicFont : spanRomanFont;
 
+                // TODO cache this in the Font (unscaled by font size).
                 long spaceWidth = font.getCharacterMetrics(' ', fontSize).getWidth();
                 // Roughly copy TeX:
                 Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
@@ -123,41 +138,8 @@ public class Typesetter {
                     text = text.toUpperCase();
                 }
 
-                // Replace ligatures with Unicode values. TODO Not sure if we want to do this here with strings or
-                // on the fly while we're rolling through code points.
-                text = font.transformLigatures(text);
-
-                int previousCh = 0;
-                for (int i = 0; i < text.length(); ) {
-                    int ch = text.codePointAt(i);
-
-                    if (ch == ' ') {
-                        horizontalList.addElement(spaceGlue);
-                    } else if (ch == '\u00A0') {
-                        // Non-break space. Precede with infinite penalty.
-                        horizontalList.addElement(new Penalty(Penalty.INFINITY));
-                        horizontalList.addElement(spaceGlue);
-                    } else {
-                        // See if we need to kern.
-                        long kerning = font.getKerning(previousCh, ch, fontSize);
-                        if (kerning != 0) {
-                            horizontalList.addElement(new Kern(kerning, true));
-                        }
-
-                        // Add the single character as a text node. TODO this makes for a large PDF since each
-                        // character is individually placed. Combine consecutive characters into text blocks.
-                        int[] codePoints = new int[1];
-                        codePoints[0] = ch;
-                        String s = new String(codePoints, 0, 1);
-                        Font.Metrics metrics = font.getCharacterMetrics(ch, fontSize);
-                        long width = font.getTextWidth(fontSize, s);
-                        horizontalList.addElement(new Text(font, fontSize, s, metrics.getWidth(), metrics.getHeight(), metrics.getDepth()));
-                    }
-
-                    // Advance to the next code point.
-                    i += Character.charCount(ch);
-                    previousCh = ch;
-                }
+                // Add the text to the current horizontal list.
+                addTextToHorizontalList(text, font, fontSize, spaceGlue, horizontalList);
             }
 
             // Add a forced break at the end of the paragraph.
@@ -179,44 +161,98 @@ public class Typesetter {
         // And a forced page break.
         verticalList.addElement(new Penalty(-Penalty.INFINITY));
 
+        return verticalList;
+    }
+
+    /**
+     * Add the specified text, in the specified font, to the horizontal list.
+     */
+    private void addTextToHorizontalList(String text, Font font, float fontSize, Glue spaceGlue, HorizontalList horizontalList) throws IOException {
+        // Replace ligatures with Unicode values. TODO Not sure if we want to do this here with strings or
+        // on the fly while we're rolling through code points. Seems weird to do it here, since a vertical
+        // list constructed in another way wouldn't have it. This code should be Doc-related only.
+        text = font.transformLigatures(text);
+
+        int previousCh = 0;
+        for (int i = 0; i < text.length(); ) {
+            int ch = text.codePointAt(i);
+
+            if (ch == ' ') {
+                horizontalList.addElement(spaceGlue);
+            } else if (ch == '\u00A0') {
+                // Non-break space. Precede with infinite penalty.
+                horizontalList.addElement(new Penalty(Penalty.INFINITY));
+                horizontalList.addElement(spaceGlue);
+            } else {
+                // See if we need to kern.
+                long kerning = font.getKerning(previousCh, ch, fontSize);
+                if (kerning != 0) {
+                    horizontalList.addElement(new Kern(kerning, true));
+                }
+
+                // Add the single character as a text node. TODO this makes for a large PDF since each
+                // character is individually placed. Combine consecutive characters into text blocks.
+                int[] codePoints = new int[1];
+                codePoints[0] = ch;
+                String s = new String(codePoints, 0, 1);
+                Font.Metrics metrics = font.getCharacterMetrics(ch, fontSize);
+                horizontalList.addElement(new Text(font, fontSize, s, metrics.getWidth(), metrics.getHeight(), metrics.getDepth()));
+            }
+
+            // Advance to the next code point.
+            i += Character.charCount(ch);
+            previousCh = ch;
+        }
+    }
+
+    /**
+     * Adds the entire vertical list to the PDF, by first breaking it into pages and then adding the
+     * pages to the PDF.
+     */
+    private void addVerticalListToPdf(VerticalList verticalList, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
         // Format the vertical list into pages.
         List<VBox> pages = new ArrayList<>();
         verticalList.format(ElementSink.listSink(pages, VBox.class), pageHeight - 2*pageMargin);
 
         // Generate each page.
         for (VBox page : pages) {
-            PDPage pdPage = new PDPage();
-            pdDoc.addPage(pdPage);
-            pdPage.setMediaBox(new PDRectangle(
-                    PT.fromSpAsFloat(pageWidth),
-                    PT.fromSpAsFloat(pageHeight)));
+            addPageToPdf(page, pdDoc, pageWidth, pageHeight, pageMargin);
+        }
+    }
 
-            PDPageContentStream contents = new PDPageContentStream(pdDoc, pdPage);
+    /**
+     * Add the VBox as a page to the PDF.
+     */
+    private void addPageToPdf(VBox page, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
+        PDPage pdPage = new PDPage();
+        pdDoc.addPage(pdPage);
+        pdPage.setMediaBox(new PDRectangle(
+                PT.fromSpAsFloat(pageWidth),
+                PT.fromSpAsFloat(pageHeight)));
 
-            // Draw the margins for debugging.
-            if (DRAW_MARGINS) {
-                contents.addRect(PT.fromSpAsFloat(pageMargin),
-                        PT.fromSpAsFloat(pageMargin),
-                        PT.fromSpAsFloat(pageWidth - 2*pageMargin),
-                        PT.fromSpAsFloat(pageHeight - 2*pageMargin));
-                contents.setStrokingColor(0.9);
-                contents.stroke();
-            }
+        PDPageContentStream contents = new PDPageContentStream(pdDoc, pdPage);
 
-            // Start at top of page.
-            long y = pageHeight - pageMargin;
-
-            // Lay out each element in the page.
-            for (Element element : page.getElements()) {
-                long advanceY = element.layOutVertically(pageMargin, y, contents);
-
-                y -= advanceY;
-            }
-
-            contents.close();
+        // Draw the margins for debugging.
+        if (DRAW_MARGINS) {
+            contents.addRect(PT.fromSpAsFloat(pageMargin),
+                    PT.fromSpAsFloat(pageMargin),
+                    PT.fromSpAsFloat(pageWidth - 2*pageMargin),
+                    PT.fromSpAsFloat(pageHeight - 2*pageMargin));
+            contents.setStrokingColor(0.9);
+            contents.stroke();
         }
 
-        return pdDoc;
+        // Start at top of page.
+        long y = pageHeight - pageMargin;
+
+        // Lay out each element in the page.
+        for (Element element : page.getElements()) {
+            long advanceY = element.layOutVertically(pageMargin, y, contents);
+
+            y -= advanceY;
+        }
+
+        contents.close();
     }
 
     /**
@@ -276,28 +312,5 @@ public class Typesetter {
 
     */
 
-    private static Element getLastElement(List<Element> elements) {
-        return elements.isEmpty() ? null : elements.get(elements.size() - 1);
-    }
-
-    /**
-     * Returns whether this elements should be skipped if at the start of a line.
-     * Basically we skip white-space and non-forcing penalties.
-     */
-    private static boolean skipElementAtStartOfLine(Element element) {
-        if (element instanceof Box) {
-            // Never skip boxes.
-            return false;
-        }
-
-        if (element instanceof Penalty) {
-            // Skip penalties except for forcing ones (end of paragraph).
-            Penalty penalty = (Penalty) element;
-            return penalty.getPenalty() != -Penalty.INFINITY;
-        }
-
-        // Skip the rest.
-        return true;
-    }
 }
 
