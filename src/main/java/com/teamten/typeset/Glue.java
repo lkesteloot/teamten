@@ -65,6 +65,10 @@ public class Glue extends DiscardableElement {
         return mShrink;
     }
 
+    public boolean isHorizontal() {
+        return mIsHorizontal;
+    }
+
     @Override
     public long getWidth() {
         return mIsHorizontal ? mSize : 0;

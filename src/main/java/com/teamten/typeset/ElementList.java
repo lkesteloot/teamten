@@ -245,7 +245,7 @@ public abstract class ElementList implements ElementSink {
                 if (expandability.isInfinite() == ratioIsInfinite) {
                     glueSize += (long) (expandability.getAmount() * ratio);
                 }
-                element = new Glue(glueSize, 0, 0, this instanceof HorizontalList); // TODO
+                element = new Glue(glueSize, 0, 0, glue.isHorizontal());
             }
 
             line.add(element);
