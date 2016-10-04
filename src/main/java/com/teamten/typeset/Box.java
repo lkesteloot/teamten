@@ -28,6 +28,16 @@ public class Box extends NonDiscardableElement {
     }
 
     /**
+     * Draw a debug rectangle at specified point, which represents the left-most point at the baseline.
+     */
+    protected void drawDebugRectangle(PDPageContentStream contents, long x, long y) throws IOException {
+        if (DRAW_DEBUG) {
+            PdfUtil.drawDebugRectangle(contents, x, y, getWidth(), getHeight());
+            PdfUtil.drawDebugRectangle(contents, x, y - getDepth(), getWidth(), getDepth());
+        }
+    }
+
+    /**
      * The width (horizontally) of this box.
      */
     @Override

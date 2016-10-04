@@ -20,6 +20,8 @@ public class HBox extends Box {
 
     @Override
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
+        drawDebugRectangle(contents, x, y);
+
         for (Element element : mElements) {
             long advanceX = element.layOutHorizontally(x, y, contents);
             x += advanceX;
@@ -30,17 +32,11 @@ public class HBox extends Box {
 
     @Override
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
-        // Lay out our elements horizontally.
-
         // Skip down our height so that "y" points to our baseline.
         y -= getHeight();
 
         // Lay out the elements horizontally.
-        try {
-            layOutHorizontally(x, y, contents);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        layOutHorizontally(x, y, contents);
 
         // Our height is the combined height and depth.
         return getHeight() + getDepth();

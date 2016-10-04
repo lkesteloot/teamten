@@ -14,15 +14,24 @@ public class VerticalList extends ElementList {
      * The depth of the last box that was added.
      */
     private long mPreviousDepth = 0;
+    /**
+     * Whether we've seen a box before.
+     */
+    private boolean mSawBox = false;
     private long mBaselineSkip = PT.toSp(11*1.2); // Default for 11pt font.
 
     @Override
     public void addElement(Element element) {
         // Add glue just before boxes so that the baselines are the right distance apart.
         if (element instanceof Box) {
-            long skip = Math.max(0, mBaselineSkip - mPreviousDepth - element.getHeight());
-            super.addElement(new Glue(skip, 0, 0, false));
+            // Don't do this on the first box.
+            if (mSawBox) {
+                long skip = Math.max(0, mBaselineSkip - mPreviousDepth - element.getHeight());
+                super.addElement(new Glue(skip, 0, 0, false));
+            }
+
             mPreviousDepth = element.getDepth();
+            mSawBox = true;
         }
 
         super.addElement(element);

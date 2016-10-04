@@ -3,6 +3,9 @@ package com.teamten.typeset;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
+import java.io.PrintStream;
+
+import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * Represents a kerning adjustment.
@@ -54,5 +57,10 @@ public class Kern extends DiscardableElement {
     @Override
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
         return getHeight();
+    }
+
+    @Override
+    public void println(PrintStream stream, String indent) {
+        stream.printf("%s%s kern: %.1fpt%n", indent, mIsHorizontal ? "Horizontal" : "Vertical", PT.fromSp(mAmount));
     }
 }

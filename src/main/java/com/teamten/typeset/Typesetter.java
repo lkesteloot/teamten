@@ -36,8 +36,8 @@ public class Typesetter {
         MarkdownParser parser = new MarkdownParser();
         Doc doc = parser.parse(inputStream);
         Typesetter typesetter = new Typesetter();
-        PDDocument pdf = typesetter.typeset(doc);
-        pdf.save(args[1]);
+        PDDocument pdDoc = typesetter.typeset(doc);
+        pdDoc.save(args[1]);
     }
 
     public PDDocument typeset(Doc doc) throws IOException {
@@ -128,23 +128,16 @@ public class Typesetter {
             for (Span span : block.getSpans()) {
                 Font font = span.isItalic() ? spanItalicFont : spanRomanFont;
 
-                // TODO cache this in the Font (unscaled by font size).
-                long spaceWidth = font.getCharacterMetrics(' ', fontSize).getWidth();
-                // Roughly copy TeX:
-                Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
-
                 String text = span.getText();
                 if (allCaps) {
                     text = text.toUpperCase();
                 }
 
                 // Add the text to the current horizontal list.
-                addTextToHorizontalList(text, font, fontSize, spaceGlue, horizontalList);
+                addTextToHorizontalList(text, font, fontSize, horizontalList);
             }
 
-            // Add a forced break at the end of the paragraph.
-            horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
-            horizontalList.addElement(new Penalty(-Penalty.INFINITY));
+            endOfParagraph(horizontalList);
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             horizontalList.format(verticalList, pageWidth - 2*pageMargin);
@@ -155,19 +148,41 @@ public class Typesetter {
             previousBlockType = block.getBlockType();
         }
 
-        // Add a final infinite glue at the bottom.
-        verticalList.addElement(new Glue(0, 1, true, 0, false, false));
-
-        // And a forced page break.
-        verticalList.addElement(new Penalty(-Penalty.INFINITY));
+        // Eject the last page.
+        ejectPage(verticalList);
 
         return verticalList;
     }
 
     /**
+     * Adds the necessary glue and penalty to end a paragraph.
+     */
+    public void endOfParagraph(HorizontalList horizontalList) {
+        // Add a forced break at the end of the paragraph.
+        horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
+        horizontalList.addElement(new Penalty(-Penalty.INFINITY));
+    }
+
+    /**
+     * Add infinite vertical glue and force a page break.
+     */
+    public void ejectPage(VerticalList verticalList) {
+        // Add a final infinite glue at the bottom.
+        verticalList.addElement(new Glue(0, 1, true, 0, false, false));
+
+        // And a forced page break.
+        verticalList.addElement(new Penalty(-Penalty.INFINITY));
+    }
+
+    /**
      * Add the specified text, in the specified font, to the horizontal list.
      */
-    private void addTextToHorizontalList(String text, Font font, float fontSize, Glue spaceGlue, HorizontalList horizontalList) throws IOException {
+    public void addTextToHorizontalList(String text, Font font, float fontSize, HorizontalList horizontalList) throws IOException {
+        // TODO cache this in the Font (unscaled by font size).
+        long spaceWidth = font.getCharacterMetrics(' ', fontSize).getWidth();
+        // Roughly copy TeX:
+        Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
+
         // Replace ligatures with Unicode values. TODO Not sure if we want to do this here with strings or
         // on the fly while we're rolling through code points. Seems weird to do it here, since a vertical
         // list constructed in another way wouldn't have it. This code should be Doc-related only.
@@ -209,7 +224,7 @@ public class Typesetter {
      * Adds the entire vertical list to the PDF, by first breaking it into pages and then adding the
      * pages to the PDF.
      */
-    private void addVerticalListToPdf(VerticalList verticalList, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
+    public void addVerticalListToPdf(VerticalList verticalList, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
         // Format the vertical list into pages.
         List<VBox> pages = new ArrayList<>();
         verticalList.format(ElementSink.listSink(pages, VBox.class), pageHeight - 2*pageMargin);
@@ -223,7 +238,7 @@ public class Typesetter {
     /**
      * Add the VBox as a page to the PDF.
      */
-    private void addPageToPdf(VBox page, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
+    public void addPageToPdf(VBox page, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
         PDPage pdPage = new PDPage();
         pdDoc.addPage(pdPage);
         pdPage.setMediaBox(new PDRectangle(
@@ -234,12 +249,7 @@ public class Typesetter {
 
         // Draw the margins for debugging.
         if (DRAW_MARGINS) {
-            contents.addRect(PT.fromSpAsFloat(pageMargin),
-                    PT.fromSpAsFloat(pageMargin),
-                    PT.fromSpAsFloat(pageWidth - 2*pageMargin),
-                    PT.fromSpAsFloat(pageHeight - 2*pageMargin));
-            contents.setStrokingColor(0.9);
-            contents.stroke();
+            PdfUtil.drawDebugRectangle(contents, pageMargin, pageMargin, pageWidth - 2*pageMargin, pageHeight - 2*pageMargin);
         }
 
         // Start at top of page.

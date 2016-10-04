@@ -24,6 +24,8 @@ public class Text extends Box {
 
     @Override
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
+        /// drawDebugRectangle(contents, x, y);
+
         contents.beginText();
         contents.setFont(mFont.getPdFont(), mFontSize);
         contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));

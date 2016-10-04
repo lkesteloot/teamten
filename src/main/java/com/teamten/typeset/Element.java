@@ -10,6 +10,8 @@ import java.io.PrintStream;
  * An element that can be stacked horizontally to make a line.
  */
 public abstract class Element {
+    protected final boolean DRAW_DEBUG = true;
+
     /**
      * Return the width of the element.
      */

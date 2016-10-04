@@ -4,6 +4,7 @@ package com.teamten.typeset;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * A location where the line can be broken, but with a penalty.
@@ -45,5 +46,10 @@ public class Penalty extends DiscardableElement {
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
         // Nothing to do.
         return 0;
+    }
+
+    @Override
+    public void println(PrintStream stream, String indent) {
+        stream.printf("%sPenalty: %d%s%n", indent, mPenalty, mPenalty == INFINITY ? " (prevent break)" : mPenalty == -INFINITY ? " (force break)" : "");
     }
 }

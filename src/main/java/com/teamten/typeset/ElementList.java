@@ -1,5 +1,6 @@
 package com.teamten.typeset;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -210,28 +211,57 @@ public abstract class ElementList implements ElementSink {
             int thisIndex = thisBreakpoint.getStartIndex();
             int nextIndex = nextBreakpoint.getIndex();
 
+            List<Element> lineElements = mElements.subList(thisIndex, nextIndex);
+            double ratio = thisBreakpoint.getRatio();
+            boolean ratioIsInfinite = thisBreakpoint.isRatioIsInfinite();
+
             // Make a new list with the glue set to specific widths.
-            List<Element> line = new ArrayList<>();
-            for (Element element : mElements.subList(thisIndex, nextIndex)) {
-                if (element instanceof Glue) {
-                    Glue glue = (Glue) element;
-                    double ratio = thisBreakpoint.getRatio();
-
-                    long glueSize = glue.getSize();
-                    Glue.Expandability expandability = ratio >= 0 ? glue.getStretch() : glue.getShrink();
-                    if (expandability.isInfinite() == thisBreakpoint.isRatioIsInfinite()) {
-                        glueSize += (long) (expandability.getAmount() * ratio);
-                    }
-                    element = new Glue(glueSize, 0, 0, this instanceof HorizontalList); // TODO
-                }
-
-                line.add(element);
-            }
+            Box box = makeBox(lineElements, ratio, ratioIsInfinite);
 
             // Add to the sink.
-            output.addElement(makeOutputBox(line));
+            output.addElement(box);
 
             thisBreakpoint = nextBreakpoint;
+        }
+    }
+
+    /**
+     * Make a box with the specified elements stretched out by the given ratio.
+     */
+    private Box makeBox(List<Element> lineElements, double ratio, boolean ratioIsInfinite) {
+        List<Element> line = new ArrayList<>();
+        for (Element element : lineElements) {
+            if (element instanceof Glue) {
+                Glue glue = (Glue) element;
+
+                long glueSize = glue.getSize();
+                Glue.Expandability expandability = ratio >= 0 ? glue.getStretch() : glue.getShrink();
+                if (expandability.isInfinite() == ratioIsInfinite) {
+                    glueSize += (long) (expandability.getAmount() * ratio);
+                }
+                element = new Glue(glueSize, 0, 0, this instanceof HorizontalList); // TODO
+            }
+
+            line.add(element);
+        }
+
+        return makeOutputBox(line);
+    }
+
+    /**
+     * Make a box with zero stretching or shrinking.
+     */
+    public Box makeBox() {
+        return makeBox(mElements, 0, false);
+    }
+
+    /**
+     * Pretty prints the list to the PrintWriter with the given indent. The method must print its own newline.
+     */
+    public void println(PrintStream stream, String indent) {
+        stream.println(this.getClass().getSimpleName() + ":");
+        for (Element element : mElements) {
+            element.println(stream, indent + "    ");
         }
     }
 
