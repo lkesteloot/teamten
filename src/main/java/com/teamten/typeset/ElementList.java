@@ -18,6 +18,10 @@ public abstract class ElementList implements ElementSink {
         mElements.add(element);
     }
 
+    private boolean printDebug() {
+        return this instanceof VerticalList;
+    }
+
     /**
      * Format the horizontal list and add the elements to the vertical list.
      */
@@ -66,7 +70,7 @@ public abstract class ElementList implements ElementSink {
         // Work backwards through the breakpoints. Use dynamic programming to cache the value of what we've
         // computed so far.
         for (int thisBreak = breakpoints.size() - 1; thisBreak >= 0; thisBreak--) {
-            if (this instanceof VerticalList && false) {
+            if (printDebug()) {
                 System.out.println("starting at element " + thisBreak);
             }
             Breakpoint thisBreakpoint = breakpoints.get(thisBreak);
@@ -152,13 +156,13 @@ public abstract class ElementList implements ElementSink {
                     if (noStretch) {
                         // Didn't find any place to stretch or shrink. Keep it anyway, but penalize it.
                         if (difference < 0) {
+                            // TODO still don't understand the difference between these two cases. Look up
+                            // the TeX code.
                             // Overfull box, consider this to be infinitely bad.
                             badness = Long.MAX_VALUE;
                         } else {
-                            // Underfull box. Knuth doesn't describe how to handle this. I'll penalize proportional
-                            // to the difference squared, to spread the different across all the breaks.
-                            // TODO will this overflow?
-                            badness += difference*difference;
+                            // Underfull box.
+                            badness = Penalty.INFINITY;
                         }
                     } else if (ratioIsInfinite) {
                         // Don't penalize for infinite stretch or shrink.
@@ -166,12 +170,12 @@ public abstract class ElementList implements ElementSink {
                         // Factor the ratio into the badness.
                         badness += 100 * Math.pow(Math.abs(ratio), 3);
                     }
-                    if (this instanceof VerticalList && false) {
+                    if (printDebug()) {
                         System.out.printf("  to element %d: difference = %.1f - %.1f = %.1f (badness = %d, bestBadness = %d, ratio = %.3f)%n", nextBreak, PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(difference),
                                 badness, bestBadness, ratio);
                     }
 
-                    if (bestNextBreakpoint == null || badness < bestBadness) {
+                    if (bestNextBreakpoint == null || badness <= bestBadness) {
                         bestNextBreakpoint = nextBreakpoint;
                         bestNextBreak = nextBreak;
                         bestBadness = badness;
@@ -182,8 +186,8 @@ public abstract class ElementList implements ElementSink {
             }
 
             if (bestNextBreakpoint != null) {
-                if (this instanceof VerticalList && false) {
-                    System.out.printf("  best next break is %d%n", bestNextBreak);
+                if (printDebug()) {
+                    System.out.printf("  best next break is %d, badness %d, ratio %.3f%n", bestNextBreak, bestBadness, bestRatio);
                 }
                 // Store the badness at this breakpoint and link to the next break.
                 thisBreakpoint.setBadness(bestBadness);

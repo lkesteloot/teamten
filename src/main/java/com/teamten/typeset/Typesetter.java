@@ -93,7 +93,7 @@ public class Typesetter {
             }
 
             long leading = PT.toSp(fontSize * 1.2f);
-            long interParagraphSpacing = leading / 4;
+            long interParagraphSpacing = 0; // leading / 4;
             long firstLineSpacing = PT.toSp(indentFirstLine ? fontSize * 2 : 0);
 
             // Set the distance between baselines based on the paragraph's main font.
@@ -169,7 +169,7 @@ public class Typesetter {
             if (marginBottom != 0) {
                 verticalList.addElement(new Glue(marginBottom, 0, 0, false));
             }
-            verticalList.addElement(new Glue(interParagraphSpacing, 0, 0, false));
+            verticalList.addElement(new Glue(interParagraphSpacing, PT.toSp(1), 0, false));
             previousBlockType = block.getBlockType();
         }
 
@@ -179,6 +179,7 @@ public class Typesetter {
         // And a forced page break.
         verticalList.addElement(new Penalty(-Penalty.INFINITY));
 
+        // Format the vertical list into pages.
         List<VBox> pages = new ArrayList<>();
         verticalList.format(ElementSink.listSink(pages, VBox.class), pageHeight - 2*pageMargin);
 
