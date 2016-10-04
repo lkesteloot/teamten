@@ -190,7 +190,11 @@ public class Typesetter {
 
         int previousCh = 0;
         for (int i = 0; i < text.length(); ) {
+            // Pick out the code point at this location. Could take two chars.
             int ch = text.codePointAt(i);
+
+            // Advance to the next code point.
+            i += Character.charCount(ch);
 
             if (ch == ' ') {
                 horizontalList.addElement(spaceGlue);
@@ -198,6 +202,9 @@ public class Typesetter {
                 // Non-break space. Precede with infinite penalty.
                 horizontalList.addElement(new Penalty(Penalty.INFINITY));
                 horizontalList.addElement(spaceGlue);
+
+                // Pretend we're a space for the purposes of previousCh.
+                ch = ' ';
             } else {
                 // See if we need to kern.
                 long kerning = font.getKerning(previousCh, ch, fontSize);
@@ -214,8 +221,6 @@ public class Typesetter {
                 horizontalList.addElement(new Text(font, fontSize, s, metrics.getWidth(), metrics.getHeight(), metrics.getDepth()));
             }
 
-            // Advance to the next code point.
-            i += Character.charCount(ch);
             previousCh = ch;
         }
     }

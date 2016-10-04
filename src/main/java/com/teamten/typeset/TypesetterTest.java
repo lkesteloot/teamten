@@ -26,7 +26,7 @@ public class TypesetterTest {
 
         // Simple paragraph.
         HorizontalList horizontalList = new HorizontalList();
-        typesetter.addTextToHorizontalList("Hello world! Test app for trying various things with the typesetter. This gives us more control than using Markdown.", font, fontSize, horizontalList);
+        typesetter.addTextToHorizontalList("Hello world! Test app for trying various things with the typesetter.\u00A0This gives us more control than using Markdown.", font, fontSize, horizontalList);
         typesetter.endOfParagraph(horizontalList);
         horizontalList.format(verticalList, pageWidth - 2*pageMargin);
 

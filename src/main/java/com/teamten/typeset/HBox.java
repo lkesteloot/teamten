@@ -20,7 +20,7 @@ public class HBox extends Box {
 
     @Override
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
-        drawDebugRectangle(contents, x, y);
+        /// drawDebugRectangle(contents, x, y);
 
         for (Element element : mElements) {
             long advanceX = element.layOutHorizontally(x, y, contents);
