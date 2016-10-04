@@ -103,8 +103,8 @@ public abstract class ElementList implements ElementSink {
                 for (int i = thisIndex; i < nextIndex; i++) {
                     Element element = mElements.get(i);
 
-                    // TODO
-                    width += (this instanceof HorizontalList) ? element.getWidth() : (element.getHeight() + element.getDepth());
+                    // Advance by the size of the element.
+                    width += getElementSize(element);
 
                     // Sum up the stretch and shrink for glues.
                     if (element instanceof Glue) {
@@ -275,6 +275,11 @@ public abstract class ElementList implements ElementSink {
      * Generate the Box that will be sent to the output.
      */
     protected abstract Box makeOutputBox(List<Element> elements);
+
+    /**
+     * Return the size (width for horizontal lists, height + depth for vertical lists) of the element.
+     */
+    protected abstract long getElementSize(Element element);
 
     /**
      * Keeps track of possible breakpoints in our paragraph, their penalty, and their effects on the whole paragraph.

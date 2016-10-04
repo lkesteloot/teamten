@@ -50,6 +50,11 @@ public class VerticalList extends ElementList {
         return new VBox(elements);
     }
 
+    @Override
+    protected long getElementSize(Element element) {
+        return element.getHeight() + element.getDepth();
+    }
+
     /**
      * Group elements vertically into pages, each of verticalSize height.
      */

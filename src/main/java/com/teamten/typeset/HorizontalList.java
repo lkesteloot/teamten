@@ -11,4 +11,9 @@ public class HorizontalList extends ElementList {
     protected Box makeOutputBox(List<Element> elements) {
         return new HBox(elements);
     }
+
+    @Override
+    protected long getElementSize(Element element) {
+        return element.getWidth();
+    }
 }
