@@ -31,6 +31,7 @@ public class Font {
     private final GlyphTable mGlyphTable;
     private final int mUnitsPerEm;
     private final Ligatures mLigatures;
+    private final long mSpaceWidth;
 
     public Font(PDDocument pdf, File file) throws IOException {
         mFile = file;
@@ -59,6 +60,9 @@ public class Font {
 
         // Get the table of glyphs that'll give us the metrics for each glyph.
         mGlyphTable = ttf.getGlyph();
+
+        // Cache the width of a space for a 1pt font.
+        mSpaceWidth = getCharacterMetrics(' ', 1.0f).getWidth();
     }
 
     /**
@@ -82,6 +86,13 @@ public class Font {
 
     public String transformLigatures(String s) {
         return mLigatures.transform(s);
+    }
+
+    /**
+     * The width of a space for a 1pt font, in scaled points.
+     */
+    public long getSpaceWidth() {
+        return mSpaceWidth;
     }
 
     /**

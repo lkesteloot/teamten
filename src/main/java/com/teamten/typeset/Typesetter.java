@@ -178,8 +178,8 @@ public class Typesetter {
      * Add the specified text, in the specified font, to the horizontal list.
      */
     public void addTextToHorizontalList(String text, Font font, float fontSize, HorizontalList horizontalList) throws IOException {
-        // TODO cache this in the Font (unscaled by font size).
-        long spaceWidth = font.getCharacterMetrics(' ', fontSize).getWidth();
+        long spaceWidth = (long) (font.getSpaceWidth()*fontSize);
+
         // Roughly copy TeX:
         Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
 
