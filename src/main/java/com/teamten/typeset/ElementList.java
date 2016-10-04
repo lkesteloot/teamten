@@ -2,7 +2,6 @@ package com.teamten.typeset;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.teamten.typeset.SpaceUnit.PT;
@@ -30,10 +29,11 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Format the horizontal list and add the elements to the vertical list.
+     * Format the list and add the elements to the sync. For horizontal lists this makes paragraphs,
+     * and for vertical lists this makes pages.
      */
     public void format(ElementSink output, long maxSize) {
-        // Find all the places that we could break a line.
+        // Find all the places that we could break a line or page.
         List<Breakpoint> breakpoints = new ArrayList<>();
 
         // For convenience put a breakpoint at the very beginning, at the first element.
@@ -55,7 +55,7 @@ public abstract class ElementList implements ElementSink {
             }
         }
 
-        // The way we construct paragraphs, there's always a forced breakpoint at the very end, so we don't
+        // The way we construct paragraphs and pages, there's always a forced breakpoint at the very end, so we don't
         // manually add one.
 
         // For each possible breakpoint, figure out the next displayed element (after the breakpoint).
@@ -75,7 +75,7 @@ public abstract class ElementList implements ElementSink {
         }
 
         // Work backwards through the breakpoints. Use dynamic programming to cache the value of what we've
-        // computed so far.
+        // computed so far. The cache is stored in the Breakpoint objects.
         for (int thisBreak = breakpoints.size() - 1; thisBreak >= 0; thisBreak--) {
             if (printDebug()) {
                 System.out.println("starting at element " + thisBreak);
@@ -83,19 +83,20 @@ public abstract class ElementList implements ElementSink {
             Breakpoint thisBreakpoint = breakpoints.get(thisBreak);
             int thisIndex = thisBreakpoint.getStartIndex();
 
-            // So now we're pretending that our paragraph starts here. We're looking for the best next breakpoint.
+            // So now we're pretending that our paragraph or page starts here. We're looking for the
+            // best next breakpoint.
             Breakpoint bestNextBreakpoint = null;
             long bestBadness = Long.MAX_VALUE;
             double bestRatio = 0;
             boolean bestRatioIsInfinite = false;
-            int bestNextBreak = -1; // TODO delete.
+            int bestNextBreak = -1;
             for (int nextBreak = thisBreak + 1; nextBreak < breakpoints.size(); nextBreak++) {
                 Breakpoint nextBreakpoint = breakpoints.get(nextBreak);
                 int nextIndex = nextBreakpoint.getIndex();
 
-                // The first line of our paragraph will go from thisIndex (inclusive) to nextIndex (exclusive).
-                // Find the sum of all the elements in that line. Also compute the total stretch and shrink
-                // for the glue in that line.
+                // The first line of our paragraph (or first page of our book) will go from thisIndex (inclusive) to
+                // nextIndex (exclusive). Find the sum of the sizes of all the elements in that line. Also compute
+                // the total stretch and shrink for the glue in that line.
                 long width = 0;
                 Glue.ExpandabilitySum stretch = new Glue.ExpandabilitySum();
                 Glue.ExpandabilitySum shrink = new Glue.ExpandabilitySum();
@@ -117,7 +118,7 @@ public abstract class ElementList implements ElementSink {
                 // Start with our own penalty, since we're breaking here.
                 long badness = thisBreakpoint.getPenalty();
 
-                // Compute difference between width and page width.
+                // Compute difference between width and page width or height.
                 long difference = maxSize - width;
 
                 // See whether we're short or long.
@@ -157,7 +158,7 @@ public abstract class ElementList implements ElementSink {
                 if (ratio < -1) {
                     // Can't shrink past maximum shrinkage.
                 } else {
-                    // Add the badness for the paragraph starting at the next breakpoint.
+                    // Add the badness for the paragraph or page starting at the next breakpoint.
                     badness += nextBreakpoint.getBadness();
 
                     if (noStretch) {
@@ -178,7 +179,8 @@ public abstract class ElementList implements ElementSink {
                         badness += 100 * Math.pow(Math.abs(ratio), 3);
                     }
                     if (printDebug()) {
-                        System.out.printf("  to element %d: difference = %.1f - %.1f = %.1f (badness = %d, bestBadness = %d, ratio = %.3f)%n", nextBreak, PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(difference),
+                        System.out.printf("  to element %d: difference = %.1f - %.1f = %.1f (badness = %d, bestBadness = %d, ratio = %.3f)%n",
+                                nextBreak, PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(difference),
                                 badness, bestBadness, ratio);
                     }
 
@@ -204,12 +206,12 @@ public abstract class ElementList implements ElementSink {
             }
         }
 
-        // Go through our linked list of breakpoints, generating lines.
+        // Go through our linked list of breakpoints, generating lines or pages.
         Breakpoint thisBreakpoint = breakpoints.get(0);
         while (true) {
             Breakpoint nextBreakpoint = thisBreakpoint.getNextBreakpoint();
             if (nextBreakpoint == null) {
-                // Lines are between breakpoints. Nothing after the last one.
+                // Lines or pages are between breakpoints. Nothing after the last one.
                 break;
             }
 
@@ -217,6 +219,7 @@ public abstract class ElementList implements ElementSink {
             int thisIndex = thisBreakpoint.getStartIndex();
             int nextIndex = nextBreakpoint.getIndex();
 
+            // Collect the line or page.
             List<Element> lineElements = mElements.subList(thisIndex, nextIndex);
             double ratio = thisBreakpoint.getRatio();
             boolean ratioIsInfinite = thisBreakpoint.isRatioIsInfinite();
@@ -227,6 +230,7 @@ public abstract class ElementList implements ElementSink {
             // Add to the sink.
             output.addElement(box);
 
+            // Next line or page.
             thisBreakpoint = nextBreakpoint;
         }
     }
@@ -245,6 +249,8 @@ public abstract class ElementList implements ElementSink {
                 if (expandability.isInfinite() == ratioIsInfinite) {
                     glueSize += (long) (expandability.getAmount() * ratio);
                 }
+
+                // Fix the glue.
                 element = new Glue(glueSize, 0, 0, glue.isHorizontal());
             }
 
@@ -282,7 +288,8 @@ public abstract class ElementList implements ElementSink {
     protected abstract long getElementSize(Element element);
 
     /**
-     * Keeps track of possible breakpoints in our paragraph, their penalty, and their effects on the whole paragraph.
+     * Keeps track of possible breakpoints in our paragraph or page, their penalty, and their effects on the
+     * whole paragraph or page.
      */
     private static class Breakpoint {
         private final int mIndex;
@@ -332,28 +339,28 @@ public abstract class ElementList implements ElementSink {
         }
 
         /**
-         * The badness of the rest of the paragraph starting at this break.
+         * The badness of the rest of the paragraph or page starting at this break.
          */
         public long getBadness() {
             return mBadness;
         }
 
         /**
-         * Set the badness of the rest of the paragraph starting at this break.
+         * Set the badness of the rest of the paragraph or page starting at this break.
          */
         public void setBadness(long badness) {
             mBadness = badness;
         }
 
         /**
-         * The next breakpoint in the paragraph assuming we're selected as a breakpoint.
+         * The next breakpoint in the paragraph or page assuming we're selected as a breakpoint.
          */
         public Breakpoint getNextBreakpoint() {
             return mNextBreakpoint;
         }
 
         /**
-         * Set the next breakpoint in the paragraph assuming we're selected as a breakpoint.
+         * Set the next breakpoint in the paragraph or page assuming we're selected as a breakpoint.
          */
         public void setNextBreakpoint(Breakpoint nextBreakpoint) {
             mNextBreakpoint = nextBreakpoint;
