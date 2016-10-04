@@ -12,6 +12,8 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * or pages.
  */
 public abstract class ElementList implements ElementSink {
+    private static final boolean DEBUG_HORIZONTAL_LIST = false;
+    private static final boolean DEBUG_VERTICAL_LIST = false;
     private final List<Element> mElements = new ArrayList<>();
 
     @Override
@@ -19,8 +21,12 @@ public abstract class ElementList implements ElementSink {
         mElements.add(element);
     }
 
+    /**
+     * Whether to print debugging information.
+     */
     private boolean printDebug() {
-        return this instanceof VerticalList;
+        return (DEBUG_HORIZONTAL_LIST && this instanceof HorizontalList) ||
+                (DEBUG_VERTICAL_LIST && this instanceof VerticalList);
     }
 
     /**
