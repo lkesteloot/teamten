@@ -214,11 +214,7 @@ public class Typesetter {
 
                 // Add the single character as a text node. TODO this makes for a large PDF since each
                 // character is individually placed. Combine consecutive characters into text blocks.
-                int[] codePoints = new int[1];
-                codePoints[0] = ch;
-                String s = new String(codePoints, 0, 1);
-                Font.Metrics metrics = font.getCharacterMetrics(ch, fontSize);
-                horizontalList.addElement(new Text(font, fontSize, s, metrics.getWidth(), metrics.getHeight(), metrics.getDepth()));
+                horizontalList.addElement(new Text(ch, font, fontSize));
             }
 
             previousCh = ch;

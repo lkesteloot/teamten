@@ -1,5 +1,6 @@
 package com.teamten.tex;
 
+import com.teamten.util.CodePoints;
 import com.teamten.util.Files;
 
 import java.io.BufferedReader;
@@ -30,44 +31,43 @@ public class TexTokenizer {
         mState = State.NORMAL;
 
         // Prime the pump.
-        mCh = Files.nextCodePoint(mReader);
+        mCh = CodePoints.nextCodePoint(mReader);
     }
 
     /**
-     * Return the next token in the stream, or null on end of file.
+     * Return the next token in the stream, or -1 on end of file.
      */
-    public Token next() throws IOException {
+    public int next() throws IOException {
         // Get characters until we have a valid token.
         while (true) {
             if (mCh == -1) {
                 // End of file.
-                return null;
+                return -1;
             }
 
             switch (mState) {
                 case NORMAL:
                     if (mCh == '\\') {
                         mState = State.START_OF_COMMAND;
-                        mCh = Files.nextCodePoint(mReader);
+                        mCh = CodePoints.nextCodePoint(mReader);
                     } else if (mCh == '%') {
                         mState = State.SKIP_COMMENT;
-                        mCh = Files.nextCodePoint(mReader);
+                        mCh = CodePoints.nextCodePoint(mReader);
                     } else if (mCh == '\n' || mCh == ' ') {
                         // Translate to space.
-                        Token token = new TextToken(" ");
-                        mCh = Files.nextCodePoint(mReader);
+                        mCh = CodePoints.nextCodePoint(mReader);
                         mState = State.SKIP_WHITESPACE;
-                        return token;
+                        return ' ';
                     } else {
-                        Token token = new TextToken(codePointToString(mCh));
-                        mCh = Files.nextCodePoint(mReader);
-                        return token;
+                        int ch = mCh;
+                        mCh = CodePoints.nextCodePoint(mReader);
+                        return ch;
                     }
                     break;
 
                 case SKIP_WHITESPACE:
                     if (Character.isWhitespace(mCh)) {
-                        mCh = Files.nextCodePoint(mReader);
+                        mCh = CodePoints.nextCodePoint(mReader);
                     } else {
                         mState = State.NORMAL;
                     }
@@ -78,11 +78,11 @@ public class TexTokenizer {
                     if (Character.isLetter(mCh)) {
                         mCommand.setLength(0);
                         mCommand.appendCodePoint(mCh);
-                        mCh = Files.nextCodePoint(mReader);
+                        mCh = CodePoints.nextCodePoint(mReader);
                         mState = State.REST_OF_COMMAND;
                     } else {
-                        Token token = new CommandToken(codePointToString(mCh));
-                        mCh = Files.nextCodePoint(mReader);
+                        int token = Command.fromCharacter(mCh);
+                        mCh = CodePoints.nextCodePoint(mReader);
                         mState = State.NORMAL;
                         return token;
                     }
@@ -91,9 +91,12 @@ public class TexTokenizer {
                 case REST_OF_COMMAND:
                     if (Character.isLetter(mCh)) {
                         mCommand.appendCodePoint(mCh);
-                        mCh = Files.nextCodePoint(mReader);
+                        mCh = CodePoints.nextCodePoint(mReader);
                     } else {
-                        Token token = new CommandToken(mCommand.toString());
+                        int token = Command.fromKeyword(mCommand.toString());
+                        if (token == -1) {
+                            throw new IllegalStateException("unknown token: " + mCommand);
+                        }
                         mState = State.SKIP_WHITESPACE;
                         return token;
                     }
@@ -103,18 +106,9 @@ public class TexTokenizer {
                     if (mCh == '\n') {
                         mState = State.NORMAL;
                     }
-                    mCh = Files.nextCodePoint(mReader);
+                    mCh = CodePoints.nextCodePoint(mReader);
                     break;
             }
         }
-    }
-
-    /**
-     * Simple routine to convert a single code point to a string, because surprisingly this isn't a thing in the standard library.
-     */
-    private static String codePointToString(int codePoint) {
-        int[] codePoints = new int[1];
-        codePoints[0] = codePoint;
-        return new String(codePoints, 0, 1);
     }
 }
