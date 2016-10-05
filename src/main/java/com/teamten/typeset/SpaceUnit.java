@@ -74,6 +74,8 @@ public enum SpaceUnit {
      * "centimeter" is rejected). The reader is left immediately after the
      * unit.
      *
+     * TODO delete?
+     *
      * @return the distance in scaled points.
      * @throws IOException from the Reader.
      * @throws NumberFormatException if the distance cannot be parsed.

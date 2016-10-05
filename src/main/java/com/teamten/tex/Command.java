@@ -1,14 +1,17 @@
 package com.teamten.tex;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.teamten.util.CodePoints;
 
 /**
  * The commands we know about, and how to encode them as code points.
  */
 public class Command {
     private static final String[] KEYWORDS = {
-        "hbox",
+            "hbox",
+            "glue",
+            "plus",
+            "minus",
+            "penalty",
     };
     // https://en.wikipedia.org/wiki/Private_Use_Areas
     private static final int PRIVATE_USE_AREA_1 = 0xE000;
@@ -51,5 +54,42 @@ public class Command {
         }
 
         return token;
+    }
+
+    /**
+     * Return the code point for the original command, or -1 if not a character command.
+     */
+    public static int toCharacter(int ch) {
+        if (ch >= PRIVATE_USE_AREA_2_START && ch <= PRIVATE_USE_AREA_2_LAST) {
+            return ch - PRIVATE_USE_AREA_2_START;
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Convert to a user-friendly command, with backslash prefix if necessary.
+     */
+    public static String toString(int token) {
+        String keyword = toKeyword(token);
+        if (keyword != null) {
+            return "\\" + keyword;
+        }
+
+        int ch = toCharacter(token);
+        if (ch != -1) {
+            return new StringBuilder().append('\\').appendCodePoint(ch).toString();
+        }
+
+        switch (token) {
+            case ' ':
+                return "(space)";
+
+            case '\n':
+                return "(return)";
+
+            default:
+                return CodePoints.toString(token);
+        }
     }
 }
