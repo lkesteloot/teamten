@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -34,5 +35,23 @@ public class Files {
                 // Swallow.
             }
         }
+    }
+
+    /**
+     * Return the next code point in the reader, or -1 on end of file.
+     */
+    public static int nextCodePoint(Reader reader) throws IOException {
+        int ch = reader.read();
+        if (ch != -1 && Character.isHighSurrogate((char) ch)) {
+            int high = ch;
+            int low = reader.read();
+            if (low == -1) {
+                ch = -1;
+            } else {
+                ch = Character.toCodePoint((char) high, (char) low);
+            }
+        }
+
+        return ch;
     }
 }

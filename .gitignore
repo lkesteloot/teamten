@@ -3,6 +3,7 @@
 /repo
 *.pdf
 *.md
+*.tex
 /libs/fontbox-*.jar
 /libs/pdfbox-*.jar
 
