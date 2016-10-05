@@ -1,7 +1,6 @@
 package com.teamten.tex;
 
 import com.teamten.util.CodePoints;
-import com.teamten.util.Files;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -81,7 +80,7 @@ public class TexTokenizer {
                         mCh = CodePoints.nextCodePoint(mReader);
                         mState = State.REST_OF_COMMAND;
                     } else {
-                        int token = Command.fromCharacter(mCh);
+                        int token = Token.fromCharacter(mCh);
                         mCh = CodePoints.nextCodePoint(mReader);
                         mState = State.NORMAL;
                         return token;
@@ -93,7 +92,7 @@ public class TexTokenizer {
                         mCommand.appendCodePoint(mCh);
                         mCh = CodePoints.nextCodePoint(mReader);
                     } else {
-                        int token = Command.fromKeyword(mCommand.toString());
+                        int token = Token.fromKeyword(mCommand.toString());
                         if (token == -1) {
                             throw new IllegalStateException("unknown token: " + mCommand);
                         }

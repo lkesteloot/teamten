@@ -24,7 +24,7 @@ public class Glue extends DiscardableElement {
      * @param stretch the maximum extra space that can be added.
      * @param shrink the maximum extra space that can be removed.
      */
-    private Glue(long size, Expandability stretch, Expandability shrink, boolean isHorizontal) {
+    public Glue(long size, Expandability stretch, Expandability shrink, boolean isHorizontal) {
         mSize = size;
         mStretch = stretch;
         mShrink = shrink;

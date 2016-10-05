@@ -1,46 +1,45 @@
 package com.teamten.tex;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.teamten.util.CodePoints;
 
 /**
  * The commands we know about, and how to encode them as code points.
  */
-public class Command {
-    private static final String[] KEYWORDS = {
-            "hbox",
-            "glue",
-            "plus",
-            "minus",
-            "penalty",
-    };
+public class Token {
     // https://en.wikipedia.org/wiki/Private_Use_Areas
     private static final int PRIVATE_USE_AREA_1 = 0xE000;
     private static final int PRIVATE_USE_AREA_2_START = 0xF0000;
     private static final int PRIVATE_USE_AREA_2_LAST = 0xFFFFD;
+    public static final int HBOX = PRIVATE_USE_AREA_1;
+    public static final int GLUE = PRIVATE_USE_AREA_1 + 1;
+    public static final int PLUS = PRIVATE_USE_AREA_1 + 2;
+    public static final int MINUS = PRIVATE_USE_AREA_1 + 3;
+    public static final int PENALTY = PRIVATE_USE_AREA_1 + 4;
+    private static final BiMap<Integer,String> TOKEN_TO_KEYWORD = HashBiMap.create();
+    private static final BiMap<String,Integer> KEYWORD_TO_TOKEN = TOKEN_TO_KEYWORD.inverse();
+
+    static {
+        TOKEN_TO_KEYWORD.put(HBOX, "hbox");
+        TOKEN_TO_KEYWORD.put(GLUE, "glue");
+        TOKEN_TO_KEYWORD.put(PLUS, "plus");
+        TOKEN_TO_KEYWORD.put(MINUS, "minus");
+        TOKEN_TO_KEYWORD.put(PENALTY, "penalty");
+    }
 
     /**
      * Return the pseudo-codepoint for the keyword, or -1 if not found.
      */
     public static int fromKeyword(String keyword) {
-        for (int i = 0; i < KEYWORDS.length; i++) {
-            if (keyword.equals(KEYWORDS[i])) {
-                return PRIVATE_USE_AREA_1 + i;
-            }
-        }
-
-        return -1;
+        return KEYWORD_TO_TOKEN.getOrDefault(keyword, -1);
     }
 
     /**
      * Return the keyword for the character, or null if it doesn't map to a keyword.
      */
     public static String toKeyword(int ch) {
-        int i = ch - PRIVATE_USE_AREA_1;
-        if (i >= 0 && i < KEYWORDS.length) {
-            return KEYWORDS[i];
-        } else {
-            return null;
-        }
+        return TOKEN_TO_KEYWORD.get(ch);
     }
 
     /**

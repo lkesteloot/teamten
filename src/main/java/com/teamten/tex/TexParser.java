@@ -10,13 +10,11 @@ import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.Text;
 import com.teamten.typeset.Typesetter;
 import com.teamten.typeset.VerticalList;
-import com.teamten.util.CodePoints;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +73,7 @@ public class TexParser {
 
         if (false) {
             while (mToken != -1) {
-                System.out.println("Got token: " + Command.toString(mToken));
+                System.out.println("Got token: " + Token.toString(mToken));
                 fetchToken();
             }
         }
@@ -94,15 +92,15 @@ public class TexParser {
         }
     }
 
-    private void skipText(int expected) throws IOException {
+    private void skip(int expected) throws IOException {
         expect(expected);
         fetchToken();
     }
 
     private void expect(int expected) {
         if (mToken != expected) {
-            throw new IllegalStateException("Expected " + Command.toString(expected) +
-                    " but got " + Command.toString(mToken));
+            throw new IllegalStateException("Expected " + Token.toString(expected) +
+                    " but got " + Token.toString(mToken));
         }
     }
 
@@ -121,23 +119,23 @@ public class TexParser {
                 return verticalList;
             }
 
-            String keyword = Command.toKeyword(mToken);
+            String keyword = Token.toKeyword(mToken);
             if (keyword != null) {
                 switch (keyword) {
                     case "hbox":
                         fetchToken();
                         skipWhitespace();
-                        skipText('{');
+                        skip('{');
                         verticalList.addElement(parseHbox());
-                        skipText('}');
+                        skip('}');
                         break;
 
                     case "glue":
                         fetchToken();
                         skipWhitespace();
-                        skipText('{');
+                        skip('{');
                         verticalList.addElement(parseGlue(false));
-                        skipText('}');
+                        skip('}');
                         break;
 
                     default:
@@ -165,7 +163,7 @@ public class TexParser {
                 break;
             }
 
-            String keyword = Command.toKeyword(mToken);
+            String keyword = Token.toKeyword(mToken);
             if (keyword == null) {
                 elements.add(new Text(mToken, mFont, mFontSize));
                 fetchToken();
@@ -174,17 +172,17 @@ public class TexParser {
                     case "hbox":
                         fetchToken();
                         skipWhitespace();
-                        skipText('{');
+                        skip('{');
                         elements.add(parseHbox());
-                        skipText('}');
+                        skip('}');
                         break;
 
                     case "glue":
                         fetchToken();
                         skipWhitespace();
-                        skipText('{');
+                        skip('{');
                         elements.add(parseGlue(true));
-                        skipText('}');
+                        skip('}');
                         break;
 
                     case "penalty":
@@ -207,11 +205,31 @@ public class TexParser {
      * Reads a glue until a closing }. Does not eat the closing brace.
      */
     private Glue parseGlue(boolean isHorizontal) throws IOException {
-        long amount = parseDistance();
+        Glue.Expandability amount = parseDistance();
+        if (amount.isInfinite()) {
+            throw new IllegalArgumentException("glue amount cannot be infinite");
+        }
+
+        Glue.Expandability plus;
+        Glue.Expandability minus;
         skipWhitespace();
+        if (mToken == Token.PLUS) {
+            skip(Token.PLUS);
+            plus = parseDistance();
+            skipWhitespace();
+        } else {
+            plus = new Glue.Expandability(0, false);
+        }
+        if (mToken == Token.MINUS) {
+            skip(Token.MINUS);
+            minus = parseDistance();
+            skipWhitespace();
+        } else {
+            minus = new Glue.Expandability(0, false);
+        }
         expect('}');
 
-        return new Glue(amount, 0, 0, isHorizontal);
+        return new Glue(amount.getAmount(), plus, minus, isHorizontal);
     }
 
     /**
@@ -226,7 +244,7 @@ public class TexParser {
      * @throws IOException from the Reader.
      * @throws NumberFormatException if the distance cannot be parsed.
      */
-    private long parseDistance() throws IOException {
+    private Glue.Expandability parseDistance() throws IOException {
         StringBuilder sb = new StringBuilder();
 
         skipWhitespace();
@@ -260,29 +278,35 @@ public class TexParser {
             throw new NumberFormatException("missing unit");
         }
 
-        // Read the second character of the unit.
-        int ch1 = mToken;
-        fetchToken();
-        int ch2 = mToken;
+        // Read the next sequence of letters, which should be a unit.
+        StringBuilder unitString = new StringBuilder();
+        while (Character.isLetter(mToken)) {
+            unitString.appendCodePoint(mToken);
+            fetchToken();
+        }
 
-        // See if we reached the end of the file.
-        if (ch2 == -1) {
+        if (unitString.length() == 0) {
             throw new NumberFormatException("missing unit");
         }
-        fetchToken();
 
-        String unitString = new StringBuilder().appendCodePoint(ch1).appendCodePoint(ch2).toString();
+        Glue.Expandability expandability;
 
-        SpaceUnit unit;
-        try {
-            // Parse unit.
-            unit = SpaceUnit.valueOf(unitString.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            // Invalid unit.
-            throw new NumberFormatException("unknown unit " + unitString);
+        if (unitString.toString().equals("inf")) {
+            expandability = new Glue.Expandability((long) value, true);
+        } else {
+            SpaceUnit unit;
+            try {
+                // Parse unit.
+                unit = SpaceUnit.valueOf(unitString.toString().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Invalid unit.
+                throw new NumberFormatException("unknown unit " + unitString);
+            }
+
+            expandability = new Glue.Expandability(unit.toSp(value), false);
         }
 
-        return unit.toSp(value);
+        return expandability;
     }
 
     /**
