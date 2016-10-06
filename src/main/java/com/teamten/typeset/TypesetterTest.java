@@ -26,26 +26,26 @@ public class TypesetterTest {
 
         // Simple paragraph.
         HorizontalList horizontalList = new HorizontalList();
-        typesetter.addTextToHorizontalList("Hello world! Test app for trying various things with the typesetter.\u00A0This gives us more control than using Markdown.", font, fontSize, horizontalList);
-        typesetter.endOfParagraph(horizontalList);
+        horizontalList.addText("Hello world! Test app for trying various things with the typesetter.\u00A0This gives us more control than using Markdown.", font, fontSize);
+        horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, pageWidth - 2*pageMargin);
 
         horizontalList = new HorizontalList();
-        typesetter.addTextToHorizontalList("The lower of the ", font, fontSize, horizontalList);
+        horizontalList.addText("The lower of the ", font, fontSize);
         VerticalList verticalList2 = new VerticalList();
         HorizontalList horizontalList2 = new HorizontalList();
-        typesetter.addTextToHorizontalList("one", font, fontSize, horizontalList2);
+        horizontalList2.addText("one", font, fontSize);
         verticalList2.addElement(horizontalList2.makeBox());
         horizontalList2 = new HorizontalList();
-        typesetter.addTextToHorizontalList("twg", font, fontSize, horizontalList2);
+        horizontalList2.addText("twg", font, fontSize);
         verticalList2.addElement(horizontalList2.makeBox());
         verticalList2.println(System.out, "");
         horizontalList.addElement(verticalList2.makeBox());
-        typesetter.addTextToHorizontalList(" lines.", font, fontSize, horizontalList);
-        typesetter.endOfParagraph(horizontalList);
+        horizontalList.addText(" lines.", font, fontSize);
+        horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, pageWidth - 2*pageMargin);
 
-        typesetter.ejectPage(verticalList);
+        verticalList.ejectPage();
         verticalList.println(System.out, "");
 
         // Add the vertical list to the PDF.

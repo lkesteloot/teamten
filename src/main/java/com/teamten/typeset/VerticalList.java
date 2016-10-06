@@ -54,4 +54,15 @@ public class VerticalList extends ElementList {
     protected long getElementSize(Element element) {
         return element.getHeight() + element.getDepth();
     }
+
+    /**
+     * Add infinite vertical glue and force a page break.
+     */
+    public void ejectPage() {
+        // Add a final infinite glue at the bottom.
+        addElement(new Glue(0, 1, true, 0, false, false));
+
+        // And a forced page break.
+        addElement(new Penalty(-Penalty.INFINITY));
+    }
 }
