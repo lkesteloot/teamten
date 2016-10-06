@@ -46,7 +46,7 @@ public class HyphenDictionary {
     }
 
     /**
-     * Reads a .dic file from an input stream.
+     * Reads a .dic file from a UTF-8 input stream.
      */
     private static HyphenDictionary fromInputStream(InputStream inputStream) throws IOException {
         HyphenDictionary dic = new HyphenDictionary();
@@ -156,34 +156,6 @@ public class HyphenDictionary {
      * after that.
      */
     public List<String> hyphenate(String word) {
-        // Strip non-alphabetic prefix.
-        String prefix = null;
-        for (int i = 0; i < word.length(); i++) {
-            if (Character.isLetter(word.charAt(i))) {
-                prefix = word.substring(0, i);
-                word = word.substring(i);
-                break;
-            }
-        }
-        if (prefix == null) {
-            // All punctuation.
-            return Arrays.asList(word);
-        }
-
-        // Strip non-alphabetic suffix.
-        String suffix = null;
-        for (int i = word.length(); i > 0; i--) {
-            if (Character.isLetter(word.charAt(i - 1))) {
-                suffix = word.substring(i);
-                word = word.substring(0, i);
-                break;
-            }
-        }
-        if (suffix == null) {
-            // All punctuation. Shouldn't happen since we handled this above.
-            return Arrays.asList(word);
-        }
-
         // Make a sequence of possible cut points.
         char[] cutPoints = new char[word.length() + 1];
         for (int i = 0; i < cutPoints.length; i++) {
@@ -243,15 +215,11 @@ public class HyphenDictionary {
             segments.add(word.substring(lastStart));
         }
 
-        // Re-attach prefix and suffix.
-        segments.set(0, prefix + segments.get(0));
-        segments.set(segments.size() - 1, segments.get(segments.size() - 1) + suffix);
-
         return segments;
     }
 
     /* package */ static String removeDigits(String line) {
-        // XXX Precompile this.
+        // TODO Precompile this.
         return line.replaceAll("[0-9]", "");
     }
 

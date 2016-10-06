@@ -55,9 +55,6 @@ public class HyphenDictionaryTest {
         // Now should work.
         checkHyphenation(d, "successivement", "suc", "ces", "si", "ve", "ment");
 
-        // With punctuation.
-        checkHyphenation(d, ":successivement!", ":suc", "ces", "si", "ve", "ment!");
-
         // Try mins.
         d.setLeftHyphenMin(3);
         d.setRightHyphenMin(4);
