@@ -139,6 +139,29 @@ public class Font {
     }
 
     /**
+     * Get the size of the text in the specified font size. Does not include kerning.
+     */
+    public Metrics getStringMetrics(String text, float fontSize) throws IOException {
+        long width = 0;
+        long height = 0;
+        long depth = 0;
+
+        // Go through every code point and place them side by side, no kerning.
+        for (int i = 0; i < text.length(); ) {
+            int ch = text.codePointAt(i);
+            i += Character.charCount(ch);
+
+            Metrics metrics = getCharacterMetrics(ch, fontSize);
+
+            width += metrics.getWidth();
+            height = Math.max(height, metrics.getHeight());
+            depth = Math.max(depth, metrics.getDepth());
+        }
+
+        return new Metrics(width, height, depth);
+    }
+
+    /**
      * The metrics for a character or text, in scaled points.
      */
     public static class Metrics {

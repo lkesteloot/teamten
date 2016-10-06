@@ -109,7 +109,14 @@ public abstract class ElementList implements ElementSink {
                     Element element = mElements.get(i);
 
                     // Advance by the size of the element.
-                    width += getElementSize(element);
+                    if (element instanceof Discretionary) {
+                        // Discretionary elements have a different size depending on whether they're broken
+                        // or not. Get the size ourselves. This assumes that we're a horizontal list.
+                        // TODO
+                        width += 0;
+                    } else {
+                        width += getElementSize(element);
+                    }
 
                     // Sum up the stretch and shrink for glues.
                     if (element instanceof Glue) {
@@ -224,7 +231,15 @@ public abstract class ElementList implements ElementSink {
             int nextIndex = nextBreakpoint.getIndex();
 
             // Collect the line or page.
-            List<Element> lineElements = mElements.subList(thisIndex, nextIndex);
+            List<Element> lineElements = new ArrayList<>();
+            for (Element element : mElements.subList(thisIndex, nextIndex)) {
+                // If it's a discretionary element, then we must keep only the no-break version.
+                if (element instanceof Discretionary) {
+                    element = ((Discretionary) element).getNoBreak();
+                }
+                lineElements.add(element);
+
+            }
             double ratio = thisBreakpoint.getRatio();
             boolean ratioIsInfinite = thisBreakpoint.isRatioIsInfinite();
 

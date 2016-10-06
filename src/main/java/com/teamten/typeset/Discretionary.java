@@ -3,30 +3,33 @@ package com.teamten.typeset;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Collections;
 
 /**
  * Represents a discretionary line break, storing both the split and unsplit versions of the text.
  */
 public class Discretionary extends NonDiscardableElement {
-    private final String mPreBreak;
-    private final String mPostBreak;
-    private final String mNoBreak;
+    public static final Discretionary EMPTY = new Discretionary(HBox.EMPTY, HBox.EMPTY, HBox.EMPTY);
+    private final HBox mPreBreak;
+    private final HBox mPostBreak;
+    private final HBox mNoBreak;
 
-    public Discretionary(String preBreak, String postBreak, String noBreak) {
+    public Discretionary(HBox preBreak, HBox postBreak, HBox noBreak) {
         mPreBreak = preBreak;
         mPostBreak = postBreak;
         mNoBreak = noBreak;
     }
 
-    public String getPreBreak() {
+    public HBox getPreBreak() {
         return mPreBreak;
     }
 
-    public String getPostBreak() {
+    public HBox getPostBreak() {
         return mPostBreak;
     }
 
-    public String getNoBreak() {
+    public HBox getNoBreak() {
         return mNoBreak;
     }
 
@@ -53,5 +56,11 @@ public class Discretionary extends NonDiscardableElement {
     @Override
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
         throw new IllegalStateException("discretionary elements should be not laid out vertically");
+    }
+
+    @Override
+    public void println(PrintStream stream, String indent) {
+        stream.printf("%sDiscretionary: split as \"%s\" and \"%s\" or whole as \"%s\"%n",
+                indent, mPreBreak.toTextString(), mPostBreak.toTextString(), mNoBreak.toTextString());
     }
 }

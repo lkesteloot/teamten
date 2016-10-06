@@ -4,13 +4,14 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Horizontal sequence of elements.
  */
 public class HBox extends Box {
+    public static final HBox EMPTY = new HBox(Collections.emptyList());
     private final List<Element> mElements;
 
     public HBox(List<Element> elements) {
@@ -45,9 +46,12 @@ public class HBox extends Box {
     @Override
     public void println(PrintStream stream, String indent) {
         stream.println(indent + "HBox " + getDimensionString() + ":");
-        for (Element element : mElements) {
-            element.println(stream, indent + "    ");
-        }
+        Element.println(stream, indent + "    ", mElements);
+    }
+
+    @Override
+    public String toTextString() {
+        return Element.toTextString(mElements);
     }
 
     /**

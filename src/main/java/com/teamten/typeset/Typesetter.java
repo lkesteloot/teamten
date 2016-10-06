@@ -134,7 +134,7 @@ public class Typesetter {
                 }
 
                 // Add the text to the current horizontal list.
-                horizontalList.addText(text, font, fontSize);
+                horizontalList.addText(text, font, fontSize, hyphenDictionary);
             }
 
             horizontalList.addEndOfParagraph();

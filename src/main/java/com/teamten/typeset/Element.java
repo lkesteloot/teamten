@@ -5,6 +5,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.List;
 
 /**
  * An element that can be stacked horizontally to make a line.
@@ -54,5 +55,34 @@ public abstract class Element {
         // Default implementation just uses toString().
         stream.print(indent);
         stream.println(toString());
+    }
+
+    /**
+     * Convenience method for implementing println() from a list of elements.
+     */
+    protected static void println(PrintStream stream, String indent, List<Element> elements) {
+        for (Element element : elements) {
+            element.println(stream, indent);
+        }
+    }
+
+    /**
+     * Return a text version of the element, ideally containing only the text of the element and its children.
+     */
+    public String toTextString() {
+        return getClass().getSimpleName();
+    }
+
+    /**
+     * Convenience method for implementing toTextString() from a list of elements.
+     */
+    protected static String toTextString(List<Element> elements) {
+        StringBuilder builder = new StringBuilder();
+
+        for (Element element : elements) {
+            builder.append(element.toTextString());
+        }
+
+        return builder.toString();
     }
 }

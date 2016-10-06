@@ -27,6 +27,16 @@ public class Text extends Box {
     }
 
     /**
+     * Constructor for a string.
+     */
+    public Text(String text, Font font, float fontSize) throws IOException {
+        super(getTextDimensions(text, font, fontSize));
+        mFont = font;
+        mFontSize = fontSize;
+        mText = text;
+    }
+
+    /**
      * Constructor for single character.
      */
     public Text(int ch, Font font, float fontSize) throws IOException {
@@ -34,6 +44,27 @@ public class Text extends Box {
         mFont = font;
         mFontSize = fontSize;
         mText = CodePoints.toString(ch);
+    }
+
+    /**
+     * The text that this element was constructed with.
+     */
+    public String getText() {
+        return mText;
+    }
+
+    /**
+     * The font the text should be displayed in.
+     */
+    public Font getFont() {
+        return mFont;
+    }
+
+    /**
+     * The font size in points.
+     */
+    public float getFontSize() {
+        return mFontSize;
     }
 
     @Override
@@ -58,6 +89,19 @@ public class Text extends Box {
     @Override
     public void println(PrintStream stream, String indent) {
         stream.printf("%sText %s: “%s” in %.0fpt %s%n", indent, getDimensionString(), mText, mFontSize, mFont);
+    }
+
+    @Override
+    public String toTextString() {
+        return mText;
+    }
+
+    /**
+     * Get the dimensions of a string.
+     */
+    private static BoxDimensions getTextDimensions(String text, Font font, float fontSize) throws IOException {
+        Font.Metrics metrics = font.getStringMetrics(text, fontSize);
+        return new BoxDimensions(metrics.getWidth(), metrics.getHeight(), metrics.getDepth());
     }
 
     /**
