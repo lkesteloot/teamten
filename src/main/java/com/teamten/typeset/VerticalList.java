@@ -46,7 +46,7 @@ public class VerticalList extends ElementList {
     }
 
     @Override
-    protected Box makeOutputBox(List<Element> elements) {
+    protected VBox makeOutputBox(List<Element> elements) {
         return new VBox(elements);
     }
 
@@ -57,6 +57,7 @@ public class VerticalList extends ElementList {
 
     /**
      * Group elements vertically into pages, each of verticalSize height.
+     * TODO delete
      */
     /*
     public List<VBox> generatePages(long verticalSize) {

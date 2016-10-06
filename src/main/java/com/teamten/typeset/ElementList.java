@@ -20,6 +20,10 @@ public abstract class ElementList implements ElementSink {
         mElements.add(element);
     }
 
+    public List<Element> getElements() {
+        return mElements;
+    }
+
     /**
      * Whether to print debugging information.
      */

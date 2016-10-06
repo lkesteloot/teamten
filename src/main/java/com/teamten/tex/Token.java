@@ -17,6 +17,7 @@ public class Token {
     public static final int PLUS = PRIVATE_USE_AREA_1 + 2;
     public static final int MINUS = PRIVATE_USE_AREA_1 + 3;
     public static final int PENALTY = PRIVATE_USE_AREA_1 + 4;
+    public static final int VBOX = PRIVATE_USE_AREA_1 + 5;
     private static final BiMap<Integer,String> TOKEN_TO_KEYWORD = HashBiMap.create();
     private static final BiMap<String,Integer> KEYWORD_TO_TOKEN = TOKEN_TO_KEYWORD.inverse();
 
@@ -26,6 +27,7 @@ public class Token {
         TOKEN_TO_KEYWORD.put(PLUS, "plus");
         TOKEN_TO_KEYWORD.put(MINUS, "minus");
         TOKEN_TO_KEYWORD.put(PENALTY, "penalty");
+        TOKEN_TO_KEYWORD.put(VBOX, "vbox");
     }
 
     /**
@@ -64,6 +66,13 @@ public class Token {
         } else {
             return -1;
         }
+    }
+
+    /**
+     * Whether the token is a command (\hbox or \+).
+     */
+    public static boolean isCommand(int ch) {
+        return toKeyword(ch) != null || toCharacter(ch) != -1;
     }
 
     /**

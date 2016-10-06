@@ -9,6 +9,7 @@ import com.teamten.typeset.Penalty;
 import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.Text;
 import com.teamten.typeset.Typesetter;
+import com.teamten.typeset.VBox;
 import com.teamten.typeset.VerticalList;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
@@ -115,34 +116,29 @@ public class TexParser {
         while (true) {
             skipWhitespace();
 
-            if (mToken == -1) {
+            if ((!internal && mToken == -1) || (internal && mToken == '}')) {
                 return verticalList;
             }
 
-            String keyword = Token.toKeyword(mToken);
-            if (keyword != null) {
-                switch (keyword) {
-                    case "hbox":
-                        fetchToken();
-                        skipWhitespace();
-                        skip('{');
-                        verticalList.addElement(parseHbox());
-                        skip('}');
-                        break;
+            switch (mToken) {
+                case Token.HBOX:
+                    fetchToken();
+                    skipWhitespace();
+                    skip('{');
+                    verticalList.addElement(parseHbox());
+                    skip('}');
+                    break;
 
-                    case "glue":
-                        fetchToken();
-                        skipWhitespace();
-                        skip('{');
-                        verticalList.addElement(parseGlue(false));
-                        skip('}');
-                        break;
+                case Token.GLUE:
+                    fetchToken();
+                    skipWhitespace();
+                    skip('{');
+                    verticalList.addElement(parseGlue(false));
+                    skip('}');
+                    break;
 
-                    default:
-                        throw new IllegalStateException("not handled: " + keyword);
-                }
-            } else {
-                throw new IllegalStateException("must have vertical element in vertical list: " + mToken);
+                default:
+                    throw new IllegalStateException("not handled: " + Token.toString(mToken));
             }
         }
     }
@@ -163,42 +159,58 @@ public class TexParser {
                 break;
             }
 
-            String keyword = Token.toKeyword(mToken);
-            if (keyword == null) {
-                elements.add(new Text(mToken, mFont, mFontSize));
-                fetchToken();
-            } else {
-                switch (keyword) {
-                    case "hbox":
-                        fetchToken();
-                        skipWhitespace();
-                        skip('{');
-                        elements.add(parseHbox());
-                        skip('}');
-                        break;
+            switch (mToken) {
+                case Token.HBOX:
+                    fetchToken();
+                    skipWhitespace();
+                    skip('{');
+                    elements.add(parseHbox());
+                    skip('}');
+                    break;
 
-                    case "glue":
-                        fetchToken();
-                        skipWhitespace();
-                        skip('{');
-                        elements.add(parseGlue(true));
-                        skip('}');
-                        break;
+                case Token.VBOX:
+                    fetchToken();
+                    skipWhitespace();
+                    skip('{');
+                    elements.add(parseVbox());
+                    skip('}');
+                    break;
 
-                    case "penalty":
-                        fetchToken();
-                        long penalty = parseLong();
-                        skipWhitespace();
-                        elements.add(new Penalty(penalty));
-                        break;
+                case Token.GLUE:
+                    fetchToken();
+                    skipWhitespace();
+                    skip('{');
+                    elements.add(parseGlue(true));
+                    skip('}');
+                    break;
 
-                    default:
-                        throw new IllegalStateException("not handled: " + keyword);
-                }
+                case Token.PENALTY:
+                    fetchToken();
+                    long penalty = parseLong();
+                    skipWhitespace();
+                    elements.add(new Penalty(penalty));
+                    break;
+
+                default:
+                    if (Token.isCommand(mToken)) {
+                        throw new IllegalStateException("not handled: " + Token.toString(mToken));
+                    } else {
+                        elements.add(new Text(mToken, mFont, mFontSize));
+                        fetchToken();
+                    }
             }
         }
 
         return new HBox(elements);
+    }
+
+    /**
+     * Reads a vertical box until a closing }. Does not eat the close brace.
+     */
+    private VBox parseVbox() throws IOException {
+        VerticalList verticalList = parseVerticalList(true);
+
+        return new VBox(verticalList.getElements());
     }
 
     /**
