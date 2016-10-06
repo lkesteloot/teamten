@@ -165,38 +165,12 @@ public class Font {
 
     /**
      * The metrics for a character or text, in scaled points.
-     * TODO consider deleting and using AbstractDimensions instead.
      */
-    public static class Metrics implements Dimensions {
-        private final long mWidth;
-        private final long mHeight;
-        private final long mDepth;
-
+    public static class Metrics extends AbstractDimensions {
         public Metrics(long width, long height, long depth) {
-            mWidth = width;
-            mHeight = height;
-            mDepth = depth;
+            super(width, height, depth);
         }
 
-        public long getWidth() {
-            return mWidth;
-        }
-
-        public long getHeight() {
-            return mHeight;
-        }
-
-        public long getDepth() {
-            return mDepth;
-        }
-
-        @Override
-        public String toString() {
-            return "Metrics{" +
-                    "mWidth=" + mWidth +
-                    ", mHeight=" + mHeight +
-                    ", mDepth=" + mDepth +
-                    '}';
-        }
+        // Nothing else yet. TODO delete?
     }
 }
