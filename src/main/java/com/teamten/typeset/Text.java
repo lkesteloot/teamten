@@ -30,7 +30,7 @@ public class Text extends Box {
      * Constructor for a string.
      */
     public Text(String text, Font font, float fontSize) throws IOException {
-        super(getTextDimensions(text, font, fontSize));
+        super(font.getStringMetrics(text, fontSize));
         mFont = font;
         mFontSize = fontSize;
         mText = text;
@@ -40,7 +40,7 @@ public class Text extends Box {
      * Constructor for single character.
      */
     public Text(int ch, Font font, float fontSize) throws IOException {
-        super(getTextDimensions(ch, font, fontSize));
+        super(font.getCharacterMetrics(ch, fontSize));
         mFont = font;
         mFontSize = fontSize;
         mText = CodePoints.toString(ch);
@@ -94,21 +94,5 @@ public class Text extends Box {
     @Override
     public String toTextString() {
         return mText;
-    }
-
-    /**
-     * Get the dimensions of a string.
-     */
-    private static AbstractDimensions getTextDimensions(String text, Font font, float fontSize) throws IOException {
-        Font.Metrics metrics = font.getStringMetrics(text, fontSize);
-        return new AbstractDimensions(metrics.getWidth(), metrics.getHeight(), metrics.getDepth());
-    }
-
-    /**
-     * Get the dimensions of a character.
-     */
-    private static AbstractDimensions getTextDimensions(int ch, Font font, float fontSize) throws IOException {
-        Font.Metrics metrics = font.getCharacterMetrics(ch, fontSize);
-        return new AbstractDimensions(metrics.getWidth(), metrics.getHeight(), metrics.getDepth());
     }
 }
