@@ -16,6 +16,8 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.IntFunction;
+import java.util.function.IntUnaryOperator;
 
 import static com.teamten.typeset.SpaceUnit.PT;
 
@@ -163,8 +165,9 @@ public class Font {
 
     /**
      * The metrics for a character or text, in scaled points.
+     * TODO consider deleting and using AbstractDimensions instead.
      */
-    public static class Metrics {
+    public static class Metrics implements Dimensions {
         private final long mWidth;
         private final long mHeight;
         private final long mDepth;

@@ -21,10 +21,8 @@ public class Box extends NonDiscardableElement {
         mDepth = depth;
     }
 
-    protected Box(BoxDimensions boxDimensions) {
-        mWidth = boxDimensions.mWidth;
-        mHeight = boxDimensions.mHeight;
-        mDepth = boxDimensions.mDepth;
+    protected Box(Dimensions dimensions) {
+        this(dimensions.getWidth(), dimensions.getHeight(), dimensions.getDepth());
     }
 
     /**
@@ -79,18 +77,4 @@ public class Box extends NonDiscardableElement {
         return String.format("(%.1fpt, %.1fpt, %.1fpt)", PT.fromSp(mWidth), PT.fromSp(mHeight), PT.fromSp(mDepth));
     }
 
-    /**
-     * So we can have a one-arg constructor.
-     */
-    protected static class BoxDimensions {
-        private final long mWidth;
-        private final long mHeight;
-        private final long mDepth;
-
-        public BoxDimensions(long width, long height, long depth) {
-            mWidth = width;
-            mHeight = height;
-            mDepth = depth;
-        }
-    }
 }

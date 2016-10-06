@@ -99,16 +99,16 @@ public class Text extends Box {
     /**
      * Get the dimensions of a string.
      */
-    private static BoxDimensions getTextDimensions(String text, Font font, float fontSize) throws IOException {
+    private static AbstractDimensions getTextDimensions(String text, Font font, float fontSize) throws IOException {
         Font.Metrics metrics = font.getStringMetrics(text, fontSize);
-        return new BoxDimensions(metrics.getWidth(), metrics.getHeight(), metrics.getDepth());
+        return new AbstractDimensions(metrics.getWidth(), metrics.getHeight(), metrics.getDepth());
     }
 
     /**
      * Get the dimensions of a character.
      */
-    private static BoxDimensions getTextDimensions(int ch, Font font, float fontSize) throws IOException {
+    private static AbstractDimensions getTextDimensions(int ch, Font font, float fontSize) throws IOException {
         Font.Metrics metrics = font.getCharacterMetrics(ch, fontSize);
-        return new BoxDimensions(metrics.getWidth(), metrics.getHeight(), metrics.getDepth());
+        return new AbstractDimensions(metrics.getWidth(), metrics.getHeight(), metrics.getDepth());
     }
 }

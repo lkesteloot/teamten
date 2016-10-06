@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * An element that can be stacked horizontally to make a line.
  */
-public abstract class Element {
+public abstract class Element implements Dimensions {
     protected final boolean DRAW_DEBUG = true;
 
     /**

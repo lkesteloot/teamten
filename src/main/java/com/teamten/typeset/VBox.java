@@ -53,7 +53,7 @@ public class VBox extends Box {
      *
      * @param elements the elements top to bottom.
      */
-    private static BoxDimensions determineVBoxDimensions(List<Element> elements) {
+    private static Dimensions determineVBoxDimensions(List<Element> elements) {
         long boxWidth = 0;
         long boxHeight = 0;
         long boxDepth = 0;
@@ -80,7 +80,6 @@ public class VBox extends Box {
             boxHeight -= depth;
         }
 
-        return new BoxDimensions(boxWidth, boxHeight, boxDepth);
+        return new AbstractDimensions(boxWidth, boxHeight, boxDepth);
     }
-
 }
