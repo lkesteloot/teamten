@@ -10,15 +10,18 @@ import java.util.Collections;
  * Represents a discretionary line break, storing both the split and unsplit versions of the text.
  */
 public class Discretionary extends NonDiscardableElement {
-    public static final Discretionary EMPTY = new Discretionary(HBox.EMPTY, HBox.EMPTY, HBox.EMPTY);
+    public static final int HYPHEN_PENALTY = 50;
+    public static final Discretionary EMPTY = new Discretionary(HBox.EMPTY, HBox.EMPTY, HBox.EMPTY, 0);
     private final HBox mPreBreak;
     private final HBox mPostBreak;
     private final HBox mNoBreak;
+    private final int mPenalty;
 
-    public Discretionary(HBox preBreak, HBox postBreak, HBox noBreak) {
+    public Discretionary(HBox preBreak, HBox postBreak, HBox noBreak, int penalty) {
         mPreBreak = preBreak;
         mPostBreak = postBreak;
         mNoBreak = noBreak;
+        mPenalty = penalty;
     }
 
     public HBox getPreBreak() {
@@ -31,6 +34,10 @@ public class Discretionary extends NonDiscardableElement {
 
     public HBox getNoBreak() {
         return mNoBreak;
+    }
+
+    public int getPenalty() {
+        return mPenalty;
     }
 
     @Override

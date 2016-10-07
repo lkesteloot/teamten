@@ -135,7 +135,7 @@ public class HorizontalList extends ElementList {
                             } else {
                                 newElements.add(new Discretionary(
                                         new HBox(Arrays.asList(new Text("-", text.getFont(), text.getFontSize()))),
-                                        HBox.EMPTY, HBox.EMPTY));
+                                        HBox.EMPTY, HBox.EMPTY, Discretionary.HYPHEN_PENALTY));
                             }
                         }
                     }

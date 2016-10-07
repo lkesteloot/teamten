@@ -38,29 +38,7 @@ public abstract class ElementList implements ElementSink {
      */
     public void format(ElementSink output, long maxSize) {
         // Find all the places that we could break a line or page.
-        List<Breakpoint> breakpoints = new ArrayList<>();
-
-        // For convenience put a breakpoint at the very beginning, at the first element.
-        breakpoints.add(new Breakpoint(0, 0));
-
-        for (int i = 0; i < mElements.size(); i++) {
-            Element element = mElements.get(i);
-            Element previousElement = i == 0 ? null : mElements.get(i - 1);
-
-            if (element instanceof Penalty) {
-                // Can break at penalties as long as they're not positive infinity.
-                Penalty penalty = (Penalty) element;
-                if (penalty.getPenalty() != Penalty.INFINITY) {
-                    breakpoints.add(new Breakpoint(i, penalty.getPenalty()));
-                }
-            } else if (element instanceof Glue && previousElement instanceof NonDiscardableElement) {
-                // Can break at glues that preceded by non-discardable elements.
-                breakpoints.add(new Breakpoint(i, 0));
-            }
-        }
-
-        // The way we construct paragraphs and pages, there's always a forced breakpoint at the very end, so we don't
-        // manually add one.
+        List<Breakpoint> breakpoints = findBreakpoints();
 
         // For each possible breakpoint, figure out the next displayed element (after the breakpoint).
         for (int breakpointIndex = 0; breakpointIndex < breakpoints.size(); breakpointIndex++) {
@@ -85,7 +63,6 @@ public abstract class ElementList implements ElementSink {
                 System.out.println("starting at element " + thisBreak);
             }
             Breakpoint thisBreakpoint = breakpoints.get(thisBreak);
-            int thisIndex = thisBreakpoint.getStartIndex();
 
             // So now we're pretending that our paragraph or page starts here. We're looking for the
             // best next breakpoint.
@@ -96,27 +73,15 @@ public abstract class ElementList implements ElementSink {
             int bestNextBreak = -1;
             for (int nextBreak = thisBreak + 1; nextBreak < breakpoints.size(); nextBreak++) {
                 Breakpoint nextBreakpoint = breakpoints.get(nextBreak);
-                int nextIndex = nextBreakpoint.getIndex();
 
                 // The first line of our paragraph (or first page of our book) will go from thisIndex (inclusive) to
-                // nextIndex (exclusive). Find the sum of the sizes of all the elements in that line. Also compute
-                // the total stretch and shrink for the glue in that line.
+                // nextIndex (inclusive, but only if it's Discretionary). Find the sum of the sizes of all the
+                // elements in that line. Also compute the total stretch and shrink for the glue in that line.
                 long width = 0;
                 Glue.ExpandabilitySum stretch = new Glue.ExpandabilitySum();
                 Glue.ExpandabilitySum shrink = new Glue.ExpandabilitySum();
-
-                for (int i = thisIndex; i < nextIndex; i++) {
-                    Element element = mElements.get(i);
-
-                    // Advance by the size of the element.
-                    if (element instanceof Discretionary) {
-                        // Discretionary elements have a different size depending on whether they're broken
-                        // or not. Get the size ourselves. This assumes that we're a horizontal list.
-                        // TODO
-                        width += 0;
-                    } else {
-                        width += getElementSize(element);
-                    }
+                for (Element element : getLineElements(thisBreakpoint, nextBreakpoint)) {
+                    width += getElementSize(element);
 
                     // Sum up the stretch and shrink for glues.
                     if (element instanceof Glue) {
@@ -226,25 +191,9 @@ public abstract class ElementList implements ElementSink {
                 break;
             }
 
-            // Find indices into the element list.
-            int thisIndex = thisBreakpoint.getStartIndex();
-            int nextIndex = nextBreakpoint.getIndex();
-
-            // Collect the line or page.
-            List<Element> lineElements = new ArrayList<>();
-            for (Element element : mElements.subList(thisIndex, nextIndex)) {
-                // If it's a discretionary element, then we must keep only the no-break version.
-                if (element instanceof Discretionary) {
-                    element = ((Discretionary) element).getNoBreak();
-                }
-                lineElements.add(element);
-
-            }
-            double ratio = thisBreakpoint.getRatio();
-            boolean ratioIsInfinite = thisBreakpoint.isRatioIsInfinite();
-
             // Make a new list with the glue set to specific widths.
-            Box box = makeBox(lineElements, ratio, ratioIsInfinite);
+            Box box = makeBox(getLineElements(thisBreakpoint, nextBreakpoint),
+                    thisBreakpoint.getRatio(), thisBreakpoint.isRatioIsInfinite());
 
             // Add to the sink.
             output.addElement(box);
@@ -252,6 +201,78 @@ public abstract class ElementList implements ElementSink {
             // Next line or page.
             thisBreakpoint = nextBreakpoint;
         }
+    }
+
+    /**
+     * Find all the places that we could break a line or page.
+     */
+    private List<Breakpoint> findBreakpoints() {
+        List<Breakpoint> breakpoints = new ArrayList<>();
+
+        // For convenience put a breakpoint at the very beginning, at the first element.
+        breakpoints.add(new Breakpoint(0, 0));
+
+        for (int i = 0; i < mElements.size(); i++) {
+            Element element = mElements.get(i);
+            Element previousElement = i == 0 ? null : mElements.get(i - 1);
+
+            if (element instanceof Penalty) {
+                // Can break at penalties as long as they're not positive infinity.
+                Penalty penalty = (Penalty) element;
+                if (penalty.getPenalty() != Penalty.INFINITY) {
+                    breakpoints.add(new Breakpoint(i, penalty.getPenalty()));
+                }
+            } else if (element instanceof Glue && previousElement instanceof NonDiscardableElement) {
+                // Can break at glues that preceded by non-discardable elements.
+                breakpoints.add(new Breakpoint(i, 0));
+            } else if (element instanceof Discretionary) {
+                // Can break at discretionary elements (hyphenation).
+                Discretionary discretionary = (Discretionary) element;
+                breakpoints.add(new Breakpoint(i, discretionary.getPenalty()));
+            }
+        }
+
+        // The way we construct paragraphs and pages, there's always a forced breakpoint at the very end, so we don't
+        // manually add one.
+
+        return breakpoints;
+    }
+
+    /**
+     * Return the list of elements on this line, from thisBreakpoint (inclusive) to nextBreakpoint
+     * (inclusive only if it's a discretionary element). All discretionary elements are turned
+     * into HBoxes depending on where they are.
+     */
+    private List<Element> getLineElements(Breakpoint thisBreakpoint, Breakpoint nextBreakpoint) {
+        List<Element> elements = new ArrayList<>();
+
+        int thisIndex = thisBreakpoint.getStartIndex();
+        int nextIndex = nextBreakpoint.getIndex();
+
+        for (int i = thisIndex; i <= nextIndex; i++) {
+            Element element = mElements.get(i);
+
+            // Include all discretionary elements, but convert them to HBoxes.
+            if (element instanceof Discretionary) {
+                Discretionary discretionary = (Discretionary) element;
+                HBox hbox;
+                if (i == thisIndex) {
+                    // This is the discretionary break at the beginning of the line. Use the "post" HBox.
+                    hbox = discretionary.getPostBreak();
+                } else if (i == nextIndex) {
+                    // This is the discretionary break at the end of the line. Use the "pre" HBox.
+                    hbox = discretionary.getPreBreak();
+                } else {
+                    // This is a discretionary in the middle of the line. Use the "no" HBox.
+                    hbox = discretionary.getNoBreak();
+                }
+                elements.add(hbox);
+            } else if (i < nextIndex) {
+                elements.add(element);
+            }
+        }
+
+        return elements;
     }
 
     /**

@@ -79,25 +79,34 @@ public class Token {
      * Convert to a user-friendly command, with backslash prefix if necessary.
      */
     public static String toString(int token) {
+        StringBuilder builder = new StringBuilder();
+
         String keyword = toKeyword(token);
         if (keyword != null) {
-            return "\\" + keyword;
+            builder.append('\\');
+            builder.append(keyword);
+        } else {
+            int ch = toCharacter(token);
+            if (ch != -1) {
+                builder.append('\\');
+                builder.appendCodePoint(ch);
+            } else {
+                switch (token) {
+                    case ' ':
+                        builder.append("(space)");
+                        break;
+
+                    case '\n':
+                        builder.append("(return)");
+                        break;
+
+                    default:
+                        builder.appendCodePoint(token);
+                        break;
+                }
+            }
         }
 
-        int ch = toCharacter(token);
-        if (ch != -1) {
-            return new StringBuilder().append('\\').appendCodePoint(ch).toString();
-        }
-
-        switch (token) {
-            case ' ':
-                return "(space)";
-
-            case '\n':
-                return "(return)";
-
-            default:
-                return CodePoints.toString(token);
-        }
+        return builder.toString();
     }
 }
