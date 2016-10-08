@@ -311,6 +311,18 @@ public class HorizontalList extends ElementList {
         // Make a new list of elements.
         List<Element> newElements = new ArrayList<>(origElements.size());
 
+        addKerningToList(origElements, newElements, 0, font, fontSize);
+
+        return newElements;
+    }
+
+    /**
+     * Adds the original elements to the new list, with the given previous element.
+     * @return the new previous element.
+     */
+    static int addKerningToList(List<Element> origElements, List<Element> newElements, int previousCh,
+                                Font font, float fontSize) throws IOException {
+
         // Go through each element, keeping track of the previous character across them.
         for (Element element : origElements) {
             if (element instanceof Text) {
@@ -345,8 +357,32 @@ public class HorizontalList extends ElementList {
                 }
                 newElements.add(element);
             } else if (element instanceof Discretionary) {
-                // TODO handle this properly.
+                Discretionary discretionary = (Discretionary) element;
+                HBox preBreak = discretionary.getPreBreak();
+                HBox postBreak = discretionary.getPostBreak();
+                HBox noBreak = discretionary.getNoBreak();
+
+                // Recurse on the three sections, sending in the appropriate previous character and capturing
+                // the next characters.
+                List<Element> preBreakElements = new ArrayList<>();
+                addKerningToList(preBreak.getElements(), preBreakElements, previousCh, font, fontSize);
+                List<Element> postBreakElements = new ArrayList<>();
+                int postBreakCh = addKerningToList(postBreak.getElements(), postBreakElements, 0, font, fontSize);
+                List<Element> noBreakElements = new ArrayList<>();
+                int noBreakCh = addKerningToList(noBreak.getElements(), noBreakElements, previousCh, font, fontSize);
+
+                // Replace discretionary with new lists.
+                element = new Discretionary(new HBox(preBreakElements), new HBox(postBreakElements),
+                        new HBox(noBreakElements), discretionary.getPenalty());
                 newElements.add(element);
+
+                if (postBreakCh != noBreakCh) {
+                    // This is both possible and valid, but handling it would be hard. So punt until we need it
+                    // and understand it better.
+                    throw new IllegalStateException("cannot resolve postBreakCh " + postBreakCh +
+                            " and noBreakCh " + noBreakCh);
+                }
+                previousCh = postBreakCh;
             } else if (element instanceof Kern) {
                 // We shouldn't have kerned already. In principle the user could insert these, so maybe?
                 throw new IllegalArgumentException("there should not be Kern elements already in list");
@@ -368,7 +404,7 @@ public class HorizontalList extends ElementList {
             }
         }
 
-        return newElements;
+        return previousCh;
     }
 
     /**

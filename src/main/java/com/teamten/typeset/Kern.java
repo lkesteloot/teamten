@@ -63,4 +63,9 @@ public class Kern extends DiscardableElement {
     public void println(PrintStream stream, String indent) {
         stream.printf("%s%s kern: %.1fpt%n", indent, mIsHorizontal ? "Horizontal" : "Vertical", PT.fromSp(mAmount));
     }
+
+    @Override
+    public String toTextString() {
+        return String.format("<Kern %.1fpt>", PT.fromSp(mAmount));
+    }
 }

@@ -19,6 +19,13 @@ public class HBox extends Box {
     }
 
     /**
+     * Do not modify this list.
+     */
+    public List<Element> getElements() {
+        return mElements;
+    }
+
+    /**
      * If the HBox contains only one element, and this element is a Text, then returns the text
      * of this Text. If the HBox is empty, returns an empty string.
      *

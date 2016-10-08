@@ -77,7 +77,7 @@ public class HorizontalListTest {
         assertEquals(hyphen, newElements.get(3));
         assertEquals("cult", newElements.get(4).toTextString());
 
-        // "difficult" with "ffi" ligature.
+        // "difficult" with "ffi" ligature. Complicates discretionary.
         newElements = HorizontalList.transformLigatures(origElements, fakeFont, fontSize);
         assertEquals(4, newElements.size());
         assertEquals("di", newElements.get(0).toTextString());
@@ -94,6 +94,69 @@ public class HorizontalListTest {
         assertEquals(origElements, newElements);
 
         pdDoc.close();
+    }
+
+    @Test
+    public void kerningTest() throws IOException {
+        PDDocument pdDoc = new PDDocument();
+        FontManager fontManager = new FontManager(pdDoc);
+        Font font = fontManager.get(FontManager.FontName.TIMES_NEW_ROMAN);
+        float fontSize = 11;
+
+        // Test kerning internal to Text nodes and between them.
+        List<Element> origElements = Arrays.asList(
+                new Text("AV", font, fontSize),
+                new Text("A", font, fontSize));
+
+        List<Element> newElements = HorizontalList.addKerning(origElements, font, fontSize);
+        assertEquals(5, newElements.size());
+        assertEquals("A", newElements.get(0).toTextString());
+        assertEquals(Kern.class, newElements.get(1).getClass());
+        assertEquals("V", newElements.get(2).toTextString());
+        assertEquals(Kern.class, newElements.get(3).getClass());
+        assertEquals("A", newElements.get(4).toTextString());
+
+        // Test discretionary.
+        origElements = Arrays.asList(
+                new Text("A", font, fontSize),
+                new Discretionary(
+                        HBox.makeOnlyString("Vo-", font, fontSize),
+                        HBox.makeOnlyString("V", font, fontSize),
+                        HBox.makeOnlyString("VoV", font, fontSize),
+                        0),
+                new Text("A", font, fontSize));
+
+        newElements = HorizontalList.addKerning(origElements, font, fontSize);
+        // Expected result: T(A)D(H(KT(V)KT(o-)), H(T(V)), H(KT(V)KT(oV)))KT(A)
+        // Where K is Kern, T(X) is Text, D(X,X,X) is Discretionary, and H(X) is HBox.
+        assertEquals(4, newElements.size());
+        assertEquals("A", newElements.get(0).toTextString());
+        {
+            Discretionary discretionary = (Discretionary) newElements.get(1);
+            {
+                List<Element> preBreak = discretionary.getPreBreak().getElements();
+                assertEquals(4, preBreak.size());
+                assertEquals(Kern.class, preBreak.get(0).getClass());
+                assertEquals("V", preBreak.get(1).toTextString());
+                assertEquals(Kern.class, preBreak.get(2).getClass());
+                assertEquals("o-", preBreak.get(3).toTextString());
+            }
+            {
+                HBox postBreak = discretionary.getPostBreak();
+                assertEquals("V", postBreak.toTextString());
+            }
+            {
+                List<Element> noBreak = discretionary.getNoBreak().getElements();
+                assertEquals(4, noBreak.size());
+                assertEquals(Kern.class, noBreak.get(0).getClass());
+                assertEquals("V", noBreak.get(1).toTextString());
+                assertEquals(Kern.class, noBreak.get(2).getClass());
+                assertEquals("oV", noBreak.get(3).toTextString());
+            }
+        }
+        assertEquals(Kern.class, newElements.get(2).getClass());
+        assertEquals("A", newElements.get(3).toTextString());
+        Element.println(newElements, System.out, "");
     }
 
     /**
