@@ -72,7 +72,7 @@ public class Text extends Box {
         /// drawDebugRectangle(contents, x, y);
 
         contents.beginText();
-        contents.setFont(mFont.getPdFont(), mFontSize);
+        contents.setFont(((PdfBoxFont) mFont).getPdFont(), mFontSize);
         contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
         contents.showText(mText);
         contents.endText();
@@ -88,11 +88,38 @@ public class Text extends Box {
 
     @Override
     public void println(PrintStream stream, String indent) {
-        stream.printf("%sText %s: “%s” in %.0fpt %s%n", indent, getDimensionString(), mText, mFontSize, mFont);
+        stream.print(indent);
+        stream.println(toString());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Text %s: “%s” in %.0fpt %s", getDimensionString(), mText, mFontSize, mFont);
     }
 
     @Override
     public String toTextString() {
         return mText;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Text text = (Text) o;
+
+        if (Float.compare(text.mFontSize, mFontSize) != 0) return false;
+        if (!mFont.equals(text.mFont)) return false;
+        return mText.equals(text.mText);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mFont.hashCode();
+        result = 31 * result + (mFontSize != +0.0f ? Float.floatToIntBits(mFontSize) : 0);
+        result = 31 * result + mText.hashCode();
+        return result;
     }
 }

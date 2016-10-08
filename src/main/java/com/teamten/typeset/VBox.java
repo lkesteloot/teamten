@@ -43,7 +43,7 @@ public class VBox extends Box {
     @Override
     public void println(PrintStream stream, String indent) {
         stream.println(indent + "VBox " + getDimensionString() + ":");
-        Element.println(stream, indent + "    ", mElements);
+        Element.println(mElements, stream, indent + "    ");
     }
 
     /**

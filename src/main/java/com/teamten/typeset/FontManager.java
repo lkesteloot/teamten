@@ -53,7 +53,7 @@ public class FontManager {
         synchronized (mFontMap) {
             Font font = mFontMap.get(fontName);
             if (font == null) {
-                font = new Font(mPdDoc, fontName.getFile());
+                font = new PdfBoxFont(mPdDoc, fontName.getFile());
                 mFontMap.put(fontName, font);
             }
 

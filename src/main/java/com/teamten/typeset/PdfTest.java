@@ -4,15 +4,11 @@ package com.teamten.typeset;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
 
 import java.io.File;
 import java.io.IOException;
 
 import static com.teamten.typeset.SpaceUnit.PT;
-import static com.teamten.typeset.SpaceUnit.SP;
 
 /**
  * Utility class for testing PDF things.
@@ -25,7 +21,7 @@ public class PdfTest {
         PDPageContentStream contents = new PDPageContentStream(pdf, page);
 
         String text = "The quick Va Vo Vu V. brown fox jumps over the lazy AV dog.";
-        Font font = new Font(pdf, new File("/Library/Fonts/Times New Roman.ttf"));
+        PdfBoxFont font = new PdfBoxFont(pdf, new File("/Library/Fonts/Times New Roman.ttf"));
         float fontSize = 14;
 
         // All together.

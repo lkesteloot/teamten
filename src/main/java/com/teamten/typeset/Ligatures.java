@@ -30,6 +30,13 @@ public class Ligatures {
     }
 
     /**
+     * A test set of ligatures that includes all the ones we know of.
+     */
+    public Ligatures() {
+        this(x -> true);
+    }
+
+    /**
      * Create a set of ligatures for a particular font.
      *
      * @param isCharInFont return true if the Unicode character (e.g., \uFB01) is in

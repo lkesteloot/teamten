@@ -1,149 +1,37 @@
-
 package com.teamten.typeset;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.fontbox.ttf.CmapSubtable;
-import org.apache.fontbox.ttf.CmapTable;
-import org.apache.fontbox.ttf.GlyphData;
-import org.apache.fontbox.ttf.GlyphTable;
-import org.apache.fontbox.ttf.KerningSubtable;
-import org.apache.fontbox.ttf.KerningTable;
-import org.apache.fontbox.ttf.TTFParser;
-import org.apache.fontbox.ttf.TrueTypeFont;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
-
-import java.io.File;
 import java.io.IOException;
-import java.util.function.IntFunction;
-import java.util.function.IntUnaryOperator;
-
-import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
- * Wrapper around a PDFBOX font.
+ * Interface for a font in our system.
  */
-public class Font {
-    private static final TTFParser TTF_PARSER = new TTFParser(true);
-    private final File mFile;
-    private final PDFont mPdFont;
-    private final KerningSubtable mKerningSubtable;
-    private final CmapSubtable mCmapSubtable;
-    private final GlyphTable mGlyphTable;
-    private final int mUnitsPerEm;
-    private final Ligatures mLigatures;
-    private final long mSpaceWidth;
-
-    public Font(PDDocument pdf, File file) throws IOException {
-        mFile = file;
-
-        // Load the font.
-        TrueTypeFont ttf = TTF_PARSER.parse(file);
-        mPdFont = PDType0Font.load(pdf, ttf, false);
-
-        // Load the kerning table.
-        KerningTable kerningTable = ttf.getKerning();
-        if (kerningTable == null) {
-            mKerningSubtable = null;
-        } else {
-            mKerningSubtable = kerningTable.getHorizontalKerningSubtable();
-        }
-
-        // Load the map from Unicode to glyph ID. We need the glyph ID when looking up the kerning info.
-        CmapTable cmap = ttf.getCmap();
-        mCmapSubtable = cmap.getSubtable(CmapTable.PLATFORM_UNICODE, CmapTable.ENCODING_UNICODE_2_0_BMP);
-
-        // The kerning numbers are given in these units.
-        mUnitsPerEm = ttf.getUnitsPerEm();
-
-        // Make a table of ligatures that only include the ones in this font.
-        mLigatures = new Ligatures(ch -> mCmapSubtable.getGlyphId(ch) != 0);
-
-        // Get the table of glyphs that'll give us the metrics for each glyph.
-        mGlyphTable = ttf.getGlyph();
-
-        // Cache the width of a space for a 1pt font.
-        mSpaceWidth = getCharacterMetrics(' ', 1.0f).getWidth();
-    }
-
-    /**
-     * The PDFont that this font is based on.
-     */
-    public PDFont getPdFont() {
-        return mPdFont;
-    }
-
+public interface Font {
     /**
      * Get the kerning between the two code points. The result is in scaled points.
      *
      * @param fontSize the size of the font in points.
      */
-    public long getKerning(int leftChar, int rightChar, double fontSize) {
-        int leftGlyph = mCmapSubtable.getGlyphId(leftChar);
-        int rightGlyph = mCmapSubtable.getGlyphId(rightChar);
+    long getKerning(int leftChar, int rightChar, double fontSize);
 
-        return PT.toSp(mKerningSubtable.getKerning(leftGlyph, rightGlyph) * fontSize / mUnitsPerEm);
-    }
-
-    public String transformLigatures(String s) {
-        return mLigatures.transform(s);
-    }
+    /**
+     * Replaces all ligatures (supported by this font) in the string.
+     */
+    String transformLigatures(String text);
 
     /**
      * The width of a space for a 1pt font, in scaled points.
      */
-    public long getSpaceWidth() {
-        return mSpaceWidth;
-    }
-
-    /**
-     * Returns the width of the text in scaled points. Does not take kerning into account.
-     * TODO delete.
-     */
-    @Deprecated
-    public long getTextWidth(float fontSize, String text) throws IOException {
-        return PT.toSp(mPdFont.getStringWidth(text) / 1000 * fontSize);
-    }
-
-    /**
-     * The basename ("Times New Roman") of the font filename.
-     */
-    @Override
-    public String toString() {
-        return FilenameUtils.getBaseName(mFile.getName());
-    }
+    long getSpaceWidth();
 
     /**
      * Return the size of a code point in the specified font size.
      */
-    public Metrics getCharacterMetrics(int ch, float fontSize) throws IOException {
-        int glyphId = mCmapSubtable.getGlyphId(ch);
-
-        // Width we can get directly.
-        long width = PT.toSp(mPdFont.getWidth(glyphId) / 1000 * fontSize);
-
-        // Height and depth we get from the glyph data.
-        GlyphData glyphData = mGlyphTable.getGlyph(glyphId);
-
-        long height;
-        long depth;
-        if (glyphData == null) {
-            // No glyph, probably a space.
-            height = 0;
-            depth = 0;
-        } else {
-            height = Math.max(PT.toSp(glyphData.getYMaximum() * fontSize / mUnitsPerEm), 0);
-            depth = Math.max(-PT.toSp(glyphData.getYMinimum() * fontSize / mUnitsPerEm), 0);
-        }
-
-        return new Metrics(width, height, depth);
-    }
+    Metrics getCharacterMetrics(int ch, float fontSize) throws IOException;
 
     /**
      * Get the size of the text in the specified font size. Does not include kerning.
      */
-    public Metrics getStringMetrics(String text, float fontSize) throws IOException {
+    default Metrics getStringMetrics(String text, float fontSize) throws IOException {
         long width = 0;
         long height = 0;
         long depth = 0;
@@ -166,11 +54,13 @@ public class Font {
     /**
      * The metrics for a character or text, in scaled points.
      */
-    public static class Metrics extends AbstractDimensions {
+    class Metrics extends AbstractDimensions {
         public Metrics(long width, long height, long depth) {
             super(width, height, depth);
         }
 
         // Nothing else yet. TODO delete?
     }
+
+
 }

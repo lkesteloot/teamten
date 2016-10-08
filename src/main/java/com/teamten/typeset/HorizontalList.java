@@ -5,7 +5,6 @@ import com.teamten.hyphen.HyphenDictionary;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,15 +134,20 @@ public class HorizontalList extends ElementList {
 
                         // Add discretionary hyphen.
                         if (i < syllables.size() - 1) {
+                            String preBreak;
                             if (syllable.endsWith("-")) {
                                 // Hyphen already exists in word.
-                                newElements.add(Discretionary.EMPTY);
+                                preBreak = "";
                             } else {
                                 // Add implicit hyphen.
-                                newElements.add(new Discretionary(
-                                        HBox.makeOnlyString("-", text.getFont(), text.getFontSize()),
-                                        HBox.EMPTY, HBox.EMPTY, Discretionary.HYPHEN_PENALTY));
+                                preBreak = "-";
                             }
+                            newElements.add(new Discretionary(
+                                    HBox.makeOnlyString(preBreak, text.getFont(), text.getFontSize()),
+                                    HBox.makeOnlyString("", text.getFont(), text.getFontSize()),
+                                    HBox.makeOnlyString("", text.getFont(), text.getFontSize()),
+                                    Discretionary.HYPHEN_PENALTY));
+
                         }
                     }
                 } else {
@@ -170,7 +174,7 @@ public class HorizontalList extends ElementList {
     /**
      * Return a new list of elements with ligatures converted to their one-character form.
      */
-    private static List<Element> transformLigatures(List<Element> elements, Font font, float fontSize)
+    static List<Element> transformLigatures(List<Element> elements, Font font, float fontSize)
             throws IOException {
 
         // If it weren't for hyphenation, we'd just go through the elements and substitute the
@@ -184,6 +188,16 @@ public class HorizontalList extends ElementList {
         // 3. Transform ligatures in each.
         // 4. Find common prefixes and suffixes.
         // 5. Reconstruct the Text/Discretionary/Text elements based on that.
+        //
+        // For example:
+        //
+        //   Original text: difficult
+        //   Hyphenated:    dif-fi-cult
+        //   As elements:   Text(dif)Discretionary(-,,)Text(fi)Discretionary(-,,)Text(cult)
+        //   With "fi":     Text(dif)Discretionary(-,,)Text(`fi`)Discretionary(-,,)Text(cult)
+        //   With "ffi":    Text(di)Discretionary(f-,`fi`,`ffi`)Discretionary(-,,)Text(cult)
+        //
+        // (The text in `backticks` above are ligature characters.
 
         // First, make a copy of the list. Use a linked list because we'll be popping and pushing
         // things on the front.

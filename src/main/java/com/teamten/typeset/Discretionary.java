@@ -4,14 +4,12 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Collections;
 
 /**
  * Represents a discretionary line break, storing both the split and unsplit versions of the text.
  */
 public class Discretionary extends NonDiscardableElement {
     public static final int HYPHEN_PENALTY = 50;
-    public static final Discretionary EMPTY = new Discretionary(HBox.EMPTY, HBox.EMPTY, HBox.EMPTY, 0);
     private final HBox mPreBreak;
     private final HBox mPostBreak;
     private final HBox mNoBreak;
@@ -67,7 +65,36 @@ public class Discretionary extends NonDiscardableElement {
 
     @Override
     public void println(PrintStream stream, String indent) {
-        stream.printf("%sDiscretionary: split as \"%s\" and \"%s\" or whole as \"%s\"%n",
-                indent, mPreBreak.toTextString(), mPostBreak.toTextString(), mNoBreak.toTextString());
+        stream.print(indent);
+        stream.println(toString());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Discretionary: split as \"%s\" and \"%s\" or whole as \"%s\"",
+                mPreBreak.toTextString(), mPostBreak.toTextString(), mNoBreak.toTextString());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Discretionary that = (Discretionary) o;
+
+        if (mPenalty != that.mPenalty) return false;
+        if (!mPreBreak.equals(that.mPreBreak)) return false;
+        if (!mPostBreak.equals(that.mPostBreak)) return false;
+        return mNoBreak.equals(that.mNoBreak);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mPreBreak.hashCode();
+        result = 31 * result + mPostBreak.hashCode();
+        result = 31 * result + mNoBreak.hashCode();
+        result = 31 * result + mPenalty;
+        return result;
     }
 }
