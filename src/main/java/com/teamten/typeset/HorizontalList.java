@@ -51,7 +51,7 @@ public class HorizontalList extends ElementList {
         elements = transformLigatures(elements, font, fontSize);
 
         // Finally, add kerning between and within text elements.
-        //// elements = addKerning(elements, font, fontSize);
+        elements = addKerning(elements, font, fontSize);
 
         // Add all the final elements to our horizontal list.
         for (Element element : elements) {
@@ -299,20 +299,77 @@ public class HorizontalList extends ElementList {
         return newElements;
     }
 
-    /*
+    /**
+     * Return a new list of elements with kerning added.
+     */
+    static List<Element> addKerning(List<Element> origElements, Font font, float fontSize)
+            throws IOException {
 
-    }        int previousCh = 0;
+        // Keep track of the last character we saw. This is 0 to mean "undefined".
+        int previousCh = 0;
 
-            previousCh = ch;
-    // See if we need to kern.
-    long kerning = font.getKerning(previousCh, ch, fontSize);
-                if (kerning != 0) {
-                        addElement(new Kern(kerning, true));
+        // Make a new list of elements.
+        List<Element> newElements = new ArrayList<>(origElements.size());
+
+        // Go through each element, keeping track of the previous character across them.
+        for (Element element : origElements) {
+            if (element instanceof Text) {
+                // Go through the text one character at a time, to see if any pair requires kerning.
+                Text text = (Text) element;
+                String s = text.getText();
+                for (int i = 0; i < s.length(); ) {
+                    int ch = s.codePointAt(i);
+
+                    // See if we need to kern.
+                    long kerning = font.getKerning(previousCh, ch, fontSize);
+                    if (kerning != 0) {
+                        // String before the kern.
+                        if (i > 0) {
+                            newElements.add(new Text(s.substring(0, i), font, fontSize));
+                            // Reset the string.
+                            s = s.substring(i);
+                            i = 0;
                         }
+                        newElements.add(new Kern(kerning, true));
+                    }
+                    i += Character.charCount(ch);
+                    previousCh = ch;
+                }
+                if (!s.isEmpty()) {
+                    newElements.add(new Text(s, font, fontSize));
+                }
+            } else if (element instanceof Glue) {
+                // See if it's a space. Guess by looking at the width.
+                if (((Glue) element).getSize() > 0) {
+                    previousCh = ' ';
+                }
+                newElements.add(element);
+            } else if (element instanceof Discretionary) {
+                // TODO handle this properly.
+                newElements.add(element);
+            } else if (element instanceof Kern) {
+                // We shouldn't have kerned already. In principle the user could insert these, so maybe?
+                throw new IllegalArgumentException("there should not be Kern elements already in list");
+            } else if (element instanceof Rule || element instanceof VBox) {
+                // Reset the previous character if the element has any width. We might have a Rule of zero
+                // width (like a strut in TeX), and that shouldn't affect kerning.
+                if (element.getWidth() > 0) {
+                    previousCh = 0;
+                }
+                newElements.add(element);
+            } else if (element instanceof HBox) {
+                // Perhaps we should recurse into the HBox here. Deal with it if it comes up.
+                throw new IllegalArgumentException("can't yet handle HBox when kerning");
+            } else if (element instanceof Penalty) {
+                // Let through.
+                newElements.add(element);
+            } else {
+                throw new IllegalArgumentException("unknown element type when kerning: " + element.getClass());
+            }
+        }
 
-                    // Pretend we're a space for the purposes of previousCh.
-                    ch = ' ';
-    */
+        return newElements;
+    }
 
     /**
      * Adds the necessary glue and penalty to end a paragraph.
