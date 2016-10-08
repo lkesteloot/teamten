@@ -324,7 +324,9 @@ public class HorizontalList extends ElementList {
                                 Font font, float fontSize) throws IOException {
 
         // Go through each element, keeping track of the previous character across them.
-        for (Element element : origElements) {
+        for (int e = 0; e < origElements.size(); e++) {
+            Element element = origElements.get(e);
+
             if (element instanceof Text) {
                 // Go through the text one character at a time, to see if any pair requires kerning.
                 Text text = (Text) element;
@@ -371,18 +373,53 @@ public class HorizontalList extends ElementList {
                 List<Element> noBreakElements = new ArrayList<>();
                 int noBreakCh = addKerningToList(noBreak.getElements(), noBreakElements, previousCh, font, fontSize);
 
+                if (postBreakCh != noBreakCh) {
+                    // This is actually the most likely scenario, because it happens with simple discretionary
+                    // hyphens. This is difficult to handle because the post break is empty (its previous
+                    // character is not defined) and the no break is empty (its previous character is the one from
+                    // before the discretionary). We're forced to put the kerning into the discretionary, in the
+                    // no-break, and to do that we have to peek ahead.
+
+                    // We'll peek ahead. We only handle the straightforward case of a Text node. If it's
+                    // anything else, we throw.
+                    boolean success = false;
+                    Element peekElement = e + 1 < origElements.size() ? origElements.get(e + 1) : null;
+                    if (peekElement instanceof Text) {
+                        String s = ((Text) peekElement).getText();
+                        int nextCh = s.isEmpty() ? 0 : s.codePointAt(0);
+                        if (nextCh != 0) {
+                            // See how our segments would kern with the next character.
+                            long kerning = font.getKerning(postBreakCh, nextCh, fontSize);
+                            if (kerning != 0) {
+                                postBreakElements.add(new Kern(kerning, true));
+                            }
+                            kerning = font.getKerning(noBreakCh, nextCh, fontSize);
+                            if (kerning != 0) {
+                                noBreakElements.add(new Kern(kerning, true));
+                            }
+                            success = true;
+                        }
+                    }
+                    if (success) {
+                        // Disable kerning with the next character, since we've already done it here.
+                        previousCh = 0;
+                    } else {
+                        // If this ever throws, then we weren't able to determine the next character. Don't panic.
+                        // The easiest and probably safest is to just not throw here, and not kern properly.
+                        // Poke around to see if we might be in a situation where kerning would be important.
+                        // If not, skip it. Set previousCh to noBreakCh, since that's the most likely case.
+                        throw new IllegalStateException("cannot resolve postBreakCh " + postBreakCh +
+                                " and noBreakCh " + noBreakCh);
+                    }
+                } else {
+                    // Set it to either postBreakCh or noBreakCh, they're equal.
+                    previousCh = postBreakCh;
+                }
+
                 // Replace discretionary with new lists.
                 element = new Discretionary(new HBox(preBreakElements), new HBox(postBreakElements),
                         new HBox(noBreakElements), discretionary.getPenalty());
                 newElements.add(element);
-
-                if (postBreakCh != noBreakCh) {
-                    // This is both possible and valid, but handling it would be hard. So punt until we need it
-                    // and understand it better.
-                    throw new IllegalStateException("cannot resolve postBreakCh " + postBreakCh +
-                            " and noBreakCh " + noBreakCh);
-                }
-                previousCh = postBreakCh;
             } else if (element instanceof Kern) {
                 // We shouldn't have kerned already. In principle the user could insert these, so maybe?
                 throw new IllegalArgumentException("there should not be Kern elements already in list");

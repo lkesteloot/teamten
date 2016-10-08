@@ -156,6 +156,39 @@ public class HorizontalListTest {
         }
         assertEquals(Kern.class, newElements.get(2).getClass());
         assertEquals("A", newElements.get(3).toTextString());
+
+        // Try just-hyphen discretionary. See all the special handling for this in addKerning().
+        origElements = Arrays.asList(
+                new Text("A", font, fontSize),
+                new Discretionary(
+                        HBox.makeOnlyString("-", font, fontSize),
+                        HBox.makeOnlyString("", font, fontSize),
+                        HBox.makeOnlyString("", font, fontSize),
+                        0),
+                new Text("V", font, fontSize));
+
+        newElements = HorizontalList.addKerning(origElements, font, fontSize);
+        // Expected result: T(A)D(H(T(-)), H(T()), H(K))T(V)
+        // Where K is Kern, T(X) is Text, D(X,X,X) is Discretionary, and H(X) is HBox.
+        assertEquals(3, newElements.size());
+        assertEquals("A", newElements.get(0).toTextString());
+        {
+            Discretionary discretionary = (Discretionary) newElements.get(1);
+            {
+                HBox preBreak = discretionary.getPreBreak();
+                assertEquals("-", preBreak.toTextString());
+            }
+            {
+                HBox postBreak = discretionary.getPostBreak();
+                assertEquals("", postBreak.toTextString());
+            }
+            {
+                List<Element> noBreak = discretionary.getNoBreak().getElements();
+                assertEquals(1, noBreak.size());
+                assertEquals(Kern.class, noBreak.get(0).getClass());
+            }
+        }
+        assertEquals("V", newElements.get(2).toTextString());
         Element.println(newElements, System.out, "");
     }
 
