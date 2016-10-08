@@ -112,7 +112,7 @@ public class Typesetter {
             verticalList.setBaselineSkip(leading);
 
             if (marginTop != 0) {
-                verticalList.addElement(new Glue(marginTop, 0, 0, false));
+                verticalList.addElement(new Glue(marginTop, marginTop/4, 0, false));
             }
 
             if (center) {
@@ -142,7 +142,7 @@ public class Typesetter {
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             horizontalList.format(verticalList, pageWidth - 2*pageMargin);
             if (marginBottom != 0) {
-                verticalList.addElement(new Glue(marginBottom, 0, 0, false));
+                verticalList.addElement(new Glue(marginBottom, marginBottom/4, 0, false));
             }
             verticalList.addElement(new Glue(interParagraphSpacing, PT.toSp(1), 0, false));
             previousBlockType = block.getBlockType();
