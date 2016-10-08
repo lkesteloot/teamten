@@ -1,10 +1,13 @@
 package com.teamten.typeset;
 
+import com.google.common.base.Strings;
 import com.teamten.hyphen.HyphenDictionary;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -46,7 +49,7 @@ public class HorizontalList extends ElementList {
         }
 
         // Third, go through the text elements and replace the ligatures.
-        /// elements = transformLigatures(elements, font, fontSize);
+        elements = transformLigatures(elements, font, fontSize);
 
         // Finally, add kerning between and within text elements.
         //// elements = addKerning(elements, font, fontSize);
@@ -123,23 +126,26 @@ public class HorizontalList extends ElementList {
 
                 if (word.length() > 0 && isWordCharacter(word.codePointAt(0))) {
                     List<String> syllables = hyphenDictionary.hyphenate(word);
-                    System.out.print("The word " + word + " was hyphenated to: ");
 
                     for (int i = 0; i < syllables.size(); i++) {
                         String syllable = syllables.get(i);
-                        System.out.print(syllable + " - ");
+
+                        // Add syllable.
                         newElements.add(new Text(syllable, text.getFont(), text.getFontSize()));
+
+                        // Add discretionary hyphen.
                         if (i < syllables.size() - 1) {
                             if (syllable.endsWith("-")) {
+                                // Hyphen already exists in word.
                                 newElements.add(Discretionary.EMPTY);
                             } else {
+                                // Add implicit hyphen.
                                 newElements.add(new Discretionary(
-                                        new HBox(Arrays.asList(new Text("-", text.getFont(), text.getFontSize()))),
+                                        HBox.makeOnlyString("-", text.getFont(), text.getFontSize()),
                                         HBox.EMPTY, HBox.EMPTY, Discretionary.HYPHEN_PENALTY));
                             }
                         }
                     }
-                    System.out.println();
                 } else {
                     // Not a word, leave it as-is.
                     newElements.add(element);
@@ -161,11 +167,125 @@ public class HorizontalList extends ElementList {
         return Character.isLetter(ch) || ch == '-' || ch == '\'' || ch == '’';
     }
 
+    /**
+     * Return a new list of elements with ligatures converted to their one-character form.
+     */
+    private static List<Element> transformLigatures(List<Element> elements, Font font, float fontSize)
+            throws IOException {
+
+        // If it weren't for hyphenation, we'd just go through the elements and substitute the
+        // ligatures in the Text elements. But a discretionary break can cut in the middle of
+        // a ligature, such as in the word "dif-fi-cult", cutting the "ffi" ligature.
+        //
+        // So our plan is to:
+        //
+        // 1. Find patterns of Text/Discretionary/Text elements.
+        // 2. Reconstruct the entire pre-break, post-break, and no-break text.
+        // 3. Transform ligatures in each.
+        // 4. Find common prefixes and suffixes.
+        // 5. Reconstruct the Text/Discretionary/Text elements based on that.
+
+        // First, make a copy of the list. Use a linked list because we'll be popping and pushing
+        // things on the front.
+        Deque<Element> oldElements = new LinkedList<>(elements);
+        elements = null;
+
+        // Our new elements.
+        List<Element> newElements = new ArrayList<>();
+
+        // Go through each element.
+        while (!oldElements.isEmpty()) {
+            Element element = oldElements.removeFirst();
+            if (element instanceof Text || element instanceof Discretionary) {
+                // Look for a Text/Discretionary/Text pattern.
+                Text beforeText;
+                Discretionary discretionary;
+                Text afterText;
+
+                if (element instanceof Text) {
+                    beforeText = (Text) element;
+                    discretionary = (Discretionary) (oldElements.peekFirst() instanceof Discretionary ?
+                            oldElements.removeFirst() : null);
+                } else {
+                    beforeText = null;
+                    discretionary = (Discretionary) element;
+                }
+                afterText = (Text) (discretionary != null && oldElements.peekFirst() instanceof Text ?
+                        oldElements.removeFirst() : null);
+
+                // We now have one of the following cases:
+                //
+                //    text / null / null
+                //    text / discretionary / null
+                //    text / discretionary / text
+                //    null / discretionary / null
+                //    null / discretionary / text
+                //
+                // Sanity check.
+                if (beforeText != null && afterText != null &&
+                        (beforeText.getFont() != afterText.getFont() ||
+                                beforeText.getFontSize() != afterText.getFontSize())) {
+
+                    throw new IllegalStateException("before and after text fonts don't match");
+                }
+
+                // Generate the full prebreak, postbreak, and nobreak strings.
+                String entirePreBreak = (beforeText == null ? "" : beforeText.getText()) +
+                        (discretionary == null ? "" : discretionary.getPreBreak().getOnlyString());
+                String entirePostBreak = (discretionary == null ? "" : discretionary.getPostBreak().getOnlyString()) +
+                        (afterText == null ? "" : afterText.getText());
+                String entireNoBreak = (beforeText == null ? "" : beforeText.getText()) +
+                        (discretionary == null ? "" : discretionary.getNoBreak().getOnlyString()) +
+                        (afterText == null ? "" : afterText.getText());
+
+                // Substitute ligatures in all three.
+                entirePreBreak = font.transformLigatures(entirePreBreak);
+                entirePostBreak = font.transformLigatures(entirePostBreak);
+                entireNoBreak = font.transformLigatures(entireNoBreak);
+
+                // Find longest common prefix and suffix.
+                String commonPrefix = Strings.commonPrefix(entirePreBreak, entireNoBreak);
+                String commonSuffix = Strings.commonSuffix(entirePostBreak, entireNoBreak);
+
+                // Find what's left, to put in the discretionary.
+                String preBreak = entirePreBreak.substring(commonPrefix.length());
+                String postBreak = entirePostBreak.substring(0, entirePostBreak.length() - commonSuffix.length());
+                String noBreak = entireNoBreak.substring(commonPrefix.length(),
+                        entireNoBreak.length() - commonSuffix.length());
+
+                // Replace the Text elements.
+                beforeText = commonPrefix.isEmpty() ? null : new Text(commonPrefix, font, fontSize);
+                discretionary = discretionary == null ? null : new Discretionary(
+                        HBox.makeOnlyString(preBreak, font, fontSize),
+                        HBox.makeOnlyString(postBreak, font, fontSize),
+                        HBox.makeOnlyString(noBreak, font, fontSize),
+                        discretionary.getPenalty());
+                afterText = commonSuffix.isEmpty() ? null : new Text(commonSuffix, font, fontSize);
+
+                // Add the elements to the output.
+                if (beforeText != null) {
+                    newElements.add(beforeText);
+                }
+                if (discretionary != null) {
+                    newElements.add(discretionary);
+                }
+
+                // The afterText must be processed again, potentially with the next discretionary, so put
+                // it back in the input. Note that this means that its string will have the ligatures
+                // substituted twice. This is fine.
+                if (afterText != null) {
+                    oldElements.addFirst(afterText);
+                }
+            } else {
+                // Not text or discretionary, leave it as-is.
+                newElements.add(element);
+            }
+        }
+
+        return newElements;
+    }
+
     /*
-        // Replace ligatures with Unicode values. TODO Not sure if we want to do this here with strings or
-        // on the fly while we're rolling through code points. Seems weird to do it here, since a vertical
-        // list constructed in another way wouldn't have it. This code should be Doc-related only.
-        text = font.transformLigatures(text);
 
     }        int previousCh = 0;
 

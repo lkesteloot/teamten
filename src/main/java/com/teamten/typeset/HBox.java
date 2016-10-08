@@ -4,6 +4,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,6 +18,36 @@ public class HBox extends Box {
     public HBox(List<Element> elements) {
         super(Dimensions.horizontally(elements));
         mElements = elements;
+    }
+
+    /**
+     * If the HBox contains only one element, and this element is a Text, then returns the text
+     * of this Text. If the HBox is empty, returns an empty string.
+     *
+     * @throws IllegalArgumentException if one of the above conditions do not hold.
+     */
+    public String getOnlyString() {
+        if (mElements.isEmpty()) {
+            return "";
+        }
+
+        if (mElements.size() != 1) {
+            throw new IllegalArgumentException("HBox must contain exactly one element");
+        }
+
+        Element element = mElements.get(0);
+        if (!(element instanceof Text)) {
+            throw new IllegalArgumentException("element must be Text");
+        }
+
+        return ((Text) element).getText();
+    }
+
+    /**
+     * Make an HBox that contains only a Text with the given string, font, and font size.
+     */
+    public static HBox makeOnlyString(String text, Font font, float fontSize) throws IOException {
+        return new HBox(Arrays.asList(new Text(text, font, fontSize)));
     }
 
     @Override
