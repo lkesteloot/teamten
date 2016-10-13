@@ -215,6 +215,9 @@ public class HyphenDictionary {
             segments.add(word.substring(lastStart));
         }
 
+        // Fix up single hyphens.
+        segments = mergeSingleHyphens(segments);
+
         return segments;
     }
 
@@ -249,6 +252,34 @@ public class HyphenDictionary {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * We once saw a problem with the word "super-confort", where the hyphen ended up
+     * as its own segment. Merge it with the previous segment.
+     */
+    private static List<String> mergeSingleHyphens(List<String> segments) {
+        // Quick exit.
+        if (!segments.contains("-")) {
+            return segments;
+        }
+
+        // Build up a new list.
+        List<String> newSegments = new ArrayList<>(segments.size());
+
+        for (int i = 0; i < segments.size(); i++) {
+            String element = segments.get(i);
+
+            if (i + 1 < segments.size() && segments.get(i + 1).equals("-")) {
+                newSegments.add(element + "-");
+                // Skip the hyphen.
+                i++;
+            } else {
+                newSegments.add(element);
+            }
+        }
+
+        return newSegments;
     }
 
     /**

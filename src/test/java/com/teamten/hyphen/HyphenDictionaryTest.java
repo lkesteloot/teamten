@@ -3,6 +3,7 @@ package com.teamten.hyphen;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -66,8 +67,28 @@ public class HyphenDictionaryTest {
         checkHyphenation(d, "successivement", "succes", "si", "vement");
     }
 
+    @Test
+    public void testFrenchDictionary() throws IOException {
+        HyphenDictionary d = HyphenDictionary.fromResource("fr");
+
+        // This was once a problem where the hyphenator returned "su", "per", "-", "confort". The hyphen
+        // should be with the "per".
+        checkHyphenation(d, "super-confort", "su", "per-", "confort");
+    }
+
     private void checkHyphenation(HyphenDictionary d, String word, String ... expectedFragments) {
         List<String> actualFragments = d.hyphenate(word);
+
+        if (false) {
+            for (String s : expectedFragments) {
+                System.out.printf("<%s>  ", s);
+            }
+            System.out.println();
+            for (String s : actualFragments) {
+                System.out.printf("<%s>  ", s);
+            }
+            System.out.println();
+        }
 
         assertArrayEquals("word " + word + " failed", expectedFragments,
                 actualFragments.toArray());
