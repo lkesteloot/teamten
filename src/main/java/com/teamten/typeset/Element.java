@@ -70,7 +70,7 @@ public abstract class Element implements Dimensions {
      * Return a text version of the element, ideally containing only the text of the element and its children.
      */
     public String toTextString() {
-        return getClass().getSimpleName();
+        return "";
     }
 
     /**

@@ -70,6 +70,11 @@ public class Discretionary extends NonDiscardableElement {
     }
 
     @Override
+    public String toTextString() {
+        return mNoBreak.toTextString();
+    }
+
+    @Override
     public String toString() {
         return String.format("Discretionary: split as \"%s\" and \"%s\" or whole as \"%s\"",
                 mPreBreak.toTextString(), mPostBreak.toTextString(), mNoBreak.toTextString());

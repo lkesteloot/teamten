@@ -9,6 +9,8 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.teamten.typeset.SpaceUnit.PT;
+
 /**
  * Accumulates elements in a horizontal list until a paragraph is finished, at which point a list of
  * elements is generated and added to a vertical list.
@@ -57,7 +59,7 @@ public class HorizontalList extends ElementList {
 
         // Add all the final elements to our horizontal list.
         for (Element element : elements) {
-            element.println(System.out, "");
+            /// element.println(System.out, "");
             addElement(element);
         }
     }
@@ -459,7 +461,7 @@ public class HorizontalList extends ElementList {
      */
     public void addEndOfParagraph() {
         // Add a forced break at the end of the paragraph.
-        addElement(new Glue(0, 1, true, 0, false, true));
+        addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
         addElement(new Penalty(-Penalty.INFINITY));
     }
 }

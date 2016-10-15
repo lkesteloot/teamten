@@ -11,6 +11,9 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * or pages.
  */
 public abstract class ElementList implements ElementSink {
+    private static final long LINE_PENALTY = 10;
+    private static final long BADNESS_TOLERANCE = 5000;
+    private static final long INFINITELY_BAD = 10000;
     private static final boolean DEBUG_HORIZONTAL_LIST = false;
     private static final boolean DEBUG_VERTICAL_LIST = false;
     private final List<Element> mElements = new ArrayList<>();
@@ -30,6 +33,42 @@ public abstract class ElementList implements ElementSink {
     private boolean printDebug() {
         return (DEBUG_HORIZONTAL_LIST && this instanceof HorizontalList) ||
                 (DEBUG_VERTICAL_LIST && this instanceof VerticalList);
+    }
+
+    /**
+     * Get a string that can be used for debugging to represent the paragraph starting here.
+     * @param thisBreakpoint the start of the line.
+     */
+    private String getDebugLinePrefix(Breakpoint thisBreakpoint) {
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = thisBreakpoint.getStartIndex(); i < mElements.size() && builder.length() < 20; i++) {
+            Element element = mElements.get(i);
+            builder.append(element.toTextString());
+        }
+
+        builder.append("...");
+
+        return builder.toString();
+    }
+
+    /**
+     * Get a string that can be used for debugging to represent the paragraph ending here.
+     * @param nextBreakpoint the end of the line.
+     */
+    private String getDebugLineSuffix(Breakpoint thisBreakpoint, Breakpoint nextBreakpoint) {
+        StringBuilder builder = new StringBuilder();
+
+        int thisIndex = thisBreakpoint.getStartIndex();
+
+        for (int i = nextBreakpoint.getIndex() - 1; i >= thisIndex && builder.length() < 20; i--) {
+            Element element = mElements.get(i);
+            builder.insert(0, element.toTextString());
+        }
+
+        builder.insert(0, "...");
+
+        return builder.toString();
     }
 
     /**
@@ -59,15 +98,16 @@ public abstract class ElementList implements ElementSink {
         // Work backwards through the breakpoints. Use dynamic programming to cache the value of what we've
         // computed so far. The cache is stored in the Breakpoint objects.
         for (int thisBreak = breakpoints.size() - 1; thisBreak >= 0; thisBreak--) {
-            if (printDebug()) {
-                System.out.println("starting at element " + thisBreak);
-            }
             Breakpoint thisBreakpoint = breakpoints.get(thisBreak);
+
+            if (printDebug()) {
+                System.out.printf("Starting at element %d (%s)\n", thisBreak, getDebugLinePrefix(thisBreakpoint));
+            }
 
             // So now we're pretending that our paragraph or page starts here. We're looking for the
             // best next breakpoint.
             Breakpoint bestNextBreakpoint = null;
-            long bestBadness = Long.MAX_VALUE;
+            long bestTotalDemerits = Long.MAX_VALUE;
             double bestRatio = 0;
             boolean bestRatioIsInfinite = false;
             int bestNextBreak = -1;
@@ -91,91 +131,118 @@ public abstract class ElementList implements ElementSink {
                     }
                 }
 
-                // Start with our own penalty, since we're breaking here.
-                long badness = thisBreakpoint.getPenalty();
-
                 // Compute difference between width and page width or height.
-                long difference = maxSize - width;
+                long extraSpace = maxSize - width;
 
                 // See whether we're short or long.
                 double ratio;
                 boolean ratioIsInfinite;
-                boolean noStretch = false;
-                if (difference > 0) {
+                boolean canStretch = true;
+                boolean isOverfull = false;
+                if (extraSpace > 0) {
                     // Our line is short. Compute how much we'd have to stretch.
                     if (stretch.getAmount() > 0) {
-                        ratio = difference / (double) stretch.getAmount();
+                        ratio = extraSpace / (double) stretch.getAmount();
                         ratioIsInfinite = stretch.isInfinite();
                     } else {
                         // There's no glue to stretch.
                         ratio = 0;
                         ratioIsInfinite = false;
-                        noStretch = true;
+                        canStretch = false;
                     }
-                } else if (difference < 0) {
+                } else if (extraSpace < 0) {
                     // Our line is long. Compute how much we'd have to shrink.
-                    if (shrink.getAmount() > 0) {
+                    if (!stretch.isInfinite() && -extraSpace > stretch.getAmount()) {
+                        // Can't shrink more than shrink amount.
+                        ratio = -1.0;
+                        ratioIsInfinite = false;
+                        isOverfull = true;
+                    } else if (shrink.getAmount() > 0) {
                         // This will be negative.
-                        ratio = difference / (double) shrink.getAmount();
+                        ratio = extraSpace / (double) shrink.getAmount();
                         ratioIsInfinite = shrink.isInfinite();
                     } else {
                         // There's no glue to shrink.
                         ratio = 0;
                         ratioIsInfinite = false;
-                        noStretch = true;
+                        canStretch = false;
                     }
                 } else {
-                    // Our line is just right, there's no extra badness.
+                    // Our line is just right.
                     ratio = 0;
                     ratioIsInfinite = false;
                 }
 
-                // See if the ratio is acceptable.
-                if (ratio < -1) {
-                    // Can't shrink past maximum shrinkage.
+                // Compute badness for the line. This is based on how much we had to stretch or shrink.
+                long badness;
+                if (ratioIsInfinite) {
+                    // No badness for infinite stretch or shrink.
+                    badness = 0;
+                } else if (isOverfull) {
+                    // We're overfull. This is infinitely bad.
+                    badness = INFINITELY_BAD;
+                } else if (!canStretch) {
+                    // We don't match the right size and we can't stretch or shrink. This is infinitely bad.
+                    badness = INFINITELY_BAD;
                 } else {
-                    // Add the badness for the paragraph or page starting at the next breakpoint.
-                    badness += nextBreakpoint.getBadness();
-
-                    if (noStretch) {
-                        // Didn't find any place to stretch or shrink. Keep it anyway, but penalize it.
-                        if (difference < 0) {
-                            // TODO still don't understand the difference between these two cases. Look up
-                            // the TeX code.
-                            // Overfull box, consider this to be infinitely bad.
-                            badness = Long.MAX_VALUE;
-                        } else {
-                            // Underfull box.
-                            badness = Penalty.INFINITY;
-                        }
-                    } else if (ratioIsInfinite) {
-                        // Don't penalize for infinite stretch or shrink.
+                    // Normal case. Use 100*r^3, but max out at INFINITELY_BAD.
+                    if (ratio < -5 || ratio > 5) {
+                        // Avoid overflow. 5 = ceil((INFINITELY_BAD/100)^(1/3)).
+                        badness = INFINITELY_BAD;
                     } else {
-                        // Factor the ratio into the badness.
-                        badness += 100 * Math.pow(Math.abs(ratio), 3);
+                        badness = Math.min(INFINITELY_BAD, (long) (100 * Math.pow(Math.abs(ratio), 3)));
                     }
-                    if (printDebug()) {
-                        System.out.printf("  to element %d: difference = %.1f - %.1f = %.1f (badness = %d, bestBadness = %d, ratio = %.3f)%n",
-                                nextBreak, PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(difference),
-                                badness, bestBadness, ratio);
+                }
+
+                // Get the penalty for the break at the end of this line.
+                long penalty = nextBreakpoint.getPenalty();
+
+                // Don't consider breaks at infinity or if the badness exceeds our tolerance.
+                if (penalty < Penalty.INFINITY && (badness <= BADNESS_TOLERANCE || bestNextBreakpoint == null)) {
+                    // Compute demerits for this line.
+                    long demerits = (LINE_PENALTY + badness);
+                    demerits = demerits*demerits;
+
+                    if (penalty >= 0) {
+                        demerits += penalty * penalty;
+                    } else if (penalty > -Penalty.INFINITY) {
+                        demerits -= penalty * penalty;
+                    } else {
+                        // No point in adding constant to a line we know we're going to break anyway.
                     }
 
-                    if (bestNextBreakpoint == null || badness <= bestBadness) {
+                    // Add the demerits for the paragraph or page starting at the next breakpoint.
+                    long totalDemerits = demerits + nextBreakpoint.getTotalDemerits();
+
+                    if (printDebug()) {
+                        System.out.printf("  to element %d (%s): %.1f - %.1f = %.1f (line d = %d, total d = %d, r = %.3f)%n",
+                                nextBreak, getDebugLineSuffix(thisBreakpoint, nextBreakpoint),
+                                PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(extraSpace),
+                                demerits, totalDemerits, ratio);
+                    }
+
+                    if (bestNextBreakpoint == null || totalDemerits <= bestTotalDemerits) {
                         bestNextBreakpoint = nextBreakpoint;
                         bestNextBreak = nextBreak;
-                        bestBadness = badness;
+                        bestTotalDemerits = totalDemerits;
                         bestRatio = ratio;
                         bestRatioIsInfinite = ratioIsInfinite;
                     }
+                }
+
+                // Actually, if we're overfull, then we're done considering this line or page, since adding
+                // any more will just make it worse (probably).
+                if (isOverfull && bestNextBreakpoint != null) {
+                    break;
                 }
             }
 
             if (bestNextBreakpoint != null) {
                 if (printDebug()) {
-                    System.out.printf("  best next break is %d, badness %d, ratio %.3f%n", bestNextBreak, bestBadness, bestRatio);
+                    System.out.printf("  best next break is %d, total demerits %d, ratio %.3f%n", bestNextBreak, bestTotalDemerits, bestRatio);
                 }
-                // Store the badness at this breakpoint and link to the next break.
-                thisBreakpoint.setBadness(bestBadness);
+                // Store the total demerits at this breakpoint and link to the next break.
+                thisBreakpoint.setTotalDemerits(bestTotalDemerits);
                 thisBreakpoint.setNextBreakpoint(bestNextBreakpoint);
                 thisBreakpoint.setRatio(bestRatio);
                 thisBreakpoint.setRatioIsInfinite(bestRatioIsInfinite);
@@ -244,10 +311,10 @@ public abstract class ElementList implements ElementSink {
      * into HBoxes depending on where they are.
      */
     private List<Element> getLineElements(Breakpoint thisBreakpoint, Breakpoint nextBreakpoint) {
-        List<Element> elements = new ArrayList<>();
-
         int thisIndex = thisBreakpoint.getStartIndex();
         int nextIndex = nextBreakpoint.getIndex();
+
+        List<Element> elements = new ArrayList<>(Math.max(nextIndex - thisIndex + 1, 10));
 
         for (int i = thisIndex; i <= nextIndex; i++) {
             Element element = mElements.get(i);
@@ -335,7 +402,7 @@ public abstract class ElementList implements ElementSink {
         private final int mIndex;
         private final long mPenalty;
         private int mStartIndex;
-        private long mBadness;
+        private long mTotalDemerits;
         private Breakpoint mNextBreakpoint;
         private double mRatio;
         private boolean mRatioIsInfinite;
@@ -344,7 +411,7 @@ public abstract class ElementList implements ElementSink {
             mIndex = index;
             mPenalty = penalty;
             mStartIndex = 0;
-            mBadness = 0;
+            mTotalDemerits = 0;
             mNextBreakpoint = null;
             mRatio = 0;
             mRatioIsInfinite = false;
@@ -379,17 +446,17 @@ public abstract class ElementList implements ElementSink {
         }
 
         /**
-         * The badness of the rest of the paragraph or page starting at this break.
+         * The demerits of the rest of the paragraph or page starting at this break.
          */
-        public long getBadness() {
-            return mBadness;
+        public long getTotalDemerits() {
+            return mTotalDemerits;
         }
 
         /**
-         * Set the badness of the rest of the paragraph or page starting at this break.
+         * Set the demerits of the rest of the paragraph or page starting at this break.
          */
-        public void setBadness(long badness) {
-            mBadness = badness;
+        public void setTotalDemerits(long totalDemerits) {
+            mTotalDemerits = totalDemerits;
         }
 
         /**

@@ -102,6 +102,11 @@ public class Glue extends DiscardableElement {
                 PT.fromSp(mSize), mStretch.toString("+"), mShrink.toString("-"));
     }
 
+    @Override
+    public String toTextString() {
+        return " ";
+    }
+
     public static class Expandability {
         private final long mAmount;
         private final boolean mIsInfinite;

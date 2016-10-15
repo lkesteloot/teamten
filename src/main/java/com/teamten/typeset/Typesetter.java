@@ -2,6 +2,7 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Stopwatch;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
@@ -34,7 +35,9 @@ public class Typesetter {
     public static void main(String[] args) throws IOException {
         InputStream inputStream = new FileInputStream(args[0]);
         MarkdownParser parser = new MarkdownParser();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Doc doc = parser.parse(inputStream);
+        System.out.println("Parsing: " + stopwatch);
         Typesetter typesetter = new Typesetter();
         PDDocument pdDoc = typesetter.typeset(doc);
         pdDoc.save(args[1]);
@@ -49,10 +52,14 @@ public class Typesetter {
         long pageHeight = IN.toSp(9);
         long pageMargin = IN.toSp(1);
 
+        Stopwatch stopwatch = Stopwatch.createStarted();
         VerticalList verticalList = docToVerticalList(doc, fontManager, pageWidth, pageMargin);
+        System.out.println("Horizontal: " + stopwatch);
 
         // Add the vertical list to the PDF.
+        stopwatch = Stopwatch.createStarted();
         addVerticalListToPdf(verticalList, pdDoc, pageWidth, pageHeight, pageMargin);
+        System.out.println("Vertical: " + stopwatch);
 
         return pdDoc;
     }
@@ -198,63 +205,5 @@ public class Typesetter {
 
         contents.close();
     }
-
-    /**
-     * Convert words to elements (boxes, glue, and penalty).
-     * TODO delete
-     */
-    /*
-    private List<Element> wordsToElements(List<String> words, Font font, float fontSize,
-                                          long firstLineSpacing, HyphenDictionary hyphenDictionary) throws IOException {
-
-        List<Element> elements = new ArrayList<>();
-
-        float spaceWidth = getTextWidth(font.getPdFont(), fontSize, " ");
-        float hyphenWidth = getTextWidth(font.getPdFont(), fontSize, "-");
-
-        if (firstLineSpacing != 0) {
-            elements.add(new Box(firstLineSpacing, ""));
-        }
-        for (int i = 0; i < words.size(); i++) {
-            String word = words.get(i);
-            boolean isLastWord = i == words.size() - 1;
-
-            // Add ligatures.
-            word = font.transformLigatures(word);
-
-            // Replace non-break space with normal space for rendering.
-            // XXX not right, should be glue (preceded by penalty 1000) so
-            // that it will stretch.
-            word = word.replace("\u00A0", " ");
-
-            // Hyphenate the word. XXX Here we should split the word if it
-            // includes punctuation like m-dashes, etc.
-            List<String> fragments = hyphenDictionary.hyphenate(word);
-            /// System.out.printf("%-25s: %s%n", word, HyphenDictionary.segmentsToString(fragments));
-
-            // Add the fragments, separated by penalties.
-            for (int j = 0; j < fragments.size(); j++) {
-                long fragment = fragments.get(j);
-                elements.add(new Box(getTextWidth(font.getPdFont(), fontSize, fragment), fragment));
-                if (j < fragments.size() - 1) {
-                    elements.add(new Penalty(hyphenWidth, Penalty.HYPHEN));
-                }
-            }
-
-            if (isLastWord) {
-                // End of paragraph.
-                elements.add(new Glue(0, getLastElement(elements)));
-                elements.add(new Penalty(0, -Penalty.INFINITY));
-            } else {
-                // Space between words.
-                elements.add(new Glue(spaceWidth, getLastElement(elements)));
-            }
-        }
-
-        return elements;
-    }
-
-    */
-
 }
 
