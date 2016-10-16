@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.teamten.typeset.SpaceUnit.IN;
+import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * A TeX-like parser. This isn't intended to be used for actually typesetting, it's mostly to make it easy
@@ -304,7 +305,7 @@ public class TexParser {
         Glue.Expandability expandability;
 
         if (unitString.toString().equals("inf")) {
-            expandability = new Glue.Expandability((long) value, true);
+            expandability = new Glue.Expandability(PT.toSp(value), true);
         } else {
             SpaceUnit unit;
             try {

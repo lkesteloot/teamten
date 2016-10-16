@@ -29,7 +29,7 @@ public class HorizontalListTest {
         String s = "Hello there";
         long width = font.getStringMetrics(s, fontSize).getWidth();
         horizontalList.addElement(new Text(font, fontSize, s, width, PT.toSp(15), 0));
-        horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
         horizontalList.addElement(new Penalty(-Penalty.INFINITY));
 
         horizontalList.format(verticalList, IN.toSp(5));

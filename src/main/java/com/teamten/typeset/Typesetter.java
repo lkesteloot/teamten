@@ -125,7 +125,7 @@ public class Typesetter {
             }
 
             if (center) {
-                horizontalList.addElement(new Glue(0, 1, true, 0, false, true));
+                horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
             }
 
             // Paragraph indent.

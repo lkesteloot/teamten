@@ -60,7 +60,7 @@ public class VerticalList extends ElementList {
      */
     public void ejectPage() {
         // Add a final infinite glue at the bottom.
-        addElement(new Glue(0, 1, true, 0, false, false));
+        addElement(new Glue(0, PT.toSp(1), true, 0, false, false));
 
         // And a forced page break.
         addElement(new Penalty(-Penalty.INFINITY));
