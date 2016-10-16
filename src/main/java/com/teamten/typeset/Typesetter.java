@@ -40,7 +40,9 @@ public class Typesetter {
         System.out.println("Parsing: " + stopwatch);
         Typesetter typesetter = new Typesetter();
         PDDocument pdDoc = typesetter.typeset(doc);
+        stopwatch = Stopwatch.createStarted();
         pdDoc.save(args[1]);
+        System.out.println("Saving: " + stopwatch);
     }
 
     public PDDocument typeset(Doc doc) throws IOException {

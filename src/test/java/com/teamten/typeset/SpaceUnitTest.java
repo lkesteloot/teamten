@@ -15,27 +15,27 @@ import static org.junit.Assert.*;
 public class SpaceUnitTest {
     @Test
     public void testConversionToSp() {
-        assertEquals(65535L, SpaceUnit.PT.toSp(1.0));
-        assertEquals(25*65535L/10 + 1, SpaceUnit.PT.toSp(2.5));
+        assertEquals(65536L, SpaceUnit.PT.toSp(1.0));
+        assertEquals(25*65536L/10, SpaceUnit.PT.toSp(2.5));
     }
 
     @Test
     public void testConversionFromSp() {
-        assertEquals(1, SpaceUnit.PT.fromSp(65535), 0.001);
+        assertEquals(1, SpaceUnit.PT.fromSp(65536), 0.001);
     }
 
     @Test
     public void testParsing() throws IOException {
-        assertEquals(65535L, parseString("1 pt*"));
-        assertEquals(65535L, parseString("1pt*"));
-        assertEquals(12*65535L, parseString("1pc*"));
-        assertEquals(72*65535L, parseString("1in*"));
-        assertEquals(72*65535L, parseString("1.0in*"));
-        assertEquals(72*65535L, parseString("1.000in*"));
-        assertEquals(-72*65535L + 1, parseString("-1.000in*"));
-        assertEquals(-72*65535L + 1, parseString("-10.0e-1 in*"));
-        assertEquals(1857685L, parseString("1 cm*"));
-        assertEquals(185768L, parseString("1 mm*"));
+        assertEquals(65536L, parseString("1 pt*"));
+        assertEquals(65536L, parseString("1pt*"));
+        assertEquals(12*65536L, parseString("1pc*"));
+        assertEquals(72*65536L, parseString("1in*"));
+        assertEquals(72*65536L, parseString("1.0in*"));
+        assertEquals(72*65536L, parseString("1.000in*"));
+        assertEquals(-72*65536L + 1, parseString("-1.000in*"));
+        assertEquals(-72*65536L + 1, parseString("-10.0e-1 in*"));
+        assertEquals(1857713L, parseString("1 cm*"));
+        assertEquals(185771L, parseString("1 mm*"));
     }
 
     @Test

@@ -12,23 +12,23 @@ public enum SpaceUnit {
      * Point. This is the base PDF unit. Note that we don't use the real printer's
      * point, which is 1/72.27 inch. Ours is equivalent to TeX's "big point (bp)".
      */
-    PT(65535L),
+    PT(65536L),
     /**
      * Pica. One pica = 12 points.
      */
-    PC(65535L*12),
+    PC(65536L*12),
     /**
      * Inch. 72 points in an inch, by PDF definition.
      */
-    IN(65535L*72),
+    IN(65536L*72),
     /**
      * Centimeter. 2.54 cm in an inch.
      */
-    CM(65535L*7200/254),
+    CM(65536L*7200/254),
     /**
      * Millimeter. 25.4 mm in an inch.
      */
-    MM(65535L*720/254),
+    MM(65536L*720/254),
     /**
      * Scaled point, about 5 nm, or 1/100 the wavelength of visible light. We
      * use this for all our internal calculations. A long lets us represent
