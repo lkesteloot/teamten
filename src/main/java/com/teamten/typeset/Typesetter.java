@@ -82,6 +82,7 @@ public class Typesetter {
             boolean indentFirstLine = false;
             boolean allCaps = false;
             boolean center = false;
+            boolean newPage = false;
             long marginTop = 0;
             long marginBottom = 0;
             HorizontalList horizontalList = new HorizontalList();
@@ -101,8 +102,9 @@ public class Typesetter {
                     fontSize = 36;
                     allCaps = true;
                     // center = true;
-                    marginTop = IN.toSp(1);
-                    marginBottom = IN.toSp(2);
+                    marginTop = IN.toSp(0.5);
+                    marginBottom = IN.toSp(1);
+                    newPage = true;
                     break;
 
                 case CHAPTER_HEADER:
@@ -110,6 +112,7 @@ public class Typesetter {
                     spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
                     fontSize = 11;
                     allCaps = true;
+                    newPage = true;
                     break;
             }
 
@@ -119,6 +122,10 @@ public class Typesetter {
 
             // Set the distance between baselines based on the paragraph's main font.
             verticalList.setBaselineSkip(leading);
+
+            if (newPage && !verticalList.getElements().isEmpty()) {
+                verticalList.ejectPage();
+            }
 
             if (marginTop != 0) {
                 verticalList.addElement(new Glue(marginTop, marginTop/4, 0, false));
