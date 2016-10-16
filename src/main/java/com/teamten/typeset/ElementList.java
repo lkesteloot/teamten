@@ -198,7 +198,9 @@ public abstract class ElementList implements ElementSink {
                 long penalty = nextBreakpoint.getPenalty();
 
                 // Don't consider breaks at infinity or if the badness exceeds our tolerance.
-                if (penalty < Penalty.INFINITY && (badness <= BADNESS_TOLERANCE || bestNextBreakpoint == null)) {
+                if (penalty < Penalty.INFINITY && (badness <= BADNESS_TOLERANCE ||
+                        bestNextBreakpoint == null || penalty == -Penalty.INFINITY)) {
+
                     // Compute demerits for this line.
                     long demerits = (LINE_PENALTY + badness);
                     demerits = demerits*demerits;
@@ -221,12 +223,17 @@ public abstract class ElementList implements ElementSink {
                                 demerits, totalDemerits, ratio);
                     }
 
-                    if (bestNextBreakpoint == null || totalDemerits <= bestTotalDemerits) {
+                    if (bestNextBreakpoint == null || totalDemerits <= bestTotalDemerits || penalty == -Penalty.INFINITY) {
                         bestNextBreakpoint = nextBreakpoint;
                         bestNextBreak = nextBreak;
                         bestTotalDemerits = totalDemerits;
                         bestRatio = ratio;
                         bestRatioIsInfinite = ratioIsInfinite;
+
+                        if (penalty == -Penalty.INFINITY) {
+                            // We're forced to break here.
+                            break;
+                        }
                     }
                 }
 
