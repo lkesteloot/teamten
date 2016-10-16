@@ -15,7 +15,7 @@ public class PdfUtil {
      */
     public static void drawDebugRectangle(PDPageContentStream contents, long x, long y, long width, long height) throws IOException {
         contents.addRect(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y), PT.fromSpAsFloat(width), PT.fromSpAsFloat(height));
-        contents.setStrokingColor(0.9);
+        contents.setStrokingColor(0.95);
         contents.stroke();
 
     }

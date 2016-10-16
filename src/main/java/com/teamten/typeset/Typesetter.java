@@ -128,7 +128,7 @@ public class Typesetter {
             }
 
             if (marginTop != 0) {
-                verticalList.addElement(new Glue(marginTop, marginTop/4, 0, false));
+                verticalList.addElement(new Box(0, marginTop, 0));
             }
 
             if (center) {
