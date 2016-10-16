@@ -167,7 +167,7 @@ public class Typesetter {
                 if (marginBottom != 0) {
                     verticalList.addElement(new Glue(marginBottom, marginBottom / 4, 0, false));
                 }
-                verticalList.addElement(new Glue(interParagraphSpacing, PT.toSp(1), 0, false));
+                verticalList.addElement(new Glue(interParagraphSpacing, PT.toSp(3), 0, false));
                 previousBlockType = block.getBlockType();
             }
         }
