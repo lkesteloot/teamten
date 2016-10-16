@@ -28,8 +28,6 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * Converts a document to a PDF.
  */
 public class Typesetter {
-    private static final Splitter WORD_SPLITTER = Splitter.on(" ").
-        omitEmptyStrings().trimResults();
     private static final boolean DRAW_MARGINS = true;
 
     public static void main(String[] args) throws IOException {

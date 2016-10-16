@@ -217,10 +217,10 @@ public abstract class ElementList implements ElementSink {
                     long totalDemerits = demerits + nextBreakpoint.getTotalDemerits();
 
                     if (printDebug()) {
-                        System.out.printf("  to element %d (%s): %.1f - %.1f = %.1f (line d = %d, total d = %d, r = %.3f)%n",
+                        System.out.printf("  to element %d (%s): %.1f - %.1f = %.1f (b = %,d, d = %,d, total d = %,d, r = %.3f)%n",
                                 nextBreak, getDebugLineSuffix(thisBreakpoint, nextBreakpoint),
                                 PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(extraSpace),
-                                demerits, totalDemerits, ratio);
+                                badness, demerits, totalDemerits, ratio);
                     }
 
                     if (bestNextBreakpoint == null || totalDemerits <= bestTotalDemerits || penalty == -Penalty.INFINITY) {
@@ -246,7 +246,7 @@ public abstract class ElementList implements ElementSink {
 
             if (bestNextBreakpoint != null) {
                 if (printDebug()) {
-                    System.out.printf("  best next break is %d, total demerits %d, ratio %.3f%n", bestNextBreak, bestTotalDemerits, bestRatio);
+                    System.out.printf("  best next break is %d, total demerits %,d, ratio %.3f%n", bestNextBreak, bestTotalDemerits, bestRatio);
                 }
                 // Store the total demerits at this breakpoint and link to the next break.
                 thisBreakpoint.setTotalDemerits(bestTotalDemerits);
@@ -268,6 +268,17 @@ public abstract class ElementList implements ElementSink {
             // Make a new list with the glue set to specific widths.
             Box box = makeBox(getLineElements(thisBreakpoint, nextBreakpoint),
                     thisBreakpoint.getRatio(), thisBreakpoint.isRatioIsInfinite());
+
+            // See if it's the right size.
+            long boxSize = getElementSize(box);
+            if (boxSize != maxSize) {
+                long difference = boxSize - maxSize;
+                double percentOff = difference*100.0/maxSize;
+                if (percentOff < -0.001 || percentOff > 0.001) {
+                    System.out.printf("Warning: %s is of wrong size (should be %,d but is %,d, off by %,d or %.3f%%)\n",
+                            box.getClass().getSimpleName(), maxSize, boxSize, difference, percentOff);
+                }
+            }
 
             // Add to the sink.
             output.addElement(box);
@@ -377,7 +388,7 @@ public abstract class ElementList implements ElementSink {
     /**
      * Make a box with zero stretching or shrinking.
      */
-    public Box makeBox() {
+    Box makeBox() {
         return makeBox(mElements, 0, false);
     }
 
