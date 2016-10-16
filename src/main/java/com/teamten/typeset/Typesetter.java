@@ -83,6 +83,7 @@ public class Typesetter {
             boolean allCaps = false;
             boolean center = false;
             boolean newPage = false;
+            boolean ownPage = false;
             long marginTop = 0;
             long marginBottom = 0;
             HorizontalList horizontalList = new HorizontalList();
@@ -99,12 +100,12 @@ public class Typesetter {
                 case PART_HEADER:
                     spanRomanFont = fontManager.get(FontName.TIMES_NEW_ROMAN);
                     spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
-                    fontSize = 36;
+                    fontSize = 15;
                     allCaps = true;
-                    // center = true;
-                    marginTop = IN.toSp(0.5);
-                    marginBottom = IN.toSp(1);
+                    center = true;
+                    marginTop = IN.toSp(1.75);
                     newPage = true;
+                    ownPage = true;
                     break;
 
                 case CHAPTER_HEADER:
@@ -112,6 +113,9 @@ public class Typesetter {
                     spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
                     fontSize = 11;
                     allCaps = true;
+                    center = true;
+                    marginTop = IN.toSp(0.75);
+                    marginBottom = IN.toSp(0.25);
                     newPage = true;
                     break;
             }
@@ -157,11 +161,17 @@ public class Typesetter {
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             horizontalList.format(verticalList, pageWidth - 2*pageMargin);
-            if (marginBottom != 0) {
-                verticalList.addElement(new Glue(marginBottom, marginBottom/4, 0, false));
+
+            if (ownPage) {
+                verticalList.ejectPage();
+                previousBlockType = null;
+            } else {
+                if (marginBottom != 0) {
+                    verticalList.addElement(new Glue(marginBottom, marginBottom / 4, 0, false));
+                }
+                verticalList.addElement(new Glue(interParagraphSpacing, PT.toSp(1), 0, false));
+                previousBlockType = block.getBlockType();
             }
-            verticalList.addElement(new Glue(interParagraphSpacing, PT.toSp(1), 0, false));
-            previousBlockType = block.getBlockType();
         }
 
         // Eject the last page.
