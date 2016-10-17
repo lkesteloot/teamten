@@ -73,7 +73,7 @@ public class HorizontalList extends ElementList {
 
         long spaceWidth = (long) (font.getSpaceWidth() * fontSize);
 
-        // Roughly copy TeX. TODO think of caching this in the font.
+        // Roughly copy TeX.
         Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
 
         for (int i = 0; i < text.length(); ) {

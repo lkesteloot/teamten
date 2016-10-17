@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * A TeX-style hyphen dictionary.
@@ -21,6 +22,7 @@ public class HyphenDictionary {
     private static final Splitter FIELD_SPLITTER = Splitter.on(" ").
         omitEmptyStrings().trimResults();
     private static final Joiner HYPHEN_JOINER = Joiner.on("-").skipNulls();
+    private static final Pattern DIGITS_RE = Pattern.compile("[0-9]");
     // Descent defaults.
     private int mLeftHyphenMin = 2;
     private int mRightHyphenMin = 3;
@@ -222,8 +224,7 @@ public class HyphenDictionary {
     }
 
     /* package */ static String removeDigits(String line) {
-        // TODO Precompile this.
-        return line.replaceAll("[0-9]", "");
+        return DIGITS_RE.matcher(line).replaceAll("");
     }
 
     /* package */ static String removeNonDigits(String line) {

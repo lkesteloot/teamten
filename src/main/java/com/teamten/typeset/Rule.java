@@ -14,13 +14,13 @@ public class Rule extends Box {
 
     @Override
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
-        // XXX draw box.
+        // TODO draw box.
         return getWidth();
     }
 
     @Override
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
-        // XXX draw box.
+        // TODO draw box.
         return getHeight() + getDepth();
     }
 }

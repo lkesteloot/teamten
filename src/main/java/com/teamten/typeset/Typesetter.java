@@ -47,7 +47,7 @@ public class Typesetter {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new FontManager(pdDoc);
 
-        // XXX Load these values from the document header.
+        // TODO Load these values from the document header.
         long pageWidth = IN.toSp(6);
         long pageHeight = IN.toSp(9);
         long pageMargin = IN.toSp(1);
