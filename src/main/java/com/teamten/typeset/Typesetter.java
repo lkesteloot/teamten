@@ -74,8 +74,7 @@ public class Typesetter {
 
         BlockType previousBlockType = null;
         for (Block block : doc.getBlocks()) {
-            Font spanRomanFont;
-            Font spanItalicFont;
+            Typeface typeface;
             float fontSize;
             boolean indentFirstLine = false;
             boolean allCaps = false;
@@ -89,15 +88,13 @@ public class Typesetter {
             switch (block.getBlockType()) {
                 case BODY:
                 default:
-                    spanRomanFont = fontManager.get(FontName.TIMES_NEW_ROMAN);
-                    spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
+                    typeface = Typeface.TIMES_NEW_ROMAN;
                     fontSize = 11;
                     indentFirstLine = previousBlockType == BlockType.BODY;
                     break;
 
                 case PART_HEADER:
-                    spanRomanFont = fontManager.get(FontName.TIMES_NEW_ROMAN);
-                    spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
+                    typeface = Typeface.TIMES_NEW_ROMAN;
                     fontSize = 15;
                     allCaps = true;
                     center = true;
@@ -107,8 +104,7 @@ public class Typesetter {
                     break;
 
                 case CHAPTER_HEADER:
-                    spanRomanFont = fontManager.get(FontName.TIMES_NEW_ROMAN);
-                    spanItalicFont = fontManager.get(FontName.TIMES_NEW_ROMAN_ITALIC);
+                    typeface = Typeface.TIMES_NEW_ROMAN;
                     fontSize = 11;
                     allCaps = true;
                     center = true;
@@ -117,6 +113,9 @@ public class Typesetter {
                     newPage = true;
                     break;
             }
+
+            Font spanRegularFont = fontManager.get(typeface.regular());
+            Font spanItalicFont = fontManager.get(typeface.italic());
 
             long leading = PT.toSp(fontSize * 1.2f);
             long interParagraphSpacing = 0;
@@ -144,7 +143,7 @@ public class Typesetter {
 
             // Each span in the paragraph.
             for (Span span : block.getSpans()) {
-                Font font = span.isItalic() ? spanItalicFont : spanRomanFont;
+                Font font = span.isItalic() ? spanItalicFont : spanRegularFont;
 
                 String text = span.getText();
                 if (allCaps) {

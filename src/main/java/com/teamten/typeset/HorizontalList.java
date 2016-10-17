@@ -420,8 +420,21 @@ public class HorizontalList extends ElementList {
                         // The easiest and probably safest is to just not throw here, and not kern properly.
                         // Poke around to see if we might be in a situation where kerning would be important.
                         // If not, skip it. Set previousCh to noBreakCh, since that's the most likely case.
-                        throw new IllegalStateException("cannot resolve postBreakCh " + postBreakCh +
-                                " and noBreakCh " + noBreakCh);
+                        if (false) {
+                            Element.println(origElements, System.out, "");
+                            throw new IllegalStateException("cannot resolve postBreakCh " + postBreakCh +
+                                    " and noBreakCh " + noBreakCh);
+                        } else {
+                            // We found this case: Text(ra)Discretionary(f-,-ﬁ,ﬃ)Discretionary(-,,)Text(né).
+                            // It was a discretionary with two ligatures, followed by a normal hyphen discretionary.
+                            // Our model isn't powerful enough to completely represent all the various possible
+                            // combinations. Punt, though in principle we could try a little harder to handle this
+                            // (for example, unpack the ligatures and notice that the last characters are "i", and
+                            // assume that the "i" kern will be consistent with the ligature ones.)
+
+                            // Set previousCh to noBreakCh, since that's the most likely case.
+                            previousCh = noBreakCh;
+                        }
                     }
                 } else {
                     // Set it to either postBreakCh or noBreakCh, they're equal.

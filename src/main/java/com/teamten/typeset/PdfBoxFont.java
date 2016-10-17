@@ -8,6 +8,7 @@ import org.apache.fontbox.ttf.GlyphData;
 import org.apache.fontbox.ttf.GlyphTable;
 import org.apache.fontbox.ttf.KerningSubtable;
 import org.apache.fontbox.ttf.KerningTable;
+import org.apache.fontbox.ttf.OTFParser;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -24,6 +25,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class PdfBoxFont extends AbstractFont {
     private static final TTFParser TTF_PARSER = new TTFParser(true);
+    private static final OTFParser OTF_PARSER = new OTFParser(true);
     private final File mFile;
     private final PDFont mPdFont;
     private final KerningSubtable mKerningSubtable;
@@ -36,7 +38,14 @@ public class PdfBoxFont extends AbstractFont {
         mFile = file;
 
         // Load the font.
-        TrueTypeFont ttf = TTF_PARSER.parse(file);
+        TrueTypeFont ttf;
+        if (file.getName().toLowerCase().endsWith(".otf")) {
+            // OTF support is untested. The one font I tried threw an exception because the "loca" table
+            // wasn't found.
+            ttf = OTF_PARSER.parse(file);
+        } else {
+            ttf = TTF_PARSER.parse(file);
+        }
         mPdFont = PDType0Font.load(pdf, ttf, false);
 
         // Load the kerning table.
@@ -78,10 +87,14 @@ public class PdfBoxFont extends AbstractFont {
      */
     @Override
     public long getKerning(int leftChar, int rightChar, double fontSize) {
-        int leftGlyph = mCmapSubtable.getGlyphId(leftChar);
-        int rightGlyph = mCmapSubtable.getGlyphId(rightChar);
+        if (mKerningSubtable == null) {
+            return 0;
+        } else {
+            int leftGlyph = mCmapSubtable.getGlyphId(leftChar);
+            int rightGlyph = mCmapSubtable.getGlyphId(rightChar);
 
-        return PT.toSp(mKerningSubtable.getKerning(leftGlyph, rightGlyph) * fontSize / mUnitsPerEm);
+            return PT.toSp(mKerningSubtable.getKerning(leftGlyph, rightGlyph) * fontSize / mUnitsPerEm);
+        }
     }
 
     /**

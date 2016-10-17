@@ -22,9 +22,14 @@ public class FontManager {
      */
     public enum FontName {
         TIMES_NEW_ROMAN(FONT_DIR, "Times New Roman.ttf"),
-        TIMES_NEW_ROMAN_ITALIC(FONT_DIR, "Times New Roman Italic.ttf"),
         TIMES_NEW_ROMAN_BOLD(FONT_DIR, "Times New Roman Bold.ttf"),
+        TIMES_NEW_ROMAN_ITALIC(FONT_DIR, "Times New Roman Italic.ttf"),
         TIMES_NEW_ROMAN_BOLD_ITALIC(FONT_DIR, "Times New Roman Italic.ttf"),
+        MINION(MY_FONT_DIR, "Minion/MinionPro-Regular.ttf"),
+        MINION_BOLD(FONT_DIR, "MinionPro-Bold.otf"),
+        MINION_ITALIC(MY_FONT_DIR, "Minion/MinionPro-It.ttf"),
+        MINION_BOLD_ITALIC(FONT_DIR, "MinionPro-BoldIt.otf"),
+        MINION_SMALL_CAPS(MY_FONT_DIR, "Minion/Minion Small Caps  Oldstyle Fi Regular.ttf"),
         HELVETICA_NEUE_ULTRA_LIGHT(MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf");
 
         private final File mDirectory;
