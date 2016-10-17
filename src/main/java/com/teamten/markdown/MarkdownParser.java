@@ -40,6 +40,9 @@ public class MarkdownParser {
         BlockType blockType = BlockType.BODY;
         Block.Builder builder = null;
         boolean isItalic = false;
+        // Whether we're owed a space from the end of the previous line.
+        boolean newlineSpace = false;
+        boolean newlineSpaceIsItalic = false;
         int chOrEof;
         while ((chOrEof = reader.read()) != -1) {
             char ch = (char) chOrEof;
@@ -60,6 +63,7 @@ public class MarkdownParser {
                         isItalic = true;
                     } else if (ch == '\n') {
                         // Blank line, end of chunk.
+                        newlineSpace = false;
                         if (builder != null && !builder.isEmpty()) {
                             doc.addBlock(builder.build());
                             builder = null;
@@ -69,6 +73,10 @@ public class MarkdownParser {
                         if (builder == null) {
                             builder = new Block.Builder(blockType);
                         }
+                        if (newlineSpace) {
+                            builder.add(' ', newlineSpaceIsItalic);
+                            newlineSpace = false;
+                        }
                         builder.add(translateCharacter(ch), isItalic);
                         state = ParserState.IN_LINE;
                     }
@@ -77,7 +85,12 @@ public class MarkdownParser {
                 case IN_LINE:
                     if (ch == '\n') {
                         state = ParserState.START_OF_LINE;
-                        builder.add(' ', isItalic);
+                        // Here we should treat the newline as a space, but we don't want to actually add the space
+                        // if the next line ends the paragraph. So we just remember that we're owed a space, and
+                        // add it later if the next line continues with more text. This also properly handles the
+                        // case of the next line being a comment.
+                        newlineSpace = true;
+                        newlineSpaceIsItalic = isItalic;
                     } else if (Character.isWhitespace(ch)) {
                         state = ParserState.SKIP_WHITESPACE;
                         builder.add(' ', isItalic);
