@@ -69,7 +69,7 @@ public class MarkdownParser {
                         if (builder == null) {
                             builder = new Block.Builder(blockType);
                         }
-                        builder.add(ch, isItalic);
+                        builder.add(translateCharacter(ch), isItalic);
                         state = ParserState.IN_LINE;
                     }
                     break;
@@ -84,7 +84,7 @@ public class MarkdownParser {
                     } else if (ch == '*') {
                         isItalic = !isItalic;
                     } else {
-                        builder.add(ch, isItalic);
+                        builder.add(translateCharacter(ch), isItalic);
                     }
                     break;
 
@@ -98,7 +98,7 @@ public class MarkdownParser {
                         isItalic = !isItalic;
                     } else {
                         state = ParserState.IN_LINE;
-                        builder.add(ch, isItalic);
+                        builder.add(translateCharacter(ch), isItalic);
                     }
                     break;
 
@@ -120,5 +120,17 @@ public class MarkdownParser {
         }
 
         return doc;
+    }
+
+    /**
+     * Do some simple in-place translations of individual characters.
+     */
+    private static char translateCharacter(char ch) {
+        if (ch == '~') {
+            // No-break space.
+            ch = '\u00A0';
+        }
+
+        return ch;
     }
 }
