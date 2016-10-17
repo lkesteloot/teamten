@@ -26,12 +26,12 @@ public interface Font {
     /**
      * Return the size of a code point in the specified font size.
      */
-    Metrics getCharacterMetrics(int ch, float fontSize) throws IOException;
+    Metrics getCharacterMetrics(int ch, float fontSize);
 
     /**
      * Get the size of the text in the specified font size. Does not include kerning.
      */
-    default Metrics getStringMetrics(String text, float fontSize) throws IOException {
+    default Metrics getStringMetrics(String text, float fontSize) {
         long width = 0;
         long height = 0;
         long depth = 0;

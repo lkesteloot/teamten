@@ -26,6 +26,13 @@ public class HBox extends Box {
     }
 
     /**
+     * Whether this horizontal box is empty, i.e., has no elements in it.
+     */
+    public boolean isEmpty() {
+        return mElements.isEmpty();
+    }
+
+    /**
      * If the HBox contains only one element, and this element is a Text, then returns the text
      * of this Text. If the HBox is empty, returns an empty string.
      *
@@ -51,7 +58,7 @@ public class HBox extends Box {
     /**
      * Make an HBox that contains only a Text with the given string, font, and font size.
      */
-    public static HBox makeOnlyString(String text, Font font, float fontSize) throws IOException {
+    public static HBox makeOnlyString(String text, Font font, float fontSize) {
         return new HBox(Arrays.asList(new Text(text, font, fontSize)));
     }
 

@@ -365,7 +365,19 @@ public abstract class ElementList implements ElementSink {
      */
     private Box makeBox(List<Element> lineElements, double ratio, boolean ratioIsInfinite) {
         List<Element> line = new ArrayList<>();
+
+        // Non-null iff the previous element was a Text element.
+        Text previousText = null;
+
         for (Element element : lineElements) {
+            if (element instanceof HBox) {
+                HBox hbox = (HBox) element;
+                if (hbox.isEmpty()) {
+                    // We can get this as a result of choosing a part of a discretionary that was empty.
+                    // Suppress them altogether so that they don't interfere with our text concatenation scheme.
+                    element = null;
+                }
+            }
             if (element instanceof Glue) {
                 Glue glue = (Glue) element;
 
@@ -379,7 +391,40 @@ public abstract class ElementList implements ElementSink {
                 element = new Glue(glueSize, 0, 0, glue.isHorizontal());
             }
 
-            line.add(element);
+            // Combine consecutive Text elements.
+            if (element instanceof Text) {
+                Text text = (Text) element;
+
+                // See if we can combine with previous text.
+                if (previousText == null) {
+                    previousText = text;
+                } else {
+                    if (text.isCompatibleWith(previousText)) {
+                        // Combine with previous text and get rid of this one.
+                        previousText = previousText.appendedWith(text);
+                    } else {
+                        // New text is not compatible. Output old text.
+                        line.add(previousText);
+                        previousText = text;
+                    }
+                }
+
+                // Suppress current element.
+                element = null;
+            } else if (previousText != null && element != null) {
+                // Not text, flush the previous text.
+                line.add(previousText);
+                previousText = null;
+            }
+
+            if (element != null) {
+                line.add(element);
+            }
+        }
+
+        if (previousText != null) {
+            line.add(previousText);
+            previousText = null;
         }
 
         return makeOutputBox(line);

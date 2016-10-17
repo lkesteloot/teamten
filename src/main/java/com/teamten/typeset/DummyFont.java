@@ -39,7 +39,7 @@ public class DummyFont extends AbstractFont {
     }
 
     @Override
-    public Metrics getCharacterMetrics(int ch, float fontSize) throws IOException {
+    public Metrics getCharacterMetrics(int ch, float fontSize) {
         return new Metrics((long) (mWidth*fontSize), (long) (mHeight*fontSize), (long) (mDepth*fontSize));
     }
 

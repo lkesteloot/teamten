@@ -117,26 +117,33 @@ public class PdfBoxFont extends AbstractFont {
      * Return the size of a code point in the specified font size.
      */
     @Override
-    public Metrics getCharacterMetrics(int ch, float fontSize) throws IOException {
-        int glyphId = mCmapSubtable.getGlyphId(ch);
+    public Metrics getCharacterMetrics(int ch, float fontSize) {
+        try {
+            int glyphId = mCmapSubtable.getGlyphId(ch);
 
-        // Width we can get directly.
-        long width = PT.toSp(mPdFont.getWidth(glyphId) / 1000 * fontSize);
+            // Width we can get directly.
+            long width = PT.toSp(mPdFont.getWidth(glyphId) / 1000 * fontSize);
 
-        // Height and depth we get from the glyph data.
-        GlyphData glyphData = mGlyphTable.getGlyph(glyphId);
+            // Height and depth we get from the glyph data.
+            GlyphData glyphData = mGlyphTable.getGlyph(glyphId);
 
-        long height;
-        long depth;
-        if (glyphData == null) {
-            // No glyph, probably a space.
-            height = 0;
-            depth = 0;
-        } else {
-            height = Math.max(PT.toSp(glyphData.getYMaximum() * fontSize / mUnitsPerEm), 0);
-            depth = Math.max(-PT.toSp(glyphData.getYMinimum() * fontSize / mUnitsPerEm), 0);
+            long height;
+            long depth;
+            if (glyphData == null) {
+                // No glyph, probably a space.
+                height = 0;
+                depth = 0;
+            } else {
+                height = Math.max(PT.toSp(glyphData.getYMaximum() * fontSize / mUnitsPerEm), 0);
+                depth = Math.max(-PT.toSp(glyphData.getYMinimum() * fontSize / mUnitsPerEm), 0);
+            }
+
+            return new Metrics(width, height, depth);
+        } catch (IOException e) {
+            // Normally I don't like to convert checked exceptions to unchecked, but in this case I think
+            // it's not possible for this to happen, and forcing a checked exception on this method causes
+            // disruption all the way up the chain.
+            throw new IllegalStateException("got an exception getting the character metrics", e);
         }
-
-        return new Metrics(width, height, depth);
     }
 }

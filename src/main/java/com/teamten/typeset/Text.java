@@ -1,5 +1,6 @@
 package com.teamten.typeset;
 
+import com.google.common.math.DoubleMath;
 import com.teamten.util.CodePoints;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
@@ -29,7 +30,7 @@ public class Text extends Box {
     /**
      * Constructor for a string.
      */
-    public Text(String text, Font font, float fontSize) throws IOException {
+    public Text(String text, Font font, float fontSize) {
         super(font.getStringMetrics(text, fontSize));
         mFont = font;
         mFontSize = fontSize;
@@ -39,7 +40,7 @@ public class Text extends Box {
     /**
      * Constructor for single character.
      */
-    public Text(int ch, Font font, float fontSize) throws IOException {
+    public Text(int ch, Font font, float fontSize) {
         super(font.getCharacterMetrics(ch, fontSize));
         mFont = font;
         mFontSize = fontSize;
@@ -65,6 +66,27 @@ public class Text extends Box {
      */
     public float getFontSize() {
         return mFontSize;
+    }
+
+    /**
+     * Whether this text can be appended to the other text.
+     */
+    public boolean isCompatibleWith(Text other) {
+        return mFont == other.mFont && DoubleMath.fuzzyEquals(mFontSize, other.mFontSize, 0.001);
+    }
+
+    /**
+     * Returns a new Text object, the text of which is the concatenation of this text and
+     * the other text.
+     *
+     * @throws IllegalArgumentException if the two text objects are not compatible.
+     */
+    public Text appendedWith(Text other) {
+        if (!isCompatibleWith(other)) {
+            throw new IllegalArgumentException("incompatible text, cannot append");
+        }
+
+        return new Text(mText + other.mText, mFont, mFontSize);
     }
 
     @Override
