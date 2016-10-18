@@ -1,7 +1,11 @@
 package com.teamten.typeset;
 
 import java.io.PrintStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.teamten.typeset.SpaceUnit.PT;
@@ -37,12 +41,13 @@ public abstract class ElementList implements ElementSink {
 
     /**
      * Get a string that can be used for debugging to represent the paragraph starting here.
-     * @param thisBreakpoint the start of the line.
+     * @param beginBreakpoint the start of the line.
+     * @param endBreakpoint the end of the line.
      */
-    private String getDebugLinePrefix(Breakpoint thisBreakpoint) {
+    private String getDebugLinePrefix(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = thisBreakpoint.getStartIndex(); i < mElements.size() && builder.length() < 20; i++) {
+        for (int i = beginBreakpoint.getStartIndex(); i < endBreakpoint.getIndex() && builder.length() < 20; i++) {
             Element element = mElements.get(i);
             builder.append(element.toTextString());
         }
@@ -54,14 +59,12 @@ public abstract class ElementList implements ElementSink {
 
     /**
      * Get a string that can be used for debugging to represent the paragraph ending here.
-     * @param nextBreakpoint the end of the line.
+     * @param endBreakpoint the end of the line.
      */
-    private String getDebugLineSuffix(Breakpoint thisBreakpoint, Breakpoint nextBreakpoint) {
+    private String getDebugLineSuffix(Breakpoint endBreakpoint) {
         StringBuilder builder = new StringBuilder();
 
-        int thisIndex = thisBreakpoint.getStartIndex();
-
-        for (int i = nextBreakpoint.getIndex() - 1; i >= thisIndex && builder.length() < 20; i--) {
+        for (int i = endBreakpoint.getIndex() - 1; i >= 0 && builder.length() < 20; i--) {
             Element element = mElements.get(i);
             builder.insert(0, element.toTextString());
         }
@@ -80,47 +83,48 @@ public abstract class ElementList implements ElementSink {
         List<Breakpoint> breakpoints = findBreakpoints();
 
         // For each possible breakpoint, figure out the next displayed element (after the breakpoint).
-        for (int breakpointIndex = 0; breakpointIndex < breakpoints.size(); breakpointIndex++) {
-            Breakpoint breakpoint = breakpoints.get(breakpointIndex);
-            int index = breakpoint.getIndex();
-            int nextIndex = breakpointIndex + 1 < breakpoints.size() ?
-                    breakpoints.get(breakpointIndex + 1).getIndex() : mElements.size();
+        computeStartIndices(breakpoints);
 
-            // See where the line would start by skipping discardable elements. Don't do this on the very
-            // first breakpoint, since we'll want to keep glue at the front of the line that might be needed
-            // to center it.
-            while (breakpointIndex != 0 && index < nextIndex && mElements.get(index) instanceof DiscardableElement) {
-                index++;
-            }
-            breakpoint.setStartIndex(index);
-        }
+        // Keep track of a list of active breakpoints. As we march through the list of all breakpoints,
+        // the active ones will represent the possible start of lines or pages. Breakpoints will be
+        // deactivated once the line or page becomes too long. Use a linked list so that we can cheaply
+        // delete from the front or the middle.
+        List<Breakpoint> activeBreakpoints = new LinkedList<>();
 
-        // Work backwards through the breakpoints. Use dynamic programming to cache the value of what we've
-        // computed so far. The cache is stored in the Breakpoint objects.
-        for (int thisBreak = breakpoints.size() - 1; thisBreak >= 0; thisBreak--) {
-            Breakpoint thisBreakpoint = breakpoints.get(thisBreak);
+        // At first only the first breakpoint is active. It's the artificial one before the first element.
+        // See the construction of the breakpoints list in findBreakpoints().
+        activeBreakpoints.add(breakpoints.get(0));
+
+        // Go through all breakpoints, considering them as possible ends of lines or pages.
+        // TODO foreach?
+        for (int endBreak = 1; endBreak < breakpoints.size(); endBreak++) {
+            Breakpoint endBreakpoint = breakpoints.get(endBreak);
 
             if (printDebug()) {
-                System.out.printf("Starting at element %d (%s)\n", thisBreak, getDebugLinePrefix(thisBreakpoint));
+                System.out.printf("Ending at element %d (%s)\n",
+                        endBreakpoint.getIndex(), getDebugLineSuffix(endBreakpoint));
             }
 
-            // So now we're pretending that our paragraph or page starts here. We're looking for the
-            // best next breakpoint.
-            Breakpoint bestNextBreakpoint = null;
-            long bestTotalDemerits = Long.MAX_VALUE;
-            double bestRatio = 0;
-            boolean bestRatioIsInfinite = false;
-            int bestNextBreak = -1;
-            for (int nextBreak = thisBreak + 1; nextBreak < breakpoints.size(); nextBreak++) {
-                Breakpoint nextBreakpoint = breakpoints.get(nextBreak);
+            // Go through all active breakpoints, considering them as start of the line or page. We'll find the
+            // one that results in the best paragraph or page ending at endBreakpoint. To do that we'll compute the
+            // demerits of this line, and add that to the sum of the demerits ending at the beginBreakpoint.
 
-                // The first line of our paragraph (or first page of our book) will go from thisIndex (inclusive) to
-                // nextIndex (inclusive, but only if it's Discretionary). Find the sum of the sizes of all the
-                // elements in that line. Also compute the total stretch and shrink for the glue in that line.
+            // Initialize the current (end) breakpoint with max values.
+            endBreakpoint.setTotalDemerits(Long.MAX_VALUE);
+            endBreakpoint.setPreviousBreakpoint(null);
+
+            // We use an iterator so that we can easily and efficiently remove breakpoints that are too far away.
+            Iterator<Breakpoint> itr = activeBreakpoints.iterator();
+            while (itr.hasNext()) {
+                Breakpoint beginBreakpoint = itr.next();
+
+                // Find the sum of the sizes of all the elements in this line. Also compute the total stretch
+                // and shrink for the glue in that line.
+                // TODO: We could build this up incrementally instead of looping each time.
                 long width = 0;
                 Glue.ExpandabilitySum stretch = new Glue.ExpandabilitySum();
                 Glue.ExpandabilitySum shrink = new Glue.ExpandabilitySum();
-                for (Element element : getLineElements(thisBreakpoint, nextBreakpoint)) {
+                for (Element element : getLineElements(beginBreakpoint, endBreakpoint)) {
                     width += getElementSize(element);
 
                     // Sum up the stretch and shrink for glues.
@@ -131,7 +135,8 @@ public abstract class ElementList implements ElementSink {
                     }
                 }
 
-                // Compute difference between width and page width or height.
+                // Compute difference between width and page width or height. This is positive if our line
+                // comes short and leaves extra space.
                 long extraSpace = maxSize - width;
 
                 // See whether we're short or long.
@@ -142,6 +147,7 @@ public abstract class ElementList implements ElementSink {
                 if (extraSpace > 0) {
                     // Our line is short. Compute how much we'd have to stretch.
                     if (stretch.getAmount() > 0) {
+                        // Can stretch, figure out by how much.
                         ratio = extraSpace / (double) stretch.getAmount();
                         ratioIsInfinite = stretch.isInfinite();
                     } else {
@@ -195,16 +201,17 @@ public abstract class ElementList implements ElementSink {
                 }
 
                 // Get the penalty for the break at the end of this line.
-                long penalty = nextBreakpoint.getPenalty();
+                long penalty = endBreakpoint.getPenalty();
 
-                // Don't consider breaks at infinity or if the badness exceeds our tolerance.
-                if (penalty < Penalty.INFINITY && (badness <= BADNESS_TOLERANCE ||
-                        bestNextBreakpoint == null || penalty == -Penalty.INFINITY)) {
+                // Don't consider breaks if the badness exceeds our tolerance.
+                if (badness <= BADNESS_TOLERANCE || (endBreakpoint.getPreviousBreakpoint() == null && isOverfull) ||
+                        penalty == -Penalty.INFINITY) {
 
                     // Compute demerits for this line.
                     long demerits = (LINE_PENALTY + badness);
                     demerits = demerits*demerits;
 
+                    // Square the penalty (keeping the sign).
                     if (penalty >= 0) {
                         demerits += penalty * penalty;
                     } else if (penalty > -Penalty.INFINITY) {
@@ -213,62 +220,90 @@ public abstract class ElementList implements ElementSink {
                         // No point in adding constant to a line we know we're going to break anyway.
                     }
 
-                    // Add the demerits for the paragraph or page starting at the next breakpoint.
-                    long totalDemerits = demerits + nextBreakpoint.getTotalDemerits();
+                    // Add the demerits for the paragraph or page ending at the beginning breakpoint.
+                    long totalDemerits = demerits + beginBreakpoint.getTotalDemerits();
 
                     if (printDebug()) {
-                        System.out.printf("  to element %d (%s): %.1f - %.1f = %.1f (b = %,d, d = %,d, total d = %,d, r = %.3f)%n",
-                                nextBreak, getDebugLineSuffix(thisBreakpoint, nextBreakpoint),
+                        System.out.printf("  from element %d (%s): %.1f - %.1f = %.1f (b = %,d, d = %,d, total d = %,d, r = %.3f)%n",
+                                beginBreakpoint.getStartIndex(), getDebugLinePrefix(beginBreakpoint, endBreakpoint),
                                 PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(extraSpace),
                                 badness, demerits, totalDemerits, ratio);
                     }
 
-                    if (bestNextBreakpoint == null || totalDemerits <= bestTotalDemerits || penalty == -Penalty.INFINITY) {
-                        bestNextBreakpoint = nextBreakpoint;
-                        bestNextBreak = nextBreak;
-                        bestTotalDemerits = totalDemerits;
-                        bestRatio = ratio;
-                        bestRatioIsInfinite = ratioIsInfinite;
+                    if (totalDemerits <= endBreakpoint.getTotalDemerits()) {
+                        endBreakpoint.setPreviousBreakpoint(beginBreakpoint);
+                        endBreakpoint.setRatio(ratio);
+                        endBreakpoint.setRatioIsInfinite(ratioIsInfinite);
+                        endBreakpoint.setTotalDemerits(totalDemerits);
 
-                        if (penalty == -Penalty.INFINITY) {
-                            // We're forced to break here.
-                            break;
+                        if (printDebug()) {
+                            System.out.println("    ^^^ best so far");
                         }
+                    }
+                } else {
+                    if (printDebug()) {
+                        System.out.printf("  ignored element %d (%s): %.1f - %.1f = %.1f (b = %,d, r = %.3f)%n",
+                                beginBreakpoint.getStartIndex(), getDebugLinePrefix(beginBreakpoint, endBreakpoint),
+                                PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(extraSpace),
+                                badness, ratio);
                     }
                 }
 
-                // Actually, if we're overfull, then we're done considering this line or page, since adding
-                // any more will just make it worse (probably).
-                if (isOverfull && bestNextBreakpoint != null) {
-                    break;
+                // If we're overfull, then deactivate this breakpoint, since it'll be overfull for all
+                // subsequent end breakpoints too. TODO but what if they need it because they can't break?
+                if (isOverfull) {
+                    if (printDebug()) {
+                        System.out.println("    XXX removing from active list");
+                    }
+                    itr.remove();
                 }
             }
 
-            if (bestNextBreakpoint != null) {
-                if (printDebug()) {
-                    System.out.printf("  best next break is %d, total demerits %,d, ratio %.3f%n", bestNextBreak, bestTotalDemerits, bestRatio);
+            // If we found a good line or page for this end breakpoint, then add it as an active breakpoint.
+            if (endBreakpoint.getPreviousBreakpoint() != null) {
+                // If we're a forced break, then delete all existing active breakpoints. They can't be reached
+                // from any breakpoint after us anyway.
+                if (endBreakpoint.getPenalty() == -Penalty.INFINITY) {
+                    if (printDebug()) {
+                        System.out.println("  !!! clearing all active breakpoints");
+                    }
+                    activeBreakpoints.clear();
                 }
-                // Store the total demerits at this breakpoint and link to the next break.
-                thisBreakpoint.setTotalDemerits(bestTotalDemerits);
-                thisBreakpoint.setNextBreakpoint(bestNextBreakpoint);
-                thisBreakpoint.setRatio(bestRatio);
-                thisBreakpoint.setRatioIsInfinite(bestRatioIsInfinite);
+
+                if (printDebug()) {
+                    System.out.println("  +++ adding to active list");
+                }
+                activeBreakpoints.add(endBreakpoint);
             }
         }
 
-        // Go through our linked list of breakpoints, generating lines or pages.
-        Breakpoint thisBreakpoint = breakpoints.get(0);
+        // Go through our linked list of breakpoints, generating lines or pages. The list runs backward through
+        // the data, so we build it up into a list in reverse order.
+        Deque<Box> boxes = new ArrayDeque<>();
+        Breakpoint endBreakpoint = breakpoints.get(breakpoints.size() - 1);
         while (true) {
-            Breakpoint nextBreakpoint = thisBreakpoint.getNextBreakpoint();
-            if (nextBreakpoint == null) {
-                // Lines or pages are between breakpoints. Nothing after the last one.
+            Breakpoint beginBreakpoint = endBreakpoint.getPreviousBreakpoint();
+            if (beginBreakpoint == null) {
+                // Done, reached beginning.
                 break;
             }
 
             // Make a new list with the glue set to specific widths.
-            Box box = makeBox(getLineElements(thisBreakpoint, nextBreakpoint),
-                    thisBreakpoint.getRatio(), thisBreakpoint.isRatioIsInfinite());
+            Box box = makeBox(getLineElements(beginBreakpoint, endBreakpoint),
+                    endBreakpoint.getRatio(), endBreakpoint.isRatioIsInfinite());
+            if (printDebug()) {
+                box.println(System.out, "");
+            }
 
+            // Push it on the front of the list, so that we'll get it out backwards.
+            boxes.addFirst(box);
+
+            // Previous line or page.
+            endBreakpoint = beginBreakpoint;
+        }
+
+        // Now run through the boxes forward.
+        for (Box box : boxes) {
             // See if it's the right size.
             long boxSize = getElementSize(box);
             if (boxSize != maxSize) {
@@ -282,9 +317,27 @@ public abstract class ElementList implements ElementSink {
 
             // Add to the sink.
             output.addElement(box);
+        }
+    }
 
-            // Next line or page.
-            thisBreakpoint = nextBreakpoint;
+    /**
+     * For each possible breakpoint, figure out the next displayed element (after the breakpoint). Modifies
+     * the breakpoint objects.
+     */
+    private void computeStartIndices(List<Breakpoint> breakpoints) {
+        for (int breakpointIndex = 0; breakpointIndex < breakpoints.size(); breakpointIndex++) {
+            Breakpoint breakpoint = breakpoints.get(breakpointIndex);
+            int index = breakpoint.getIndex();
+            int nextIndex = breakpointIndex + 1 < breakpoints.size() ?
+                    breakpoints.get(breakpointIndex + 1).getIndex() : mElements.size();
+
+            // See where the line would start by skipping discardable elements. Don't do this on the very
+            // first breakpoint, since we'll want to keep glue at the front of the line that might be needed
+            // to center it.
+            while (breakpointIndex != 0 && index < nextIndex && mElements.get(index) instanceof DiscardableElement) {
+                index++;
+            }
+            breakpoint.setStartIndex(index);
         }
     }
 
@@ -304,7 +357,7 @@ public abstract class ElementList implements ElementSink {
             if (element instanceof Penalty) {
                 // Can break at penalties as long as they're not positive infinity.
                 Penalty penalty = (Penalty) element;
-                if (penalty.getPenalty() != Penalty.INFINITY) {
+                if (penalty.getPenalty() < Penalty.INFINITY) {
                     breakpoints.add(new Breakpoint(i, penalty.getPenalty()));
                 }
             } else if (element instanceof Glue && previousElement instanceof NonDiscardableElement) {
@@ -324,27 +377,27 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Return the list of elements on this line, from thisBreakpoint (inclusive) to nextBreakpoint
+     * Return the list of elements on this line, from beginBreakpoint (inclusive) to endBreakpoint
      * (inclusive only if it's a discretionary element). All discretionary elements are turned
      * into HBoxes depending on where they are.
      */
-    private List<Element> getLineElements(Breakpoint thisBreakpoint, Breakpoint nextBreakpoint) {
-        int thisIndex = thisBreakpoint.getStartIndex();
-        int nextIndex = nextBreakpoint.getIndex();
+    private List<Element> getLineElements(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
+        int beginIndex = beginBreakpoint.getStartIndex();
+        int endIndex = endBreakpoint.getIndex();
 
-        List<Element> elements = new ArrayList<>(Math.max(nextIndex - thisIndex + 1, 10));
+        List<Element> elements = new ArrayList<>(Math.max(endIndex - beginIndex + 1, 10));
 
-        for (int i = thisIndex; i <= nextIndex; i++) {
+        for (int i = beginIndex; i <= endIndex; i++) {
             Element element = mElements.get(i);
 
             // Include all discretionary elements, but convert them to HBoxes.
             if (element instanceof Discretionary) {
                 Discretionary discretionary = (Discretionary) element;
                 HBox hbox;
-                if (i == thisIndex) {
+                if (i == beginIndex) {
                     // This is the discretionary break at the beginning of the line. Use the "post" HBox.
                     hbox = discretionary.getPostBreak();
-                } else if (i == nextIndex) {
+                } else if (i == endIndex) {
                     // This is the discretionary break at the end of the line. Use the "pre" HBox.
                     hbox = discretionary.getPreBreak();
                 } else {
@@ -352,7 +405,7 @@ public abstract class ElementList implements ElementSink {
                     hbox = discretionary.getNoBreak();
                 }
                 elements.add(hbox);
-            } else if (i < nextIndex) {
+            } else if (i < endIndex) {
                 elements.add(element);
             }
         }
@@ -466,7 +519,7 @@ public abstract class ElementList implements ElementSink {
         private final long mPenalty;
         private int mStartIndex;
         private long mTotalDemerits;
-        private Breakpoint mNextBreakpoint;
+        private Breakpoint mPreviousBreakpoint;
         private double mRatio;
         private boolean mRatioIsInfinite;
 
@@ -475,7 +528,7 @@ public abstract class ElementList implements ElementSink {
             mPenalty = penalty;
             mStartIndex = 0;
             mTotalDemerits = 0;
-            mNextBreakpoint = null;
+            mPreviousBreakpoint = null;
             mRatio = 0;
             mRatioIsInfinite = false;
         }
@@ -523,17 +576,17 @@ public abstract class ElementList implements ElementSink {
         }
 
         /**
-         * The next breakpoint in the paragraph or page assuming we're selected as a breakpoint.
+         * The previous breakpoint in the paragraph or page assuming we're selected as a breakpoint.
          */
-        public Breakpoint getNextBreakpoint() {
-            return mNextBreakpoint;
+        public Breakpoint getPreviousBreakpoint() {
+            return mPreviousBreakpoint;
         }
 
         /**
-         * Set the next breakpoint in the paragraph or page assuming we're selected as a breakpoint.
+         * Set the previous breakpoint in the paragraph or page assuming we're selected as a breakpoint.
          */
-        public void setNextBreakpoint(Breakpoint nextBreakpoint) {
-            mNextBreakpoint = nextBreakpoint;
+        public void setPreviousBreakpoint(Breakpoint previousBreakpoint) {
+            mPreviousBreakpoint = previousBreakpoint;
         }
 
         /**

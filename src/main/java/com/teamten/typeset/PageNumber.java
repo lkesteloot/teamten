@@ -38,7 +38,7 @@ public class PageNumber {
     /**
      * Return the subsequent page.
      */
-    public PageNumber getNextPage() {
+    public PageNumber successor() {
         return new PageNumber(mNumber + 1, mIsRomanNumeral);
     }
 }
