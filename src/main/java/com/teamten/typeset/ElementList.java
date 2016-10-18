@@ -133,8 +133,8 @@ public abstract class ElementList implements ElementSink {
                     }
                 }
 
-                // Compute difference between width and page width or height. This is positive if our line
-                // comes short and leaves extra space.
+                // Compute difference between width and page width (or height and page height). This is positive
+                // if our line comes short and leaves extra space.
                 long extraSpace = maxSize - width;
 
                 // See whether we're short or long.
@@ -178,30 +178,15 @@ public abstract class ElementList implements ElementSink {
                 }
 
                 // Compute badness for the line. This is based on how much we had to stretch or shrink.
-                long badness;
-                if (ratioIsInfinite) {
-                    // No badness for infinite stretch or shrink.
-                    badness = 0;
-                } else if (isOverfull) {
-                    // We're overfull. This is infinitely bad.
-                    badness = INFINITELY_BAD;
-                } else if (!canStretch) {
-                    // We don't match the right size and we can't stretch or shrink. This is infinitely bad.
-                    badness = INFINITELY_BAD;
-                } else {
-                    // Normal case. Use 100*r^3, but max out at INFINITELY_BAD.
-                    if (ratio < -5 || ratio > 5) {
-                        // Avoid overflow. 5 = ceil((INFINITELY_BAD/100)^(1/3)).
-                        badness = INFINITELY_BAD;
-                    } else {
-                        badness = Math.min(INFINITELY_BAD, (long) (100 * Math.pow(Math.abs(ratio), 3)));
-                    }
-                }
+                long badness = computeBadness(ratio, ratioIsInfinite, canStretch, isOverfull);
 
                 // Get the penalty for the break at the end of this line.
                 long penalty = endBreakpoint.getPenalty();
 
-                // Don't consider breaks if the badness exceeds our tolerance.
+                // Don't consider breaks if the badness exceeds our tolerance. We'll accept really bad lines
+                // if we've not found a break at all and we're overfull (to allow lines to break when a very
+                // long unbreakable word crosses the boundary). We'll allow allow it if we're being forced
+                // to break here by a penalty.
                 if (badness <= BADNESS_TOLERANCE || (endBreakpoint.getPreviousBreakpoint() == null && isOverfull) ||
                         penalty == -Penalty.INFINITY) {
 
@@ -228,6 +213,7 @@ public abstract class ElementList implements ElementSink {
                                 badness, demerits, totalDemerits, ratio);
                     }
 
+                    // If it's the best we've seen so far, remember it.
                     if (totalDemerits < endBreakpoint.getTotalDemerits()) {
                         endBreakpoint.setPreviousBreakpoint(beginBreakpoint);
                         endBreakpoint.setRatio(ratio);
@@ -239,6 +225,7 @@ public abstract class ElementList implements ElementSink {
                         }
                     }
                 } else {
+                    // This element's badness exceeded our tolerance. Log it.
                     if (printDebug()) {
                         System.out.printf("  ignored element %d (%s): %.1f - %.1f = %.1f (b = %,d, r = %.3f)%n",
                                 beginBreakpoint.getStartIndex(), getDebugLinePrefix(beginBreakpoint, endBreakpoint),
@@ -373,6 +360,35 @@ public abstract class ElementList implements ElementSink {
         }
 
         return elements;
+    }
+
+    /**
+     * Given what we found about this line or page, compute the badness, which basically tells us how
+     * much we had to stretch or shrink.
+     */
+    private long computeBadness(double ratio, boolean ratioIsInfinite, boolean canStretch, boolean isOverfull) {
+        long badness;
+
+        if (ratioIsInfinite) {
+            // No badness for infinite stretch or shrink.
+            badness = 0;
+        } else if (isOverfull) {
+            // We're overfull. This is infinitely bad.
+            badness = INFINITELY_BAD;
+        } else if (!canStretch) {
+            // We don't match the right size and we can't stretch or shrink. This is infinitely bad.
+            badness = INFINITELY_BAD;
+        } else {
+            // Normal case. Use 100*r^3, but max out at INFINITELY_BAD.
+            if (ratio < -5 || ratio > 5) {
+                // Avoid overflow. 5 = ceil((INFINITELY_BAD/100)^(1/3)).
+                badness = INFINITELY_BAD;
+            } else {
+                badness = Math.min(INFINITELY_BAD, (long) (100 * Math.pow(Math.abs(ratio), 3)));
+            }
+        }
+
+        return badness;
     }
 
     /**
