@@ -88,18 +88,16 @@ public abstract class ElementList implements ElementSink {
         // Keep track of a list of active breakpoints. As we march through the list of all breakpoints,
         // the active ones will represent the possible start of lines or pages. Breakpoints will be
         // deactivated once the line or page becomes too long. Use a linked list so that we can cheaply
-        // delete from the front or the middle.
+        // delete from the front or the middle when deactivating breakpoints.
         List<Breakpoint> activeBreakpoints = new LinkedList<>();
 
         // At first only the first breakpoint is active. It's the artificial one before the first element.
         // See the construction of the breakpoints list in findBreakpoints().
         activeBreakpoints.add(breakpoints.get(0));
 
-        // Go through all breakpoints, considering them as possible ends of lines or pages.
-        // TODO foreach?
-        for (int endBreak = 1; endBreak < breakpoints.size(); endBreak++) {
-            Breakpoint endBreakpoint = breakpoints.get(endBreak);
-
+        // Go through all breakpoints, considering them as possible ends of lines or pages. Skip the first one
+        // since it's not a possible end of line.
+        for (Breakpoint endBreakpoint : breakpoints.subList(1, breakpoints.size())) {
             if (printDebug()) {
                 System.out.printf("Ending at element %d (%s)\n",
                         endBreakpoint.getIndex(), getDebugLineSuffix(endBreakpoint));
@@ -230,7 +228,7 @@ public abstract class ElementList implements ElementSink {
                                 badness, demerits, totalDemerits, ratio);
                     }
 
-                    if (totalDemerits <= endBreakpoint.getTotalDemerits()) {
+                    if (totalDemerits < endBreakpoint.getTotalDemerits()) {
                         endBreakpoint.setPreviousBreakpoint(beginBreakpoint);
                         endBreakpoint.setRatio(ratio);
                         endBreakpoint.setRatioIsInfinite(ratioIsInfinite);
@@ -277,68 +275,11 @@ public abstract class ElementList implements ElementSink {
             }
         }
 
-        // Go through our linked list of breakpoints, generating lines or pages. The list runs backward through
-        // the data, so we build it up into a list in reverse order.
-        Deque<Box> boxes = new ArrayDeque<>();
-        Breakpoint endBreakpoint = breakpoints.get(breakpoints.size() - 1);
-        while (true) {
-            Breakpoint beginBreakpoint = endBreakpoint.getPreviousBreakpoint();
-            if (beginBreakpoint == null) {
-                // Done, reached beginning.
-                break;
-            }
+        // Convert the final list of breakpoints into boxes.
+        Iterable<Box> boxes = makeAllFinalBoxes(breakpoints);
 
-            // Make a new list with the glue set to specific widths.
-            Box box = makeBox(getLineElements(beginBreakpoint, endBreakpoint),
-                    endBreakpoint.getRatio(), endBreakpoint.isRatioIsInfinite());
-            if (printDebug()) {
-                box.println(System.out, "");
-            }
-
-            // Push it on the front of the list, so that we'll get it out backwards.
-            boxes.addFirst(box);
-
-            // Previous line or page.
-            endBreakpoint = beginBreakpoint;
-        }
-
-        // Now run through the boxes forward.
-        for (Box box : boxes) {
-            // See if it's the right size.
-            long boxSize = getElementSize(box);
-            if (boxSize != maxSize) {
-                long difference = boxSize - maxSize;
-                double percentOff = difference*100.0/maxSize;
-                if (percentOff < -0.001 || percentOff > 0.001) {
-                    System.out.printf("Warning: %s is of wrong size (should be %,d but is %,d, off by %,d or %.3f%%)\n",
-                            box.getClass().getSimpleName(), maxSize, boxSize, difference, percentOff);
-                }
-            }
-
-            // Add to the sink.
-            output.addElement(box);
-        }
-    }
-
-    /**
-     * For each possible breakpoint, figure out the next displayed element (after the breakpoint). Modifies
-     * the breakpoint objects.
-     */
-    private void computeStartIndices(List<Breakpoint> breakpoints) {
-        for (int breakpointIndex = 0; breakpointIndex < breakpoints.size(); breakpointIndex++) {
-            Breakpoint breakpoint = breakpoints.get(breakpointIndex);
-            int index = breakpoint.getIndex();
-            int nextIndex = breakpointIndex + 1 < breakpoints.size() ?
-                    breakpoints.get(breakpointIndex + 1).getIndex() : mElements.size();
-
-            // See where the line would start by skipping discardable elements. Don't do this on the very
-            // first breakpoint, since we'll want to keep glue at the front of the line that might be needed
-            // to center it.
-            while (breakpointIndex != 0 && index < nextIndex && mElements.get(index) instanceof DiscardableElement) {
-                index++;
-            }
-            breakpoint.setStartIndex(index);
-        }
+        // Send the boxes to the sync.
+        outputBoxes(boxes, output, maxSize);
     }
 
     /**
@@ -374,6 +315,27 @@ public abstract class ElementList implements ElementSink {
         // manually add one.
 
         return breakpoints;
+    }
+
+    /**
+     * For each possible breakpoint, figure out the next displayed element (after the breakpoint). Modifies
+     * the breakpoint objects.
+     */
+    private void computeStartIndices(List<Breakpoint> breakpoints) {
+        for (int breakpointIndex = 0; breakpointIndex < breakpoints.size(); breakpointIndex++) {
+            Breakpoint breakpoint = breakpoints.get(breakpointIndex);
+            int index = breakpoint.getIndex();
+            int nextIndex = breakpointIndex + 1 < breakpoints.size() ?
+                    breakpoints.get(breakpointIndex + 1).getIndex() : mElements.size();
+
+            // See where the line would start by skipping discardable elements. Don't do this on the very
+            // first breakpoint, since we'll want to keep glue at the front of the line that might be needed
+            // to center it.
+            while (breakpointIndex != 0 && index < nextIndex && mElements.get(index) instanceof DiscardableElement) {
+                index++;
+            }
+            breakpoint.setStartIndex(index);
+        }
     }
 
     /**
@@ -488,6 +450,59 @@ public abstract class ElementList implements ElementSink {
      */
     Box makeBox() {
         return makeBox(mElements, 0, false);
+    }
+
+    /**
+     * Go through our linked list of breakpoints, generating lines or pages. The list runs backward through
+     * the data, so we build it up into a list in reverse order.
+     */
+    private Iterable<Box> makeAllFinalBoxes(List<Breakpoint> breakpoints) {
+        Deque<Box> boxes = new ArrayDeque<>();
+
+        Breakpoint endBreakpoint = breakpoints.get(breakpoints.size() - 1);
+        while (true) {
+            Breakpoint beginBreakpoint = endBreakpoint.getPreviousBreakpoint();
+            if (beginBreakpoint == null) {
+                // Done, reached beginning.
+                break;
+            }
+
+            // Make a new list with the glue set to specific widths.
+            Box box = makeBox(getLineElements(beginBreakpoint, endBreakpoint),
+                    endBreakpoint.getRatio(), endBreakpoint.isRatioIsInfinite());
+            if (printDebug()) {
+                box.println(System.out, "");
+            }
+
+            // Push it on the front of the list, so that we'll get it out backwards.
+            boxes.addFirst(box);
+
+            // Jump to previous line or page.
+            endBreakpoint = beginBreakpoint;
+        }
+
+        return boxes;
+    }
+
+    /**
+     * Output all the boxes to the sync, warning if they're the wrong size.
+     */
+    private void outputBoxes(Iterable<Box> boxes, ElementSink output, long maxSize) {
+        for (Box box : boxes) {
+            // See if it's the right size.
+            long boxSize = getElementSize(box);
+            if (boxSize != maxSize) {
+                long difference = boxSize - maxSize;
+                double percentOff = difference*100.0/maxSize;
+                if (percentOff < -0.001 || percentOff > 0.001) {
+                    System.out.printf("Warning: %s is of wrong size (should be %,d but is %,d, off by %,d or %.3f%%)\n",
+                            box.getClass().getSimpleName(), maxSize, boxSize, difference, percentOff);
+                }
+            }
+
+            // Add to the sink.
+            output.addElement(box);
+        }
     }
 
     /**
