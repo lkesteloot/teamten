@@ -1,5 +1,6 @@
 package com.teamten.tex;
 
+import com.teamten.typeset.BookLayout;
 import com.teamten.typeset.Element;
 import com.teamten.typeset.Font;
 import com.teamten.typeset.FontManager;
@@ -8,6 +9,7 @@ import com.teamten.typeset.HBox;
 import com.teamten.typeset.Penalty;
 import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.Text;
+import com.teamten.typeset.Typeface;
 import com.teamten.typeset.Typesetter;
 import com.teamten.typeset.VBox;
 import com.teamten.typeset.VerticalList;
@@ -30,8 +32,6 @@ public class TexParser {
     private final InputStream mInputStream;
     private final Typesetter mTypesetter;
     private final FontManager mFontManager;
-    private final long mPageWidth;
-    private final long mPageHeight;
     private final TexTokenizer mTexTokenizer;
     private final Font mFont;
     private final float mFontSize;
@@ -45,30 +45,26 @@ public class TexParser {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new FontManager(pdDoc);
 
-        long pageWidth = IN.toSp(6);
-        long pageHeight = IN.toSp(9);
-        long pageMargin = IN.toSp(1);
+        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
+                fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 11);
 
         Typesetter typesetter = new Typesetter();
-        TexParser texParser = new TexParser(inputStream, typesetter, fontManager, pageWidth, pageHeight);
+        TexParser texParser = new TexParser(inputStream, typesetter, fontManager);
 
         VerticalList verticalList = texParser.parseVerticalList(false);
         verticalList.println(System.out, "");
 
         // Add the vertical list to the PDF.
-        typesetter.addVerticalListToPdf(verticalList, pdDoc, pageWidth, pageHeight, pageMargin);
+        typesetter.addVerticalListToPdf(verticalList, bookLayout, pdDoc);
 
         pdDoc.save(pdfFilename);
     }
 
-    public TexParser(InputStream inputStream, Typesetter typesetter, FontManager fontManager, long pageWidth,
-                     long pageHeight) throws IOException {
+    public TexParser(InputStream inputStream, Typesetter typesetter, FontManager fontManager) throws IOException {
 
         mInputStream = inputStream;
         mTypesetter = typesetter;
         mFontManager = fontManager;
-        mPageWidth = pageWidth;
-        mPageHeight = pageHeight;
 
         mTexTokenizer = new TexTokenizer(mInputStream);
         fetchToken();

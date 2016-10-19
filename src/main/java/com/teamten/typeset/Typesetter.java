@@ -58,21 +58,20 @@ public class Typesetter {
         FontManager fontManager = new FontManager(pdDoc);
 
         // TODO Load these values from the document header.
-        long pageWidth = IN.toSp(6);
-        long pageHeight = IN.toSp(9);
-        long pageMargin = IN.toSp(1);
+        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
+                fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 9);
 
         List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
         for (int pass = 0; pass < MAX_ITERATIONS; pass++) {
             System.out.printf("Pass %d:\n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
-            VerticalList verticalList = docToVerticalList(doc, fontManager, pageWidth, pageMargin);
+            VerticalList verticalList = docToVerticalList(doc, fontManager, bookLayout.getBodyWidth());
             System.out.println("  Horizontal: " + stopwatch);
 
             // Format the vertical list into pages.
             stopwatch = Stopwatch.createStarted();
-            pages = verticalListToPages(verticalList, pageHeight - 2 * pageMargin);
+            pages = verticalListToPages(verticalList, bookLayout.getBodyHeight());
             System.out.println("  Vertical: " + stopwatch);
 
             // Get the full list of bookmarks.
@@ -90,7 +89,7 @@ public class Typesetter {
 
         // Send pages to PDF.
         Stopwatch stopwatch = Stopwatch.createStarted();
-        addPagesToPdf(pages, pdDoc, pageWidth, pageHeight, pageMargin);
+        addPagesToPdf(pages, bookLayout, pdDoc);
         System.out.println("Adding to PDF: " + stopwatch);
 
         return pdDoc;
@@ -99,7 +98,7 @@ public class Typesetter {
     /**
      * Converts a DOM document to a vertical list.
      */
-    private VerticalList docToVerticalList(Doc doc, FontManager fontManager, long pageWidth, long pageMargin) throws IOException {
+    private VerticalList docToVerticalList(Doc doc, FontManager fontManager, long bodyWidth) throws IOException {
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
 
         VerticalList verticalList = new VerticalList();
@@ -206,7 +205,7 @@ public class Typesetter {
             horizontalList.addEndOfParagraph();
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
-            horizontalList.format(verticalList, pageWidth - 2*pageMargin);
+            horizontalList.format(verticalList, bodyWidth);
 
             if (ownPage) {
                 verticalList.ejectPage();
@@ -230,12 +229,12 @@ public class Typesetter {
      * Adds the entire vertical list to the PDF, by first breaking it into pages and then adding the
      * pages to the PDF.
      */
-    public void addVerticalListToPdf(VerticalList verticalList, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
+    public void addVerticalListToPdf(VerticalList verticalList, BookLayout bookLayout, PDDocument pdDoc) throws IOException {
         // Format the vertical list into pages.
-        List<Page> pages = verticalListToPages(verticalList, pageHeight - 2*pageMargin);
+        List<Page> pages = verticalListToPages(verticalList, bookLayout.getBodyHeight());
 
         // Generate each page.
-        addPagesToPdf(pages, pdDoc, pageWidth, pageHeight, pageMargin);
+        addPagesToPdf(pages, bookLayout, pdDoc);
     }
 
     /**
@@ -253,38 +252,45 @@ public class Typesetter {
     /**
      * Send each page (with the given size) to the PDF.
      */
-    public void addPagesToPdf(List<Page> pages, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
+    public void addPagesToPdf(List<Page> pages, BookLayout bookLayout, PDDocument pdDoc) throws IOException {
         for (Page page : pages) {
-            addPageToPdf(page, pdDoc, pageWidth, pageHeight, pageMargin);
+            addPageToPdf(page, bookLayout, pdDoc);
         }
     }
 
     /**
      * Add the VBox as a page to the PDF.
      */
-    public void addPageToPdf(Page page, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
+    public void addPageToPdf(Page page, BookLayout bookLayout, PDDocument pdDoc) throws IOException {
         PDPage pdPage = new PDPage();
         pdDoc.addPage(pdPage);
         pdPage.setMediaBox(new PDRectangle(
-                PT.fromSpAsFloat(pageWidth),
-                PT.fromSpAsFloat(pageHeight)));
+                PT.fromSpAsFloat(bookLayout.getPageWidth()),
+                PT.fromSpAsFloat(bookLayout.getPageHeight())));
 
         PDPageContentStream contents = new PDPageContentStream(pdDoc, pdPage);
 
         // Draw the margins for debugging.
         if (DRAW_MARGINS) {
-            PdfUtil.drawDebugRectangle(contents, pageMargin, pageMargin, pageWidth - 2*pageMargin, pageHeight - 2*pageMargin);
+            PdfUtil.drawDebugRectangle(contents,
+                    bookLayout.getPageMargin(),
+                    bookLayout.getPageMargin(),
+                    bookLayout.getBodyWidth(),
+                    bookLayout.getBodyHeight());
         }
 
         // Start at top of page.
-        long y = pageHeight - pageMargin;
+        long y = bookLayout.getPageHeight() - bookLayout.getPageMargin();
 
         // Lay out each element in the page.
         for (Element element : page.getElements()) {
-            long advanceY = element.layOutVertically(pageMargin, y, contents);
+            long advanceY = element.layOutVertically(bookLayout.getPageMargin(), y, contents);
 
             y -= advanceY;
         }
+
+        // Draw the page number.
+        bookLayout.drawHeadline(page, contents);
 
         contents.close();
     }

@@ -15,9 +15,8 @@ public class TypesetterTest {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new FontManager(pdDoc);
 
-        long pageWidth = IN.toSp(6);
-        long pageHeight = IN.toSp(9);
-        long pageMargin = IN.toSp(1);
+        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
+                fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 11);
 
         Font font = fontManager.get(FontManager.FontName.TIMES_NEW_ROMAN);
         float fontSize = 11;
@@ -28,7 +27,7 @@ public class TypesetterTest {
         HorizontalList horizontalList = new HorizontalList();
         horizontalList.addText("Hello world! Test app for trying various things with the typesetter.\u00A0This gives us more control than using Markdown.", font, fontSize);
         horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, pageWidth - 2*pageMargin);
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
 
         horizontalList = new HorizontalList();
         horizontalList.addText("The lower of the ", font, fontSize);
@@ -43,13 +42,13 @@ public class TypesetterTest {
         horizontalList.addElement(verticalList2.makeBox(0));
         horizontalList.addText(" lines.", font, fontSize);
         horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, pageWidth - 2*pageMargin);
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
 
         verticalList.ejectPage();
         verticalList.println(System.out, "");
 
         // Add the vertical list to the PDF.
-        typesetter.addVerticalListToPdf(verticalList, pdDoc, pageWidth, pageHeight, pageMargin);
+        typesetter.addVerticalListToPdf(verticalList, bookLayout, pdDoc);
 
         pdDoc.save("foo.pdf");
     }
