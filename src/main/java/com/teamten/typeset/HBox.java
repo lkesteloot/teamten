@@ -90,7 +90,9 @@ public class HBox extends Box {
     @Override
     public void visit(Consumer<Element> consumer) {
         super.visit(consumer);
-        mElements.forEach(consumer);
+        mElements.forEach((element) -> {
+            element.visit(consumer);
+        });
     }
 
     @Override

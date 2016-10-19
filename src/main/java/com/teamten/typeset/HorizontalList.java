@@ -19,7 +19,7 @@ public class HorizontalList extends ElementList {
     private static final boolean DEBUG_LIGATURES = false;
 
     @Override
-    protected HBox makeOutputBox(List<Element> elements) {
+    protected HBox makeOutputBox(List<Element> elements, int lineNumber) {
         return new HBox(elements);
     }
 
@@ -204,6 +204,8 @@ public class HorizontalList extends ElementList {
         // First, make a copy of the list. Use a linked list because we'll be popping and pushing
         // things on the front.
         Deque<Element> oldElements = new LinkedList<>(elements);
+
+        // Clear this so we don't accidentally access it.
         elements = null;
 
         // Our new elements.
@@ -313,9 +315,6 @@ public class HorizontalList extends ElementList {
      * Return a new list of elements with kerning added.
      */
     static List<Element> addKerning(List<Element> origElements, Font font, float fontSize) {
-        // Keep track of the last character we saw. This is 0 to mean "undefined".
-        int previousCh = 0;
-
         // Make a new list of elements.
         List<Element> newElements = new ArrayList<>(origElements.size());
 

@@ -46,8 +46,8 @@ public class VerticalList extends ElementList {
     }
 
     @Override
-    protected VBox makeOutputBox(List<Element> elements) {
-        return new VBox(elements);
+    protected Page makeOutputBox(List<Element> elements, int counter) {
+        return new Page(elements, counter);
     }
 
     @Override

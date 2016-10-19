@@ -35,12 +35,12 @@ public class TypesetterTest {
         VerticalList verticalList2 = new VerticalList();
         HorizontalList horizontalList2 = new HorizontalList();
         horizontalList2.addText("one", font, fontSize);
-        verticalList2.addElement(horizontalList2.makeBox());
+        verticalList2.addElement(horizontalList2.makeBox(0));
         horizontalList2 = new HorizontalList();
         horizontalList2.addText("twg", font, fontSize);
-        verticalList2.addElement(horizontalList2.makeBox());
+        verticalList2.addElement(horizontalList2.makeBox(0));
         verticalList2.println(System.out, "");
-        horizontalList.addElement(verticalList2.makeBox());
+        horizontalList.addElement(verticalList2.makeBox(0));
         horizontalList.addText(" lines.", font, fontSize);
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, pageWidth - 2*pageMargin);

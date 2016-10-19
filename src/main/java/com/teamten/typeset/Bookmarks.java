@@ -7,10 +7,10 @@ import java.io.PrintStream;
 import java.util.List;
 
 /**
- * Keeps track of a set of bookmarks and which page they're on.
+ * Keeps track of a set of bookmarks and which physical page they're on.
  */
 public class Bookmarks {
-    private final SetMultimap<PageNumber,Bookmark> mPageNumberToBookmark = HashMultimap.create();
+    private final SetMultimap<Integer,Bookmark> mPhysicalPageNumberToBookmark = HashMultimap.create();
 
     private Bookmarks() {
         // Private constructor.
@@ -20,19 +20,15 @@ public class Bookmarks {
         return new Bookmarks();
     }
 
-    public static Bookmarks fromPages(List<VBox> pages) {
+    public static Bookmarks fromPages(List<Page> pages) {
         Bookmarks bookmarks = new Bookmarks();
 
-        PageNumber pageNumber = new PageNumber(1, false);
-        for (VBox page : pages) {
-            PageNumber finalPageNumber = pageNumber;
+        for (Page page : pages) {
             page.visit((element) -> {
                 if (element instanceof Bookmark) {
-                    bookmarks.add(finalPageNumber, (Bookmark) element);
+                    bookmarks.add(page.getPhysicalPageNumber(), (Bookmark) element);
                 }
             });
-
-            pageNumber = pageNumber.successor();
         }
 
         return bookmarks;
@@ -41,8 +37,8 @@ public class Bookmarks {
     /**
      * Add the bookmark at the specified page number.
      */
-    private void add(PageNumber pageNumber, Bookmark bookmark) {
-        mPageNumberToBookmark.put(pageNumber, bookmark);
+    private void add(Integer physicalPageNumber, Bookmark bookmark) {
+        mPhysicalPageNumberToBookmark.put(physicalPageNumber, bookmark);
     }
 
     /**
@@ -50,8 +46,8 @@ public class Bookmarks {
      */
     public void println(PrintStream stream) {
         stream.println("Bookmarks:");
-        mPageNumberToBookmark.keySet().stream().sorted().forEach((pageNumber) -> {
-            mPageNumberToBookmark.get(pageNumber).forEach((bookmark) -> {
+        mPhysicalPageNumberToBookmark.keySet().stream().sorted().forEach((pageNumber) -> {
+            mPhysicalPageNumberToBookmark.get(pageNumber).forEach((bookmark) -> {
                 stream.printf("%4s: %s\n", pageNumber, bookmark);
             });
         });
@@ -64,7 +60,7 @@ public class Bookmarks {
 
         Bookmarks bookmarks = (Bookmarks) o;
 
-        return mPageNumberToBookmark.equals(bookmarks.mPageNumberToBookmark);
+        return mPhysicalPageNumberToBookmark.equals(bookmarks.mPhysicalPageNumberToBookmark);
 
     }
 }

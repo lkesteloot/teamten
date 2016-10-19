@@ -62,7 +62,7 @@ public class Typesetter {
         long pageHeight = IN.toSp(9);
         long pageMargin = IN.toSp(1);
 
-        List<VBox> pages = null;
+        List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
         for (int pass = 0; pass < MAX_ITERATIONS; pass++) {
             System.out.printf("Pass %d:\n", pass + 1);
@@ -202,6 +202,7 @@ public class Typesetter {
                     break;
             }
 
+            // Eject the paragraph.
             horizontalList.addEndOfParagraph();
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
@@ -231,7 +232,7 @@ public class Typesetter {
      */
     public void addVerticalListToPdf(VerticalList verticalList, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
         // Format the vertical list into pages.
-        List<VBox> pages = verticalListToPages(verticalList, pageHeight - 2*pageMargin);
+        List<Page> pages = verticalListToPages(verticalList, pageHeight - 2*pageMargin);
 
         // Generate each page.
         addPagesToPdf(pages, pdDoc, pageWidth, pageHeight, pageMargin);
@@ -241,10 +242,10 @@ public class Typesetter {
      * Format the vertical list into a sequence of pages.
      * @param textHeight the max height of the text on a page.
      */
-    public List<VBox> verticalListToPages(VerticalList verticalList, long textHeight) {
-        List<VBox> pages = new ArrayList<>();
+    public List<Page> verticalListToPages(VerticalList verticalList, long textHeight) {
+        List<Page> pages = new ArrayList<>();
 
-        verticalList.format(ElementSink.listSink(pages, VBox.class), textHeight);
+        verticalList.format(ElementSink.listSink(pages, Page.class), textHeight);
 
         return pages;
     }
@@ -252,8 +253,8 @@ public class Typesetter {
     /**
      * Send each page (with the given size) to the PDF.
      */
-    public void addPagesToPdf(List<VBox> pages, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
-        for (VBox page : pages) {
+    public void addPagesToPdf(List<Page> pages, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
+        for (Page page : pages) {
             addPageToPdf(page, pdDoc, pageWidth, pageHeight, pageMargin);
         }
     }
@@ -261,7 +262,7 @@ public class Typesetter {
     /**
      * Add the VBox as a page to the PDF.
      */
-    public void addPageToPdf(VBox page, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
+    public void addPageToPdf(Page page, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
         PDPage pdPage = new PDPage();
         pdDoc.addPage(pdPage);
         pdPage.setMediaBox(new PDRectangle(

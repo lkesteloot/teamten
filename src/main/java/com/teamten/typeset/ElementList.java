@@ -394,7 +394,7 @@ public abstract class ElementList implements ElementSink {
     /**
      * Make a box with the specified elements stretched out by the given ratio.
      */
-    private Box makeBox(List<Element> lineElements, double ratio, boolean ratioIsInfinite) {
+    private Box makeBox(List<Element> lineElements, double ratio, boolean ratioIsInfinite, int counter) {
         List<Element> line = new ArrayList<>();
 
         // Non-null iff the previous element was a Text element.
@@ -458,14 +458,14 @@ public abstract class ElementList implements ElementSink {
             previousText = null;
         }
 
-        return makeOutputBox(line);
+        return makeOutputBox(line, counter);
     }
 
     /**
      * Make a box with zero stretching or shrinking.
      */
-    Box makeBox() {
-        return makeBox(mElements, 0, false);
+    Box makeBox(int counter) {
+        return makeBox(mElements, 0, false, counter);
     }
 
     /**
@@ -485,7 +485,8 @@ public abstract class ElementList implements ElementSink {
 
             // Make a new list with the glue set to specific widths.
             Box box = makeBox(getLineElements(beginBreakpoint, endBreakpoint),
-                    endBreakpoint.getRatio(), endBreakpoint.isRatioIsInfinite());
+                    endBreakpoint.getRatio(), endBreakpoint.isRatioIsInfinite(),
+                    endBreakpoint.getCounter());
             if (printDebug()) {
                 box.println(System.out, "");
             }
@@ -533,8 +534,12 @@ public abstract class ElementList implements ElementSink {
 
     /**
      * Generate the Box that will be sent to the output.
+     *
+     * @param elements the elements of the box.
+     * @param counter the number of the box, starting from 0. For horizontal lists this is the line number
+     *                of the paragraph. For vertical lists this is the physical page number.
      */
-    protected abstract Box makeOutputBox(List<Element> elements);
+    protected abstract Box makeOutputBox(List<Element> elements, int counter);
 
     /**
      * Return the size (width for horizontal lists, height + depth for vertical lists) of the element.
@@ -548,6 +553,7 @@ public abstract class ElementList implements ElementSink {
     private static class Breakpoint {
         private final int mIndex;
         private final long mPenalty;
+        private int mCounter;
         private int mStartIndex;
         private long mTotalDemerits;
         private Breakpoint mPreviousBreakpoint;
@@ -557,6 +563,7 @@ public abstract class ElementList implements ElementSink {
         private Breakpoint(int index, long penalty) {
             mIndex = index;
             mPenalty = penalty;
+            mCounter = 0;
             mStartIndex = 0;
             mTotalDemerits = 0;
             mPreviousBreakpoint = null;
@@ -576,6 +583,14 @@ public abstract class ElementList implements ElementSink {
          */
         public long getPenalty() {
             return mPenalty;
+        }
+
+        /**
+         * Generic counter, used for line number or physical page number. The counter of a section
+         * is stored in the breakpoint at its end (end of line or end of page).
+         */
+        public int getCounter() {
+            return mCounter;
         }
 
         /**
@@ -615,9 +630,16 @@ public abstract class ElementList implements ElementSink {
 
         /**
          * Set the previous breakpoint in the paragraph or page assuming we're selected as a breakpoint.
+         * Also updates the counter to be one more than the previous breakpoint's counter.
          */
         public void setPreviousBreakpoint(Breakpoint previousBreakpoint) {
             mPreviousBreakpoint = previousBreakpoint;
+
+            if (mPreviousBreakpoint == null) {
+                mCounter = 0;
+            } else {
+                mCounter = mPreviousBreakpoint.mCounter + 1;
+            }
         }
 
         /**
