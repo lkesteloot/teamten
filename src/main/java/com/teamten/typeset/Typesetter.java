@@ -28,7 +28,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * Converts a document to a PDF.
  */
 public class Typesetter {
-    private static final boolean DRAW_MARGINS = true;
+    private static final boolean DRAW_MARGINS = false;
     /**
      * The maximum number of times that we'll typeset the document without it converging on a stable set
      * of page numbers.
@@ -58,7 +58,8 @@ public class Typesetter {
         FontManager fontManager = new FontManager(pdDoc);
 
         // TODO Load these values from the document header.
-        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
+        String bookTitle = "La Famille Klat"; // TODO
+        BookLayout bookLayout = new BookLayout(bookTitle, IN.toSp(6), IN.toSp(9), IN.toSp(1),
                 fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 9);
 
         List<Page> pages = null;
@@ -86,6 +87,9 @@ public class Typesetter {
             bookmarks = newBookmarks;
         }
         // TODO throw if we had too many iterations.
+
+        // Now that we have a full set of bookmarks, figure out where the sections are.
+        bookLayout.configureFromBookmarks(bookmarks);
 
         // Send pages to PDF.
         Stopwatch stopwatch = Stopwatch.createStarted();

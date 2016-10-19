@@ -5,6 +5,8 @@ import com.google.common.collect.SetMultimap;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Keeps track of a set of bookmarks and which physical page they're on.
@@ -39,6 +41,15 @@ public class Bookmarks {
      */
     private void add(Integer physicalPageNumber, Bookmark bookmark) {
         mPhysicalPageNumberToBookmark.put(physicalPageNumber, bookmark);
+    }
+
+    /**
+     * Calls the consumer for each bookmark in our collection.
+     *
+     * @param consumer takes a physical page number and bookmark as a map entry.
+     */
+    public void forEach(Consumer<Map.Entry<Integer,Bookmark>> consumer) {
+        mPhysicalPageNumberToBookmark.entries().forEach(consumer);
     }
 
     /**
