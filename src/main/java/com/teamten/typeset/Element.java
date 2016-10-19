@@ -6,6 +6,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * An element that can be stacked horizontally to make a line.
@@ -37,6 +38,14 @@ public abstract class Element implements Dimensions {
      * @return how much to move right afterward.
      */
     public abstract long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException;
+
+    /**
+     * Calls the consumer on this element and all child elements in pre-order. The default implementation
+     * just calls the consumer on this element.
+     */
+    public void visit(Consumer<Element> consumer) {
+        consumer.accept(this);
+    }
 
     /**
      * Add the element to the contents.

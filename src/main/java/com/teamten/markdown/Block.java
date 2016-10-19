@@ -3,6 +3,7 @@ package com.teamten.markdown;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A block is a paragraph (similar to a block in HTML DOM). It's a sequence of spans.
@@ -21,6 +22,13 @@ public class Block {
 
     public List<Span> getSpans() {
         return mSpans;
+    }
+
+    /**
+     * Return a string version of all text spans.
+     */
+    public String getText() {
+        return mSpans.stream().map(Span::getText).collect(Collectors.joining());
     }
 
     public void addSpan(Span span) {

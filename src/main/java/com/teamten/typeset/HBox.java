@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Horizontal sequence of elements.
@@ -84,6 +85,12 @@ public class HBox extends Box {
 
         // Our height is the combined height and depth.
         return getHeight() + getDepth();
+    }
+
+    @Override
+    public void visit(Consumer<Element> consumer) {
+        super.visit(consumer);
+        mElements.forEach(consumer);
     }
 
     @Override

@@ -5,6 +5,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Represents a page in the output medium.
@@ -38,6 +39,12 @@ public class VBox extends Box {
         }
 
         return getWidth();
+    }
+
+    @Override
+    public void visit(Consumer<Element> consumer) {
+        super.visit(consumer);
+        mElements.forEach(consumer);
     }
 
     @Override

@@ -29,15 +29,25 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class Typesetter {
     private static final boolean DRAW_MARGINS = true;
+    /**
+     * The maximum number of times that we'll typeset the document without it converging on a stable set
+     * of page numbers.
+     */
+    private static final int MAX_ITERATIONS = 3;
 
     public static void main(String[] args) throws IOException {
+        // Load and parse the Markdown file.
+        Stopwatch stopwatch = Stopwatch.createStarted();
         InputStream inputStream = new FileInputStream(args[0]);
         MarkdownParser parser = new MarkdownParser();
-        Stopwatch stopwatch = Stopwatch.createStarted();
         Doc doc = parser.parse(inputStream);
         System.out.println("Parsing: " + stopwatch);
+
+        // Typeset the document.
         Typesetter typesetter = new Typesetter();
         PDDocument pdDoc = typesetter.typeset(doc);
+
+        // Save the PDF.
         stopwatch = Stopwatch.createStarted();
         pdDoc.save(args[1]);
         System.out.println("Saving: " + stopwatch);
@@ -52,14 +62,36 @@ public class Typesetter {
         long pageHeight = IN.toSp(9);
         long pageMargin = IN.toSp(1);
 
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        VerticalList verticalList = docToVerticalList(doc, fontManager, pageWidth, pageMargin);
-        System.out.println("Horizontal: " + stopwatch);
+        List<VBox> pages = null;
+        Bookmarks bookmarks = Bookmarks.empty();
+        for (int pass = 0; pass < MAX_ITERATIONS; pass++) {
+            System.out.printf("Pass %d:\n", pass + 1);
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            VerticalList verticalList = docToVerticalList(doc, fontManager, pageWidth, pageMargin);
+            System.out.println("  Horizontal: " + stopwatch);
 
-        // Add the vertical list to the PDF.
-        stopwatch = Stopwatch.createStarted();
-        addVerticalListToPdf(verticalList, pdDoc, pageWidth, pageHeight, pageMargin);
-        System.out.println("Vertical: " + stopwatch);
+            // Format the vertical list into pages.
+            stopwatch = Stopwatch.createStarted();
+            pages = verticalListToPages(verticalList, pageHeight - 2 * pageMargin);
+            System.out.println("  Vertical: " + stopwatch);
+
+            // Get the full list of bookmarks.
+            Bookmarks newBookmarks = Bookmarks.fromPages(pages);
+            newBookmarks.println(System.out);
+            if (newBookmarks.equals(bookmarks)) {
+                // We've converged, we can stop.
+                break;
+            }
+
+            // Try again with these new bookmarks.
+            bookmarks = newBookmarks;
+        }
+        // TODO throw if we had too many iterations.
+
+        // Send pages to PDF.
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        addPagesToPdf(pages, pdDoc, pageWidth, pageHeight, pageMargin);
+        System.out.println("Adding to PDF: " + stopwatch);
 
         return pdDoc;
     }
@@ -154,6 +186,22 @@ public class Typesetter {
                 horizontalList.addText(text, font, fontSize, hyphenDictionary);
             }
 
+            // Potentially add bookmark if we're starting a new part or chapter.
+            switch (block.getBlockType()) {
+                case BODY:
+                default:
+                    // Nothing special.
+                    break;
+
+                case PART_HEADER:
+                    horizontalList.addElement(new SectionBookmark(block.getText()));
+                    break;
+
+                case CHAPTER_HEADER:
+                    horizontalList.addElement(new SectionBookmark(block.getText()));
+                    break;
+            }
+
             horizontalList.addEndOfParagraph();
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
@@ -183,10 +231,28 @@ public class Typesetter {
      */
     public void addVerticalListToPdf(VerticalList verticalList, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
         // Format the vertical list into pages.
-        List<VBox> pages = new ArrayList<>();
-        verticalList.format(ElementSink.listSink(pages, VBox.class), pageHeight - 2*pageMargin);
+        List<VBox> pages = verticalListToPages(verticalList, pageHeight - 2*pageMargin);
 
         // Generate each page.
+        addPagesToPdf(pages, pdDoc, pageWidth, pageHeight, pageMargin);
+    }
+
+    /**
+     * Format the vertical list into a sequence of pages.
+     * @param textHeight the max height of the text on a page.
+     */
+    public List<VBox> verticalListToPages(VerticalList verticalList, long textHeight) {
+        List<VBox> pages = new ArrayList<>();
+
+        verticalList.format(ElementSink.listSink(pages, VBox.class), textHeight);
+
+        return pages;
+    }
+
+    /**
+     * Send each page (with the given size) to the PDF.
+     */
+    public void addPagesToPdf(List<VBox> pages, PDDocument pdDoc, long pageWidth, long pageHeight, long pageMargin) throws IOException {
         for (VBox page : pages) {
             addPageToPdf(page, pdDoc, pageWidth, pageHeight, pageMargin);
         }
