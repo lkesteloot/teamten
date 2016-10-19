@@ -71,7 +71,7 @@ public class BookLayout {
         mSectionMap.clear();
 
         mFirstFrontMatterPhysicalPage = 1;
-        mFirstBodyMatterPhysicalPage = 1;
+        mFirstBodyMatterPhysicalPage = Integer.MAX_VALUE;
 
         // Go through each bookmark and capture all sections.
         bookmarks.forEach((entry) -> {
@@ -79,9 +79,34 @@ public class BookLayout {
             Bookmark bookmark = entry.getValue();
 
             if (bookmark instanceof SectionBookmark) {
-                mSectionMap.put(physicalPageNumber, (SectionBookmark) bookmark);
+                SectionBookmark sectionBookmark = (SectionBookmark) bookmark;
+
+                // Here we guess where the body starts by looking at the first part. In a book without parts
+                // and only chapters, we'd need a way to be told explicitly which chapter starts the body, perhaps
+                // by having a different section type for front matter sections.
+                if (sectionBookmark.getType() == SectionBookmark.Type.PART) {
+                    if (physicalPageNumber < mFirstBodyMatterPhysicalPage) {
+                        mFirstBodyMatterPhysicalPage = physicalPageNumber;
+                    }
+                }
+
+                // Make sure that two sections don't start on the same page.
+                if (mSectionMap.containsKey(physicalPageNumber)) {
+                    // We can't display the logical page here because we've not figured out the
+                    // final value of mFirstBodyMatterPhysicalPage.
+                    System.out.printf("Warning: Duplicate sections for physical page %d (%s and %s).",
+                            physicalPageNumber, mSectionMap.get(physicalPageNumber), sectionBookmark);
+                } else {
+                    mSectionMap.put(physicalPageNumber, sectionBookmark);
+                }
             }
         });
+
+        // Never found the body.
+        if (mFirstBodyMatterPhysicalPage == Integer.MAX_VALUE) {
+            mFirstBodyMatterPhysicalPage = 1;
+            System.out.println("Warning: Never found the book's body.");
+        }
     }
 
     /**
@@ -95,7 +120,7 @@ public class BookLayout {
             String headlineLabel = getHeadlineLabel(physicalPageNumber);
 
             // TODO pick nice vertical position:
-            long y = mPageHeight - mPageMargin + PT.toSp(mPageNumberFontSize) * 2;
+            long y = mPageHeight - mPageMargin + PT.toSp(mPageNumberFontSize)*5/2;
 
             // Draw page number.
             long x;

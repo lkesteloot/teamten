@@ -60,7 +60,7 @@ public class Typesetter {
         // TODO Load these values from the document header.
         String bookTitle = "La Famille Klat"; // TODO
         BookLayout bookLayout = new BookLayout(bookTitle, IN.toSp(6), IN.toSp(9), IN.toSp(1),
-                fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 9);
+                fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 8);
 
         List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
@@ -197,11 +197,11 @@ public class Typesetter {
                     break;
 
                 case PART_HEADER:
-                    horizontalList.addElement(new SectionBookmark(block.getText()));
+                    horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.PART, block.getText()));
                     break;
 
                 case CHAPTER_HEADER:
-                    horizontalList.addElement(new SectionBookmark(block.getText()));
+                    horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.CHAPTER, block.getText()));
                     break;
             }
 
