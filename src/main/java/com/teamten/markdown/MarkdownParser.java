@@ -18,6 +18,7 @@ public class MarkdownParser {
         IN_LINE,
         SKIP_WHITESPACE,
         COMMENT,
+        IN_TAG,
     }
 
     public static void main(String[] args) throws IOException {
@@ -43,6 +44,9 @@ public class MarkdownParser {
         // Whether we're owed a space from the end of the previous line.
         boolean newlineSpace = false;
         boolean newlineSpaceIsItalic = false;
+        // Accumulated tag.
+        StringBuilder tagBuilder = new StringBuilder();
+        ParserState preTagState = null;
         int chOrEof;
         while ((chOrEof = reader.read()) != -1) {
             char ch = (char) chOrEof;
@@ -69,6 +73,10 @@ public class MarkdownParser {
                             builder = null;
                             blockType = BlockType.BODY;
                         }
+                    } else if (ch == '[') {
+                        tagBuilder.setLength(0);
+                        preTagState = state;
+                        state = ParserState.IN_TAG;
                     } else {
                         if (builder == null) {
                             builder = new Block.Builder(blockType);
@@ -96,6 +104,10 @@ public class MarkdownParser {
                         builder.add(' ', isItalic);
                     } else if (ch == '*') {
                         isItalic = !isItalic;
+                    } else if (ch == '[') {
+                        tagBuilder.setLength(0);
+                        preTagState = state;
+                        state = ParserState.IN_TAG;
                     } else {
                         builder.add(translateCharacter(ch), isItalic);
                     }
@@ -121,6 +133,26 @@ public class MarkdownParser {
                         state = ParserState.START_OF_LINE;
                     } else {
                         // Skip comment character.
+                    }
+                    break;
+
+                case IN_TAG:
+                    if (ch == ']') {
+                        String tag = tagBuilder.toString();
+                        if (tag.equals("TOC")) {
+                            // Eject current block.
+                            if (builder != null && !builder.isEmpty()) {
+                                doc.addBlock(builder.build());
+                                builder = null;
+                            }
+                            doc.addBlock(new Block.Builder(BlockType.TABLE_OF_CONTENTS).build());
+                        } else {
+                            System.out.println("Unknown block type: " + tag);
+                        }
+                        state = preTagState;
+                        preTagState = null;
+                    } else {
+                        tagBuilder.append(ch);
                     }
                     break;
             }

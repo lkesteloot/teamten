@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.teamten.typeset.SpaceUnit.IN;
 import static com.teamten.typeset.SpaceUnit.PT;
@@ -29,6 +30,8 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class Typesetter {
     private static final boolean DRAW_MARGINS = false;
+    // TODO: Put into markdown, and store in BookLayout.
+    private static final String TOC_TITLE = "Table de matrères";
     /**
      * The maximum number of times that we'll typeset the document without it converging on a stable set
      * of page numbers.
@@ -67,7 +70,7 @@ public class Typesetter {
         for (int pass = 0; pass < MAX_ITERATIONS; pass++) {
             System.out.printf("Pass %d:\n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
-            VerticalList verticalList = docToVerticalList(doc, fontManager, bookLayout.getBodyWidth());
+            VerticalList verticalList = docToVerticalList(doc, bookLayout, fontManager);
             System.out.println("  Horizontal: " + stopwatch);
 
             // Format the vertical list into pages.
@@ -85,11 +88,11 @@ public class Typesetter {
 
             // Try again with these new bookmarks.
             bookmarks = newBookmarks;
+
+            // Figure out where the sections are.
+            bookLayout.configureFromBookmarks(bookmarks);
         }
         // TODO throw if we had too many iterations.
-
-        // Now that we have a full set of bookmarks, figure out where the sections are.
-        bookLayout.configureFromBookmarks(bookmarks);
 
         // Send pages to PDF.
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -102,7 +105,7 @@ public class Typesetter {
     /**
      * Converts a DOM document to a vertical list.
      */
-    private VerticalList docToVerticalList(Doc doc, FontManager fontManager, long bodyWidth) throws IOException {
+    private VerticalList docToVerticalList(Doc doc, BookLayout bookLayout, FontManager fontManager) throws IOException {
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
 
         VerticalList verticalList = new VerticalList();
@@ -122,7 +125,6 @@ public class Typesetter {
 
             switch (block.getBlockType()) {
                 case BODY:
-                default:
                     typeface = Typeface.TIMES_NEW_ROMAN;
                     fontSize = 11;
                     indentFirstLine = previousBlockType == BlockType.BODY;
@@ -147,6 +149,14 @@ public class Typesetter {
                     marginBottom = IN.toSp(0.25);
                     newPage = true;
                     break;
+
+                case TABLE_OF_CONTENTS:
+                    generateTableOfContents(TOC_TITLE, bookLayout, verticalList, fontManager);
+                    continue;
+
+                default:
+                    System.out.println("Warning: Unknown block type " + block.getBlockType());
+                    continue;
             }
 
             Font spanRegularFont = fontManager.get(typeface.regular());
@@ -159,8 +169,8 @@ public class Typesetter {
             // Set the distance between baselines based on the paragraph's main font.
             verticalList.setBaselineSkip(leading);
 
-            if (newPage && !verticalList.getElements().isEmpty()) {
-                verticalList.ejectPage();
+            if (newPage) {
+                verticalList.newPage();
             }
 
             if (marginTop != 0) {
@@ -209,7 +219,7 @@ public class Typesetter {
             horizontalList.addEndOfParagraph();
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
-            horizontalList.format(verticalList, bodyWidth);
+            horizontalList.format(verticalList, bookLayout.getBodyWidth());
 
             if (ownPage) {
                 verticalList.ejectPage();
@@ -297,6 +307,60 @@ public class Typesetter {
         bookLayout.drawHeadline(page, contents);
 
         contents.close();
+    }
+
+    /**
+     * Adds the table of contents to the vertical list. Does not eject the page.
+     */
+    public void generateTableOfContents(String tocTitle, BookLayout bookLayout, VerticalList verticalList,
+                                        FontManager fontManager) throws IOException {
+
+        long marginTop = IN.toSp(1.0);
+        long paddingBelowTitle = IN.toSp(1.0);
+
+        // TODO: Get from book layout:
+        Font titleFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.regular());
+        float titleFontSize = 14.0f;
+        Font entryFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.regular());
+        float entryFontSize = 11.0f;
+
+        verticalList.newPage();
+        verticalList.addElement(new Box(0, marginTop, 0));
+
+        // Title.
+        HorizontalList horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(tocTitle.toUpperCase(), titleFont, titleFontSize, null);
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        verticalList.addElement(new Glue(paddingBelowTitle, 0, 0, false));
+
+        long leading = PT.toSp(entryFontSize * 1.2f);
+        verticalList.setBaselineSkip(leading);
+
+        // List each section.
+        for (Map.Entry<Integer,SectionBookmark> entry : bookLayout.sections()) {
+            int physicalPageNumber = entry.getKey();
+            SectionBookmark sectionBookmark = entry.getValue();
+
+            long indent = 0;
+            String name = sectionBookmark.getName();
+            String pageLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
+
+            if (sectionBookmark.getType() == SectionBookmark.Type.PART) {
+                name = name.toUpperCase();
+            }
+
+            horizontalList = new HorizontalList();
+            if (indent > 0) {
+                horizontalList.addElement(new Glue(indent, 0, 0, true));
+            }
+            horizontalList.addText(name, entryFont, entryFontSize, null);
+            horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+            horizontalList.addText(pageLabel, entryFont, entryFontSize, null);
+            horizontalList.addElement(new Penalty(-Penalty.INFINITY));
+            horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        }
     }
 }
 

@@ -8,4 +8,5 @@ public enum BlockType {
     BODY,
     PART_HEADER,
     CHAPTER_HEADER,
+    TABLE_OF_CONTENTS,
 }

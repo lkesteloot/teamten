@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static com.teamten.typeset.SpaceUnit.PT;
 
@@ -110,6 +112,14 @@ public class BookLayout {
     }
 
     /**
+     * Returns an ordered sequence of the sections in this document. The integer key is the
+     * physical page number.
+     */
+    public Iterable<Map.Entry<Integer,SectionBookmark>> sections() {
+        return mSectionMap.entrySet();
+    }
+
+    /**
      * Draw the headline (page number of part or chapter title) at the top of the page.
      */
     public void drawHeadline(Page page, PDPageContentStream contents) throws IOException {
@@ -168,7 +178,7 @@ public class BookLayout {
      * Returns the displayed page number label for the physical page number. The displayed page
      * number might be in roman or arabic numerals.
      */
-    private String getPageNumberLabel(int physicalPageNumber) {
+    public String getPageNumberLabel(int physicalPageNumber) {
         if (physicalPageNumber >= mFirstBodyMatterPhysicalPage) {
             return String.valueOf(physicalPageNumber - mFirstBodyMatterPhysicalPage + 1);
         } else {

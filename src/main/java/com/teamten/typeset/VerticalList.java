@@ -56,6 +56,15 @@ public class VerticalList extends ElementList {
     }
 
     /**
+     * Like ejectPage(), but only if the document is not empty.
+     */
+    public void newPage() {
+        if (!getElements().isEmpty()) {
+            ejectPage();
+        }
+    }
+
+    /**
      * Add infinite vertical glue and force a page break.
      */
     public void ejectPage() {
