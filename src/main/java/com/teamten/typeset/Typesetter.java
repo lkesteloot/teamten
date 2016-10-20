@@ -348,6 +348,7 @@ public class Typesetter {
 
         long previousMarginBelow = paddingBelowTitle;
         long interEntryMargin = PT.toSp(entryFontSize*0.8);
+        Leader leader = new Leader(entryFont, entryFontSize, "  .  ", PT.toSp(1));
 
         // List each section.
         for (Map.Entry<Integer,SectionBookmark> entry : bookLayout.sections()) {
@@ -390,7 +391,7 @@ public class Typesetter {
                     horizontalList.addElement(new Glue(indent, 0, 0, true));
                 }
                 horizontalList.addText(name, entryFont, entryFontSize, null);
-                horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+                horizontalList.addElement(leader);
                 horizontalList.addText(pageLabel, entryFont, entryFontSize, null);
                 horizontalList.addElement(new Penalty(-Penalty.INFINITY));
                 horizontalList.format(verticalList, bookLayout.getBodyWidth());

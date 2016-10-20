@@ -69,6 +69,13 @@ public class Glue extends DiscardableElement {
         return mIsHorizontal;
     }
 
+    /**
+     * Fix the glue to the specified size. Subclasses can override to return a copy of themselves.
+     */
+    public Glue fixed(long newSize) {
+        return new Glue(newSize, 0, 0, mIsHorizontal);
+    }
+
     @Override
     public long getWidth() {
         return mIsHorizontal ? mSize : 0;

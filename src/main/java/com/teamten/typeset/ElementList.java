@@ -419,7 +419,7 @@ public abstract class ElementList implements ElementSink {
                 }
 
                 // Fix the glue.
-                element = new Glue(glueSize, 0, 0, glue.isHorizontal());
+                element = glue.fixed(glueSize);
             }
 
             // Combine consecutive Text elements.
