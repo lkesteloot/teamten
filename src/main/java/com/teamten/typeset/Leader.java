@@ -48,11 +48,7 @@ public class Leader extends Glue {
 
         // Draw the pattern all along the glue length.
         for (long position = startX; position < endX; position += mPatternWidth) {
-            contents.beginText();
-            contents.setFont(((PdfBoxFont) mFont).getPdFont(), mFontSize);
-            contents.newLineAtOffset(PT.fromSpAsFloat(position), PT.fromSpAsFloat(y));
-            contents.showText(mPattern);
-            contents.endText();
+            mFont.draw(mPattern, mFontSize, position, y, contents);
         }
 
         return getSize();

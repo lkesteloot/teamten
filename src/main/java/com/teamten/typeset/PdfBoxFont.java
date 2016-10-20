@@ -12,6 +12,7 @@ import org.apache.fontbox.ttf.OTFParser;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 
@@ -145,5 +146,14 @@ public class PdfBoxFont extends AbstractFont {
             // disruption all the way up the chain.
             throw new IllegalStateException("got an exception getting the character metrics", e);
         }
+    }
+
+    @Override
+    public void draw(String text, float fontSize, long x, long y, PDPageContentStream contents) throws IOException {
+        contents.beginText();
+        contents.setFont(getPdFont(), fontSize);
+        contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
+        contents.showText(text);
+        contents.endText();
     }
 }

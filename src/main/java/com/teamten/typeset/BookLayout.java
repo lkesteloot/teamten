@@ -143,25 +143,19 @@ public class BookLayout {
                 x = mPageWidth - mPageMargin - labelWidth;
             }
 
-            contents.beginText();
-            contents.setFont(((PdfBoxFont) mPageNumberFont).getPdFont(), mPageNumberFontSize);
-            contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
-            contents.showText(pageNumberLabel);
-            contents.endText();
+            // TODO this doesn't kern.
+            mPageNumberFont.draw(pageNumberLabel, mPageNumberFontSize, x, y, contents);
 
             // Draw headline label.
             if (headlineLabel != null) {
                 // Draw this in upper case. TODO put this into a style.
                 headlineLabel = headlineLabel.toUpperCase();
 
+                // TODO this doesn't kern.
                 long labelWidth = mPageNumberFont.getStringMetrics(headlineLabel, mPageNumberFontSize).getWidth();
                 x = mPageMargin + (getBodyWidth() - labelWidth)/2;
 
-                contents.beginText();
-                contents.setFont(((PdfBoxFont) mPageNumberFont).getPdFont(), mPageNumberFontSize);
-                contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
-                contents.showText(headlineLabel);
-                contents.endText();
+                mPageNumberFont.draw(headlineLabel, mPageNumberFontSize, x, y, contents);
             }
         }
     }

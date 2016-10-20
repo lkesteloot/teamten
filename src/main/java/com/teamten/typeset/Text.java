@@ -93,11 +93,7 @@ public class Text extends Box {
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
         /// drawDebugRectangle(contents, x, y);
 
-        contents.beginText();
-        contents.setFont(((PdfBoxFont) mFont).getPdFont(), mFontSize);
-        contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
-        contents.showText(mText);
-        contents.endText();
+        mFont.draw(mText, mFontSize, x, y, contents);
 
         return getWidth();
     }

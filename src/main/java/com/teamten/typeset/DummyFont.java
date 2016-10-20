@@ -1,5 +1,7 @@
 package com.teamten.typeset;
 
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+
 import java.io.IOException;
 
 import static com.teamten.typeset.SpaceUnit.PT;
@@ -41,6 +43,11 @@ public class DummyFont extends AbstractFont {
     @Override
     public Metrics getCharacterMetrics(int ch, float fontSize) {
         return new Metrics((long) (mWidth*fontSize), (long) (mHeight*fontSize), (long) (mDepth*fontSize));
+    }
+
+    @Override
+    public void draw(String text, float fontSize, long x, long y, PDPageContentStream contents) throws IOException {
+        // Don't draw.
     }
 
     @Override

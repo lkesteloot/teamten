@@ -1,5 +1,7 @@
 package com.teamten.typeset;
 
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+
 import java.io.IOException;
 
 /**
@@ -27,6 +29,17 @@ public interface Font {
      * Return the size of a code point in the specified font size.
      */
     Metrics getCharacterMetrics(int ch, float fontSize);
+
+    /**
+     * Draw the text.
+     *
+     * @param text the text to draw.
+     * @param fontSize the size in points.
+     * @param x the left-hand edge of the text in scaled points.
+     * @param y the baseline of the text in scaled points.
+     * @param contents the stream to write to.
+     */
+    void draw(String text, float fontSize, long x, long y, PDPageContentStream contents) throws IOException;
 
     /**
      * Get the size of the text in the specified font size. Does not include kerning.
