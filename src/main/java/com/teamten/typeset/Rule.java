@@ -14,13 +14,15 @@ public class Rule extends Box {
 
     @Override
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
-        // TODO draw box.
+        PdfUtil.drawSolidRectangle(contents, x, y - getDepth(), getWidth(), getHeight());
+
         return getWidth();
     }
 
     @Override
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
-        // TODO draw box.
+        PdfUtil.drawSolidRectangle(contents, x, y - getHeight() - getDepth(), getWidth(), getHeight());
+
         return getHeight() + getDepth();
     }
 }

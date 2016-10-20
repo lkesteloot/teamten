@@ -12,11 +12,24 @@ import static com.teamten.typeset.SpaceUnit.PT;
 public class PdfUtil {
     /**
      * Draw a light gray rectangle at the specified scaled point coordinates.
+     *
+     * @param x lower-left X coordinate.
+     * @param y lower-left Y coordinate.
      */
     public static void drawDebugRectangle(PDPageContentStream contents, long x, long y, long width, long height) throws IOException {
         contents.addRect(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y), PT.fromSpAsFloat(width), PT.fromSpAsFloat(height));
         contents.setStrokingColor(0.95);
         contents.stroke();
+    }
 
+    /**
+     * Draw a solid black rectangle at the specified scaled point coordinates.
+     *
+     * @param x lower-left X coordinate.
+     * @param y lower-left Y coordinate.
+     */
+    public static void drawSolidRectangle(PDPageContentStream contents, long x, long y, long width, long height) throws IOException {
+        contents.addRect(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y), PT.fromSpAsFloat(width), PT.fromSpAsFloat(height));
+        contents.fill();
     }
 }

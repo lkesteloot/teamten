@@ -324,13 +324,15 @@ public class Typesetter {
                                         FontManager fontManager) throws IOException {
 
         long marginTop = IN.toSp(1.0);
-        long paddingBelowTitle = IN.toSp(1.0);
+        long paddingBelowTitle = IN.toSp(0.75);
 
         // TODO: Get from book layout:
         Font titleFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.regular());
         float titleFontSize = 14.0f;
         Font entryFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.regular());
         float entryFontSize = 11.0f;
+        long boxWidth = IN.toSp(1.0);
+        long boxHeight = PT.toSp(0.5);
 
         verticalList.newPage();
         verticalList.addElement(new Box(0, marginTop, 0));
@@ -343,10 +345,23 @@ public class Typesetter {
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, bookLayout.getBodyWidth());
 
+        // Space between title and line.
+        verticalList.addElement(new Glue(paddingBelowTitle/3, 0, 0, false));
+
+        // Centered line.
+        horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addElement(new Rule(boxWidth, boxHeight, 0));
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+
+        // Space below line.
+        verticalList.addElement(new Glue(paddingBelowTitle*2/3, 0, 0, false));
+
         long leading = PT.toSp(entryFontSize * 1.2f);
         verticalList.setBaselineSkip(leading);
 
-        long previousMarginBelow = paddingBelowTitle;
+        long previousMarginBelow = 0;
         long interEntryMargin = PT.toSp(entryFontSize*0.8);
         Leader leader = new Leader(entryFont, entryFontSize, "  .  ", PT.toSp(1));
 
