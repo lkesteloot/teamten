@@ -130,7 +130,7 @@ public class BookLayout {
             String headlineLabel = getHeadlineLabel(physicalPageNumber);
 
             // TODO pick nice vertical position:
-            long y = mPageHeight - mPageMargin + PT.toSp(mPageNumberFontSize)*5/2;
+            long y = mPageHeight - mPageMargin + PT.toSp(mPageNumberFontSize*2.5);
 
             // Draw page number.
             long x;

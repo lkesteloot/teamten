@@ -10,6 +10,7 @@ public class SectionBookmark extends Bookmark {
     public enum Type {
         PART("Part", true),
         CHAPTER("Chapter", true),
+        MINOR_SECTION("Minor Section", true),
         TABLE_OF_CONTENTS("Table of Contents", false);
 
         private final String mLabel;

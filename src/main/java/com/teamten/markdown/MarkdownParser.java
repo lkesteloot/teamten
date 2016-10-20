@@ -63,6 +63,8 @@ public class MarkdownParser {
                         blockType = BlockType.PART_HEADER;
                     } else if (builder == null && ch == '#' && blockType == BlockType.PART_HEADER) {
                         blockType = BlockType.CHAPTER_HEADER;
+                    } else if (builder == null && ch == '#' && blockType == BlockType.CHAPTER_HEADER) {
+                        blockType = BlockType.MINOR_SECTION_HEADER;
                     } else if (ch == '*') {
                         isItalic = true;
                     } else if (ch == '\n') {

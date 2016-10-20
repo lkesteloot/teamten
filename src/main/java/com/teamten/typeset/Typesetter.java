@@ -31,7 +31,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
 public class Typesetter {
     private static final boolean DRAW_MARGINS = false;
     // TODO: Put into markdown, and store in BookLayout.
-    private static final String TOC_TITLE = "Table de matrères";
+    private static final String TOC_TITLE = "Table des matières";
     /**
      * The maximum number of times that we'll typeset the document without it converging on a stable set
      * of page numbers.
@@ -141,6 +141,7 @@ public class Typesetter {
                     break;
 
                 case CHAPTER_HEADER:
+                case MINOR_SECTION_HEADER:
                     typeface = Typeface.TIMES_NEW_ROMAN;
                     fontSize = 11;
                     allCaps = true;
@@ -202,7 +203,6 @@ public class Typesetter {
             // Potentially add bookmark if we're starting a new part or chapter.
             switch (block.getBlockType()) {
                 case BODY:
-                default:
                     // Nothing special.
                     break;
 
@@ -212,6 +212,14 @@ public class Typesetter {
 
                 case CHAPTER_HEADER:
                     horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.CHAPTER, block.getText()));
+                    break;
+
+                case MINOR_SECTION_HEADER:
+                    horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.MINOR_SECTION, block.getText()));
+                    break;
+
+                default:
+                    System.out.println("Warning: Unknown block type " + block.getBlockType());
                     break;
             }
 
@@ -334,10 +342,12 @@ public class Typesetter {
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.TABLE_OF_CONTENTS, tocTitle));
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, bookLayout.getBodyWidth());
-        verticalList.addElement(new Glue(paddingBelowTitle, 0, 0, false));
 
         long leading = PT.toSp(entryFontSize * 1.2f);
         verticalList.setBaselineSkip(leading);
+
+        long previousMarginBelow = paddingBelowTitle;
+        long interEntryMargin = PT.toSp(entryFontSize*0.8);
 
         // List each section.
         for (Map.Entry<Integer,SectionBookmark> entry : bookLayout.sections()) {
@@ -345,12 +355,35 @@ public class Typesetter {
             SectionBookmark sectionBookmark = entry.getValue();
             if (sectionBookmark.getType().isIncludedInTableOfContents()) {
                 long indent = 0;
+                // Above and below the entry. The actual space is the max of the two.
+                long marginAbove = 0;
+                long marginBelow = 0;
                 String name = sectionBookmark.getName();
                 String pageLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
 
-                if (sectionBookmark.getType() == SectionBookmark.Type.PART) {
-                    name = name.toUpperCase();
+                switch (sectionBookmark.getType()) {
+                    case PART:
+                        marginAbove = interEntryMargin;
+                        marginBelow = interEntryMargin;
+                        name = name.toUpperCase();
+                        break;
+
+                    case CHAPTER:
+                        indent = PT.toSp(entryFontSize);
+                        break;
+
+                    case MINOR_SECTION:
+                        marginAbove = interEntryMargin;
+                        marginBelow = interEntryMargin;
+                        break;
+
+                    default:
+                        System.out.println("Warning: Unknown section bookmark type " + sectionBookmark.getType());
+                        break;
                 }
+
+                // Intra-entry margin.
+                verticalList.addElement(new Glue(Math.max(previousMarginBelow, marginAbove), 0, 0, false));
 
                 horizontalList = new HorizontalList();
                 if (indent > 0) {
@@ -361,6 +394,8 @@ public class Typesetter {
                 horizontalList.addText(pageLabel, entryFont, entryFontSize, null);
                 horizontalList.addElement(new Penalty(-Penalty.INFINITY));
                 horizontalList.format(verticalList, bookLayout.getBodyWidth());
+
+                previousMarginBelow = marginBelow;
             }
         }
     }
