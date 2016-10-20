@@ -331,6 +331,7 @@ public class Typesetter {
         HorizontalList horizontalList = new HorizontalList();
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
         horizontalList.addText(tocTitle.toUpperCase(), titleFont, titleFontSize, null);
+        horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.TABLE_OF_CONTENTS, tocTitle));
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, bookLayout.getBodyWidth());
         verticalList.addElement(new Glue(paddingBelowTitle, 0, 0, false));
@@ -342,24 +343,25 @@ public class Typesetter {
         for (Map.Entry<Integer,SectionBookmark> entry : bookLayout.sections()) {
             int physicalPageNumber = entry.getKey();
             SectionBookmark sectionBookmark = entry.getValue();
+            if (sectionBookmark.getType().isIncludedInTableOfContents()) {
+                long indent = 0;
+                String name = sectionBookmark.getName();
+                String pageLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
 
-            long indent = 0;
-            String name = sectionBookmark.getName();
-            String pageLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
+                if (sectionBookmark.getType() == SectionBookmark.Type.PART) {
+                    name = name.toUpperCase();
+                }
 
-            if (sectionBookmark.getType() == SectionBookmark.Type.PART) {
-                name = name.toUpperCase();
+                horizontalList = new HorizontalList();
+                if (indent > 0) {
+                    horizontalList.addElement(new Glue(indent, 0, 0, true));
+                }
+                horizontalList.addText(name, entryFont, entryFontSize, null);
+                horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+                horizontalList.addText(pageLabel, entryFont, entryFontSize, null);
+                horizontalList.addElement(new Penalty(-Penalty.INFINITY));
+                horizontalList.format(verticalList, bookLayout.getBodyWidth());
             }
-
-            horizontalList = new HorizontalList();
-            if (indent > 0) {
-                horizontalList.addElement(new Glue(indent, 0, 0, true));
-            }
-            horizontalList.addText(name, entryFont, entryFontSize, null);
-            horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-            horizontalList.addText(pageLabel, entryFont, entryFontSize, null);
-            horizontalList.addElement(new Penalty(-Penalty.INFINITY));
-            horizontalList.format(verticalList, bookLayout.getBodyWidth());
         }
     }
 }

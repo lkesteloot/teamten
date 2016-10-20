@@ -8,13 +8,23 @@ public class SectionBookmark extends Bookmark {
     private final String mName;
 
     public enum Type {
-        PART("Part"),
-        CHAPTER("Chapter");
+        PART("Part", true),
+        CHAPTER("Chapter", true),
+        TABLE_OF_CONTENTS("Table of Contents", false);
 
         private final String mLabel;
+        private final boolean mIncludedInTableOfContents;
 
-        Type(String label) {
+        Type(String label, boolean includedInTableOfContents) {
             mLabel = label;
+            mIncludedInTableOfContents = includedInTableOfContents;
+        }
+
+        /**
+         * Whether this section should be included in the table of contents.
+         */
+        public boolean isIncludedInTableOfContents() {
+            return mIncludedInTableOfContents;
         }
 
         @Override
