@@ -119,6 +119,7 @@ public class Typesetter {
             boolean center = false;
             boolean newPage = false;
             boolean ownPage = false;
+            boolean addTracking = false;
             long marginTop = 0;
             long marginBottom = 0;
             HorizontalList horizontalList = new HorizontalList();
@@ -138,6 +139,7 @@ public class Typesetter {
                     marginTop = IN.toSp(1.75);
                     newPage = true;
                     ownPage = true;
+                    addTracking = true;
                     break;
 
                 case CHAPTER_HEADER:
@@ -149,6 +151,7 @@ public class Typesetter {
                     marginTop = IN.toSp(0.75);
                     marginBottom = IN.toSp(0.25);
                     newPage = true;
+                    addTracking = true;
                     break;
 
                 case TABLE_OF_CONTENTS:
@@ -162,6 +165,11 @@ public class Typesetter {
 
             Font spanRegularFont = fontManager.get(typeface.regular());
             Font spanItalicFont = fontManager.get(typeface.italic());
+
+            if (addTracking) {
+                spanRegularFont = new TrackingFont(spanRegularFont, 0.1, 0.5);
+                spanItalicFont = new TrackingFont(spanItalicFont, 0.1, 0.5);
+            }
 
             long leading = PT.toSp(fontSize * 1.2f);
             long interParagraphSpacing = 0;
@@ -327,7 +335,7 @@ public class Typesetter {
         long paddingBelowTitle = IN.toSp(0.75);
 
         // TODO: Get from book layout:
-        Font titleFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.regular());
+        Font titleFont = new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5);
         float titleFontSize = 14.0f;
         Font entryFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.regular());
         float entryFontSize = 11.0f;
