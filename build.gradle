@@ -36,9 +36,9 @@ dependencies {
 // My task for generating javadocs that are published on github IO pages.
 task docs(type: Javadoc) {
     source = sourceSets.main.allJava
-    destinationDir = file('../docs')
+    destinationDir = file('docs')
     options {
-        links "http://download.oracle.com/javase/6/docs/api"
+        links "http://download.oracle.com/javase/8/docs/api"
     }
 }
 
