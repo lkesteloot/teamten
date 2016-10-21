@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * An element that can be stacked horizontally to make a line.
+ * An element that can be stacked horizontally to make a line or vertically to make a page.
  */
 public abstract class Element implements Dimensions {
     protected final boolean DRAW_DEBUG = true;
@@ -67,7 +67,7 @@ public abstract class Element implements Dimensions {
     }
 
     /**
-     * Convenience method for implementing println() from a list of elements.
+     * Convenience method for implementing {@link #println(PrintStream, String)} from a list of elements.
      */
     protected static void println(Iterable<Element> elements, PrintStream stream, String indent) {
         for (Element element : elements) {
@@ -83,7 +83,7 @@ public abstract class Element implements Dimensions {
     }
 
     /**
-     * Convenience method for implementing toTextString() from a list of elements.
+     * Convenience method for implementing {@link #toTextString()} from a list of elements.
      */
     protected static String toTextString(List<Element> elements) {
         StringBuilder builder = new StringBuilder();

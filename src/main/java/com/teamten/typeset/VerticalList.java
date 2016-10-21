@@ -56,7 +56,7 @@ public class VerticalList extends ElementList {
     }
 
     /**
-     * Like ejectPage(), but only if the document is not empty.
+     * Like {@link #ejectPage()}, but only if the document is not empty.
      */
     public void newPage() {
         if (!getElements().isEmpty()) {

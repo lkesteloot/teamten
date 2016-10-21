@@ -7,9 +7,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 /**
- * A location where the line can be broken, but with a penalty.
+ * A location where the line or page can be broken, but with a penalty.
  */
 public class Penalty extends DiscardableElement {
+    /**
+     * Prevents breaking a line or page at this location. When negated, forces a break.
+     */
     public static final long INFINITY = 10000;
     private final long mPenalty;
 
@@ -17,6 +20,11 @@ public class Penalty extends DiscardableElement {
         mPenalty = penalty;
     }
 
+    /**
+     * Gets the value of the penalty.
+     *
+     * @return the value of the penalty.
+     */
     public long getPenalty() {
         return mPenalty;
     }

@@ -39,6 +39,7 @@ task docs(type: Javadoc) {
     destinationDir = file('docs')
     options {
         links "http://download.oracle.com/javase/8/docs/api"
+        noTimestamp()
     }
 }
 
