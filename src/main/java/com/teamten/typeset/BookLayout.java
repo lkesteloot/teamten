@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import static com.teamten.typeset.SpaceUnit.PT;
 
@@ -21,7 +19,8 @@ public class BookLayout {
     /**
      * From physical page number to section bookmark.
      */
-    private final NavigableMap<Integer,SectionBookmark> mSectionMap = new TreeMap<>();
+    private final NavigableMap<Integer,SectionBookmark> mPageToSectionMap = new TreeMap<>();
+    private final Map<SectionBookmark.Type,Integer> mSectionToPageMap = new HashMap<>();
     private final Map<MetadataKey,String> mMetadata = new HashMap<>();
     private final long mPageWidth;
     private final long mPageHeight;
@@ -88,7 +87,8 @@ public class BookLayout {
      * part and chapter it's in.
      */
     public void configureFromBookmarks(Bookmarks bookmarks) {
-        mSectionMap.clear();
+        mPageToSectionMap.clear();
+        mSectionToPageMap.clear();
 
         mFirstFrontMatterPhysicalPage = 1;
         mFirstBodyMatterPhysicalPage = Integer.MAX_VALUE;
@@ -111,13 +111,14 @@ public class BookLayout {
                 }
 
                 // Make sure that two sections don't start on the same page.
-                if (mSectionMap.containsKey(physicalPageNumber)) {
+                if (mPageToSectionMap.containsKey(physicalPageNumber)) {
                     // We can't display the logical page here because we've not figured out the
                     // final value of mFirstBodyMatterPhysicalPage.
                     System.out.printf("Warning: Duplicate sections for physical page %d (%s and %s).",
-                            physicalPageNumber, mSectionMap.get(physicalPageNumber), sectionBookmark);
+                            physicalPageNumber, mPageToSectionMap.get(physicalPageNumber), sectionBookmark);
                 } else {
-                    mSectionMap.put(physicalPageNumber, sectionBookmark);
+                    mPageToSectionMap.put(physicalPageNumber, sectionBookmark);
+                    mSectionToPageMap.put(sectionBookmark.getType(), physicalPageNumber);
                 }
             }
         });
@@ -134,7 +135,7 @@ public class BookLayout {
      * physical page number.
      */
     public Iterable<Map.Entry<Integer,SectionBookmark>> sections() {
-        return mSectionMap.entrySet();
+        return mPageToSectionMap.entrySet();
     }
 
     /**
@@ -182,8 +183,19 @@ public class BookLayout {
      * Whether we should draw a headline on this page.
      */
     private boolean shouldDrawHeadline(int physicalPageNumber) {
-        // Draw on all pages except where sections start.
-        return !mSectionMap.containsKey(physicalPageNumber);
+        // Don't draw on pages where sections start.
+        if (mPageToSectionMap.containsKey(physicalPageNumber)) {
+            return false;
+        }
+
+        // Don't draw on pages before the table of contents.
+        Integer tocPage = mSectionToPageMap.get(SectionBookmark.Type.TABLE_OF_CONTENTS);
+        if (tocPage != null && physicalPageNumber < tocPage) {
+            return false;
+        }
+
+        // Draw on all the rest.
+        return true;
     }
 
     /**
@@ -209,7 +221,7 @@ public class BookLayout {
 
         if (physicalPageNumber % 2 == 1) {
             // Use section name on right-hand (odd) pages.
-            Map.Entry<Integer, SectionBookmark> entry = mSectionMap.floorEntry(physicalPageNumber);
+            Map.Entry<Integer, SectionBookmark> entry = mPageToSectionMap.floorEntry(physicalPageNumber);
             if (entry != null) {
                 SectionBookmark bookmark = entry.getValue();
                 headlineLabel = bookmark.getName();
