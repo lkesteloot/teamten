@@ -245,7 +245,9 @@ public class Typesetter {
             horizontalList.format(verticalList, bookLayout.getBodyWidth());
 
             if (ownPage) {
-                verticalList.ejectPage();
+                verticalList.oddPage();
+                // Space at the top of the section.
+                verticalList.addElement(new Box(0, IN.toSp(2.0), 0));
                 previousBlockType = null;
             } else {
                 if (marginBottom != 0) {
