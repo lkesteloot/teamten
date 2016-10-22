@@ -1,6 +1,5 @@
 package com.teamten.typeset;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.teamten.typeset.SpaceUnit.PT;
@@ -17,21 +16,21 @@ public class VerticalList extends ElementList {
     /**
      * Whether we've seen a box before.
      */
-    private boolean mSawBox = false;
+    private boolean mSawHBox = false;
     private long mBaselineSkip = PT.toSp(11*1.2); // Default for 11pt font.
 
     @Override
     public void addElement(Element element) {
-        // Add glue just before boxes so that the baselines are the right distance apart.
-        if (element instanceof Box) {
+        // Add glue just before horizontal boxes so that the baselines are the right distance apart.
+        if (element instanceof HBox) {
             // Don't do this on the first box.
-            if (mSawBox) {
+            if (mSawHBox) {
                 long skip = Math.max(0, mBaselineSkip - mPreviousDepth - element.getHeight());
                 super.addElement(new Glue(skip, 0, 0, false));
             }
 
             mPreviousDepth = element.getDepth();
-            mSawBox = true;
+            mSawHBox = true;
         }
 
         super.addElement(element);

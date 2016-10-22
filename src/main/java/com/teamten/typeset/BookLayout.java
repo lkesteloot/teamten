@@ -4,6 +4,7 @@ import com.teamten.util.RomanNumerals;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -21,8 +22,7 @@ public class BookLayout {
      * From physical page number to section bookmark.
      */
     private final NavigableMap<Integer,SectionBookmark> mSectionMap = new TreeMap<>();
-    private final String mBookTitle;
-    private final String mBookAuthor;
+    private final Map<MetadataKey,String> mMetadata = new HashMap<>();
     private final long mPageWidth;
     private final long mPageHeight;
     private final long mPageMargin;
@@ -31,9 +31,14 @@ public class BookLayout {
     private int mFirstFrontMatterPhysicalPage = 1;
     private int mFirstBodyMatterPhysicalPage = 5;
 
-    public BookLayout(String bookTitle, String bookAuthor, long pageWidth, long pageHeight, long pageMargin, Font pageNumberFont, float pageNumberFontSize) {
-        mBookTitle = bookTitle;
-        mBookAuthor = bookAuthor;
+    public enum MetadataKey {
+        TITLE,
+        AUTHOR,
+        PUBLISHER_NAME,
+        PUBLISHER_LOCATION,
+    }
+
+    public BookLayout(long pageWidth, long pageHeight, long pageMargin, Font pageNumberFont, float pageNumberFontSize) {
         mPageWidth = pageWidth;
         mPageHeight = pageHeight;
         mPageMargin = pageMargin;
@@ -41,12 +46,12 @@ public class BookLayout {
         mPageNumberFontSize = pageNumberFontSize;
     }
 
-    public String getBookTitle() {
-        return mBookTitle;
+    public void setMetadata(MetadataKey key, String value) {
+        mMetadata.put(key, value);
     }
 
-    public String getBookAuthor() {
-        return mBookAuthor;
+    public String getMetadata(MetadataKey key) {
+        return mMetadata.get(key);
     }
 
     public long getPageWidth() {
@@ -197,7 +202,7 @@ public class BookLayout {
      * part or chapter title.
      */
     private String getHeadlineLabel(int physicalPageNumber) {
-        String headlineLabel = mBookTitle;
+        String headlineLabel = getMetadata(MetadataKey.TITLE);
 
         if (physicalPageNumber % 2 == 1) {
             // Use section name on right-hand (odd) pages.

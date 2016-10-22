@@ -45,7 +45,7 @@ public class TexParser {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new FontManager(pdDoc);
 
-        BookLayout bookLayout = new BookLayout("Book Title", "Book Author", IN.toSp(6), IN.toSp(9), IN.toSp(1),
+        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
                 fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 11);
 
         Typesetter typesetter = new Typesetter();

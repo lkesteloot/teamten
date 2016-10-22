@@ -74,6 +74,4 @@ public interface Font {
 
         // Nothing else yet. TODO delete?
     }
-
-
 }

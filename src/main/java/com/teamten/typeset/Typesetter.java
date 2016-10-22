@@ -59,10 +59,14 @@ public class Typesetter {
         FontManager fontManager = new FontManager(pdDoc);
 
         // TODO Load these values from the document header.
-        String bookTitle = "La famille Klat"; // TODO
-        String bookAuthor = "André Klat"; // TODO
-        BookLayout bookLayout = new BookLayout(bookTitle, bookAuthor, IN.toSp(6), IN.toSp(9), IN.toSp(1),
+        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
                 fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 8);
+
+        // TODO Load these values from the document header.
+        bookLayout.setMetadata(BookLayout.MetadataKey.TITLE, "La famille Klat");
+        bookLayout.setMetadata(BookLayout.MetadataKey.AUTHOR, "André Klat");
+        bookLayout.setMetadata(BookLayout.MetadataKey.PUBLISHER_NAME, "Team Ten Press");
+        bookLayout.setMetadata(BookLayout.MetadataKey.PUBLISHER_LOCATION, "San Francisco, California");
 
         List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
@@ -362,7 +366,7 @@ public class Typesetter {
         // TODO: Get from book layout:
         Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
         float titleFontSize = 19.0f;
-        String title = bookLayout.getBookTitle();
+        String title = bookLayout.getMetadata(BookLayout.MetadataKey.TITLE);
 
         // Assume we're at the very beginning of the book, and we want an entire blank page at the front.
         verticalList.ejectPage();
@@ -386,13 +390,21 @@ public class Typesetter {
 
         long marginTop = IN.toSp(0.5);
         long titleMargin = IN.toSp(1.5);
+        long publisherNameMargin = IN.toSp(4.0);
+        long publisherLocationMargin = IN.toSp(0.02);
         // TODO: Get from book layout:
         Font authorFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
         float authorFontSize = 14.0f;
         Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
         float titleFontSize = 27.0f;
-        String title = bookLayout.getBookTitle();
-        String author = bookLayout.getBookAuthor();
+        Font publisherNameFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        float publisherNameFontSize = 9.0f;
+        Font publisherLocationFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.italic());
+        float publisherLocationFontSize = 9.0f;
+        String title = bookLayout.getMetadata(BookLayout.MetadataKey.TITLE);
+        String author = bookLayout.getMetadata(BookLayout.MetadataKey.AUTHOR);
+        String publisherName = bookLayout.getMetadata(BookLayout.MetadataKey.PUBLISHER_NAME);
+        String publisherLocation = bookLayout.getMetadata(BookLayout.MetadataKey.PUBLISHER_LOCATION);
 
         verticalList.oddPage();
         verticalList.addElement(new Box(0, marginTop, 0));
@@ -411,6 +423,24 @@ public class Typesetter {
         horizontalList = new HorizontalList();
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
         horizontalList.addText(title, titleFont, titleFontSize, null);
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+
+        verticalList.addElement(new Box(0, publisherNameMargin, 0));
+
+        // Publisher name.
+        horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(publisherName, publisherNameFont, publisherNameFontSize, null);
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+
+        verticalList.addElement(new Box(0, publisherLocationMargin, 0));
+
+        // Publisher location.
+        horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(publisherLocation, publisherLocationFont, publisherLocationFontSize, null);
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, bookLayout.getBodyWidth());
     }
