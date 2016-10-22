@@ -116,6 +116,12 @@ public abstract class ElementList implements ElementSink {
             while (itr.hasNext()) {
                 Breakpoint beginBreakpoint = itr.next();
 
+                // Some penalty elements are marked as only valid on odd pages. Here we check if it's the
+                // case, and if we're on an even page, completely ignore it.
+                if (shouldIgnoreBreakpoint(beginBreakpoint, endBreakpoint)) {
+                    continue;
+                }
+
                 // Find the sum of the sizes of all the elements in this line. Also compute the total stretch
                 // and shrink for the glue in that line.
                 // TODO: We could build this up incrementally instead of looping each time.
@@ -309,20 +315,61 @@ public abstract class ElementList implements ElementSink {
      * the breakpoint objects.
      */
     private void computeStartIndices(List<Breakpoint> breakpoints) {
+        // Analyze every breakpoint.
         for (int breakpointIndex = 0; breakpointIndex < breakpoints.size(); breakpointIndex++) {
             Breakpoint breakpoint = breakpoints.get(breakpointIndex);
             int index = breakpoint.getIndex();
             int nextIndex = breakpointIndex + 1 < breakpoints.size() ?
                     breakpoints.get(breakpointIndex + 1).getIndex() : mElements.size();
 
-            // See where the line would start by skipping discardable elements. Don't do this on the very
-            // first breakpoint, since we'll want to keep glue at the front of the line that might be needed
-            // to center it.
-            while (breakpointIndex != 0 && index < nextIndex && mElements.get(index) instanceof DiscardableElement) {
+            // See where the line would start by skipping discardable elements.
+            while (index < nextIndex && shouldSkipElementAtStart(mElements.get(index))) {
+                // Skip this element.
                 index++;
             }
             breakpoint.setStartIndex(index);
         }
+    }
+
+    /**
+     * Returns whether this element, at the beginning of a line or page, should be skipped.
+     */
+    private boolean shouldSkipElementAtStart(Element element) {
+        // Don't skip infinite glue at the start of lines or pages, since they could either
+        // be used to center text or to fill a whole page with glue (for an empty page).
+        if (element instanceof Glue) {
+            Glue glue = (Glue) element;
+            if (glue.getStretch().isInfinite()) {
+                return false;
+            }
+        }
+
+        // Otherwise we can skip all discardable elements.
+        return element instanceof DiscardableElement;
+    }
+
+    /**
+     * Whether this breakpoint should be ignored altogether in this case.
+     */
+    private boolean shouldIgnoreBreakpoint(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
+        // Get the element that we're proposing to break on.
+        Element element = mElements.get(endBreakpoint.getIndex());
+
+        // See if it's a penalty
+        if (element instanceof Penalty) {
+            Penalty penalty = (Penalty) element;
+            if (penalty.isOddPageOnly()) {
+                // Okay, check if we're on an even page.
+                int page = beginBreakpoint.getCounter() + 1;
+                if (page % 2 == 0) {
+                    // We're on an even page, ignore the penalty that's for odd pages only.
+                    return true;
+                }
+            }
+        }
+
+        // Don't skip anything else.
+        return false;
     }
 
     /**

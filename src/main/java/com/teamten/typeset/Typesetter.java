@@ -61,7 +61,7 @@ public class Typesetter {
         FontManager fontManager = new FontManager(pdDoc);
 
         // TODO Load these values from the document header.
-        String bookTitle = "La Famille Klat"; // TODO
+        String bookTitle = "La famille Klat"; // TODO
         BookLayout bookLayout = new BookLayout(bookTitle, IN.toSp(6), IN.toSp(9), IN.toSp(1),
                 fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 8);
 
@@ -71,16 +71,15 @@ public class Typesetter {
             System.out.printf("Pass %d:\n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
             VerticalList verticalList = docToVerticalList(doc, bookLayout, fontManager);
-            System.out.println("  Horizontal: " + stopwatch);
+            System.out.println("  Horizontal layout: " + stopwatch);
 
             // Format the vertical list into pages.
             stopwatch = Stopwatch.createStarted();
             pages = verticalListToPages(verticalList, bookLayout.getBodyHeight());
-            System.out.println("  Vertical: " + stopwatch);
+            System.out.println("  Vertical layout: " + stopwatch);
 
             // Get the full list of bookmarks.
             Bookmarks newBookmarks = Bookmarks.fromPages(pages);
-            newBookmarks.println(System.out);
             if (newBookmarks.equals(bookmarks)) {
                 // We've converged, we can stop.
                 break;
@@ -118,6 +117,7 @@ public class Typesetter {
             boolean allCaps = false;
             boolean center = false;
             boolean newPage = false;
+            boolean oddPage = false;
             boolean ownPage = false;
             boolean addTracking = false;
             boolean smallCaps = false;
@@ -137,7 +137,7 @@ public class Typesetter {
                     fontSize = 19;
                     center = true;
                     marginTop = IN.toSp(1.75);
-                    newPage = true;
+                    oddPage = true;
                     ownPage = true;
                     addTracking = true;
                     smallCaps = true;
@@ -150,7 +150,7 @@ public class Typesetter {
                     center = true;
                     marginTop = IN.toSp(0.75);
                     marginBottom = IN.toSp(0.75);
-                    newPage = true;
+                    oddPage = true;
                     addTracking = true;
                     smallCaps = true;
                     break;
@@ -183,7 +183,9 @@ public class Typesetter {
             // Set the distance between baselines based on the paragraph's main font.
             verticalList.setBaselineSkip(leading);
 
-            if (newPage) {
+            if (oddPage) {
+                verticalList.oddPage();
+            } else if (newPage) {
                 verticalList.newPage();
             }
 
@@ -418,7 +420,7 @@ public class Typesetter {
 
                 horizontalList = new HorizontalList();
                 if (indent > 0) {
-                    horizontalList.addElement(new Glue(indent, 0, 0, true));
+                    horizontalList.addElement(new Box(indent, 0, 0));
                 }
                 horizontalList.addText(name, sectionNameFont, entryFontSize, null);
                 horizontalList.addElement(leader);

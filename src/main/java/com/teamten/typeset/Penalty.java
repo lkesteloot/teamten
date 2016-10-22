@@ -15,9 +15,23 @@ public class Penalty extends DiscardableElement {
      */
     public static final long INFINITY = 10000;
     private final long mPenalty;
+    private final boolean mOddPageOnly;
 
-    public Penalty(long penalty) {
+    /**
+     * Create a penalty with the given score and whether to only apply the penalty at the end of odd pages.
+     * When true, the penalty will be ignored if it's considered for breaking the end of an even page. This
+     * is used to force the next section to start on an odd page.
+     */
+    public Penalty(long penalty, boolean oddPageOnly) {
         mPenalty = penalty;
+        mOddPageOnly = oddPageOnly;
+    }
+
+    /**
+     * Create a penalty with the given score. Is not suppressed on even pages.
+     */
+    public Penalty(long penalty) {
+        this(penalty, false);
     }
 
     /**
@@ -27,6 +41,13 @@ public class Penalty extends DiscardableElement {
      */
     public long getPenalty() {
         return mPenalty;
+    }
+
+    /**
+     * Whether this penalty should only be considered at the end of odd pages.
+     */
+    public boolean isOddPageOnly() {
+        return mOddPageOnly;
     }
 
     @Override

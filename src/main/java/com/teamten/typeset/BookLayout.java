@@ -174,8 +174,10 @@ public class BookLayout {
      */
     public String getPageNumberLabel(int physicalPageNumber) {
         if (physicalPageNumber >= mFirstBodyMatterPhysicalPage) {
+            // Arabic numerals for body of book.
             return String.valueOf(physicalPageNumber - mFirstBodyMatterPhysicalPage + 1);
         } else {
+            // Roman numerals for front matter.
             return RomanNumerals.toString(physicalPageNumber - mFirstFrontMatterPhysicalPage + 1);
         }
     }
