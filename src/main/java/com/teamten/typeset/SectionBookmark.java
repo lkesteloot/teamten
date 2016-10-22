@@ -13,6 +13,7 @@ public class SectionBookmark extends Bookmark {
         MINOR_SECTION("Minor Section", true),
         HALF_TITLE_PAGE("Half Title Page", false),
         TITLE_PAGE("Title Page", false),
+        COPYRIGHT_PAGE("Copyright Page", false),
         TABLE_OF_CONTENTS("Table of Contents", false);
 
         private final String mLabel;

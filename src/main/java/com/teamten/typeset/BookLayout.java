@@ -36,6 +36,9 @@ public class BookLayout {
         AUTHOR,
         PUBLISHER_NAME,
         PUBLISHER_LOCATION,
+        COPYRIGHT,
+        PRINTING,
+        TOC_TITLE,
     }
 
     public BookLayout(long pageWidth, long pageHeight, long pageMargin, Font pageNumberFont, float pageNumberFontSize) {

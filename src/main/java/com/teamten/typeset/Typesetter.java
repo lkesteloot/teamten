@@ -28,8 +28,6 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class Typesetter {
     private static final boolean DRAW_MARGINS = false;
-    // TODO: Put into markdown, and store in BookLayout.
-    private static final String TOC_TITLE = "Table des matières";
     /**
      * The maximum number of times that we'll typeset the document without it converging on a stable set
      * of page numbers.
@@ -67,6 +65,9 @@ public class Typesetter {
         bookLayout.setMetadata(BookLayout.MetadataKey.AUTHOR, "André Klat");
         bookLayout.setMetadata(BookLayout.MetadataKey.PUBLISHER_NAME, "Team Ten Press");
         bookLayout.setMetadata(BookLayout.MetadataKey.PUBLISHER_LOCATION, "San Francisco, California");
+        bookLayout.setMetadata(BookLayout.MetadataKey.COPYRIGHT, "© Copyright 1989 by André Klat");
+        bookLayout.setMetadata(BookLayout.MetadataKey.PRINTING, "First printing, December 2016");
+        bookLayout.setMetadata(BookLayout.MetadataKey.TOC_TITLE, "Table des matières");
 
         List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
@@ -167,11 +168,11 @@ public class Typesetter {
                     continue;
 
                 case COPYRIGHT_PAGE:
-                    /// generateTableOfContents(TOC_TITLE, bookLayout, verticalList, fontManager);
+                    generateCopyrightPage(bookLayout, verticalList, fontManager);
                     continue;
 
                 case TABLE_OF_CONTENTS:
-                    generateTableOfContents(TOC_TITLE, bookLayout, verticalList, fontManager);
+                    generateTableOfContents(bookLayout, verticalList, fontManager);
                     continue;
 
                 default:
@@ -446,13 +447,52 @@ public class Typesetter {
     }
 
     /**
+     * Adds the copyright page to the vertical list. Does not eject the page.
+     */
+    private void generateCopyrightPage(BookLayout bookLayout, VerticalList verticalList,
+                                       FontManager fontManager) throws IOException {
+
+        long marginTop = IN.toSp(2.5);
+        long printingMargin = IN.toSp(4.0);
+        // TODO: Get from book layout:
+        Font copyrightFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.italic());
+        float copyrightFontSize = 11.0f;
+        Font printingFont = new SmallCapsFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.8f);
+        float printingFontSize = 9.0f;
+        String copyright = bookLayout.getMetadata(BookLayout.MetadataKey.COPYRIGHT);
+        String printing = bookLayout.getMetadata(BookLayout.MetadataKey.PRINTING);
+
+        verticalList.newPage();
+        verticalList.addElement(new Box(0, marginTop, 0));
+
+        // Copyright.
+        HorizontalList horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(copyright, copyrightFont, copyrightFontSize, null);
+        horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.COPYRIGHT_PAGE, copyright));
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+
+        verticalList.addElement(new Box(0, printingMargin, 0));
+
+        // Publisher location.
+        horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(printing, printingFont, printingFontSize, null);
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+    }
+
+    /**
      * Adds the table of contents to the vertical list. Does not eject the page.
      */
-    private void generateTableOfContents(String tocTitle, BookLayout bookLayout, VerticalList verticalList,
-                                        FontManager fontManager) throws IOException {
+    private void generateTableOfContents(BookLayout bookLayout, VerticalList verticalList,
+                                         FontManager fontManager) throws IOException {
 
         long marginTop = IN.toSp(1.0);
         long paddingBelowTitle = IN.toSp(0.75);
+
+        String tocTitle = bookLayout.getMetadata(BookLayout.MetadataKey.TOC_TITLE);
 
         // TODO: Get from book layout:
         Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
