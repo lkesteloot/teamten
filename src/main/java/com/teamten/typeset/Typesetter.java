@@ -377,7 +377,7 @@ public class Typesetter {
 
         long previousMarginBelow = 0;
         long interEntryMargin = PT.toSp(entryFontSize*0.8);
-        Leader leader = new Leader(entryFont, entryFontSize, "  .  ", PT.toSp(1));
+        Leader leader = new Leader(entryFont, entryFontSize, " .   ", PT.toSp(1));
 
         // List each section.
         for (Map.Entry<Integer,SectionBookmark> entry : bookLayout.sections()) {
