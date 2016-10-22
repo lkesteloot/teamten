@@ -22,6 +22,7 @@ public class BookLayout {
      */
     private final NavigableMap<Integer,SectionBookmark> mSectionMap = new TreeMap<>();
     private final String mBookTitle;
+    private final String mBookAuthor;
     private final long mPageWidth;
     private final long mPageHeight;
     private final long mPageMargin;
@@ -30,13 +31,22 @@ public class BookLayout {
     private int mFirstFrontMatterPhysicalPage = 1;
     private int mFirstBodyMatterPhysicalPage = 5;
 
-    public BookLayout(String bookTitle, long pageWidth, long pageHeight, long pageMargin, Font pageNumberFont, float pageNumberFontSize) {
+    public BookLayout(String bookTitle, String bookAuthor, long pageWidth, long pageHeight, long pageMargin, Font pageNumberFont, float pageNumberFontSize) {
         mBookTitle = bookTitle;
+        mBookAuthor = bookAuthor;
         mPageWidth = pageWidth;
         mPageHeight = pageHeight;
         mPageMargin = pageMargin;
         mPageNumberFont = pageNumberFont;
         mPageNumberFontSize = pageNumberFontSize;
+    }
+
+    public String getBookTitle() {
+        return mBookTitle;
+    }
+
+    public String getBookAuthor() {
+        return mBookAuthor;
     }
 
     public long getPageWidth() {

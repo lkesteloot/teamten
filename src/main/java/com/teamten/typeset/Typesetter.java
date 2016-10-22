@@ -1,7 +1,6 @@
 
 package com.teamten.typeset;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Stopwatch;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
@@ -9,7 +8,6 @@ import com.teamten.markdown.BlockType;
 import com.teamten.markdown.Doc;
 import com.teamten.markdown.MarkdownParser;
 import com.teamten.markdown.Span;
-import com.teamten.typeset.FontManager.FontName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -62,7 +60,8 @@ public class Typesetter {
 
         // TODO Load these values from the document header.
         String bookTitle = "La famille Klat"; // TODO
-        BookLayout bookLayout = new BookLayout(bookTitle, IN.toSp(6), IN.toSp(9), IN.toSp(1),
+        String bookAuthor = "André Klat"; // TODO
+        BookLayout bookLayout = new BookLayout(bookTitle, bookAuthor, IN.toSp(6), IN.toSp(9), IN.toSp(1),
                 fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 8);
 
         List<Page> pages = null;
@@ -154,6 +153,18 @@ public class Typesetter {
                     addTracking = true;
                     smallCaps = true;
                     break;
+
+                case HALF_TITLE_PAGE:
+                    generateHalfTitlePage(bookLayout, verticalList, fontManager);
+                    continue;
+
+                case TITLE_PAGE:
+                    generateTitlePage(bookLayout, verticalList, fontManager);
+                    continue;
+
+                case COPYRIGHT_PAGE:
+                    /// generateTableOfContents(TOC_TITLE, bookLayout, verticalList, fontManager);
+                    continue;
 
                 case TABLE_OF_CONTENTS:
                     generateTableOfContents(TOC_TITLE, bookLayout, verticalList, fontManager);
@@ -342,9 +353,72 @@ public class Typesetter {
     }
 
     /**
+     * Adds the half-title page (the one with only the title on it) to the vertical list. Does not eject the page.
+     */
+    private void generateHalfTitlePage(BookLayout bookLayout, VerticalList verticalList,
+                                       FontManager fontManager) throws IOException {
+
+        long marginTop = IN.toSp(2.0);
+        // TODO: Get from book layout:
+        Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        float titleFontSize = 19.0f;
+        String title = bookLayout.getBookTitle();
+
+        // Assume we're at the very beginning of the book, and we want an entire blank page at the front.
+        verticalList.ejectPage();
+        verticalList.oddPage();
+        verticalList.addElement(new Box(0, marginTop, 0));
+
+        // Title.
+        HorizontalList horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(title, titleFont, titleFontSize, null);
+        horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.HALF_TITLE_PAGE, title));
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+    }
+
+    /**
+     * Adds the title page to the vertical list. Does not eject the page.
+     */
+    private void generateTitlePage(BookLayout bookLayout, VerticalList verticalList,
+                                   FontManager fontManager) throws IOException {
+
+        long marginTop = IN.toSp(0.5);
+        long titleMargin = IN.toSp(1.5);
+        // TODO: Get from book layout:
+        Font authorFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        float authorFontSize = 14.0f;
+        Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        float titleFontSize = 27.0f;
+        String title = bookLayout.getBookTitle();
+        String author = bookLayout.getBookAuthor();
+
+        verticalList.oddPage();
+        verticalList.addElement(new Box(0, marginTop, 0));
+
+        // Author.
+        HorizontalList horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(author, authorFont, authorFontSize, null);
+        horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.TITLE_PAGE, title));
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+
+        verticalList.addElement(new Box(0, titleMargin, 0));
+
+        // Title.
+        horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(title, titleFont, titleFontSize, null);
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+    }
+
+    /**
      * Adds the table of contents to the vertical list. Does not eject the page.
      */
-    public void generateTableOfContents(String tocTitle, BookLayout bookLayout, VerticalList verticalList,
+    private void generateTableOfContents(String tocTitle, BookLayout bookLayout, VerticalList verticalList,
                                         FontManager fontManager) throws IOException {
 
         long marginTop = IN.toSp(1.0);
@@ -359,7 +433,7 @@ public class Typesetter {
         long boxWidth = IN.toSp(1.0);
         long boxHeight = PT.toSp(0.5);
 
-        verticalList.newPage();
+        verticalList.oddPage();
         verticalList.addElement(new Box(0, marginTop, 0));
 
         // Title.

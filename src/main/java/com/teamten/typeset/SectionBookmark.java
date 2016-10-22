@@ -11,6 +11,8 @@ public class SectionBookmark extends Bookmark {
         PART("Part", true),
         CHAPTER("Chapter", true),
         MINOR_SECTION("Minor Section", true),
+        HALF_TITLE_PAGE("Half Title Page", false),
+        TITLE_PAGE("Title Page", false),
         TABLE_OF_CONTENTS("Table of Contents", false);
 
         private final String mLabel;

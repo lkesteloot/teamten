@@ -6,19 +6,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Parses a Markdown file into a DOM.
  */
 public class MarkdownParser {
+    private static final Map<String,BlockType> TAG_BLOCK_TYPE_MAP = new HashMap<>();
+
     private enum ParserState {
         START_OF_LINE,
         IN_LINE,
         SKIP_WHITESPACE,
         COMMENT,
         IN_TAG,
+    }
+
+    static {
+        // Map tags like "[TOC]" to the block they should create.
+        TAG_BLOCK_TYPE_MAP.put("HALF-TITLE", BlockType.HALF_TITLE_PAGE);
+        TAG_BLOCK_TYPE_MAP.put("TITLE", BlockType.TITLE_PAGE);
+        TAG_BLOCK_TYPE_MAP.put("COPYRIGHT", BlockType.COPYRIGHT_PAGE);
+        TAG_BLOCK_TYPE_MAP.put("TOC", BlockType.TABLE_OF_CONTENTS);
     }
 
     public static void main(String[] args) throws IOException {
@@ -148,13 +158,14 @@ public class MarkdownParser {
                 case IN_TAG:
                     if (ch == ']') {
                         String tag = tagBuilder.toString();
-                        if (tag.equals("TOC")) {
+                        BlockType tagBlockType = TAG_BLOCK_TYPE_MAP.get(tag);
+                        if (tagBlockType != null) {
                             // Eject current block.
                             if (builder != null && !builder.isEmpty()) {
                                 doc.addBlock(builder.build());
                                 builder = null;
                             }
-                            doc.addBlock(new Block.Builder(BlockType.TABLE_OF_CONTENTS).build());
+                            doc.addBlock(new Block.Builder(tagBlockType).build());
                         } else if (tag.equals("sc")) {
                             if (isSmallCaps) {
                                 System.out.println("Warning: [sc] within [sc]");
