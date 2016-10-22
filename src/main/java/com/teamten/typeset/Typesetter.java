@@ -60,14 +60,10 @@ public class Typesetter {
         BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
                 fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 8);
 
-        // TODO Load these values from the document header.
-        bookLayout.setMetadata(BookLayout.MetadataKey.TITLE, "La famille Klat");
-        bookLayout.setMetadata(BookLayout.MetadataKey.AUTHOR, "André Klat");
-        bookLayout.setMetadata(BookLayout.MetadataKey.PUBLISHER_NAME, "Team Ten Press");
-        bookLayout.setMetadata(BookLayout.MetadataKey.PUBLISHER_LOCATION, "San Francisco, California");
-        bookLayout.setMetadata(BookLayout.MetadataKey.COPYRIGHT, "© Copyright 1989 by André Klat");
-        bookLayout.setMetadata(BookLayout.MetadataKey.PRINTING, "First printing, December 2016");
-        bookLayout.setMetadata(BookLayout.MetadataKey.TOC_TITLE, "Table des matières");
+        // Add document metadata.
+        for (Map.Entry<String,String> entry : doc.getMetadata()) {
+            bookLayout.addMetadata(entry.getKey(), entry.getValue());
+        }
 
         List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
@@ -363,11 +359,15 @@ public class Typesetter {
     private void generateHalfTitlePage(BookLayout bookLayout, VerticalList verticalList,
                                        FontManager fontManager) throws IOException {
 
+        String title = bookLayout.getMetadata(BookLayout.MetadataKey.TITLE);
+        if (title == null) {
+            return;
+        }
+
         long marginTop = IN.toSp(2.0);
         // TODO: Get from book layout:
         Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
         float titleFontSize = 19.0f;
-        String title = bookLayout.getMetadata(BookLayout.MetadataKey.TITLE);
 
         // Assume we're at the very beginning of the book, and we want an entire blank page at the front.
         verticalList.ejectPage();
@@ -389,6 +389,14 @@ public class Typesetter {
     private void generateTitlePage(BookLayout bookLayout, VerticalList verticalList,
                                    FontManager fontManager) throws IOException {
 
+        String title = bookLayout.getMetadata(BookLayout.MetadataKey.TITLE);
+        String author = bookLayout.getMetadata(BookLayout.MetadataKey.AUTHOR);
+        String publisherName = bookLayout.getMetadata(BookLayout.MetadataKey.PUBLISHER_NAME);
+        String publisherLocation = bookLayout.getMetadata(BookLayout.MetadataKey.PUBLISHER_LOCATION);
+        if (title == null || author == null) {
+            return;
+        }
+
         long marginTop = IN.toSp(0.5);
         long titleMargin = IN.toSp(1.5);
         long publisherNameMargin = IN.toSp(4.0);
@@ -402,10 +410,6 @@ public class Typesetter {
         float publisherNameFontSize = 9.0f;
         Font publisherLocationFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.italic());
         float publisherLocationFontSize = 9.0f;
-        String title = bookLayout.getMetadata(BookLayout.MetadataKey.TITLE);
-        String author = bookLayout.getMetadata(BookLayout.MetadataKey.AUTHOR);
-        String publisherName = bookLayout.getMetadata(BookLayout.MetadataKey.PUBLISHER_NAME);
-        String publisherLocation = bookLayout.getMetadata(BookLayout.MetadataKey.PUBLISHER_LOCATION);
 
         verticalList.oddPage();
         verticalList.addElement(new Box(0, marginTop, 0));
@@ -427,23 +431,27 @@ public class Typesetter {
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, bookLayout.getBodyWidth());
 
-        verticalList.addElement(new Box(0, publisherNameMargin, 0));
+        if (publisherName != null) {
+            verticalList.addElement(new Box(0, publisherNameMargin, 0));
 
-        // Publisher name.
-        horizontalList = new HorizontalList();
-        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(publisherName, publisherNameFont, publisherNameFontSize, null);
-        horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+            // Publisher name.
+            horizontalList = new HorizontalList();
+            horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+            horizontalList.addText(publisherName, publisherNameFont, publisherNameFontSize, null);
+            horizontalList.addEndOfParagraph();
+            horizontalList.format(verticalList, bookLayout.getBodyWidth());
 
-        verticalList.addElement(new Box(0, publisherLocationMargin, 0));
+            if (publisherLocation != null) {
+                verticalList.addElement(new Box(0, publisherLocationMargin, 0));
 
-        // Publisher location.
-        horizontalList = new HorizontalList();
-        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(publisherLocation, publisherLocationFont, publisherLocationFontSize, null);
-        horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+                // Publisher location.
+                horizontalList = new HorizontalList();
+                horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+                horizontalList.addText(publisherLocation, publisherLocationFont, publisherLocationFontSize, null);
+                horizontalList.addEndOfParagraph();
+                horizontalList.format(verticalList, bookLayout.getBodyWidth());
+            }
+        }
     }
 
     /**
@@ -452,6 +460,13 @@ public class Typesetter {
     private void generateCopyrightPage(BookLayout bookLayout, VerticalList verticalList,
                                        FontManager fontManager) throws IOException {
 
+        String copyright = bookLayout.getMetadata(BookLayout.MetadataKey.COPYRIGHT);
+        String printing = bookLayout.getMetadata(BookLayout.MetadataKey.PRINTING);
+
+        if (copyright == null) {
+            return;
+        }
+
         long marginTop = IN.toSp(2.5);
         long printingMargin = IN.toSp(4.0);
         // TODO: Get from book layout:
@@ -459,8 +474,6 @@ public class Typesetter {
         float copyrightFontSize = 11.0f;
         Font printingFont = new SmallCapsFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.8f);
         float printingFontSize = 9.0f;
-        String copyright = bookLayout.getMetadata(BookLayout.MetadataKey.COPYRIGHT);
-        String printing = bookLayout.getMetadata(BookLayout.MetadataKey.PRINTING);
 
         verticalList.newPage();
         verticalList.addElement(new Box(0, marginTop, 0));
@@ -473,14 +486,16 @@ public class Typesetter {
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, bookLayout.getBodyWidth());
 
-        verticalList.addElement(new Box(0, printingMargin, 0));
+        if (printing != null) {
+            verticalList.addElement(new Box(0, printingMargin, 0));
 
-        // Publisher location.
-        horizontalList = new HorizontalList();
-        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(printing, printingFont, printingFontSize, null);
-        horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+            // Publisher location.
+            horizontalList = new HorizontalList();
+            horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+            horizontalList.addText(printing, printingFont, printingFontSize, null);
+            horizontalList.addEndOfParagraph();
+            horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        }
     }
 
     /**
@@ -493,6 +508,9 @@ public class Typesetter {
         long paddingBelowTitle = IN.toSp(0.75);
 
         String tocTitle = bookLayout.getMetadata(BookLayout.MetadataKey.TOC_TITLE);
+        if (tocTitle == null) {
+            tocTitle = "Table of Contents";
+        }
 
         // TODO: Get from book layout:
         Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);

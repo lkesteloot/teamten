@@ -8,12 +8,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Parses a Markdown file into a DOM.
  */
 public class MarkdownParser {
     private static final Map<String,BlockType> TAG_BLOCK_TYPE_MAP = new HashMap<>();
+    private static final Pattern mMetadataPattern = Pattern.compile("([A-Za-z-]+): (.*)");
 
     private enum ParserState {
         START_OF_LINE,
@@ -176,6 +179,8 @@ public class MarkdownParser {
                                 System.out.println("Warning: [/sc] not within [sc]");
                             }
                             isSmallCaps = false;
+                        } else if (addMetadataTag(tag, doc)) {
+                            // Nothing to do, the method added it.
                         } else {
                             System.out.println("Warning: Unknown block type: " + tag);
                         }
@@ -207,5 +212,26 @@ public class MarkdownParser {
         }
 
         return ch;
+    }
+
+    /**
+     * Checks if the tag is in metadata form, and if so adds the key and value to the document.
+     *
+     * <p>Metadata form is similar to email header form: "Multi-Word-Key: Value"
+     *
+     * @return whether the tag was processed as metadata.
+     */
+    private boolean addMetadataTag(String tag, Doc doc) {
+        Matcher matcher = mMetadataPattern.matcher(tag);
+        if (matcher.matches()) {
+            String key = matcher.group(1);
+            String value = matcher.group(2);
+
+            doc.addMetadata(key, value);
+
+            return true;
+        }
+
+        return false;
     }
 }

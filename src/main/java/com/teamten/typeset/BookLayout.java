@@ -48,8 +48,26 @@ public class BookLayout {
         mPageNumberFontSize = pageNumberFontSize;
     }
 
-    public void setMetadata(MetadataKey key, String value) {
+    public void addMetadata(MetadataKey key, String value) {
         mMetadata.put(key, value);
+    }
+
+    /**
+     * Similar to {@link #addMetadata(MetadataKey, String)}, but the key is a string. The string key is
+     * converted to upper case, and hyphens are converted to underscores. The result must be one of the
+     * values in the {@link MetadataKey} enum.
+     *
+     * @throws IllegalArgumentException if the key does not match one of the entries in the {@link MetadataKey} enum.
+     */
+    public void addMetadata(String stringKey, String value) {
+        // Convert to upper case and replace hyphens with underscores.
+        stringKey = stringKey.toUpperCase().replace("-", "_");
+
+        // This will throw an IllegalArgumentException if the key is not found in the enum.
+        MetadataKey key = MetadataKey.valueOf(stringKey);
+
+        // Add it to the map of metadata.
+        addMetadata(key, value);
     }
 
     public String getMetadata(MetadataKey key) {
