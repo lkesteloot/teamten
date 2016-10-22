@@ -15,20 +15,20 @@ public class Penalty extends DiscardableElement {
      */
     public static final long INFINITY = 10000;
     private final long mPenalty;
-    private final boolean mOddPageOnly;
+    private final boolean mEvenPageOnly;
 
     /**
-     * Create a penalty with the given score and whether to only apply the penalty at the end of odd pages.
-     * When true, the penalty will be ignored if it's considered for breaking the end of an even page. This
+     * Create a penalty with the given score and whether to only apply the penalty at the end of even pages.
+     * When true, the penalty will be ignored if it's considered for breaking the end of an odd page. This
      * is used to force the next section to start on an odd page.
      */
-    public Penalty(long penalty, boolean oddPageOnly) {
+    public Penalty(long penalty, boolean evenPageOnly) {
         mPenalty = penalty;
-        mOddPageOnly = oddPageOnly;
+        mEvenPageOnly = evenPageOnly;
     }
 
     /**
-     * Create a penalty with the given score. Is not suppressed on even pages.
+     * Create a penalty with the given score that is not limited to only even pages.
      */
     public Penalty(long penalty) {
         this(penalty, false);
@@ -44,10 +44,10 @@ public class Penalty extends DiscardableElement {
     }
 
     /**
-     * Whether this penalty should only be considered at the end of odd pages.
+     * Whether this penalty should only be considered at the end of even pages.
      */
-    public boolean isOddPageOnly() {
-        return mOddPageOnly;
+    public boolean isEvenPageOnly() {
+        return mEvenPageOnly;
     }
 
     @Override
@@ -79,6 +79,8 @@ public class Penalty extends DiscardableElement {
 
     @Override
     public void println(PrintStream stream, String indent) {
-        stream.printf("%sPenalty: %d%s%n", indent, mPenalty, mPenalty == INFINITY ? " (prevent break)" : mPenalty == -INFINITY ? " (force break)" : "");
+        stream.printf("%sPenalty: %d%s%s%n", indent, mPenalty,
+                mPenalty == INFINITY ? " (prevent break)" : mPenalty == -INFINITY ? " (force break)" : "",
+                mEvenPageOnly ? " (even pages only)" : "");
     }
 }

@@ -116,8 +116,8 @@ public abstract class ElementList implements ElementSink {
             while (itr.hasNext()) {
                 Breakpoint beginBreakpoint = itr.next();
 
-                // Some penalty elements are marked as only valid on odd pages. Here we check if it's the
-                // case, and if we're on an even page, completely ignore it.
+                // Some penalty elements are marked as only valid on even pages. Here we check if it's the
+                // case, and if we're on an odd page, completely ignore it.
                 if (shouldIgnoreBreakpoint(beginBreakpoint, endBreakpoint)) {
                     continue;
                 }
@@ -358,11 +358,11 @@ public abstract class ElementList implements ElementSink {
         // See if it's a penalty
         if (element instanceof Penalty) {
             Penalty penalty = (Penalty) element;
-            if (penalty.isOddPageOnly()) {
+            if (penalty.isEvenPageOnly()) {
                 // Okay, check if we're on an even page.
                 int page = beginBreakpoint.getCounter() + 1;
-                if (page % 2 == 0) {
-                    // We're on an even page, ignore the penalty that's for odd pages only.
+                if (page % 2 != 0) {
+                    // We're on an odd page, ignore the penalty that's for even pages only.
                     return true;
                 }
             }

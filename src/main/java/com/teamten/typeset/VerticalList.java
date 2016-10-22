@@ -68,21 +68,18 @@ public class VerticalList extends ElementList {
      * Like {@link #newPage()}, but ensures that the next page is an odd page.
      */
     public void oddPage() {
-        // Here we have two full page ejects, but the first's penalty is suppressed when it's on an even page.
-        // Therefore, on even pages we'll end up with two infinite glues, and on odd pages we'll have two normal
-        // page ejects. Either way the next page will be odd. Note that our double-glue works for us because we
-        // don't have any other infinite vertical glue on the page. If we were trying to center the text vertically
-        // with infinite glue on top, this would not work.
+        // Here we have two infinite glues separated by a neutral penalty. The second penalty is forced, but only
+        // exists at the end of even pages. This guarantees that the next page will be odd. The second penalty
+        // will either skip or include the first penalty, depending on what's best overall.
+
+        // Note that our double-glue works for us because we don't have any other infinite vertical glue on
+        // the page. If we were trying to center the text vertically with infinite glue on top, this would not work.
 
         if (!getElements().isEmpty()) {
-            // Add a final infinite glue at the bottom.
             addElement(new Glue(0, PT.toSp(1), true, 0, false, false));
-
-            // And a forced page break, but only consider it on odd pages.
+            addElement(new Penalty(0));
+            addElement(new Glue(0, PT.toSp(1), true, 0, false, false));
             addElement(new Penalty(-Penalty.INFINITY, true));
-
-            // Normal page eject.
-            ejectPage();
         }
     }
 
