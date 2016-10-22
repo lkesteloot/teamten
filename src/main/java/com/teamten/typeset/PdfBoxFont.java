@@ -87,7 +87,7 @@ public class PdfBoxFont extends AbstractFont {
      * @param fontSize the size of the font in points.
      */
     @Override
-    public long getKerning(int leftChar, int rightChar, double fontSize) {
+    public long getKerning(int leftChar, int rightChar, float fontSize) {
         if (mKerningSubtable == null) {
             return 0;
         } else {

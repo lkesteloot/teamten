@@ -13,7 +13,7 @@ public interface Font {
      *
      * @param fontSize the size of the font in points.
      */
-    long getKerning(int leftChar, int rightChar, double fontSize);
+    long getKerning(int leftChar, int rightChar, float fontSize);
 
     /**
      * Replaces all ligatures (supported by this font) in the string.

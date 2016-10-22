@@ -41,7 +41,7 @@ public class TrackingFont extends AbstractFont {
     }
 
     @Override
-    public long getKerning(int leftChar, int rightChar, double fontSize) {
+    public long getKerning(int leftChar, int rightChar, float fontSize) {
         if (mKerning != 0.0) {
             // Respect regular kerning.
             return (long) (mUnderlyingFont.getKerning(leftChar, rightChar, fontSize)*mKerning + 0.5);

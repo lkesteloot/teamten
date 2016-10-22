@@ -120,6 +120,7 @@ public class Typesetter {
             boolean newPage = false;
             boolean ownPage = false;
             boolean addTracking = false;
+            boolean smallCaps = false;
             long marginTop = 0;
             long marginBottom = 0;
             HorizontalList horizontalList = new HorizontalList();
@@ -133,25 +134,25 @@ public class Typesetter {
 
                 case PART_HEADER:
                     typeface = Typeface.TIMES_NEW_ROMAN;
-                    fontSize = 15;
-                    allCaps = true;
+                    fontSize = 19;
                     center = true;
                     marginTop = IN.toSp(1.75);
                     newPage = true;
                     ownPage = true;
                     addTracking = true;
+                    smallCaps = true;
                     break;
 
                 case CHAPTER_HEADER:
                 case MINOR_SECTION_HEADER:
                     typeface = Typeface.TIMES_NEW_ROMAN;
-                    fontSize = 11;
-                    allCaps = true;
+                    fontSize = 14;
                     center = true;
                     marginTop = IN.toSp(0.75);
-                    marginBottom = IN.toSp(0.25);
+                    marginBottom = IN.toSp(0.75);
                     newPage = true;
                     addTracking = true;
+                    smallCaps = true;
                     break;
 
                 case TABLE_OF_CONTENTS:
@@ -169,6 +170,10 @@ public class Typesetter {
             if (addTracking) {
                 spanRegularFont = new TrackingFont(spanRegularFont, 0.1, 0.5);
                 spanItalicFont = new TrackingFont(spanItalicFont, 0.1, 0.5);
+            }
+            if (smallCaps) {
+                spanRegularFont = new SmallCapsFont(spanRegularFont, 0.8f);
+                spanItalicFont = new SmallCapsFont(spanItalicFont, 0.8f);
             }
 
             long leading = PT.toSp(fontSize * 1.2f);
@@ -335,9 +340,10 @@ public class Typesetter {
         long paddingBelowTitle = IN.toSp(0.75);
 
         // TODO: Get from book layout:
-        Font titleFont = new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5);
+        Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
         float titleFontSize = 14.0f;
         Font entryFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.regular());
+        Font smallCapsEntryFont = new SmallCapsFont(entryFont, 0.8f);
         float entryFontSize = 11.0f;
         long boxWidth = IN.toSp(1.0);
         long boxHeight = PT.toSp(0.5);
@@ -348,7 +354,7 @@ public class Typesetter {
         // Title.
         HorizontalList horizontalList = new HorizontalList();
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(tocTitle.toUpperCase(), titleFont, titleFontSize, null);
+        horizontalList.addText(tocTitle, titleFont, titleFontSize, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.TABLE_OF_CONTENTS, tocTitle));
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, bookLayout.getBodyWidth());
@@ -384,12 +390,13 @@ public class Typesetter {
                 long marginBelow = 0;
                 String name = sectionBookmark.getName();
                 String pageLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
+                Font sectionNameFont = entryFont;
 
                 switch (sectionBookmark.getType()) {
                     case PART:
                         marginAbove = interEntryMargin;
                         marginBelow = interEntryMargin;
-                        name = name.toUpperCase();
+                        sectionNameFont = smallCapsEntryFont;
                         break;
 
                     case CHAPTER:
@@ -413,7 +420,7 @@ public class Typesetter {
                 if (indent > 0) {
                     horizontalList.addElement(new Glue(indent, 0, 0, true));
                 }
-                horizontalList.addText(name, entryFont, entryFontSize, null);
+                horizontalList.addText(name, sectionNameFont, entryFontSize, null);
                 horizontalList.addElement(leader);
                 horizontalList.addText(pageLabel, entryFont, entryFontSize, null);
                 horizontalList.addElement(new Penalty(-Penalty.INFINITY));

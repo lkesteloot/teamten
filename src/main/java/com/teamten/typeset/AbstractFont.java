@@ -1,7 +1,5 @@
 package com.teamten.typeset;
 
-import java.io.IOException;
-
 /**
  * Parent of real font classes, with stub methods.
  */
@@ -27,7 +25,7 @@ public abstract class AbstractFont implements Font {
     }
 
     @Override
-    public long getKerning(int leftChar, int rightChar, double fontSize) {
+    public long getKerning(int leftChar, int rightChar, float fontSize) {
         // No kerning by default.
         return 0;
     }
