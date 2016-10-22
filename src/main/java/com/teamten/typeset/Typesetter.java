@@ -166,14 +166,20 @@ public class Typesetter {
 
             Font spanRegularFont = fontManager.get(typeface.regular());
             Font spanItalicFont = fontManager.get(typeface.italic());
+            Font spanSmallCapsFont = typeface.smallCaps() == null ?
+                    new SmallCapsFont(spanRegularFont, 0.8f) : fontManager.get(typeface.smallCaps());
 
             if (addTracking) {
                 spanRegularFont = new TrackingFont(spanRegularFont, 0.1, 0.5);
                 spanItalicFont = new TrackingFont(spanItalicFont, 0.1, 0.5);
+                spanSmallCapsFont = new TrackingFont(spanSmallCapsFont, 0.1, 0.5);
             }
             if (smallCaps) {
+                // TODO if we ever get a real small caps font, we'll want to move this up above the tracking
+                // adjustment and use the real small cap font as a foundation.
                 spanRegularFont = new SmallCapsFont(spanRegularFont, 0.8f);
                 spanItalicFont = new SmallCapsFont(spanItalicFont, 0.8f);
+                // spanSmallCapsFont is already small caps.
             }
 
             long leading = PT.toSp(fontSize * 1.2f);
@@ -204,7 +210,8 @@ public class Typesetter {
 
             // Each span in the paragraph.
             for (Span span : block.getSpans()) {
-                Font font = span.isItalic() ? spanItalicFont : spanRegularFont;
+                Font font = span.isSmallCaps() ? spanSmallCapsFont :
+                        span.isItalic() ? spanItalicFont : spanRegularFont;
 
                 String text = span.getText();
                 if (allCaps) {

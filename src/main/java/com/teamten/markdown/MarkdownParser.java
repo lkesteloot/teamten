@@ -41,9 +41,11 @@ public class MarkdownParser {
         BlockType blockType = BlockType.BODY;
         Block.Builder builder = null;
         boolean isItalic = false;
+        boolean isSmallCaps = false;
         // Whether we're owed a space from the end of the previous line.
         boolean newlineSpace = false;
         boolean newlineSpaceIsItalic = false;
+        boolean newlineSpaceIsSmallCaps = false;
         // Accumulated tag.
         StringBuilder tagBuilder = new StringBuilder();
         ParserState preTagState = null;
@@ -84,10 +86,10 @@ public class MarkdownParser {
                             builder = new Block.Builder(blockType);
                         }
                         if (newlineSpace) {
-                            builder.add(' ', newlineSpaceIsItalic);
+                            builder.add(' ', newlineSpaceIsItalic, newlineSpaceIsSmallCaps);
                             newlineSpace = false;
                         }
-                        builder.add(translateCharacter(ch), isItalic);
+                        builder.add(translateCharacter(ch), isItalic, isSmallCaps);
                         state = ParserState.IN_LINE;
                     }
                     break;
@@ -101,9 +103,10 @@ public class MarkdownParser {
                         // case of the next line being a comment.
                         newlineSpace = true;
                         newlineSpaceIsItalic = isItalic;
+                        newlineSpaceIsSmallCaps = isSmallCaps;
                     } else if (Character.isWhitespace(ch)) {
                         state = ParserState.SKIP_WHITESPACE;
-                        builder.add(' ', isItalic);
+                        builder.add(' ', isItalic, isSmallCaps);
                     } else if (ch == '*') {
                         isItalic = !isItalic;
                     } else if (ch == '[') {
@@ -111,7 +114,7 @@ public class MarkdownParser {
                         preTagState = state;
                         state = ParserState.IN_TAG;
                     } else {
-                        builder.add(translateCharacter(ch), isItalic);
+                        builder.add(translateCharacter(ch), isItalic, isSmallCaps);
                     }
                     break;
 
@@ -123,9 +126,13 @@ public class MarkdownParser {
                     } else if (ch == '*') {
                         state = ParserState.IN_LINE;
                         isItalic = !isItalic;
+                    } else if (ch == '[') {
+                        tagBuilder.setLength(0);
+                        preTagState = state;
+                        state = ParserState.IN_TAG;
                     } else {
                         state = ParserState.IN_LINE;
-                        builder.add(translateCharacter(ch), isItalic);
+                        builder.add(translateCharacter(ch), isItalic, isSmallCaps);
                     }
                     break;
 
@@ -148,8 +155,18 @@ public class MarkdownParser {
                                 builder = null;
                             }
                             doc.addBlock(new Block.Builder(BlockType.TABLE_OF_CONTENTS).build());
+                        } else if (tag.equals("sc")) {
+                            if (isSmallCaps) {
+                                System.out.println("Warning: [sc] within [sc]");
+                            }
+                            isSmallCaps = true;
+                        } else if (tag.equals("/sc")) {
+                            if (!isSmallCaps) {
+                                System.out.println("Warning: [/sc] not within [sc]");
+                            }
+                            isSmallCaps = false;
                         } else {
-                            System.out.println("Unknown block type: " + tag);
+                            System.out.println("Warning: Unknown block type: " + tag);
                         }
                         state = preTagState;
                         preTagState = null;

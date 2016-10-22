@@ -54,6 +54,7 @@ public class Block {
         private final Block mBlock;
         private final StringBuilder mStringBuilder = new StringBuilder();
         private boolean mIsItalic;
+        private boolean mIsSmallCaps;
 
         public Builder(BlockType blockType) {
             mBlock = new Block(blockType);
@@ -63,11 +64,13 @@ public class Block {
          * Add the character to the block.
          * @param ch the character to add.
          * @param isItalic whether the character should be displayed in italics.
+         * @param isSmallCaps whether the character should be displayed in small caps.
          */
-        public void add(char ch, boolean isItalic) {
-            if (isItalic != mIsItalic) {
+        public void add(char ch, boolean isItalic, boolean isSmallCaps) {
+            if (isItalic != mIsItalic || isSmallCaps != mIsSmallCaps) {
                 emitSpan();
                 mIsItalic = isItalic;
+                mIsSmallCaps = isSmallCaps;
             }
 
             mStringBuilder.append(ch);
@@ -93,7 +96,7 @@ public class Block {
          */
         private void emitSpan() {
             if (mStringBuilder.length() > 0) {
-                Span span = new Span(mStringBuilder.toString(), mIsItalic);
+                Span span = new Span(mStringBuilder.toString(), mIsItalic, mIsSmallCaps);
                 mStringBuilder.setLength(0);
                 mBlock.addSpan(span);
             }

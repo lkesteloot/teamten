@@ -7,10 +7,12 @@ package com.teamten.markdown;
 public class Span {
     private final String mText;
     private final boolean mIsItalic;
+    private final boolean mIsSmallCaps;
 
-    public Span(String text, boolean isItalic) {
+    public Span(String text, boolean isItalic, boolean isSmallCaps) {
         mText = text;
         mIsItalic = isItalic;
+        mIsSmallCaps = isSmallCaps;
     }
 
     public String getText() {
@@ -19,5 +21,9 @@ public class Span {
 
     public boolean isItalic() {
         return mIsItalic;
+    }
+
+    public boolean isSmallCaps() {
+        return mIsSmallCaps;
     }
 }
