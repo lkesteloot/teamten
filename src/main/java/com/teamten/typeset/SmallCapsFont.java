@@ -10,13 +10,13 @@ import java.io.IOException;
  */
 public class SmallCapsFont extends AbstractFont {
     private final Font mUnderlyingFont;
-    private final float mSmallSize;
+    private final double mSmallSize;
 
     /***
      * @param underlyingFont the font to draw.
      * @param smallSize fraction of font size to use for the small capitals. A value of 0.8 is recommended.
      */
-    public SmallCapsFont(Font underlyingFont, float smallSize) {
+    public SmallCapsFont(Font underlyingFont, double smallSize) {
         // No ligatures. We could handle them for those that are entirely of the same class (all lower case or all
         // not lower case).
         super();

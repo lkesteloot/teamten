@@ -41,5 +41,14 @@
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-security:7.1.6.v20100715" level="project" />
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-io:7.1.6.v20100715" level="project" />
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-util:7.1.6.v20100715" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$APPLICATION_HOME_DIR$/redist/annotations-java8.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

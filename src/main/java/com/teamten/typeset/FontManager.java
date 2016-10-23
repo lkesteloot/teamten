@@ -1,6 +1,5 @@
 package com.teamten.typeset;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -9,14 +8,14 @@ import java.util.function.Function;
  * Loads and manages fonts.
  */
 public class FontManager {
-    private final Function<File,Font> mFontLoader;
-    private final Map<FontName,Font> mFontMap = new HashMap<>();
+    private final Function<TypefaceVariant,Font> mFontLoader;
+    private final Map<TypefaceVariant,Font> mFontCache = new HashMap<>();
 
     /**
      * A font manager that creates new fonts from the specified font loader. The font loader should
      * throw an IllegalArgumentException if the font cannot be loaded.
      */
-    public FontManager(Function<File,Font> fontLoader) {
+    public FontManager(Function<TypefaceVariant,Font> fontLoader) {
         mFontLoader = fontLoader;
     }
 
@@ -25,15 +24,23 @@ public class FontManager {
      *
      * @throws IllegalArgumentException if the font cannot be loaded.
      */
-    public Font get(FontName fontName) {
-        synchronized (mFontMap) {
-            Font font = mFontMap.get(fontName);
+    public Font get(TypefaceVariant typefaceVariant) {
+        synchronized (mFontCache) {
+            Font font = mFontCache.get(typefaceVariant);
             if (font == null) {
-                font = mFontLoader.apply(fontName.getFile());
-                mFontMap.put(fontName, font);
+                font = mFontLoader.apply(typefaceVariant);
+                mFontCache.put(typefaceVariant, font);
             }
 
             return font;
         }
+    }
+
+    /**
+     * Utility method that calls {@link #get(TypefaceVariant)} with a new {@link TypefaceVariant} object
+     * created from the two parameters.
+     */
+    public Font get(Typeface typeface, FontVariant fontVariant) {
+        return get(new TypefaceVariant(typeface, fontVariant));
     }
 }

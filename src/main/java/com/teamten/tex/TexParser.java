@@ -5,6 +5,7 @@ import com.teamten.typeset.Element;
 import com.teamten.typeset.Font;
 import com.teamten.typeset.FontManager;
 import com.teamten.typeset.FontName;
+import com.teamten.typeset.FontVariant;
 import com.teamten.typeset.Glue;
 import com.teamten.typeset.HBox;
 import com.teamten.typeset.PdfBoxFontManager;
@@ -48,7 +49,7 @@ public class TexParser {
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
 
         BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
-                fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 11);
+                fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
 
         Typesetter typesetter = new Typesetter();
         TexParser texParser = new TexParser(inputStream, typesetter, fontManager);
@@ -78,7 +79,7 @@ public class TexParser {
             }
         }
 
-        mFont = mFontManager.get(FontName.TIMES_NEW_ROMAN);
+        mFont = mFontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
         mFontSize = 11;
     }
 

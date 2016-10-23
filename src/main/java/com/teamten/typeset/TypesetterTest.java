@@ -15,11 +15,9 @@ public class TypesetterTest {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
 
-        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
-                fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 11);
-
-        Font font = fontManager.get(FontName.TIMES_NEW_ROMAN);
+        Font font = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
         float fontSize = 11;
+        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1), font, fontSize);
 
         VerticalList verticalList = new VerticalList();
 

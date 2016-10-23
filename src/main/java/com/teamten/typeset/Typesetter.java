@@ -58,7 +58,7 @@ public class Typesetter {
 
         // TODO Load these values from the document header.
         BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
-                fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 8);
+                fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 8);
 
         // Add document metadata.
         for (Map.Entry<String,String> entry : doc.getMetadata()) {
@@ -176,10 +176,9 @@ public class Typesetter {
                     continue;
             }
 
-            Font spanRegularFont = fontManager.get(typeface.regular());
-            Font spanItalicFont = fontManager.get(typeface.italic());
-            Font spanSmallCapsFont = typeface.smallCaps() == null ?
-                    new SmallCapsFont(spanRegularFont, 0.8f) : fontManager.get(typeface.smallCaps());
+            Font spanRegularFont = fontManager.get(typeface, FontVariant.REGULAR);
+            Font spanItalicFont = fontManager.get(typeface, FontVariant.ITALIC);
+            Font spanSmallCapsFont = fontManager.get(typeface, FontVariant.SMALL_CAPS);
 
             if (addTracking) {
                 spanRegularFont = new TrackingFont(spanRegularFont, 0.1, 0.5);
@@ -366,7 +365,7 @@ public class Typesetter {
 
         long marginTop = IN.toSp(2.0);
         // TODO: Get from book layout:
-        Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        Font titleFont = new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.SMALL_CAPS), 0.1, 0.5);
         float titleFontSize = 19.0f;
 
         // Assume we're at the very beginning of the book, and we want an entire blank page at the front.
@@ -402,13 +401,13 @@ public class Typesetter {
         long publisherNameMargin = IN.toSp(4.0);
         long publisherLocationMargin = IN.toSp(0.02);
         // TODO: Get from book layout:
-        Font authorFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        Font authorFont = new TrackingFont(new SmallCapsFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 0.8f), 0.1, 0.5);
         float authorFontSize = 14.0f;
-        Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        Font titleFont = new TrackingFont(new SmallCapsFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 0.8f), 0.1, 0.5);
         float titleFontSize = 27.0f;
-        Font publisherNameFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        Font publisherNameFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 0.1, 0.5), 0.8f);
         float publisherNameFontSize = 9.0f;
-        Font publisherLocationFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.italic());
+        Font publisherLocationFont = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.ITALIC);
         float publisherLocationFontSize = 9.0f;
 
         verticalList.oddPage();
@@ -470,9 +469,9 @@ public class Typesetter {
         long marginTop = IN.toSp(2.5);
         long printingMargin = IN.toSp(4.0);
         // TODO: Get from book layout:
-        Font copyrightFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.italic());
+        Font copyrightFont = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.ITALIC);
         float copyrightFontSize = 11.0f;
-        Font printingFont = new SmallCapsFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.8f);
+        Font printingFont = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.SMALL_CAPS);
         float printingFontSize = 9.0f;
 
         verticalList.newPage();
@@ -513,9 +512,9 @@ public class Typesetter {
         }
 
         // TODO: Get from book layout:
-        Font titleFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 0.1, 0.5), 0.8f);
+        Font titleFont = new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.SMALL_CAPS), 0.1, 0.5);
         float titleFontSize = 14.0f;
-        Font entryFont = fontManager.get(Typeface.TIMES_NEW_ROMAN.regular());
+        Font entryFont = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
         Font smallCapsEntryFont = new SmallCapsFont(entryFont, 0.8f);
         float entryFontSize = 11.0f;
         long boxWidth = IN.toSp(1.0);

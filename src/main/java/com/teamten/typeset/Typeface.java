@@ -1,55 +1,59 @@
 package com.teamten.typeset;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Tracks sets of fonts for a given typeface.
  */
 public enum Typeface {
-    TIMES_NEW_ROMAN(
-            FontName.TIMES_NEW_ROMAN,
-            FontName.TIMES_NEW_ROMAN_BOLD,
-            FontName.TIMES_NEW_ROMAN_ITALIC,
-            FontName.TIMES_NEW_ROMAN_BOLD_ITALIC,
-            null),
-    MINION(
-            FontName.MINION,
-            FontName.MINION_BOLD,
-            FontName.MINION_ITALIC,
-            FontName.MINION_BOLD_ITALIC,
-            FontName.MINION_SMALL_CAPS);
+    TIMES_NEW_ROMAN(new MapBuilder()
+            .with(FontVariant.REGULAR, FontName.TIMES_NEW_ROMAN)
+            .with(FontVariant.BOLD, FontName.TIMES_NEW_ROMAN_BOLD)
+            .with(FontVariant.ITALIC, FontName.TIMES_NEW_ROMAN_ITALIC)
+            .with(FontVariant.BOLD_ITALIC, FontName.TIMES_NEW_ROMAN_BOLD_ITALIC)
+            .build()),
+    MINION(new MapBuilder()
+            .with(FontVariant.REGULAR, FontName.MINION)
+            .with(FontVariant.BOLD, FontName.MINION_BOLD)
+            .with(FontVariant.ITALIC, FontName.MINION_ITALIC)
+            .with(FontVariant.BOLD_ITALIC, FontName.MINION_BOLD_ITALIC)
+            .with(FontVariant.SMALL_CAPS, FontName.MINION_SMALL_CAPS)
+            .build());
 
-    private final FontName mRegular;
-    private final FontName mBold;
-    private final FontName mItalic;
-    private final FontName mBoldItalic;
-    private final FontName mSmallCaps;
+    private final Map<FontVariant,FontName> mFontMap;
 
-    Typeface(FontName regular, FontName bold, FontName italic,
-             FontName boldItalic, FontName smallCaps) {
-
-        mRegular = regular;
-        mBold = bold;
-        mItalic = italic;
-        mBoldItalic = boldItalic;
-        mSmallCaps = smallCaps;
+    Typeface(Map<FontVariant,FontName> fontMap) {
+        mFontMap = fontMap;
     }
 
-    public FontName regular() {
-        return mRegular;
+    /**
+     * Return the font name for this variant, or null if the typeface does not define one.
+     */
+    FontName get(FontVariant fontVariant) {
+        return mFontMap.get(fontVariant);
     }
 
-    public FontName bold() {
-        return mBold;
-    }
+    /**
+     * Utility class to help build the map of font variants.
+     */
+    private static class MapBuilder {
+        private final Map<FontVariant,FontName> mFontMap = new HashMap<>();
 
-    public FontName italic() {
-        return mItalic;
-    }
+        /**
+         * Fluid method to add an entry to the map.
+         */
+        MapBuilder with(FontVariant fontVariant, FontName fontName) {
+            mFontMap.put(fontVariant, fontName);
+            return this;
+        }
 
-    public FontName boldItalic() {
-        return mBoldItalic;
-    }
-
-    public FontName smallCaps() {
-        return mSmallCaps;
+        /**
+         * Returns an unmodifiable version of the map.
+         */
+        Map<FontVariant,FontName> build() {
+            return Collections.unmodifiableMap(mFontMap);
+        }
     }
 }
