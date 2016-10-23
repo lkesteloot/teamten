@@ -31,8 +31,8 @@ public class HorizontalList extends ElementList {
     /**
      * Add the specified text, in the specified font, to the horizontal list.
      */
-    public void addText(String text, Font font, double fontSize) throws IOException {
-        addText(text, font, fontSize, null);
+    public void addText(String text, FontSize font) throws IOException {
+        addText(text, font, null);
     }
 
     /**
@@ -40,11 +40,11 @@ public class HorizontalList extends ElementList {
      *
      * @param hyphenDictionary the dictionary to use for hyphenation, or null to skip hyphenation.
      */
-    public void addText(String text, Font font, double fontSize, HyphenDictionary hyphenDictionary) {
+    public void addText(String text, FontSize font, HyphenDictionary hyphenDictionary) {
         // First, convert the single string to a sequence of elements, where each word
         // is a single Text element. There will be other elements, like glues and
         // penalties.
-        List<Element> elements = textToWords(text, font, fontSize);
+        List<Element> elements = textToWords(text, font);
 
         // Second, go through the text elements and add discretionary hyphens.
         if (hyphenDictionary != null) {
@@ -52,10 +52,10 @@ public class HorizontalList extends ElementList {
         }
 
         // Third, go through the text elements and replace the ligatures.
-        elements = transformLigatures(elements, font, fontSize);
+        elements = transformLigatures(elements, font);
 
         // Finally, add kerning between and within text elements.
-        elements = addKerning(elements, font, fontSize);
+        elements = addKerning(elements, font);
 
         // Add all the final elements to our horizontal list.
         for (Element element : elements) {
@@ -68,10 +68,10 @@ public class HorizontalList extends ElementList {
      * Take the single large string and break it into three kinds of elements: glue (for space and non-breaking
      * space); words; and sequences of non-word characters.
      */
-    private static List<Element> textToWords(String text, Font font, double fontSize) {
+    private static List<Element> textToWords(String text, FontSize font) {
         List<Element> elements = new ArrayList<>();
 
-        long spaceWidth = (long) (font.getSpaceWidth() * fontSize);
+        long spaceWidth = font.getSpaceWidth();
 
         // Roughly copy TeX.
         Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
@@ -108,7 +108,7 @@ public class HorizontalList extends ElementList {
                 }
 
                 // Add the whole word at once.
-                elements.add(new Text(word.toString(), font, fontSize));
+                elements.add(new Text(word.toString(), font));
             }
         }
 
@@ -119,7 +119,7 @@ public class HorizontalList extends ElementList {
      * Return a modified copy of the element list with the words hyphenated, meaning that discretionary
      * breaks have been inserted. Any word to be hyphenated must be within a single Text element.
      */
-    private static List<Element> hyphenate(List<Element> elements,HyphenDictionary hyphenDictionary) {
+    private static List<Element> hyphenate(List<Element> elements, HyphenDictionary hyphenDictionary) {
         List<Element> newElements = new ArrayList<>();
 
         for (Element element : elements) {
@@ -134,7 +134,7 @@ public class HorizontalList extends ElementList {
                         String syllable = syllables.get(i);
 
                         // Add syllable.
-                        newElements.add(new Text(syllable, text.getFont(), text.getFontSize()));
+                        newElements.add(new Text(syllable, text.getFont()));
 
                         // Add discretionary hyphen.
                         if (i < syllables.size() - 1) {
@@ -147,9 +147,9 @@ public class HorizontalList extends ElementList {
                                 preBreak = "-";
                             }
                             newElements.add(new Discretionary(
-                                    HBox.makeOnlyString(preBreak, text.getFont(), text.getFontSize()),
-                                    HBox.makeOnlyString("", text.getFont(), text.getFontSize()),
-                                    HBox.makeOnlyString("", text.getFont(), text.getFontSize()),
+                                    HBox.makeOnlyString(preBreak, text.getFont()),
+                                    HBox.makeOnlyString("", text.getFont()),
+                                    HBox.makeOnlyString("", text.getFont()),
                                     Discretionary.HYPHEN_PENALTY));
 
                         }
@@ -178,7 +178,7 @@ public class HorizontalList extends ElementList {
     /**
      * Return a new list of elements with ligatures converted to their one-character form.
      */
-    static List<Element> transformLigatures(List<Element> elements, Font font, double fontSize) {
+    static List<Element> transformLigatures(List<Element> elements, FontSize font) {
         // If it weren't for hyphenation, we'd just go through the elements and substitute the
         // ligatures in the Text elements. But a discretionary break can cut in the middle of
         // a ligature, such as in the word "dif-fi-cult", cutting the "ffi" ligature.
@@ -240,10 +240,7 @@ public class HorizontalList extends ElementList {
                 //    null / discretionary / text
                 //
                 // Sanity check.
-                if (beforeText != null && afterText != null &&
-                        (beforeText.getFont() != afterText.getFont() ||
-                                beforeText.getFontSize() != afterText.getFontSize())) {
-
+                if (beforeText != null && afterText != null && !beforeText.getFont().equals(afterText.getFont())) {
                     throw new IllegalStateException("before and after text fonts don't match");
                 }
 
@@ -280,13 +277,13 @@ public class HorizontalList extends ElementList {
                         entireNoBreak.length() - commonSuffix.length());
 
                 // Replace the Text elements.
-                beforeText = commonPrefix.isEmpty() ? null : new Text(commonPrefix, font, fontSize);
+                beforeText = commonPrefix.isEmpty() ? null : new Text(commonPrefix, font);
                 discretionary = discretionary == null ? null : new Discretionary(
-                        HBox.makeOnlyString(preBreak, font, fontSize),
-                        HBox.makeOnlyString(postBreak, font, fontSize),
-                        HBox.makeOnlyString(noBreak, font, fontSize),
+                        HBox.makeOnlyString(preBreak, font),
+                        HBox.makeOnlyString(postBreak, font),
+                        HBox.makeOnlyString(noBreak, font),
                         discretionary.getPenalty());
-                afterText = commonSuffix.isEmpty() ? null : new Text(commonSuffix, font, fontSize);
+                afterText = commonSuffix.isEmpty() ? null : new Text(commonSuffix, font);
 
                 // Add the elements to the output.
                 if (beforeText != null) {
@@ -314,11 +311,11 @@ public class HorizontalList extends ElementList {
     /**
      * Return a new list of elements with kerning added.
      */
-    static List<Element> addKerning(List<Element> origElements, Font font, double fontSize) {
+    static List<Element> addKerning(List<Element> origElements, FontSize font) {
         // Make a new list of elements.
         List<Element> newElements = new ArrayList<>(origElements.size());
 
-        addKerningToList(origElements, newElements, 0, font, fontSize);
+        addKerningToList(origElements, newElements, 0, font);
 
         return newElements;
     }
@@ -327,9 +324,7 @@ public class HorizontalList extends ElementList {
      * Adds the original elements to the new list, with the given previous element.
      * @return the new previous element.
      */
-    static int addKerningToList(List<Element> origElements, List<Element> newElements, int previousCh,
-                                Font font, double fontSize) {
-
+    static int addKerningToList(List<Element> origElements, List<Element> newElements, int previousCh, FontSize font) {
         // Go through each element, keeping track of the previous character across them.
         for (int e = 0; e < origElements.size(); e++) {
             Element element = origElements.get(e);
@@ -342,11 +337,11 @@ public class HorizontalList extends ElementList {
                     int ch = s.codePointAt(i);
 
                     // See if we need to kern.
-                    long kerning = font.getKerning(previousCh, ch, fontSize);
+                    long kerning = font.getKerning(previousCh, ch);
                     if (kerning != 0) {
                         // String before the kern.
                         if (i > 0) {
-                            newElements.add(new Text(s.substring(0, i), font, fontSize));
+                            newElements.add(new Text(s.substring(0, i), font));
                             // Reset the string.
                             s = s.substring(i);
                             i = 0;
@@ -357,7 +352,7 @@ public class HorizontalList extends ElementList {
                     previousCh = ch;
                 }
                 if (!s.isEmpty()) {
-                    newElements.add(new Text(s, font, fontSize));
+                    newElements.add(new Text(s, font));
                 }
             } else if (element instanceof Glue) {
                 // See if it's a space. Guess by looking at the width.
@@ -374,11 +369,11 @@ public class HorizontalList extends ElementList {
                 // Recurse on the three sections, sending in the appropriate previous character and capturing
                 // the next characters.
                 List<Element> preBreakElements = new ArrayList<>();
-                addKerningToList(preBreak.getElements(), preBreakElements, previousCh, font, fontSize);
+                addKerningToList(preBreak.getElements(), preBreakElements, previousCh, font);
                 List<Element> postBreakElements = new ArrayList<>();
-                int postBreakCh = addKerningToList(postBreak.getElements(), postBreakElements, 0, font, fontSize);
+                int postBreakCh = addKerningToList(postBreak.getElements(), postBreakElements, 0, font);
                 List<Element> noBreakElements = new ArrayList<>();
-                int noBreakCh = addKerningToList(noBreak.getElements(), noBreakElements, previousCh, font, fontSize);
+                int noBreakCh = addKerningToList(noBreak.getElements(), noBreakElements, previousCh, font);
 
                 if (postBreakCh != noBreakCh) {
                     // This is actually the most likely scenario, because it happens with simple discretionary
@@ -396,11 +391,11 @@ public class HorizontalList extends ElementList {
                         int nextCh = s.isEmpty() ? 0 : s.codePointAt(0);
                         if (nextCh != 0) {
                             // See how our segments would kern with the next character.
-                            long kerning = font.getKerning(postBreakCh, nextCh, fontSize);
+                            long kerning = font.getKerning(postBreakCh, nextCh);
                             if (kerning != 0) {
                                 postBreakElements.add(new Kern(kerning, true));
                             }
-                            kerning = font.getKerning(noBreakCh, nextCh, fontSize);
+                            kerning = font.getKerning(noBreakCh, nextCh);
                             if (kerning != 0) {
                                 noBreakElements.add(new Kern(kerning, true));
                             }

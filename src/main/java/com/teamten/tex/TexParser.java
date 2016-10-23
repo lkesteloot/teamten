@@ -5,6 +5,7 @@ import com.teamten.typeset.Config;
 import com.teamten.typeset.Element;
 import com.teamten.typeset.Font;
 import com.teamten.typeset.FontManager;
+import com.teamten.typeset.FontSize;
 import com.teamten.typeset.FontVariant;
 import com.teamten.typeset.Glue;
 import com.teamten.typeset.HBox;
@@ -35,8 +36,7 @@ public class TexParser {
     private final InputStream mInputStream;
     private final FontManager mFontManager;
     private final TexTokenizer mTexTokenizer;
-    private final Font mFont;
-    private final float mFontSize;
+    private final FontSize mFont;
     private int mToken;
 
     public static void main(String[] args) throws IOException {
@@ -77,8 +77,7 @@ public class TexParser {
             }
         }
 
-        mFont = mFontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
-        mFontSize = 11;
+        mFont = mFontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR, 11);
     }
 
     private void fetchToken() throws IOException {
@@ -193,7 +192,7 @@ public class TexParser {
                     if (Token.isCommand(mToken)) {
                         throw new IllegalStateException("not handled: " + Token.toString(mToken));
                     } else {
-                        elements.add(new Text(mToken, mFont, mFontSize));
+                        elements.add(new Text(mToken, mFont));
                         fetchToken();
                     }
             }

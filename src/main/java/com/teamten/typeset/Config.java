@@ -48,8 +48,21 @@ public class Config {
         LANGUAGE(KeyType.STRING),
 
         // Fonts.
+        BODY_FONT(KeyType.FONT),
+        PART_HEADER_FONT(KeyType.FONT),
+        CHAPTER_HEADER_FONT(KeyType.FONT),
         PAGE_NUMBER_FONT(KeyType.FONT),
         HEADLINE_FONT(KeyType.FONT),
+        HALF_TITLE_PAGE_TITLE_FONT(KeyType.FONT),
+        TITLE_PAGE_AUTHOR_FONT(KeyType.FONT),
+        TITLE_PAGE_TITLE_FONT(KeyType.FONT),
+        TITLE_PAGE_PUBLISHER_NAME_FONT(KeyType.FONT),
+        TITLE_PAGE_PUBLISHER_LOCATION_FONT(KeyType.FONT),
+        COPYRIGHT_PAGE_COPYRIGHT_FONT(KeyType.FONT),
+        COPYRIGHT_PAGE_PRINTING_FONT(KeyType.FONT),
+        TOC_PAGE_TITLE_FONT(KeyType.FONT),
+        TOC_PAGE_PART_FONT(KeyType.FONT),
+        TOC_PAGE_CHAPTER_FONT(KeyType.FONT),
 
         // Distances
         PAGE_WIDTH(KeyType.DISTANCE),

@@ -33,10 +33,24 @@ public class FontSize {
     }
 
     /**
+     * Create a new object, replacing the font.
+     */
+    public FontSize withFont(Font font) {
+        return new FontSize(font, mSize);
+    }
+
+    /**
      * Get the kerning between the two code points. The result is in scaled points.
      */
     public long getKerning(int leftChar, int rightChar) {
         return mFont.getKerning(leftChar, rightChar, mSize);
+    }
+
+    /**
+     * Replaces all ligatures (supported by this font) in the string.
+     */
+    public String transformLigatures(String text) {
+        return mFont.transformLigatures(text);
     }
 
     /**
@@ -69,5 +83,32 @@ public class FontSize {
      */
     public Font.Metrics getStringMetrics(String text) {
         return mFont.getStringMetrics(text, mSize);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %.0fpt", mFont, mSize);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FontSize fontSize = (FontSize) o;
+
+        if (Double.compare(fontSize.mSize, mSize) != 0) return false;
+        return mFont.equals(fontSize.mFont);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = mFont.hashCode();
+        temp = Double.doubleToLongBits(mSize);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 }

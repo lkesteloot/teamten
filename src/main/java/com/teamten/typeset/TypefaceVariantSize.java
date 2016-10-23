@@ -18,6 +18,13 @@ public class TypefaceVariantSize extends TypefaceVariant {
         return mSize;
     }
 
+    /**
+     * Return a new instance with the specified variant.
+     */
+    public TypefaceVariantSize withVariant(FontVariant fontVariant) {
+        return new TypefaceVariantSize(getTypeface(), fontVariant, getSize());
+    }
+
     @Override
     public String toString() {
         return getTypeface() + ", " + getFontVariant() + ", " + mSize + "pt";

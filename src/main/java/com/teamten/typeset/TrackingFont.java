@@ -40,6 +40,15 @@ public class TrackingFont extends AbstractFont {
         mSpaceWidth = mUnderlyingFont.getSpaceWidth() + PT.toSp(mTracking);
     }
 
+    /**
+     * Utility method to create a FontSize incorporating the TrackingFont and the same size.
+     */
+    public static FontSize create(FontSize fontSize, double tracking, double kerning) {
+        return new FontSize(
+                new TrackingFont(fontSize.getFont(), tracking, kerning),
+                fontSize.getSize());
+    }
+
     @Override
     public long getKerning(int leftChar, int rightChar, double fontSize) {
         if (mKerning != 0.0) {

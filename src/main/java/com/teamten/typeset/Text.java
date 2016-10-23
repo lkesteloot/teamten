@@ -14,37 +14,33 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * A sequence of characters.
  */
 public class Text extends Box {
-    private final @NotNull Font mFont;
-    private final double mFontSize;
+    private final @NotNull FontSize mFont;
     private final @NotNull String mText;
 
     /**
      * Constructor for string of any size.
      */
-    public Text(Font font, double fontSize, String text, long width, long height, long depth) {
+    public Text(FontSize font, String text, long width, long height, long depth) {
         super(width, height, depth);
         mFont = font;
-        mFontSize = fontSize;
         mText = text;
     }
 
     /**
      * Constructor for a string.
      */
-    public Text(String text, Font font, double fontSize) {
-        super(font.getStringMetrics(text, fontSize));
+    public Text(String text, FontSize font) {
+        super(font.getStringMetrics(text));
         mFont = font;
-        mFontSize = fontSize;
         mText = text;
     }
 
     /**
      * Constructor for single character.
      */
-    public Text(int ch, Font font, double fontSize) {
-        super(font.getCharacterMetrics(ch, fontSize));
+    public Text(int ch, FontSize font) {
+        super(font.getCharacterMetrics(ch));
         mFont = font;
-        mFontSize = fontSize;
         mText = CodePoints.toString(ch);
     }
 
@@ -58,22 +54,16 @@ public class Text extends Box {
     /**
      * The font the text should be displayed in.
      */
-    public Font getFont() {
+    public FontSize getFont() {
         return mFont;
-    }
-
-    /**
-     * The font size in points.
-     */
-    public double getFontSize() {
-        return mFontSize;
     }
 
     /**
      * Whether this text can be appended to the other text.
      */
     public boolean isCompatibleWith(Text other) {
-        return mFont == other.mFont && DoubleMath.fuzzyEquals(mFontSize, other.mFontSize, 0.001);
+        return mFont.getFont() == other.mFont.getFont() &&
+                DoubleMath.fuzzyEquals(mFont.getSize(), other.mFont.getSize(), 0.001);
     }
 
     /**
@@ -87,14 +77,14 @@ public class Text extends Box {
             throw new IllegalArgumentException("incompatible text, cannot append");
         }
 
-        return new Text(mText + other.mText, mFont, mFontSize);
+        return new Text(mText + other.mText, mFont);
     }
 
     @Override
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
         /// drawDebugRectangle(contents, x, y);
 
-        mFont.draw(mText, mFontSize, x, y, contents);
+        mFont.draw(mText, x, y, contents);
 
         return getWidth();
     }
@@ -113,7 +103,7 @@ public class Text extends Box {
 
     @Override
     public String toString() {
-        return String.format("Text %s: “%s” in %.0fpt %s", getDimensionString(), mText, mFontSize, mFont);
+        return String.format("Text %s: “%s” in %s", getDimensionString(), mText, mFont);
     }
 
     @Override
@@ -128,7 +118,6 @@ public class Text extends Box {
 
         Text text = (Text) o;
 
-        if (Double.compare(text.mFontSize, mFontSize) != 0) return false;
         if (!mFont.equals(text.mFont)) return false;
         return mText.equals(text.mText);
 
@@ -136,11 +125,7 @@ public class Text extends Box {
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        result = mFont.hashCode();
-        temp = Double.doubleToLongBits(mFontSize);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        int result = mFont.hashCode();
         result = 31 * result + mText.hashCode();
         return result;
     }

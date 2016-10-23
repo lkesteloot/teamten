@@ -11,17 +11,15 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * Like glue, but draws a pattern over and over (e.g., for table of contents).
  */
 public class Leader extends Glue {
-    private final Font mFont;
-    private final double mFontSize;
+    private final FontSize mFont;
     private final String mPattern;
     private final long mPatternWidth;
 
-    private Leader(Font font, double fontSize, String pattern, long size, long stretch) {
+    private Leader(FontSize font, String pattern, long size, long stretch) {
         super(size, stretch, stretch != 0, 0, false, true);
         mFont = font;
-        mFontSize = fontSize;
         mPattern = pattern;
-        mPatternWidth = mFont.getStringMetrics(mPattern, mFontSize).getWidth();
+        mPatternWidth = mFont.getStringMetrics(mPattern).getWidth();
     }
 
     /**
@@ -30,13 +28,13 @@ public class Leader extends Glue {
      * @param pattern For table of contents you want something like " . "
      * @param stretch how much (infinite) stretchability. 1pt is good for this.
      */
-    public Leader(Font font, double fontSize, String pattern, long stretch) {
-        this(font, fontSize, pattern, 0, stretch);
+    public Leader(FontSize font, String pattern, long stretch) {
+        this(font, pattern, 0, stretch);
     }
 
     @Override
     public Glue fixed(long newSize) {
-        return new Leader(mFont, mFontSize, mPattern, newSize, 0);
+        return new Leader(mFont, mPattern, newSize, 0);
     }
 
     @Override
@@ -48,7 +46,7 @@ public class Leader extends Glue {
 
         // Draw the pattern all along the glue length.
         for (long position = startX; position < endX; position += mPatternWidth) {
-            mFont.draw(mPattern, mFontSize, position, y, contents);
+            mFont.draw(mPattern, position, y, contents);
         }
 
         return getSize();

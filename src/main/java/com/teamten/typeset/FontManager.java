@@ -56,4 +56,12 @@ public class FontManager {
     public Font get(Typeface typeface, FontVariant fontVariant) {
         return get(new TypefaceVariant(typeface, fontVariant));
     }
+
+    /**
+     * Utility method that calls {@link #get(TypefaceVariantSize)} with a new {@link TypefaceVariant} object
+     * created from the two parameters.
+     */
+    public FontSize get(Typeface typeface, FontVariant fontVariant, double fontSize) {
+        return get(new TypefaceVariantSize(typeface, fontVariant, fontSize));
+    }
 }

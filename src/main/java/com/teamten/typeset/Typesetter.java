@@ -128,8 +128,8 @@ public class Typesetter {
 
         BlockType previousBlockType = null;
         for (Block block : doc.getBlocks()) {
-            Typeface typeface;
-            double fontSize;
+            Config.Key regularFontKey;
+            TypefaceVariantSize regularFontDesc;
             boolean indentFirstLine = false;
             boolean allCaps = false;
             boolean center = false;
@@ -137,39 +137,33 @@ public class Typesetter {
             boolean oddPage = false;
             boolean ownPage = false;
             boolean addTracking = false;
-            boolean smallCaps = false;
             long marginTop = 0;
             long marginBottom = 0;
             HorizontalList horizontalList = new HorizontalList();
 
             switch (block.getBlockType()) {
                 case BODY:
-                    typeface = Typeface.TIMES_NEW_ROMAN;
-                    fontSize = 11;
+                    regularFontKey = Config.Key.BODY_FONT;
                     indentFirstLine = previousBlockType == BlockType.BODY;
                     break;
 
                 case PART_HEADER:
-                    typeface = Typeface.TIMES_NEW_ROMAN;
-                    fontSize = 19;
+                    regularFontKey = Config.Key.PART_HEADER_FONT;
                     center = true;
                     marginTop = IN.toSp(1.75);
                     oddPage = true;
                     ownPage = true;
                     addTracking = true;
-                    smallCaps = true;
                     break;
 
                 case CHAPTER_HEADER:
                 case MINOR_SECTION_HEADER:
-                    typeface = Typeface.TIMES_NEW_ROMAN;
-                    fontSize = 14;
+                    regularFontKey = Config.Key.CHAPTER_HEADER_FONT;
                     center = true;
                     marginTop = IN.toSp(0.75);
                     marginBottom = IN.toSp(0.75);
                     oddPage = true;
                     addTracking = true;
-                    smallCaps = true;
                     break;
 
                 case HALF_TITLE_PAGE:
@@ -193,18 +187,17 @@ public class Typesetter {
                     continue;
             }
 
-            Font spanRegularFont = fontManager.get(typeface, FontVariant.REGULAR);
-            Font spanItalicFont = fontManager.get(typeface, FontVariant.ITALIC);
-            Font spanSmallCapsFont = fontManager.get(typeface, FontVariant.SMALL_CAPS);
+            regularFontDesc = config.getFont(regularFontKey);
 
-            if (smallCaps) {
-                spanRegularFont = spanSmallCapsFont;
-                // No small caps for italics.
-            }
+            FontSize spanRegularFont = fontManager.get(regularFontDesc);
+            FontSize spanItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.ITALIC));
+            FontSize spanSmallCapsFont = fontManager.get(regularFontDesc.withVariant(FontVariant.SMALL_CAPS));
+            double fontSize = regularFontDesc.getSize();
+
             if (addTracking) {
-                spanRegularFont = new TrackingFont(spanRegularFont, 0.1, 0.5);
-                spanItalicFont = new TrackingFont(spanItalicFont, 0.1, 0.5);
-                spanSmallCapsFont = new TrackingFont(spanSmallCapsFont, 0.1, 0.5);
+                spanRegularFont = TrackingFont.create(spanRegularFont, 0.1, 0.5);
+                spanItalicFont = TrackingFont.create(spanItalicFont, 0.1, 0.5);
+                spanSmallCapsFont = TrackingFont.create(spanSmallCapsFont, 0.1, 0.5);
             }
 
             long leading = PT.toSp(fontSize * 1.2f);
@@ -235,7 +228,7 @@ public class Typesetter {
 
             // Each span in the paragraph.
             for (Span span : block.getSpans()) {
-                Font font = span.isSmallCaps() ? spanSmallCapsFont :
+                FontSize font = span.isSmallCaps() ? spanSmallCapsFont :
                         span.isItalic() ? spanItalicFont : spanRegularFont;
 
                 String text = span.getText();
@@ -244,7 +237,7 @@ public class Typesetter {
                 }
 
                 // Add the text to the current horizontal list.
-                horizontalList.addText(text, font, fontSize, hyphenDictionary);
+                horizontalList.addText(text, font, hyphenDictionary);
             }
 
             // Potentially add bookmark if we're starting a new part or chapter.
@@ -384,9 +377,8 @@ public class Typesetter {
         }
 
         long marginTop = IN.toSp(2.0);
-        // TODO: Get from book layout:
-        Font titleFont = new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.SMALL_CAPS), 0.1, 0.5);
-        float titleFontSize = 19.0f;
+        FontSize titleFont = fontManager.get(config.getFont(Config.Key.HALF_TITLE_PAGE_TITLE_FONT));
+        titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
 
         // Assume we're at the very beginning of the book, and we want an entire blank page at the front.
         verticalList.ejectPage();
@@ -396,7 +388,7 @@ public class Typesetter {
         // Title.
         HorizontalList horizontalList = new HorizontalList();
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(title, titleFont, titleFontSize, null);
+        horizontalList.addText(title, titleFont, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.HALF_TITLE_PAGE, title));
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, config.getBodyWidth());
@@ -420,15 +412,13 @@ public class Typesetter {
         long titleMargin = IN.toSp(1.5);
         long publisherNameMargin = IN.toSp(4.0);
         long publisherLocationMargin = IN.toSp(0.02);
-        // TODO: Get from book layout:
-        Font authorFont = new TrackingFont(new SmallCapsFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 0.8f), 0.1, 0.5);
-        float authorFontSize = 14.0f;
-        Font titleFont = new TrackingFont(new SmallCapsFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 0.8f), 0.1, 0.5);
-        float titleFontSize = 27.0f;
-        Font publisherNameFont = new SmallCapsFont(new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 0.1, 0.5), 0.8f);
-        float publisherNameFontSize = 9.0f;
-        Font publisherLocationFont = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.ITALIC);
-        float publisherLocationFontSize = 9.0f;
+        FontSize authorFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_AUTHOR_FONT));
+        authorFont = TrackingFont.create(authorFont, 0.1, 0.5);
+        FontSize titleFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_TITLE_FONT));
+        titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
+        FontSize publisherNameFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_PUBLISHER_NAME_FONT));
+        publisherNameFont = TrackingFont.create(publisherNameFont, 0.1, 0.5);
+        FontSize publisherLocationFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_PUBLISHER_LOCATION_FONT));
 
         verticalList.oddPage();
         verticalList.addElement(new Box(0, marginTop, 0));
@@ -436,7 +426,7 @@ public class Typesetter {
         // Author.
         HorizontalList horizontalList = new HorizontalList();
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(author, authorFont, authorFontSize, null);
+        horizontalList.addText(author, authorFont, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.TITLE_PAGE, title));
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, config.getBodyWidth());
@@ -446,7 +436,7 @@ public class Typesetter {
         // Title.
         horizontalList = new HorizontalList();
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(title, titleFont, titleFontSize, null);
+        horizontalList.addText(title, titleFont, null);
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, config.getBodyWidth());
 
@@ -456,7 +446,7 @@ public class Typesetter {
             // Publisher name.
             horizontalList = new HorizontalList();
             horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-            horizontalList.addText(publisherName, publisherNameFont, publisherNameFontSize, null);
+            horizontalList.addText(publisherName, publisherNameFont, null);
             horizontalList.addEndOfParagraph();
             horizontalList.format(verticalList, config.getBodyWidth());
 
@@ -466,7 +456,7 @@ public class Typesetter {
                 // Publisher location.
                 horizontalList = new HorizontalList();
                 horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-                horizontalList.addText(publisherLocation, publisherLocationFont, publisherLocationFontSize, null);
+                horizontalList.addText(publisherLocation, publisherLocationFont, null);
                 horizontalList.addEndOfParagraph();
                 horizontalList.format(verticalList, config.getBodyWidth());
             }
@@ -488,11 +478,8 @@ public class Typesetter {
 
         long marginTop = IN.toSp(2.5);
         long printingMargin = IN.toSp(4.0);
-        // TODO: Get from book layout:
-        Font copyrightFont = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.ITALIC);
-        float copyrightFontSize = 11.0f;
-        Font printingFont = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.SMALL_CAPS);
-        float printingFontSize = 9.0f;
+        FontSize copyrightFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_COPYRIGHT_FONT));
+        FontSize printingFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_PRINTING_FONT));
 
         verticalList.newPage();
         verticalList.addElement(new Box(0, marginTop, 0));
@@ -500,7 +487,7 @@ public class Typesetter {
         // Copyright.
         HorizontalList horizontalList = new HorizontalList();
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(copyright, copyrightFont, copyrightFontSize, null);
+        horizontalList.addText(copyright, copyrightFont, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.COPYRIGHT_PAGE, copyright));
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, config.getBodyWidth());
@@ -511,7 +498,7 @@ public class Typesetter {
             // Publisher location.
             horizontalList = new HorizontalList();
             horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-            horizontalList.addText(printing, printingFont, printingFontSize, null);
+            horizontalList.addText(printing, printingFont, null);
             horizontalList.addEndOfParagraph();
             horizontalList.format(verticalList, config.getBodyWidth());
         }
@@ -531,12 +518,11 @@ public class Typesetter {
             tocTitle = "Table of Contents";
         }
 
-        // TODO: Get from book layout:
-        Font titleFont = new TrackingFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.SMALL_CAPS), 0.1, 0.5);
-        float titleFontSize = 14.0f;
-        Font entryFont = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
-        Font smallCapsEntryFont = new SmallCapsFont(entryFont, 0.8f);
-        float entryFontSize = 11.0f;
+        FontSize titleFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_TITLE_FONT));
+        titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
+        FontSize partFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_PART_FONT));
+        FontSize chapterFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_CHAPTER_FONT));
+        double entryFontSize = chapterFont.getSize();
         long boxWidth = IN.toSp(1.0);
         long boxHeight = PT.toSp(0.5);
 
@@ -546,7 +532,7 @@ public class Typesetter {
         // Title.
         HorizontalList horizontalList = new HorizontalList();
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-        horizontalList.addText(tocTitle, titleFont, titleFontSize, null);
+        horizontalList.addText(tocTitle, titleFont, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.TABLE_OF_CONTENTS, tocTitle));
         horizontalList.addEndOfParagraph();
         horizontalList.format(verticalList, config.getBodyWidth());
@@ -569,7 +555,7 @@ public class Typesetter {
 
         long previousMarginBelow = 0;
         long interEntryMargin = PT.toSp(entryFontSize*0.8);
-        Leader leader = new Leader(entryFont, entryFontSize, " .   ", PT.toSp(1));
+        Leader leader = new Leader(chapterFont, " .   ", PT.toSp(1));
 
         // List each section.
         for (Map.Entry<Integer,SectionBookmark> entry : bookLayout.sections()) {
@@ -582,13 +568,13 @@ public class Typesetter {
                 long marginBelow = 0;
                 String name = sectionBookmark.getName();
                 String pageLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
-                Font sectionNameFont = entryFont;
+                FontSize sectionNameFont = chapterFont;
 
                 switch (sectionBookmark.getType()) {
                     case PART:
                         marginAbove = interEntryMargin;
                         marginBelow = interEntryMargin;
-                        sectionNameFont = smallCapsEntryFont;
+                        sectionNameFont = partFont;
                         break;
 
                     case CHAPTER:
@@ -612,9 +598,9 @@ public class Typesetter {
                 if (indent > 0) {
                     horizontalList.addElement(new Box(indent, 0, 0));
                 }
-                horizontalList.addText(name, sectionNameFont, entryFontSize, null);
+                horizontalList.addText(name, sectionNameFont, null);
                 horizontalList.addElement(leader);
-                horizontalList.addText(pageLabel, entryFont, entryFontSize, null);
+                horizontalList.addText(pageLabel, chapterFont, null);
                 horizontalList.addElement(new Penalty(-Penalty.INFINITY));
                 horizontalList.format(verticalList, config.getBodyWidth());
 
