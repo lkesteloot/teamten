@@ -1,10 +1,10 @@
 package com.teamten.tex;
 
 import com.teamten.typeset.BookLayout;
+import com.teamten.typeset.Config;
 import com.teamten.typeset.Element;
 import com.teamten.typeset.Font;
 import com.teamten.typeset.FontManager;
-import com.teamten.typeset.FontName;
 import com.teamten.typeset.FontVariant;
 import com.teamten.typeset.Glue;
 import com.teamten.typeset.HBox;
@@ -48,8 +48,8 @@ public class TexParser {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
 
-        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
-                fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
+        Config config = Config.testConfig();
+        BookLayout bookLayout = new BookLayout();
 
         Typesetter typesetter = new Typesetter();
         TexParser texParser = new TexParser(inputStream, typesetter, fontManager);
@@ -58,7 +58,7 @@ public class TexParser {
         verticalList.println(System.out, "");
 
         // Add the vertical list to the PDF.
-        typesetter.addVerticalListToPdf(verticalList, bookLayout, pdDoc);
+        typesetter.addVerticalListToPdf(verticalList, config, bookLayout, fontManager, pdDoc);
 
         pdDoc.save(pdfFilename);
     }

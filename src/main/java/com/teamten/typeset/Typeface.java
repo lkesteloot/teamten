@@ -56,4 +56,14 @@ public enum Typeface {
             return Collections.unmodifiableMap(mFontMap);
         }
     }
+
+    /**
+     * Parses a typeface name by converting it to upper case and transforming spaces and hyphens to
+     * underscores, then looking it up in this enum.
+     *
+     * @throws IllegalArgumentException if the typeface is not found.
+     */
+    public static Typeface parse(String s) {
+        return valueOf(s.toUpperCase().replace(' ', '_').replace('-', '_'));
+    }
 }

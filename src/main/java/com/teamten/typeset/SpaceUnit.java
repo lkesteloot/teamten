@@ -1,8 +1,11 @@
 
 package com.teamten.typeset;
 
+import com.teamten.tex.TexParser;
+
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 
 /**
  * Represents various units to measure 1-dimensional space.
@@ -74,7 +77,7 @@ public enum SpaceUnit {
      * "centimeter" is rejected). The reader is left immediately after the
      * unit.
      *
-     * TODO delete?
+     * TODO merge with {@link TexParser#parseDistance()}?
      *
      * @return the distance in scaled points.
      * @throws IOException from the Reader.
@@ -134,5 +137,19 @@ public enum SpaceUnit {
         }
 
         return unit.toSp(value);
+    }
+
+    /**
+     * Parses a distance as a string. See {@link #parseDistance(Reader)} for details.
+     *
+     * @throws NumberFormatException if the distance cannot be parsed.
+     */
+    public static long parseDistance(String s) {
+        try {
+            return parseDistance(new StringReader(s));
+        } catch (IOException e) {
+            // Hopefully this can't happen.
+            throw new IllegalStateException("got exception parsing distance", e);
+        }
     }
 }

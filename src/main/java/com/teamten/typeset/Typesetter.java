@@ -8,6 +8,7 @@ import com.teamten.markdown.BlockType;
 import com.teamten.markdown.Doc;
 import com.teamten.markdown.MarkdownParser;
 import com.teamten.markdown.Span;
+import com.teamten.util.RomanNumerals;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -55,14 +56,13 @@ public class Typesetter {
     public PDDocument typeset(Doc doc) throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
-
-        // TODO Load these values from the document header.
-        BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
-                fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 8);
+        BookLayout bookLayout = new BookLayout();
 
         // Add document metadata.
+        Config config = new Config();
         for (Map.Entry<String,String> entry : doc.getMetadata()) {
-            bookLayout.addMetadata(entry.getKey(), entry.getValue());
+            Config.Key key = Config.Key.fromHeader(entry.getKey());
+            config.add(key, entry.getValue());
         }
 
         List<Page> pages = null;
@@ -70,12 +70,12 @@ public class Typesetter {
         for (int pass = 0; pass < MAX_ITERATIONS; pass++) {
             System.out.printf("Pass %d:\n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
-            VerticalList verticalList = docToVerticalList(doc, bookLayout, fontManager);
+            VerticalList verticalList = docToVerticalList(doc, config, bookLayout, fontManager);
             System.out.println("  Horizontal layout: " + stopwatch);
 
             // Format the vertical list into pages.
             stopwatch = Stopwatch.createStarted();
-            pages = verticalListToPages(verticalList, bookLayout.getBodyHeight());
+            pages = verticalListToPages(verticalList, config.getBodyHeight());
             System.out.println("  Vertical layout: " + stopwatch);
 
             // Get the full list of bookmarks.
@@ -95,7 +95,7 @@ public class Typesetter {
 
         // Send pages to PDF.
         Stopwatch stopwatch = Stopwatch.createStarted();
-        addPagesToPdf(pages, bookLayout, pdDoc);
+        addPagesToPdf(pages, config, bookLayout, fontManager, pdDoc);
         System.out.println("Adding to PDF: " + stopwatch);
 
         return pdDoc;
@@ -104,7 +104,7 @@ public class Typesetter {
     /**
      * Converts a DOM document to a vertical list.
      */
-    private VerticalList docToVerticalList(Doc doc, BookLayout bookLayout, FontManager fontManager) throws IOException {
+    private VerticalList docToVerticalList(Doc doc, Config config, BookLayout bookLayout, FontManager fontManager) throws IOException {
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
 
         VerticalList verticalList = new VerticalList();
@@ -156,19 +156,19 @@ public class Typesetter {
                     break;
 
                 case HALF_TITLE_PAGE:
-                    generateHalfTitlePage(bookLayout, verticalList, fontManager);
+                    generateHalfTitlePage(config, bookLayout, verticalList, fontManager);
                     continue;
 
                 case TITLE_PAGE:
-                    generateTitlePage(bookLayout, verticalList, fontManager);
+                    generateTitlePage(config, bookLayout, verticalList, fontManager);
                     continue;
 
                 case COPYRIGHT_PAGE:
-                    generateCopyrightPage(bookLayout, verticalList, fontManager);
+                    generateCopyrightPage(config, bookLayout, verticalList, fontManager);
                     continue;
 
                 case TABLE_OF_CONTENTS:
-                    generateTableOfContents(bookLayout, verticalList, fontManager);
+                    generateTableOfContents(config, bookLayout, verticalList, fontManager);
                     continue;
 
                 default:
@@ -260,7 +260,7 @@ public class Typesetter {
             horizontalList.addEndOfParagraph();
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
-            horizontalList.format(verticalList, bookLayout.getBodyWidth());
+            horizontalList.format(verticalList, config.getBodyWidth());
 
             if (ownPage) {
                 verticalList.oddPage();
@@ -286,12 +286,14 @@ public class Typesetter {
      * Adds the entire vertical list to the PDF, by first breaking it into pages and then adding the
      * pages to the PDF.
      */
-    public void addVerticalListToPdf(VerticalList verticalList, BookLayout bookLayout, PDDocument pdDoc) throws IOException {
+    public void addVerticalListToPdf(VerticalList verticalList, Config config, BookLayout bookLayout,
+                                     FontManager fontManager, PDDocument pdDoc) throws IOException {
+
         // Format the vertical list into pages.
-        List<Page> pages = verticalListToPages(verticalList, bookLayout.getBodyHeight());
+        List<Page> pages = verticalListToPages(verticalList, config.getBodyHeight());
 
         // Generate each page.
-        addPagesToPdf(pages, bookLayout, pdDoc);
+        addPagesToPdf(pages, config, bookLayout, fontManager, pdDoc);
     }
 
     /**
@@ -309,45 +311,49 @@ public class Typesetter {
     /**
      * Send each page (with the given size) to the PDF.
      */
-    public void addPagesToPdf(List<Page> pages, BookLayout bookLayout, PDDocument pdDoc) throws IOException {
+    public void addPagesToPdf(List<Page> pages, Config config, BookLayout bookLayout,
+                              FontManager fontManager, PDDocument pdDoc) throws IOException {
+
         for (Page page : pages) {
-            addPageToPdf(page, bookLayout, pdDoc);
+            addPageToPdf(page, config, bookLayout, fontManager, pdDoc);
         }
     }
 
     /**
      * Add the VBox as a page to the PDF.
      */
-    public void addPageToPdf(Page page, BookLayout bookLayout, PDDocument pdDoc) throws IOException {
+    public void addPageToPdf(Page page, Config config, BookLayout bookLayout,
+                             FontManager fontManager, PDDocument pdDoc) throws IOException {
+
         PDPage pdPage = new PDPage();
         pdDoc.addPage(pdPage);
         pdPage.setMediaBox(new PDRectangle(
-                PT.fromSpAsFloat(bookLayout.getPageWidth()),
-                PT.fromSpAsFloat(bookLayout.getPageHeight())));
+                PT.fromSpAsFloat(config.getPageWidth()),
+                PT.fromSpAsFloat(config.getPageHeight())));
 
         PDPageContentStream contents = new PDPageContentStream(pdDoc, pdPage);
 
         // Draw the margins for debugging.
         if (DRAW_MARGINS) {
             PdfUtil.drawDebugRectangle(contents,
-                    bookLayout.getPageMargin(),
-                    bookLayout.getPageMargin(),
-                    bookLayout.getBodyWidth(),
-                    bookLayout.getBodyHeight());
+                    config.getPageMargin(),
+                    config.getPageMargin(),
+                    config.getBodyWidth(),
+                    config.getBodyHeight());
         }
 
         // Start at top of page.
-        long y = bookLayout.getPageHeight() - bookLayout.getPageMargin();
+        long y = config.getPageHeight() - config.getPageMargin();
 
         // Lay out each element in the page.
         for (Element element : page.getElements()) {
-            long advanceY = element.layOutVertically(bookLayout.getPageMargin(), y, contents);
+            long advanceY = element.layOutVertically(config.getPageMargin(), y, contents);
 
             y -= advanceY;
         }
 
         // Draw the page number.
-        bookLayout.drawHeadline(page, contents);
+        drawHeadline(page, config, bookLayout, fontManager, contents);
 
         contents.close();
     }
@@ -355,10 +361,10 @@ public class Typesetter {
     /**
      * Adds the half-title page (the one with only the title on it) to the vertical list. Does not eject the page.
      */
-    private void generateHalfTitlePage(BookLayout bookLayout, VerticalList verticalList,
+    private void generateHalfTitlePage(Config config, BookLayout bookLayout, VerticalList verticalList,
                                        FontManager fontManager) throws IOException {
 
-        String title = bookLayout.getMetadata(BookLayout.MetadataKey.TITLE);
+        String title = config.getString(Config.Key.TITLE);
         if (title == null) {
             return;
         }
@@ -379,19 +385,19 @@ public class Typesetter {
         horizontalList.addText(title, titleFont, titleFontSize, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.HALF_TITLE_PAGE, title));
         horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        horizontalList.format(verticalList, config.getBodyWidth());
     }
 
     /**
      * Adds the title page to the vertical list. Does not eject the page.
      */
-    private void generateTitlePage(BookLayout bookLayout, VerticalList verticalList,
+    private void generateTitlePage(Config config, BookLayout bookLayout, VerticalList verticalList,
                                    FontManager fontManager) throws IOException {
 
-        String title = bookLayout.getMetadata(BookLayout.MetadataKey.TITLE);
-        String author = bookLayout.getMetadata(BookLayout.MetadataKey.AUTHOR);
-        String publisherName = bookLayout.getMetadata(BookLayout.MetadataKey.PUBLISHER_NAME);
-        String publisherLocation = bookLayout.getMetadata(BookLayout.MetadataKey.PUBLISHER_LOCATION);
+        String title = config.getString(Config.Key.TITLE);
+        String author = config.getString(Config.Key.AUTHOR);
+        String publisherName = config.getString(Config.Key.PUBLISHER_NAME);
+        String publisherLocation = config.getString(Config.Key.PUBLISHER_LOCATION);
         if (title == null || author == null) {
             return;
         }
@@ -419,7 +425,7 @@ public class Typesetter {
         horizontalList.addText(author, authorFont, authorFontSize, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.TITLE_PAGE, title));
         horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        horizontalList.format(verticalList, config.getBodyWidth());
 
         verticalList.addElement(new Box(0, titleMargin, 0));
 
@@ -428,7 +434,7 @@ public class Typesetter {
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
         horizontalList.addText(title, titleFont, titleFontSize, null);
         horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        horizontalList.format(verticalList, config.getBodyWidth());
 
         if (publisherName != null) {
             verticalList.addElement(new Box(0, publisherNameMargin, 0));
@@ -438,7 +444,7 @@ public class Typesetter {
             horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
             horizontalList.addText(publisherName, publisherNameFont, publisherNameFontSize, null);
             horizontalList.addEndOfParagraph();
-            horizontalList.format(verticalList, bookLayout.getBodyWidth());
+            horizontalList.format(verticalList, config.getBodyWidth());
 
             if (publisherLocation != null) {
                 verticalList.addElement(new Box(0, publisherLocationMargin, 0));
@@ -448,7 +454,7 @@ public class Typesetter {
                 horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
                 horizontalList.addText(publisherLocation, publisherLocationFont, publisherLocationFontSize, null);
                 horizontalList.addEndOfParagraph();
-                horizontalList.format(verticalList, bookLayout.getBodyWidth());
+                horizontalList.format(verticalList, config.getBodyWidth());
             }
         }
     }
@@ -456,11 +462,11 @@ public class Typesetter {
     /**
      * Adds the copyright page to the vertical list. Does not eject the page.
      */
-    private void generateCopyrightPage(BookLayout bookLayout, VerticalList verticalList,
+    private void generateCopyrightPage(Config config, BookLayout bookLayout, VerticalList verticalList,
                                        FontManager fontManager) throws IOException {
 
-        String copyright = bookLayout.getMetadata(BookLayout.MetadataKey.COPYRIGHT);
-        String printing = bookLayout.getMetadata(BookLayout.MetadataKey.PRINTING);
+        String copyright = config.getString(Config.Key.COPYRIGHT);
+        String printing = config.getString(Config.Key.PRINTING);
 
         if (copyright == null) {
             return;
@@ -483,7 +489,7 @@ public class Typesetter {
         horizontalList.addText(copyright, copyrightFont, copyrightFontSize, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.COPYRIGHT_PAGE, copyright));
         horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        horizontalList.format(verticalList, config.getBodyWidth());
 
         if (printing != null) {
             verticalList.addElement(new Box(0, printingMargin, 0));
@@ -493,20 +499,20 @@ public class Typesetter {
             horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
             horizontalList.addText(printing, printingFont, printingFontSize, null);
             horizontalList.addEndOfParagraph();
-            horizontalList.format(verticalList, bookLayout.getBodyWidth());
+            horizontalList.format(verticalList, config.getBodyWidth());
         }
     }
 
     /**
      * Adds the table of contents to the vertical list. Does not eject the page.
      */
-    private void generateTableOfContents(BookLayout bookLayout, VerticalList verticalList,
+    private void generateTableOfContents(Config config, BookLayout bookLayout, VerticalList verticalList,
                                          FontManager fontManager) throws IOException {
 
         long marginTop = IN.toSp(1.0);
         long paddingBelowTitle = IN.toSp(0.75);
 
-        String tocTitle = bookLayout.getMetadata(BookLayout.MetadataKey.TOC_TITLE);
+        String tocTitle = config.getString(Config.Key.TOC_TITLE);
         if (tocTitle == null) {
             tocTitle = "Table of Contents";
         }
@@ -529,7 +535,7 @@ public class Typesetter {
         horizontalList.addText(tocTitle, titleFont, titleFontSize, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.TABLE_OF_CONTENTS, tocTitle));
         horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        horizontalList.format(verticalList, config.getBodyWidth());
 
         // Space between title and line.
         verticalList.addElement(new Glue(paddingBelowTitle/3, 0, 0, false));
@@ -539,7 +545,7 @@ public class Typesetter {
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
         horizontalList.addElement(new Rule(boxWidth, boxHeight, 0));
         horizontalList.addEndOfParagraph();
-        horizontalList.format(verticalList, bookLayout.getBodyWidth());
+        horizontalList.format(verticalList, config.getBodyWidth());
 
         // Space below line.
         verticalList.addElement(new Glue(paddingBelowTitle*2/3, 0, 0, false));
@@ -596,9 +602,55 @@ public class Typesetter {
                 horizontalList.addElement(leader);
                 horizontalList.addText(pageLabel, entryFont, entryFontSize, null);
                 horizontalList.addElement(new Penalty(-Penalty.INFINITY));
-                horizontalList.format(verticalList, bookLayout.getBodyWidth());
+                horizontalList.format(verticalList, config.getBodyWidth());
 
                 previousMarginBelow = marginBelow;
+            }
+        }
+    }
+
+    /**
+     * Draw the headline (page number of part or chapter title) at the top of the page.
+     */
+    public void drawHeadline(Page page, Config config, BookLayout bookLayout,
+                             FontManager fontManager, PDPageContentStream contents) throws IOException {
+
+        int physicalPageNumber = page.getPhysicalPageNumber();
+
+        if (bookLayout.shouldDrawHeadline(physicalPageNumber)) {
+            String pageNumberLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
+            String headlineLabel = bookLayout.getHeadlineLabel(physicalPageNumber, config);
+            long pageMargin = config.getPageMargin();
+            TypefaceVariantSize pageNumberFontDesc = config.getFont(Config.Key.PAGE_NUMBER_FONT);
+            Font pageNumberFont = fontManager.get(pageNumberFontDesc);
+            float pageNumberFontSize = (float) pageNumberFontDesc.getSize(); // TODO remove cast.
+
+            long y = config.getPageHeight() - pageMargin + PT.toSp(pageNumberFontSize*2.5);
+
+            // Draw page number.
+            long x;
+            if (physicalPageNumber % 2 == 0) {
+                // Even page, number on the left.
+                x = pageMargin;
+            } else {
+                // Odd page, number on the right.
+                long labelWidth = pageNumberFont.getStringMetrics(pageNumberLabel, pageNumberFontSize).getWidth();
+                x = config.getPageWidth() - pageMargin - labelWidth;
+            }
+
+            // TODO this doesn't kern.
+            pageNumberFont.draw(pageNumberLabel, pageNumberFontSize, x, y, contents);
+
+            // Draw headline label.
+            if (headlineLabel != null) {
+                // Draw this in upper case. TODO put this into a style.
+                headlineLabel = headlineLabel.toUpperCase();
+
+                // TODO this doesn't kern.
+                long labelWidth = pageNumberFont.getStringMetrics(headlineLabel, pageNumberFontSize).getWidth();
+                x = pageMargin + (config.getBodyWidth() - labelWidth)/2;
+
+                pageNumberFont.draw(headlineLabel, pageNumberFontSize, x, y, contents);
             }
         }
     }

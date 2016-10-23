@@ -1,15 +1,11 @@
 package com.teamten.typeset;
 
 import com.teamten.util.RomanNumerals;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-
-import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * Manages the overall layout of the book. This includes the position and format of the page numbers,
@@ -21,84 +17,8 @@ public class BookLayout {
      */
     private final NavigableMap<Integer,SectionBookmark> mPageToSectionMap = new TreeMap<>();
     private final Map<SectionBookmark.Type,Integer> mSectionToPageMap = new HashMap<>();
-    private final Map<MetadataKey,String> mMetadata = new HashMap<>();
-    private final long mPageWidth;
-    private final long mPageHeight;
-    private final long mPageMargin;
-    private final Font mPageNumberFont;
-    private final float mPageNumberFontSize;
     private int mFirstFrontMatterPhysicalPage = 1;
     private int mFirstBodyMatterPhysicalPage = 5;
-
-    public enum MetadataKey {
-        TITLE,
-        AUTHOR,
-        PUBLISHER_NAME,
-        PUBLISHER_LOCATION,
-        COPYRIGHT,
-        PRINTING,
-        TOC_TITLE,
-    }
-
-    public BookLayout(long pageWidth, long pageHeight, long pageMargin, Font pageNumberFont, float pageNumberFontSize) {
-        mPageWidth = pageWidth;
-        mPageHeight = pageHeight;
-        mPageMargin = pageMargin;
-        mPageNumberFont = pageNumberFont;
-        mPageNumberFontSize = pageNumberFontSize;
-    }
-
-    public void addMetadata(MetadataKey key, String value) {
-        mMetadata.put(key, value);
-    }
-
-    /**
-     * Similar to {@link #addMetadata(MetadataKey, String)}, but the key is a string. The string key is
-     * converted to upper case, and hyphens are converted to underscores. The result must be one of the
-     * values in the {@link MetadataKey} enum.
-     *
-     * @throws IllegalArgumentException if the key does not match one of the entries in the {@link MetadataKey} enum.
-     */
-    public void addMetadata(String stringKey, String value) {
-        // Convert to upper case and replace hyphens with underscores.
-        stringKey = stringKey.toUpperCase().replace("-", "_");
-
-        // This will throw an IllegalArgumentException if the key is not found in the enum.
-        MetadataKey key = MetadataKey.valueOf(stringKey);
-
-        // Add it to the map of metadata.
-        addMetadata(key, value);
-    }
-
-    public String getMetadata(MetadataKey key) {
-        return mMetadata.get(key);
-    }
-
-    public long getPageWidth() {
-        return mPageWidth;
-    }
-
-    public long getPageHeight() {
-        return mPageHeight;
-    }
-
-    public long getPageMargin() {
-        return mPageMargin;
-    }
-
-    /**
-     * The width of the text on the page.
-     */
-    public long getBodyWidth() {
-        return mPageWidth - 2*mPageMargin;
-    }
-
-    /**
-     * The height of the text on the page.
-     */
-    public long getBodyHeight() {
-        return mPageHeight - 2*mPageMargin;
-    }
 
     /**
      * Look through the bookmarks to figure out where the body starts and, for any given page, what
@@ -157,50 +77,9 @@ public class BookLayout {
     }
 
     /**
-     * Draw the headline (page number of part or chapter title) at the top of the page.
-     */
-    public void drawHeadline(Page page, PDPageContentStream contents) throws IOException {
-        int physicalPageNumber = page.getPhysicalPageNumber();
-
-        if (shouldDrawHeadline(physicalPageNumber)) {
-            String pageNumberLabel = getPageNumberLabel(physicalPageNumber);
-            String headlineLabel = getHeadlineLabel(physicalPageNumber);
-
-            // TODO pick nice vertical position:
-            long y = mPageHeight - mPageMargin + PT.toSp(mPageNumberFontSize*2.5);
-
-            // Draw page number.
-            long x;
-            if (physicalPageNumber % 2 == 0) {
-                // Even page, number on the left.
-                x = mPageMargin;
-            } else {
-                // Odd page, number on the right.
-                long labelWidth = mPageNumberFont.getStringMetrics(pageNumberLabel, mPageNumberFontSize).getWidth();
-                x = mPageWidth - mPageMargin - labelWidth;
-            }
-
-            // TODO this doesn't kern.
-            mPageNumberFont.draw(pageNumberLabel, mPageNumberFontSize, x, y, contents);
-
-            // Draw headline label.
-            if (headlineLabel != null) {
-                // Draw this in upper case. TODO put this into a style.
-                headlineLabel = headlineLabel.toUpperCase();
-
-                // TODO this doesn't kern.
-                long labelWidth = mPageNumberFont.getStringMetrics(headlineLabel, mPageNumberFontSize).getWidth();
-                x = mPageMargin + (getBodyWidth() - labelWidth)/2;
-
-                mPageNumberFont.draw(headlineLabel, mPageNumberFontSize, x, y, contents);
-            }
-        }
-    }
-
-    /**
      * Whether we should draw a headline on this page.
      */
-    private boolean shouldDrawHeadline(int physicalPageNumber) {
+    public boolean shouldDrawHeadline(int physicalPageNumber) {
         // Don't draw on pages where sections start.
         if (mPageToSectionMap.containsKey(physicalPageNumber)) {
             return false;
@@ -234,8 +113,11 @@ public class BookLayout {
      * Return the string to display at the top center of the page. This is usually based on the current
      * part or chapter title.
      */
-    private String getHeadlineLabel(int physicalPageNumber) {
-        String headlineLabel = getMetadata(MetadataKey.TITLE);
+    public String getHeadlineLabel(int physicalPageNumber, Config config) {
+        String headlineLabel = config.getString(Config.Key.TITLE);
+        if (headlineLabel == null) {
+            headlineLabel = "";
+        }
 
         if (physicalPageNumber % 2 == 1) {
             // Use section name on right-hand (odd) pages.
