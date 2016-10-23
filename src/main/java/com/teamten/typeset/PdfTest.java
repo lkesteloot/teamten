@@ -22,12 +22,12 @@ public class PdfTest {
 
         String text = "The quick Va Vo Vu V. brown fox jumps over the lazy AV dog.";
         PdfBoxFont font = new PdfBoxFont(pdf, new File("/Library/Fonts/Times New Roman.ttf"));
-        float fontSize = 14;
+        double fontSize = 14;
 
         // All together.
         long y = PT.toSp(700);
         contents.beginText();
-        contents.setFont(font.getPdFont(), fontSize);
+        contents.setFont(font.getPdFont(), (float) fontSize);
         contents.newLineAtOffset(100, PT.fromSpAsFloat(y));
         contents.showText(text);
         contents.endText();
@@ -39,7 +39,7 @@ public class PdfTest {
             String letter = text.substring(i, i + 1);
 
             contents.beginText();
-            contents.setFont(font.getPdFont(), fontSize);
+            contents.setFont(font.getPdFont(), (float) fontSize);
             contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
             contents.showText(letter);
             contents.endText();
@@ -60,7 +60,7 @@ public class PdfTest {
             }
 
             contents.beginText();
-            contents.setFont(font.getPdFont(), fontSize);
+            contents.setFont(font.getPdFont(), (float) fontSize);
             contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
             contents.showText(letter);
             contents.endText();

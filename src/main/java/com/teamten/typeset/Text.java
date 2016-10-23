@@ -3,6 +3,7 @@ package com.teamten.typeset;
 import com.google.common.math.DoubleMath;
 import com.teamten.util.CodePoints;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -13,14 +14,14 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * A sequence of characters.
  */
 public class Text extends Box {
-    private final Font mFont;
-    private final float mFontSize;
-    private final String mText;
+    private final @NotNull Font mFont;
+    private final double mFontSize;
+    private final @NotNull String mText;
 
     /**
      * Constructor for string of any size.
      */
-    public Text(Font font, float fontSize, String text, long width, long height, long depth) {
+    public Text(Font font, double fontSize, String text, long width, long height, long depth) {
         super(width, height, depth);
         mFont = font;
         mFontSize = fontSize;
@@ -30,7 +31,7 @@ public class Text extends Box {
     /**
      * Constructor for a string.
      */
-    public Text(String text, Font font, float fontSize) {
+    public Text(String text, Font font, double fontSize) {
         super(font.getStringMetrics(text, fontSize));
         mFont = font;
         mFontSize = fontSize;
@@ -40,7 +41,7 @@ public class Text extends Box {
     /**
      * Constructor for single character.
      */
-    public Text(int ch, Font font, float fontSize) {
+    public Text(int ch, Font font, double fontSize) {
         super(font.getCharacterMetrics(ch, fontSize));
         mFont = font;
         mFontSize = fontSize;
@@ -64,7 +65,7 @@ public class Text extends Box {
     /**
      * The font size in points.
      */
-    public float getFontSize() {
+    public double getFontSize() {
         return mFontSize;
     }
 
@@ -127,7 +128,7 @@ public class Text extends Box {
 
         Text text = (Text) o;
 
-        if (Float.compare(text.mFontSize, mFontSize) != 0) return false;
+        if (Double.compare(text.mFontSize, mFontSize) != 0) return false;
         if (!mFont.equals(text.mFont)) return false;
         return mText.equals(text.mText);
 
@@ -135,8 +136,11 @@ public class Text extends Box {
 
     @Override
     public int hashCode() {
-        int result = mFont.hashCode();
-        result = 31 * result + (mFontSize != +0.0f ? Float.floatToIntBits(mFontSize) : 0);
+        int result;
+        long temp;
+        result = mFont.hashCode();
+        temp = Double.doubleToLongBits(mFontSize);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
         result = 31 * result + mText.hashCode();
         return result;
     }

@@ -59,7 +59,7 @@ public class HBox extends Box {
     /**
      * Make an HBox that contains only a Text with the given string, font, and font size.
      */
-    public static HBox makeOnlyString(String text, Font font, float fontSize) {
+    public static HBox makeOnlyString(String text, Font font, double fontSize) {
         return new HBox(Arrays.asList(new Text(text, font, fontSize)));
     }
 

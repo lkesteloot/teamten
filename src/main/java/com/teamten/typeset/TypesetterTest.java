@@ -17,7 +17,7 @@ public class TypesetterTest {
 
         Config config = Config.testConfig();
         Font font = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
-        float fontSize = 11;
+        double fontSize = 11;
         BookLayout bookLayout = new BookLayout();
 
         VerticalList verticalList = new VerticalList();

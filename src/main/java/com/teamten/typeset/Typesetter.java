@@ -129,7 +129,7 @@ public class Typesetter {
         BlockType previousBlockType = null;
         for (Block block : doc.getBlocks()) {
             Typeface typeface;
-            float fontSize;
+            double fontSize;
             boolean indentFirstLine = false;
             boolean allCaps = false;
             boolean center = false;
@@ -647,12 +647,12 @@ public class Typesetter {
                 x = pageMargin;
             } else {
                 // Odd page, number on the right.
-                long labelWidth = pageNumberFont.getFont().getStringMetrics(pageNumberLabel, (float) pageNumberFont.getSize()).getWidth();
+                long labelWidth = pageNumberFont.getFont().getStringMetrics(pageNumberLabel, pageNumberFont.getSize()).getWidth();
                 x = config.getPageWidth() - pageMargin - labelWidth;
             }
 
             // TODO this doesn't kern.
-            pageNumberFont.getFont().draw(pageNumberLabel, (float) pageNumberFont.getSize(), x, y, contents);
+            pageNumberFont.getFont().draw(pageNumberLabel, pageNumberFont.getSize(), x, y, contents);
 
             // Draw headline label.
             if (headlineLabel != null) {
@@ -660,10 +660,10 @@ public class Typesetter {
                 headlineLabel = headlineLabel.toUpperCase();
 
                 // TODO this doesn't kern.
-                long labelWidth = pageNumberFont.getFont().getStringMetrics(headlineLabel, (float) pageNumberFont.getSize()).getWidth();
+                long labelWidth = pageNumberFont.getFont().getStringMetrics(headlineLabel, pageNumberFont.getSize()).getWidth();
                 x = pageMargin + (config.getBodyWidth() - labelWidth)/2;
 
-                pageNumberFont.getFont().draw(headlineLabel, (float) pageNumberFont.getSize(), x, y, contents);
+                pageNumberFont.getFont().draw(headlineLabel, pageNumberFont.getSize(), x, y, contents);
             }
         }
     }

@@ -12,11 +12,11 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class Leader extends Glue {
     private final Font mFont;
-    private final float mFontSize;
+    private final double mFontSize;
     private final String mPattern;
     private final long mPatternWidth;
 
-    private Leader(Font font, float fontSize, String pattern, long size, long stretch) {
+    private Leader(Font font, double fontSize, String pattern, long size, long stretch) {
         super(size, stretch, stretch != 0, 0, false, true);
         mFont = font;
         mFontSize = fontSize;
@@ -30,7 +30,7 @@ public class Leader extends Glue {
      * @param pattern For table of contents you want something like " . "
      * @param stretch how much (infinite) stretchability. 1pt is good for this.
      */
-    public Leader(Font font, float fontSize, String pattern, long stretch) {
+    public Leader(Font font, double fontSize, String pattern, long stretch) {
         this(font, fontSize, pattern, 0, stretch);
     }
 
