@@ -13,7 +13,7 @@ public interface Font {
      *
      * @param fontSize the size of the font in points.
      */
-    long getKerning(int leftChar, int rightChar, float fontSize);
+    long getKerning(int leftChar, int rightChar, double fontSize);
 
     /**
      * Replaces all ligatures (supported by this font) in the string.
@@ -28,23 +28,22 @@ public interface Font {
     /**
      * Return the size of a code point in the specified font size.
      */
-    Metrics getCharacterMetrics(int ch, float fontSize);
+    Metrics getCharacterMetrics(int ch, double fontSize);
 
     /**
      * Draw the text.
-     *
-     * @param text the text to draw.
+     *  @param text the text to draw.
      * @param fontSize the size in points.
      * @param x the left-hand edge of the text in scaled points.
      * @param y the baseline of the text in scaled points.
      * @param contents the stream to write to.
      */
-    void draw(String text, float fontSize, long x, long y, PDPageContentStream contents) throws IOException;
+    void draw(String text, double fontSize, long x, long y, PDPageContentStream contents) throws IOException;
 
     /**
      * Get the size of the text in the specified font size. Does not include kerning.
      */
-    default Metrics getStringMetrics(String text, float fontSize) {
+    default Metrics getStringMetrics(String text, double fontSize) {
         long width = 0;
         long height = 0;
         long depth = 0;

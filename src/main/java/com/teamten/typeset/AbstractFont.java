@@ -25,7 +25,7 @@ public abstract class AbstractFont implements Font {
     }
 
     @Override
-    public long getKerning(int leftChar, int rightChar, float fontSize) {
+    public long getKerning(int leftChar, int rightChar, double fontSize) {
         // No kerning by default.
         return 0;
     }

@@ -87,7 +87,7 @@ public class PdfBoxFont extends AbstractFont {
      * @param fontSize the size of the font in points.
      */
     @Override
-    public long getKerning(int leftChar, int rightChar, float fontSize) {
+    public long getKerning(int leftChar, int rightChar, double fontSize) {
         if (mKerningSubtable == null) {
             return 0;
         } else {
@@ -118,7 +118,7 @@ public class PdfBoxFont extends AbstractFont {
      * Return the size of a code point in the specified font size.
      */
     @Override
-    public Metrics getCharacterMetrics(int ch, float fontSize) {
+    public Metrics getCharacterMetrics(int ch, double fontSize) {
         try {
             int glyphId = mCmapSubtable.getGlyphId(ch);
 
@@ -149,9 +149,9 @@ public class PdfBoxFont extends AbstractFont {
     }
 
     @Override
-    public void draw(String text, float fontSize, long x, long y, PDPageContentStream contents) throws IOException {
+    public void draw(String text, double fontSize, long x, long y, PDPageContentStream contents) throws IOException {
         contents.beginText();
-        contents.setFont(getPdFont(), fontSize);
+        contents.setFont(getPdFont(), (float) fontSize);
         contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
         contents.showText(text);
         contents.endText();

@@ -26,14 +26,14 @@ public class SmallCapsFont extends AbstractFont {
     }
 
     @Override
-    public long getKerning(int leftChar, int rightChar, float fontSize) {
+    public long getKerning(int leftChar, int rightChar, double fontSize) {
         // Convert each to fake small caps.
-        float leftFontSize = fontSize;
+        double leftFontSize = fontSize;
         if (isSmallCapCharacter(leftChar)) {
             leftFontSize *= mSmallSize;
             leftChar = Character.toUpperCase(leftChar);
         }
-        float rightFontSize = fontSize;
+        double rightFontSize = fontSize;
         if (isSmallCapCharacter(rightChar)) {
             rightFontSize *= mSmallSize;
             rightChar = Character.toUpperCase(rightChar);
@@ -41,7 +41,7 @@ public class SmallCapsFont extends AbstractFont {
 
         // Average them. This will be correct if they're in the same class. Otherwise it'll get a font size
         // half way, which is probably close.
-        float effectiveFontSize = (leftFontSize + rightFontSize) / 2.0f;
+        double effectiveFontSize = (leftFontSize + rightFontSize) / 2.0;
 
         return mUnderlyingFont.getKerning(leftChar, rightChar, effectiveFontSize);
     }
@@ -52,7 +52,7 @@ public class SmallCapsFont extends AbstractFont {
     }
 
     @Override
-    public Metrics getCharacterMetrics(int ch, float fontSize) {
+    public Metrics getCharacterMetrics(int ch, double fontSize) {
         if (isSmallCapCharacter(ch)) {
             fontSize *= mSmallSize;
             ch = Character.toUpperCase(ch);
@@ -62,7 +62,7 @@ public class SmallCapsFont extends AbstractFont {
     }
 
     @Override
-    public void draw(String text, float fontSize, long x, long y, PDPageContentStream contents) throws IOException {
+    public void draw(String text, double fontSize, long x, long y, PDPageContentStream contents) throws IOException {
         // Draw one character at a time. We could be more clever here and find spans of characters of the same class,
         // but very little of the book is in small caps, so it would buy us little in performance or output file size.
         int i = 0;
@@ -70,7 +70,7 @@ public class SmallCapsFont extends AbstractFont {
             int ch = text.codePointAt(i);
 
             // Convert to fake small caps.
-            float characterFontSize = fontSize;
+            double characterFontSize = fontSize;
             if (isSmallCapCharacter(ch)) {
                 characterFontSize *= mSmallSize;
                 ch = Character.toUpperCase(ch);

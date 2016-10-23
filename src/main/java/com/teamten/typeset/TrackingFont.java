@@ -41,7 +41,7 @@ public class TrackingFont extends AbstractFont {
     }
 
     @Override
-    public long getKerning(int leftChar, int rightChar, float fontSize) {
+    public long getKerning(int leftChar, int rightChar, double fontSize) {
         if (mKerning != 0.0) {
             // Respect regular kerning.
             return (long) (mUnderlyingFont.getKerning(leftChar, rightChar, fontSize)*mKerning + 0.5);
@@ -56,7 +56,7 @@ public class TrackingFont extends AbstractFont {
     }
 
     @Override
-    public Metrics getCharacterMetrics(int ch, float fontSize) {
+    public Metrics getCharacterMetrics(int ch, double fontSize) {
         Metrics metrics = mUnderlyingFont.getCharacterMetrics(ch, fontSize);
 
         // Figure out extra space.
@@ -66,7 +66,7 @@ public class TrackingFont extends AbstractFont {
     }
 
     @Override
-    public void draw(String text, float fontSize, long x, long y, PDPageContentStream contents) throws IOException {
+    public void draw(String text, double fontSize, long x, long y, PDPageContentStream contents) throws IOException {
         // Draw one character at a time.
         int i = 0;
         while (i < text.length()) {

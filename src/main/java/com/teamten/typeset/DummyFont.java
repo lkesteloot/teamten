@@ -41,12 +41,12 @@ public class DummyFont extends AbstractFont {
     }
 
     @Override
-    public Metrics getCharacterMetrics(int ch, float fontSize) {
+    public Metrics getCharacterMetrics(int ch, double fontSize) {
         return new Metrics((long) (mWidth*fontSize), (long) (mHeight*fontSize), (long) (mDepth*fontSize));
     }
 
     @Override
-    public void draw(String text, float fontSize, long x, long y, PDPageContentStream contents) throws IOException {
+    public void draw(String text, double fontSize, long x, long y, PDPageContentStream contents) throws IOException {
         // Don't draw.
     }
 
