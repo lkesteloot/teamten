@@ -15,6 +15,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -65,12 +66,27 @@ public class Typesetter {
             config.add(key, entry.getValue());
         }
 
+        // Load the hyphenation dictionary.
+        String language = config.getString(Config.Key.LANGUAGE);
+        if (language == null) {
+            language = "en";
+        }
+        HyphenDictionary hyphenDictionary;
+        try {
+            hyphenDictionary = HyphenDictionary.fromResource(language);
+        } catch (FileNotFoundException e) {
+            System.out.printf("Warning: No hyphenation dictionary for language \"" + language + "\"\n");
+            // Hyphenation won't happen.
+            hyphenDictionary = null;
+        }
+
         List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
-        for (int pass = 0; pass < MAX_ITERATIONS; pass++) {
+        int pass;
+        for (pass = 0; pass < MAX_ITERATIONS; pass++) {
             System.out.printf("Pass %d:\n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
-            VerticalList verticalList = docToVerticalList(doc, config, bookLayout, fontManager);
+            VerticalList verticalList = docToVerticalList(doc, config, bookLayout, fontManager, hyphenDictionary);
             System.out.println("  Horizontal layout: " + stopwatch);
 
             // Format the vertical list into pages.
@@ -91,7 +107,9 @@ public class Typesetter {
             // Figure out where the sections are.
             bookLayout.configureFromBookmarks(bookmarks);
         }
-        // TODO throw if we had too many iterations.
+        if (pass == MAX_ITERATIONS) {
+            throw new IllegalStateException("took too many passes to converge on stable page numbers");
+        }
 
         // Send pages to PDF.
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -104,8 +122,8 @@ public class Typesetter {
     /**
      * Converts a DOM document to a vertical list.
      */
-    private VerticalList docToVerticalList(Doc doc, Config config, BookLayout bookLayout, FontManager fontManager) throws IOException {
-        HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("fr");
+    private VerticalList docToVerticalList(Doc doc, Config config, BookLayout bookLayout,
+                                           FontManager fontManager, HyphenDictionary hyphenDictionary) throws IOException {
 
         VerticalList verticalList = new VerticalList();
 
@@ -180,17 +198,14 @@ public class Typesetter {
             Font spanItalicFont = fontManager.get(typeface, FontVariant.ITALIC);
             Font spanSmallCapsFont = fontManager.get(typeface, FontVariant.SMALL_CAPS);
 
+            if (smallCaps) {
+                spanRegularFont = spanSmallCapsFont;
+                // No small caps for italics.
+            }
             if (addTracking) {
                 spanRegularFont = new TrackingFont(spanRegularFont, 0.1, 0.5);
                 spanItalicFont = new TrackingFont(spanItalicFont, 0.1, 0.5);
                 spanSmallCapsFont = new TrackingFont(spanSmallCapsFont, 0.1, 0.5);
-            }
-            if (smallCaps) {
-                // TODO if we ever get a real small caps font, we'll want to move this up above the tracking
-                // adjustment and use the real small cap font as a foundation.
-                spanRegularFont = new SmallCapsFont(spanRegularFont, 0.8f);
-                spanItalicFont = new SmallCapsFont(spanItalicFont, 0.8f);
-                // spanSmallCapsFont is already small caps.
             }
 
             long leading = PT.toSp(fontSize * 1.2f);

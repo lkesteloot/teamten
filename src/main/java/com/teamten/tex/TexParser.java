@@ -33,7 +33,6 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class TexParser {
     private final InputStream mInputStream;
-    private final Typesetter mTypesetter;
     private final FontManager mFontManager;
     private final TexTokenizer mTexTokenizer;
     private final Font mFont;
@@ -52,7 +51,7 @@ public class TexParser {
         BookLayout bookLayout = new BookLayout();
 
         Typesetter typesetter = new Typesetter();
-        TexParser texParser = new TexParser(inputStream, typesetter, fontManager);
+        TexParser texParser = new TexParser(inputStream, fontManager);
 
         VerticalList verticalList = texParser.parseVerticalList(false);
         verticalList.println(System.out, "");
@@ -63,10 +62,9 @@ public class TexParser {
         pdDoc.save(pdfFilename);
     }
 
-    public TexParser(InputStream inputStream, Typesetter typesetter, FontManager fontManager) throws IOException {
+    public TexParser(InputStream inputStream, FontManager fontManager) throws IOException {
 
         mInputStream = inputStream;
-        mTypesetter = typesetter;
         mFontManager = fontManager;
 
         mTexTokenizer = new TexTokenizer(mInputStream);

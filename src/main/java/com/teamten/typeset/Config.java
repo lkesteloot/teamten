@@ -45,10 +45,11 @@ public class Config {
         COPYRIGHT(KeyType.STRING),
         PRINTING(KeyType.STRING),
         TOC_TITLE(KeyType.STRING),
+        LANGUAGE(KeyType.STRING),
 
         // Fonts.
         PAGE_NUMBER_FONT(KeyType.FONT),
-        HEADLINE_FONT(KeyType.FONT),
+        HEADLINE_FONT(KeyType.FONT), // TODO use
 
         // Distances
         PAGE_WIDTH(KeyType.DISTANCE),

@@ -5,6 +5,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,12 +38,18 @@ public class HyphenDictionary {
 
     /**
      * Reads a .dic file from a resource. Use e.g., "fr" for language.
+     *
+     * @throws FileNotFoundException if the file can't be found.
+     * @throws IOException if the file can't be loaded.
      */
     public static HyphenDictionary fromResource(String language) throws IOException {
         String filename = "hyph_" + language + ".dic";
 
         // In the same resource directory as this class.
         InputStream inputStream = HyphenDictionary.class.getResourceAsStream(filename);
+        if (inputStream == null) {
+            throw new FileNotFoundException("no hyphenation dictionary for language \"" + language + "\"");
+        }
 
         return fromInputStream(inputStream);
     }

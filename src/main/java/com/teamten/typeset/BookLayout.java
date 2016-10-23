@@ -10,6 +10,8 @@ import java.util.TreeMap;
 /**
  * Manages the overall layout of the book. This includes the position and format of the page numbers,
  * the section headers, etc.
+ *
+ * TODO this class has an awkward name. Maybe "Sections", since that's all it keeps track of.
  */
 public class BookLayout {
     /**
