@@ -37,8 +37,21 @@ public class FontManager {
     }
 
     /**
+     * Fetches a font, returning the font and size together.
+     *
+     * @throws IllegalArgumentException if the font cannot be loaded.
+     */
+    public FontSize get(TypefaceVariantSize typefaceVariantSize) {
+        Font font = get((TypefaceVariant) typefaceVariantSize);
+
+        return new FontSize(font, typefaceVariantSize.getSize());
+    }
+
+    /**
      * Utility method that calls {@link #get(TypefaceVariant)} with a new {@link TypefaceVariant} object
      * created from the two parameters.
+     *
+     * TODO can eventually delete.
      */
     public Font get(Typeface typeface, FontVariant fontVariant) {
         return get(new TypefaceVariant(typeface, fontVariant));

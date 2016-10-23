@@ -8,7 +8,6 @@ import com.teamten.markdown.BlockType;
 import com.teamten.markdown.Doc;
 import com.teamten.markdown.MarkdownParser;
 import com.teamten.markdown.Span;
-import com.teamten.util.RomanNumerals;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -637,10 +636,9 @@ public class Typesetter {
             String headlineLabel = bookLayout.getHeadlineLabel(physicalPageNumber, config);
             long pageMargin = config.getPageMargin();
             TypefaceVariantSize pageNumberFontDesc = config.getFont(Config.Key.PAGE_NUMBER_FONT);
-            Font pageNumberFont = fontManager.get(pageNumberFontDesc);
-            float pageNumberFontSize = (float) pageNumberFontDesc.getSize(); // TODO remove cast.
+            FontSize pageNumberFont = fontManager.get(pageNumberFontDesc);
 
-            long y = config.getPageHeight() - pageMargin + PT.toSp(pageNumberFontSize*2.5);
+            long y = config.getPageHeight() - pageMargin + PT.toSp(pageNumberFont.getSize()*2.5);
 
             // Draw page number.
             long x;
@@ -649,12 +647,12 @@ public class Typesetter {
                 x = pageMargin;
             } else {
                 // Odd page, number on the right.
-                long labelWidth = pageNumberFont.getStringMetrics(pageNumberLabel, pageNumberFontSize).getWidth();
+                long labelWidth = pageNumberFont.getFont().getStringMetrics(pageNumberLabel, (float) pageNumberFont.getSize()).getWidth();
                 x = config.getPageWidth() - pageMargin - labelWidth;
             }
 
             // TODO this doesn't kern.
-            pageNumberFont.draw(pageNumberLabel, pageNumberFontSize, x, y, contents);
+            pageNumberFont.getFont().draw(pageNumberLabel, (float) pageNumberFont.getSize(), x, y, contents);
 
             // Draw headline label.
             if (headlineLabel != null) {
@@ -662,10 +660,10 @@ public class Typesetter {
                 headlineLabel = headlineLabel.toUpperCase();
 
                 // TODO this doesn't kern.
-                long labelWidth = pageNumberFont.getStringMetrics(headlineLabel, pageNumberFontSize).getWidth();
+                long labelWidth = pageNumberFont.getFont().getStringMetrics(headlineLabel, (float) pageNumberFont.getSize()).getWidth();
                 x = pageMargin + (config.getBodyWidth() - labelWidth)/2;
 
-                pageNumberFont.draw(headlineLabel, pageNumberFontSize, x, y, contents);
+                pageNumberFont.getFont().draw(headlineLabel, (float) pageNumberFont.getSize(), x, y, contents);
             }
         }
     }
