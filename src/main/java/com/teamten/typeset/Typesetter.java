@@ -54,7 +54,7 @@ public class Typesetter {
 
     public PDDocument typeset(Doc doc) throws IOException {
         PDDocument pdDoc = new PDDocument();
-        FontManager fontManager = new FontManager(pdDoc);
+        FontManager fontManager = new PdfBoxFontManager(pdDoc);
 
         // TODO Load these values from the document header.
         BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),

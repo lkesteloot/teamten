@@ -4,8 +4,10 @@ import com.teamten.typeset.BookLayout;
 import com.teamten.typeset.Element;
 import com.teamten.typeset.Font;
 import com.teamten.typeset.FontManager;
+import com.teamten.typeset.FontName;
 import com.teamten.typeset.Glue;
 import com.teamten.typeset.HBox;
+import com.teamten.typeset.PdfBoxFontManager;
 import com.teamten.typeset.Penalty;
 import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.Text;
@@ -43,7 +45,7 @@ public class TexParser {
 
         InputStream inputStream = new FileInputStream(texFilename);
         PDDocument pdDoc = new PDDocument();
-        FontManager fontManager = new FontManager(pdDoc);
+        FontManager fontManager = new PdfBoxFontManager(pdDoc);
 
         BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
                 fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 11);
@@ -76,7 +78,7 @@ public class TexParser {
             }
         }
 
-        mFont = mFontManager.get(FontManager.FontName.TIMES_NEW_ROMAN);
+        mFont = mFontManager.get(FontName.TIMES_NEW_ROMAN);
         mFontSize = 11;
     }
 

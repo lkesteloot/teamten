@@ -13,12 +13,12 @@ public class TypesetterTest {
     public static void main(String[] args) throws IOException {
         Typesetter typesetter = new Typesetter();
         PDDocument pdDoc = new PDDocument();
-        FontManager fontManager = new FontManager(pdDoc);
+        FontManager fontManager = new PdfBoxFontManager(pdDoc);
 
         BookLayout bookLayout = new BookLayout(IN.toSp(6), IN.toSp(9), IN.toSp(1),
                 fontManager.get(Typeface.TIMES_NEW_ROMAN.regular()), 11);
 
-        Font font = fontManager.get(FontManager.FontName.TIMES_NEW_ROMAN);
+        Font font = fontManager.get(FontName.TIMES_NEW_ROMAN);
         float fontSize = 11;
 
         VerticalList verticalList = new VerticalList();

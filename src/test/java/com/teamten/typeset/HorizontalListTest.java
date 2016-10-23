@@ -20,7 +20,7 @@ public class HorizontalListTest {
     public void wrapTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new FontManager(pdDoc);
-        Font font = fontManager.get(FontManager.FontName.TIMES_NEW_ROMAN);
+        Font font = fontManager.get(FontName.TIMES_NEW_ROMAN);
         float fontSize = 11;
 
         MockVerticalList verticalList = new MockVerticalList();
@@ -44,7 +44,7 @@ public class HorizontalListTest {
     public void ligatureTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new FontManager(pdDoc);
-        Font font = fontManager.get(FontManager.FontName.TIMES_NEW_ROMAN);
+        Font font = fontManager.get(FontName.TIMES_NEW_ROMAN);
         float fontSize = 11;
 
         // Fake font with "ffi" (and in fact all) ligatures.
@@ -100,7 +100,7 @@ public class HorizontalListTest {
     public void kerningTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new FontManager(pdDoc);
-        Font font = fontManager.get(FontManager.FontName.TIMES_NEW_ROMAN);
+        Font font = fontManager.get(FontName.TIMES_NEW_ROMAN);
         float fontSize = 11;
 
         // Test kerning internal to Text nodes and between them.
