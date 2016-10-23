@@ -49,7 +49,7 @@ public class Config {
 
         // Fonts.
         PAGE_NUMBER_FONT(KeyType.FONT),
-        HEADLINE_FONT(KeyType.FONT), // TODO use
+        HEADLINE_FONT(KeyType.FONT),
 
         // Distances
         PAGE_WIDTH(KeyType.DISTANCE),

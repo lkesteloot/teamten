@@ -635,8 +635,8 @@ public class Typesetter {
             String pageNumberLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
             String headlineLabel = bookLayout.getHeadlineLabel(physicalPageNumber, config);
             long pageMargin = config.getPageMargin();
-            TypefaceVariantSize pageNumberFontDesc = config.getFont(Config.Key.PAGE_NUMBER_FONT);
-            FontSize pageNumberFont = fontManager.get(pageNumberFontDesc);
+            FontSize pageNumberFont = fontManager.get(config.getFont(Config.Key.PAGE_NUMBER_FONT));
+            FontSize headlineFont = fontManager.get(config.getFont(Config.Key.HEADLINE_FONT));
 
             long y = config.getPageHeight() - pageMargin + PT.toSp(pageNumberFont.getSize()*2.5);
 
@@ -647,12 +647,11 @@ public class Typesetter {
                 x = pageMargin;
             } else {
                 // Odd page, number on the right.
-                long labelWidth = pageNumberFont.getFont().getStringMetrics(pageNumberLabel, pageNumberFont.getSize()).getWidth();
+                long labelWidth = pageNumberFont.getStringMetrics(pageNumberLabel).getWidth();
                 x = config.getPageWidth() - pageMargin - labelWidth;
             }
-
             // TODO this doesn't kern.
-            pageNumberFont.getFont().draw(pageNumberLabel, pageNumberFont.getSize(), x, y, contents);
+            pageNumberFont.draw(pageNumberLabel, x, y, contents);
 
             // Draw headline label.
             if (headlineLabel != null) {
@@ -660,10 +659,10 @@ public class Typesetter {
                 headlineLabel = headlineLabel.toUpperCase();
 
                 // TODO this doesn't kern.
-                long labelWidth = pageNumberFont.getFont().getStringMetrics(headlineLabel, pageNumberFont.getSize()).getWidth();
+                long labelWidth = headlineFont.getStringMetrics(headlineLabel).getWidth();
                 x = pageMargin + (config.getBodyWidth() - labelWidth)/2;
 
-                pageNumberFont.getFont().draw(headlineLabel, pageNumberFont.getSize(), x, y, contents);
+                headlineFont.draw(headlineLabel, x, y, contents);
             }
         }
     }
