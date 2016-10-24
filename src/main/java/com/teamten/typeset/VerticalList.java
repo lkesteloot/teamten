@@ -1,5 +1,11 @@
 package com.teamten.typeset;
 
+import com.teamten.typeset.element.Element;
+import com.teamten.typeset.element.Glue;
+import com.teamten.typeset.element.HBox;
+import com.teamten.typeset.element.Page;
+import com.teamten.typeset.element.Penalty;
+
 import java.util.List;
 
 import static com.teamten.typeset.SpaceUnit.PT;

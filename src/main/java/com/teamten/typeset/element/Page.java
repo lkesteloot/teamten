@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.typeset.element;
 
 import java.util.List;
 

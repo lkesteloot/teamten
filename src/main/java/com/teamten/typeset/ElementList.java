@@ -1,5 +1,15 @@
 package com.teamten.typeset;
 
+import com.teamten.typeset.element.Box;
+import com.teamten.typeset.element.DiscardableElement;
+import com.teamten.typeset.element.Discretionary;
+import com.teamten.typeset.element.Element;
+import com.teamten.typeset.element.Glue;
+import com.teamten.typeset.element.HBox;
+import com.teamten.typeset.element.NonDiscardableElement;
+import com.teamten.typeset.element.Penalty;
+import com.teamten.typeset.element.Text;
+
 import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;

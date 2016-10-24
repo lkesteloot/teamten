@@ -3,6 +3,15 @@ package com.teamten.typeset;
 import com.google.common.base.Strings;
 import com.teamten.font.FontSize;
 import com.teamten.hyphen.HyphenDictionary;
+import com.teamten.typeset.element.Discretionary;
+import com.teamten.typeset.element.Element;
+import com.teamten.typeset.element.Glue;
+import com.teamten.typeset.element.HBox;
+import com.teamten.typeset.element.Kern;
+import com.teamten.typeset.element.Penalty;
+import com.teamten.typeset.element.Rule;
+import com.teamten.typeset.element.Text;
+import com.teamten.typeset.element.VBox;
 
 import java.io.IOException;
 import java.util.ArrayList;

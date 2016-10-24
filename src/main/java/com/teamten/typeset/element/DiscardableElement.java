@@ -1,4 +1,6 @@
-package com.teamten.typeset;
+package com.teamten.typeset.element;
+
+import com.teamten.typeset.element.Element;
 
 /**
  * Represents an element that should be discarded at the start of a line.

@@ -2,6 +2,8 @@ package com.teamten.typeset;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import com.teamten.typeset.element.Bookmark;
+import com.teamten.typeset.element.Page;
 
 import java.io.PrintStream;
 import java.util.List;

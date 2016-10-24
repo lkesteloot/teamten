@@ -1,5 +1,7 @@
 package com.teamten.typeset;
 
+import com.teamten.typeset.element.Element;
+
 import java.util.List;
 
 /**

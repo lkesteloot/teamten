@@ -1,6 +1,7 @@
-package com.teamten.typeset;
+package com.teamten.typeset.element;
 
 import com.teamten.font.FontSize;
+import com.teamten.typeset.Dimensions;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;

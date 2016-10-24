@@ -1,5 +1,6 @@
-package com.teamten.typeset;
+package com.teamten.typeset.element;
 
+import com.teamten.typeset.element.NonDiscardableElement;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;

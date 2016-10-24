@@ -1,5 +1,7 @@
 package com.teamten.typeset;
 
+import com.teamten.typeset.element.Bookmark;
+import com.teamten.typeset.element.SectionBookmark;
 import com.teamten.util.RomanNumerals;
 
 import java.util.HashMap;

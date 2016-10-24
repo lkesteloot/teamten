@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.typeset.element;
 
 import com.google.common.math.DoubleMath;
 import com.teamten.font.FontSize;

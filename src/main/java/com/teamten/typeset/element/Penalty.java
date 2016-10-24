@@ -1,5 +1,5 @@
 
-package com.teamten.typeset;
+package com.teamten.typeset.element;
 
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 

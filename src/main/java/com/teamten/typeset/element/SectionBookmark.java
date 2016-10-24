@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.typeset.element;
 
 /**
  * A bookmark for a section, such as a part or chapter.

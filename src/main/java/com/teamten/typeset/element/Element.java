@@ -1,6 +1,7 @@
 
-package com.teamten.typeset;
+package com.teamten.typeset.element;
 
+import com.teamten.typeset.Dimensions;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
@@ -69,7 +70,7 @@ public abstract class Element implements Dimensions {
     /**
      * Convenience method for implementing {@link #println(PrintStream, String)} from a list of elements.
      */
-    protected static void println(Iterable<Element> elements, PrintStream stream, String indent) {
+    public static void println(Iterable<Element> elements, PrintStream stream, String indent) {
         for (Element element : elements) {
             element.println(stream, indent);
         }
