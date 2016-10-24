@@ -20,6 +20,29 @@ public enum Typeface {
             .with(FontVariant.ITALIC, FontName.MINION_ITALIC)
             .with(FontVariant.BOLD_ITALIC, FontName.MINION_BOLD_ITALIC)
             .with(FontVariant.SMALL_CAPS, FontName.MINION_SMALL_CAPS)
+            .build()),
+    /**
+     * https://fonts.google.com/specimen/Alegreya
+     */
+    ALEGREYA(new MapBuilder()
+            .with(FontVariant.REGULAR, FontName.ALEGREYA_REGULAR)
+            .with(FontVariant.ITALIC, FontName.ALEGREYA_ITALIC)
+            .with(FontVariant.SMALL_CAPS, FontName.ALEGREYA_SMALL_CAPS)
+            .build()),
+    /**
+     * https://fonts.google.com/specimen/IM+Fell+English
+     */
+    IM_FELL_ENGLISH(new MapBuilder()
+            .with(FontVariant.REGULAR, FontName.IM_FELL_ENGLISH_REGULAR)
+            .with(FontVariant.ITALIC, FontName.IM_FELL_ENGLISH_ITALIC)
+            .with(FontVariant.SMALL_CAPS, FontName.IM_FELL_ENGLISH_SMALL_CAPS)
+            .build()),
+    /**
+     * https://fonts.google.com/specimen/Sorts+Mill+Goudy
+     */
+    SORTS_MILL_GOUDY(new MapBuilder()
+            .with(FontVariant.REGULAR, FontName.SORTS_MILL_GOUDY_REGULAR)
+            .with(FontVariant.ITALIC, FontName.SORTS_MILL_GOUDY_ITALIC)
             .build());
 
     private final Map<FontVariant,FontName> mFontMap;

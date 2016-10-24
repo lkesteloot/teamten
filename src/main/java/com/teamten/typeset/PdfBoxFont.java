@@ -47,7 +47,7 @@ public class PdfBoxFont extends AbstractFont {
         } else {
             ttf = TTF_PARSER.parse(file);
         }
-        mPdFont = PDType0Font.load(pdf, ttf, false);
+        mPdFont = PDType0Font.load(pdf, ttf, true);
 
         // Load the kerning table.
         KerningTable kerningTable = ttf.getKerning();

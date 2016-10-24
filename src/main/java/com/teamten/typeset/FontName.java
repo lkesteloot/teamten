@@ -15,7 +15,15 @@ public enum FontName {
     MINION_ITALIC(FontDirs.MY_FONT_DIR, "Minion/MinionPro-It.ttf"),
     MINION_BOLD_ITALIC(FontDirs.FONT_DIR, "MinionPro-BoldIt.otf"),
     MINION_SMALL_CAPS(FontDirs.MY_FONT_DIR, "Minion/Minion Small Caps  Oldstyle Fi Regular.ttf"),
-    HELVETICA_NEUE_ULTRA_LIGHT(FontDirs.MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf");
+    HELVETICA_NEUE_ULTRA_LIGHT(FontDirs.MY_FONT_DIR, "Helvetica Neue/HelveticaNeue-UltraLight.ttf"),
+    ALEGREYA_REGULAR(FontDirs.MY_FONT_DIR, "Alegreya/Alegreya-Regular.ttf"),
+    ALEGREYA_ITALIC(FontDirs.MY_FONT_DIR, "Alegreya/Alegreya-Italic.ttf"),
+    ALEGREYA_SMALL_CAPS(FontDirs.MY_FONT_DIR, "Alegreya/AlegreyaSC-Regular.ttf"),
+    IM_FELL_ENGLISH_REGULAR(FontDirs.MY_FONT_DIR, "IM Fell English/IMFeENrm28P.ttf"),
+    IM_FELL_ENGLISH_ITALIC(FontDirs.MY_FONT_DIR, "IM Fell English/IMFeENit28P.ttf"),
+    IM_FELL_ENGLISH_SMALL_CAPS(FontDirs.MY_FONT_DIR, "IM Fell English/IMFeENsc28P.ttf"),
+    SORTS_MILL_GOUDY_REGULAR(FontDirs.MY_FONT_DIR, "Sorts Mill Goudy/SortsMillGoudy-Regular.ttf"),
+    SORTS_MILL_GOUDY_ITALIC(FontDirs.MY_FONT_DIR, "Sorts Mill Goudy/SortsMillGoudy-Italic.ttf");
 
     // Enums aren't allows to have forward references to static members, so we wrap the static members
     // in a nested class.

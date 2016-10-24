@@ -28,6 +28,8 @@ public class TrackingFont extends AbstractFont {
     /***
      * @param underlyingFont the font to draw.
      * @param tracking fraction of font size to space out characters.
+     *                 <a href="http://practicaltypography.com/letterspacing.html">Practical Typography</a> recommends
+     *                 5% to 12%. We tend to use around 10% (0.1).
      * @param kerning how much to kern, from 0.0 (no kerning) to 1.0 (full kerning). A value of 0.5 is recommended.
      */
     public TrackingFont(Font underlyingFont, double tracking, double kerning) {

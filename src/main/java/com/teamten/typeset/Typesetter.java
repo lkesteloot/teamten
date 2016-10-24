@@ -29,6 +29,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class Typesetter {
     private static final boolean DRAW_MARGINS = false;
+    private static final boolean DRAW_PAGE_BOUNDARY = true;
     /**
      * The maximum number of times that we'll typeset the document without it converging on a stable set
      * of page numbers.
@@ -79,6 +80,7 @@ public class Typesetter {
             hyphenDictionary = null;
         }
 
+        // Do several passes at laying out the book until the page numbers stabilize.
         List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
         int pass;
@@ -347,6 +349,11 @@ public class Typesetter {
                     config.getPageMargin(),
                     config.getBodyWidth(),
                     config.getBodyHeight());
+        }
+        if (DRAW_PAGE_BOUNDARY) {
+            long inset = PT.toSp(0.0);
+            PdfUtil.drawDebugRectangle(contents, inset, inset,
+                    config.getPageWidth() - 2*inset, config.getPageHeight() - 2*inset);
         }
 
         // Start at top of page.
