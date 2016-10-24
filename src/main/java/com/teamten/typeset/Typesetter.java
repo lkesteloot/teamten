@@ -12,8 +12,10 @@ import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
 import com.teamten.markdown.Doc;
+import com.teamten.markdown.IndexSpan;
 import com.teamten.markdown.MarkdownParser;
 import com.teamten.markdown.Span;
+import com.teamten.markdown.TextSpan;
 import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
@@ -48,7 +50,7 @@ public class Typesetter {
      * The maximum number of times that we'll typeset the document without it converging on a stable set
      * of page numbers.
      */
-    private static final int MAX_ITERATIONS = 3;
+    private static final int MAX_ITERATIONS = 5;
 
     public static void main(String[] args) throws IOException {
         // Load and parse the Markdown file.
@@ -111,6 +113,7 @@ public class Typesetter {
 
             // Get the full list of bookmarks.
             Bookmarks newBookmarks = Bookmarks.fromPages(pages);
+            newBookmarks.println(System.out);
             if (newBookmarks.equals(bookmarks)) {
                 // We've converged, we can stop.
                 break;
@@ -198,6 +201,10 @@ public class Typesetter {
                     generateTableOfContents(config, bookLayout, verticalList, fontManager);
                     continue;
 
+                case INDEX:
+                    generateIndex(config, bookLayout, verticalList, fontManager);
+                    continue;
+
                 default:
                     System.out.println("Warning: Unknown block type " + block.getBlockType());
                     continue;
@@ -244,16 +251,25 @@ public class Typesetter {
 
             // Each span in the paragraph.
             for (Span span : block.getSpans()) {
-                FontSize font = span.isSmallCaps() ? spanSmallCapsFont :
-                        span.isItalic() ? spanItalicFont : spanRegularFont;
+                if (span instanceof TextSpan) {
+                    // Span for text that's part of the paragraph.
+                    TextSpan textSpan = (TextSpan) span;
+                    FontSize font = textSpan.isSmallCaps() ? spanSmallCapsFont :
+                            textSpan.isItalic() ? spanItalicFont : spanRegularFont;
 
-                String text = span.getText();
-                if (allCaps) {
-                    text = text.toUpperCase();
+                    String text = textSpan.getText();
+                    if (allCaps) {
+                        text = text.toUpperCase();
+                    }
+
+                    // Add the text to the current horizontal list.
+                    horizontalList.addText(text, font, hyphenDictionary);
+                } else if (span instanceof IndexSpan) {
+                    // Span that creates an index entry.
+                    IndexSpan indexSpan = (IndexSpan) span;
+
+                    horizontalList.addElement(new IndexBookmark(indexSpan.getEntries()));
                 }
-
-                // Add the text to the current horizontal list.
-                horizontalList.addText(text, font, hyphenDictionary);
             }
 
             // Potentially add bookmark if we're starting a new part or chapter.
@@ -607,6 +623,10 @@ public class Typesetter {
                         marginBelow = interEntryMargin;
                         break;
 
+                    case INDEX:
+                        // Ignore.
+                        break;
+
                     default:
                         System.out.println("Warning: Unknown section bookmark type " + sectionBookmark.getType());
                         break;
@@ -628,6 +648,51 @@ public class Typesetter {
                 previousMarginBelow = marginBelow;
             }
         }
+    }
+
+    /**
+     * Adds the index to the vertical list. Does not eject the page.
+     */
+    private void generateIndex(Config config, BookLayout bookLayout, VerticalList verticalList,
+                               FontManager fontManager) throws IOException {
+
+        long marginTop = IN.toSp(1.0);
+        long paddingBelowTitle = IN.toSp(0.75);
+
+        String indexTitle = config.getString(Config.Key.INDEX_TITLE);
+        if (indexTitle == null) {
+            indexTitle = "Index";
+        }
+
+        FontSize titleFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_TITLE_FONT));
+        titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
+        long boxWidth = IN.toSp(1.0);
+        long boxHeight = PT.toSp(0.5);
+
+        verticalList.oddPage();
+        verticalList.addElement(new Box(0, marginTop, 0));
+
+        // Title.
+        HorizontalList horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addText(indexTitle, titleFont, null);
+        horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.INDEX, indexTitle));
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, config.getBodyWidth());
+
+        // Space between title and line.
+        verticalList.addElement(new Glue(paddingBelowTitle/3, 0, 0, false));
+
+        // Centered line.
+        horizontalList = new HorizontalList();
+        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        horizontalList.addElement(new Rule(boxWidth, boxHeight, 0));
+        horizontalList.addEndOfParagraph();
+        horizontalList.format(verticalList, config.getBodyWidth());
+
+        // Space below line.
+        verticalList.addElement(new Glue(paddingBelowTitle*2/3, 0, 0, false));
+
     }
 
     /**

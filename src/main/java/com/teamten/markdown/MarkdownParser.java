@@ -32,6 +32,7 @@ public class MarkdownParser {
         TAG_BLOCK_TYPE_MAP.put("TITLE", BlockType.TITLE_PAGE);
         TAG_BLOCK_TYPE_MAP.put("COPYRIGHT", BlockType.COPYRIGHT_PAGE);
         TAG_BLOCK_TYPE_MAP.put("TOC", BlockType.TABLE_OF_CONTENTS);
+        TAG_BLOCK_TYPE_MAP.put("INDEX", BlockType.INDEX);
     }
 
     public static void main(String[] args) throws IOException {
@@ -99,10 +100,10 @@ public class MarkdownParser {
                             builder = new Block.Builder(blockType);
                         }
                         if (newlineSpace) {
-                            builder.add(' ', newlineSpaceIsItalic, newlineSpaceIsSmallCaps);
+                            builder.addText(' ', newlineSpaceIsItalic, newlineSpaceIsSmallCaps);
                             newlineSpace = false;
                         }
-                        builder.add(translateCharacter(ch), isItalic, isSmallCaps);
+                        builder.addText(translateCharacter(ch), isItalic, isSmallCaps);
                         state = ParserState.IN_LINE;
                     }
                     break;
@@ -119,7 +120,7 @@ public class MarkdownParser {
                         newlineSpaceIsSmallCaps = isSmallCaps;
                     } else if (Character.isWhitespace(ch)) {
                         state = ParserState.SKIP_WHITESPACE;
-                        builder.add(' ', isItalic, isSmallCaps);
+                        builder.addText(' ', isItalic, isSmallCaps);
                     } else if (ch == '*') {
                         isItalic = !isItalic;
                     } else if (ch == '[') {
@@ -127,7 +128,7 @@ public class MarkdownParser {
                         preTagState = state;
                         state = ParserState.IN_TAG;
                     } else {
-                        builder.add(translateCharacter(ch), isItalic, isSmallCaps);
+                        builder.addText(translateCharacter(ch), isItalic, isSmallCaps);
                     }
                     break;
 
@@ -145,7 +146,7 @@ public class MarkdownParser {
                         state = ParserState.IN_TAG;
                     } else {
                         state = ParserState.IN_LINE;
-                        builder.add(translateCharacter(ch), isItalic, isSmallCaps);
+                        builder.addText(translateCharacter(ch), isItalic, isSmallCaps);
                     }
                     break;
 
@@ -181,6 +182,9 @@ public class MarkdownParser {
                             isSmallCaps = false;
                         } else if (addMetadataTag(tag, doc)) {
                             // Nothing to do, the method added it.
+                        } else if (tag.startsWith("@")) {
+                            // Index entry.
+                            builder.addSpan(new IndexSpan(tag.substring(1)));
                         } else {
                             System.out.println("Warning: Unknown block type: " + tag);
                         }

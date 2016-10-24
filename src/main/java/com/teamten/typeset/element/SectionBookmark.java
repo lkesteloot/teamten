@@ -14,7 +14,8 @@ public class SectionBookmark extends Bookmark {
         HALF_TITLE_PAGE("Half Title Page", false),
         TITLE_PAGE("Title Page", false),
         COPYRIGHT_PAGE("Copyright Page", false),
-        TABLE_OF_CONTENTS("Table of Contents", false);
+        TABLE_OF_CONTENTS("Table of Contents", false),
+        INDEX("Index", true);
 
         private final String mLabel;
         private final boolean mIncludedInTableOfContents;

@@ -25,10 +25,14 @@ public class Block {
     }
 
     /**
-     * Return a string version of all text spans.
+     * Return a string version of all text spans. Ignores non-text spans.
      */
     public String getText() {
-        return mSpans.stream().map(Span::getText).collect(Collectors.joining());
+        return mSpans.stream()
+                .filter((span) -> span instanceof TextSpan)
+                .map((span) -> (TextSpan) span)
+                .map(TextSpan::getText)
+                .collect(Collectors.joining());
     }
 
     public void addSpan(Span span) {
@@ -40,10 +44,11 @@ public class Block {
         if (mSpans.isEmpty()) {
             return "No spans";
         } else {
-            String first = mSpans.get(0).getText();
+            String first = getText();
+            first = first.substring(0, Math.min(30, first.length()));
+
             return String.format("%s, %d spans, starting with: %s ...",
-                    mBlockType, mSpans.size(),
-                    first.substring(0, Math.min(1000, first.length())));
+                    mBlockType, mSpans.size(), first);
         }
     }
 
@@ -66,7 +71,7 @@ public class Block {
          * @param isItalic whether the character should be displayed in italics.
          * @param isSmallCaps whether the character should be displayed in small caps.
          */
-        public void add(char ch, boolean isItalic, boolean isSmallCaps) {
+        public void addText(char ch, boolean isItalic, boolean isSmallCaps) {
             if (isItalic != mIsItalic || isSmallCaps != mIsSmallCaps) {
                 emitSpan();
                 mIsItalic = isItalic;
@@ -74,6 +79,14 @@ public class Block {
             }
 
             mStringBuilder.append(ch);
+        }
+
+        /**
+         * Add any span to this block.
+         */
+        public void addSpan(Span span) {
+            emitSpan();
+            mBlock.addSpan(span);
         }
 
         /**
@@ -96,7 +109,7 @@ public class Block {
          */
         private void emitSpan() {
             if (mStringBuilder.length() > 0) {
-                Span span = new Span(mStringBuilder.toString(), mIsItalic, mIsSmallCaps);
+                TextSpan span = new TextSpan(mStringBuilder.toString(), mIsItalic, mIsSmallCaps);
                 mStringBuilder.setLength(0);
                 mBlock.addSpan(span);
             }

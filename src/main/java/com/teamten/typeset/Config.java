@@ -47,6 +47,7 @@ public class Config {
         COPYRIGHT(KeyType.STRING),
         PRINTING(KeyType.STRING),
         TOC_TITLE(KeyType.STRING),
+        INDEX_TITLE(KeyType.STRING),
         LANGUAGE(KeyType.STRING),
 
         // Fonts.

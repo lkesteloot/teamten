@@ -15,4 +15,5 @@ public enum BlockType {
     TITLE_PAGE,
     COPYRIGHT_PAGE,
     TABLE_OF_CONTENTS,
+    INDEX,
 }

@@ -68,10 +68,7 @@ public class HorizontalList extends ElementList {
         elements = addKerning(elements, font);
 
         // Add all the final elements to our horizontal list.
-        for (Element element : elements) {
-            /// element.println(System.out, "");
-            addElement(element);
-        }
+        elements.forEach(this::addElement);
     }
 
     /**
