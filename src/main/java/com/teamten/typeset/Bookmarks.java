@@ -8,7 +8,7 @@ import com.teamten.typeset.element.Page;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Set;
 
 /**
  * Keeps track of a set of bookmarks and which physical page they're on.
@@ -46,12 +46,11 @@ public class Bookmarks {
     }
 
     /**
-     * Calls the consumer for each bookmark in our collection.
-     *
-     * @param consumer takes a physical page number and bookmark as a map entry.
+     * Get a set of bookmark entries, where the key is the physical page number and the
+     * value is the bookmark
      */
-    public void forEach(Consumer<Map.Entry<Integer,Bookmark>> consumer) {
-        mPhysicalPageNumberToBookmark.entries().forEach(consumer);
+    public Set<Map.Entry<Integer,Bookmark>> entries() {
+        return mPhysicalPageNumberToBookmark.entries();
     }
 
     /**

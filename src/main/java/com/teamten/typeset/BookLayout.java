@@ -36,7 +36,7 @@ public class BookLayout {
         mFirstBodyMatterPhysicalPage = Integer.MAX_VALUE;
 
         // Go through each bookmark and capture all sections.
-        bookmarks.forEach((entry) -> {
+        bookmarks.entries().forEach((entry) -> {
             Integer physicalPageNumber = entry.getKey();
             Bookmark bookmark = entry.getValue();
 

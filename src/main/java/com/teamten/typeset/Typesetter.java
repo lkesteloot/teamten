@@ -103,7 +103,8 @@ public class Typesetter {
         for (pass = 0; pass < MAX_ITERATIONS; pass++) {
             System.out.printf("Pass %d:\n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
-            VerticalList verticalList = docToVerticalList(doc, config, bookLayout, fontManager, hyphenDictionary);
+            VerticalList verticalList = docToVerticalList(doc, config, bookLayout,
+                    fontManager, bookmarks, hyphenDictionary);
             System.out.println("  Horizontal layout: " + stopwatch);
 
             // Format the vertical list into pages.
@@ -141,7 +142,8 @@ public class Typesetter {
      * Converts a DOM document to a vertical list.
      */
     private VerticalList docToVerticalList(Doc doc, Config config, BookLayout bookLayout,
-                                           FontManager fontManager, HyphenDictionary hyphenDictionary) throws IOException {
+                                           FontManager fontManager, Bookmarks bookmarks,
+                                           HyphenDictionary hyphenDictionary) throws IOException {
 
         VerticalList verticalList = new VerticalList();
 
@@ -202,7 +204,7 @@ public class Typesetter {
                     continue;
 
                 case INDEX:
-                    generateIndex(config, bookLayout, verticalList, fontManager);
+                    generateIndex(config, bookLayout, verticalList, fontManager, bookmarks);
                     continue;
 
                 default:
@@ -654,7 +656,7 @@ public class Typesetter {
      * Adds the index to the vertical list. Does not eject the page.
      */
     private void generateIndex(Config config, BookLayout bookLayout, VerticalList verticalList,
-                               FontManager fontManager) throws IOException {
+                               FontManager fontManager, Bookmarks bookmarks) throws IOException {
 
         long marginTop = IN.toSp(1.0);
         long paddingBelowTitle = IN.toSp(0.75);
@@ -693,6 +695,18 @@ public class Typesetter {
         // Space below line.
         verticalList.addElement(new Glue(paddingBelowTitle*2/3, 0, 0, false));
 
+        // Generate the index. First go through all bookmarks and pick out the index ones.
+        IndexEntries indexEntries = new IndexEntries();
+        bookmarks.entries().stream()
+                .filter((entry) -> (entry.getValue() instanceof IndexBookmark))
+                .forEach((entry) -> {
+                    int physicalPageNumber = entry.getKey();
+                    IndexBookmark indexBookmark = (IndexBookmark) entry.getValue();
+                    indexEntries.add(indexBookmark.getEntries(), physicalPageNumber);
+                });
+
+        System.out.println("Index:");
+        indexEntries.println(System.out, "    ");
     }
 
     /**
