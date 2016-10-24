@@ -1,5 +1,7 @@
-package com.teamten.typeset;
+package com.teamten.font;
 
+import com.teamten.font.AbstractFont;
+import com.teamten.typeset.Ligatures;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;

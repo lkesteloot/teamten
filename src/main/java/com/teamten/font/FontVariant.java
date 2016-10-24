@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.font;
 
 /**
  * Describes the various variants of a typeface (regular, bold, etc.).

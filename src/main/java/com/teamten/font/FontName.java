@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.font;
 
 import java.io.File;
 

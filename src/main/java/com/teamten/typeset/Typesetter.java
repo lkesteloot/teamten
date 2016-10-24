@@ -2,6 +2,12 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Stopwatch;
+import com.teamten.font.FontManager;
+import com.teamten.font.FontSize;
+import com.teamten.font.FontVariant;
+import com.teamten.font.PdfBoxFontManager;
+import com.teamten.font.TrackingFont;
+import com.teamten.font.TypefaceVariantSize;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;

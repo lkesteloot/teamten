@@ -1,5 +1,11 @@
 package com.teamten.typeset;
 
+import com.teamten.font.DummyFont;
+import com.teamten.font.Font;
+import com.teamten.font.FontManager;
+import com.teamten.font.FontVariant;
+import com.teamten.font.PdfBoxFontManager;
+import com.teamten.font.Typeface;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.Test;
 

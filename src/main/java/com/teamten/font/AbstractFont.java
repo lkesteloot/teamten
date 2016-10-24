@@ -1,4 +1,7 @@
-package com.teamten.typeset;
+package com.teamten.font;
+
+import com.teamten.font.Font;
+import com.teamten.typeset.Ligatures;
 
 /**
  * Parent of real font classes, with stub methods.

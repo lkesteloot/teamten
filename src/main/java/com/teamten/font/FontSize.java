@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.font;
 
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.jetbrains.annotations.NotNull;

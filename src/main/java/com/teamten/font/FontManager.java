@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.font;
 
 import java.util.HashMap;
 import java.util.Map;

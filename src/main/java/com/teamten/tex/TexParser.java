@@ -3,17 +3,16 @@ package com.teamten.tex;
 import com.teamten.typeset.BookLayout;
 import com.teamten.typeset.Config;
 import com.teamten.typeset.Element;
-import com.teamten.typeset.Font;
-import com.teamten.typeset.FontManager;
-import com.teamten.typeset.FontSize;
-import com.teamten.typeset.FontVariant;
+import com.teamten.font.FontManager;
+import com.teamten.font.FontSize;
+import com.teamten.font.FontVariant;
 import com.teamten.typeset.Glue;
 import com.teamten.typeset.HBox;
-import com.teamten.typeset.PdfBoxFontManager;
+import com.teamten.font.PdfBoxFontManager;
 import com.teamten.typeset.Penalty;
 import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.Text;
-import com.teamten.typeset.Typeface;
+import com.teamten.font.Typeface;
 import com.teamten.typeset.Typesetter;
 import com.teamten.typeset.VBox;
 import com.teamten.typeset.VerticalList;
@@ -25,7 +24,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.teamten.typeset.SpaceUnit.IN;
 import static com.teamten.typeset.SpaceUnit.PT;
 
 /**

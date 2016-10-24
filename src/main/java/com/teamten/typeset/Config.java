@@ -1,5 +1,7 @@
 package com.teamten.typeset;
 
+import com.teamten.font.TypefaceVariantSize;
+
 import java.util.HashMap;
 import java.util.Map;
 

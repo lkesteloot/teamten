@@ -1,14 +1,13 @@
 package com.teamten.typeset;
 
 import com.google.common.math.DoubleMath;
+import com.teamten.font.FontSize;
 import com.teamten.util.CodePoints;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.PrintStream;
-
-import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * A sequence of characters.

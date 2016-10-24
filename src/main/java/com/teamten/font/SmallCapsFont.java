@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.font;
 
 import com.teamten.util.CodePoints;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;

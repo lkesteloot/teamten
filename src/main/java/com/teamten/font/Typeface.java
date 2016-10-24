@@ -1,4 +1,4 @@
-package com.teamten.typeset;
+package com.teamten.font;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public enum Typeface {
     /**
      * Return the font name for this variant, or null if the typeface does not define one.
      */
-    FontName get(FontVariant fontVariant) {
+    public FontName get(FontVariant fontVariant) {
         return mFontMap.get(fontVariant);
     }
 

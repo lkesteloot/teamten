@@ -1,6 +1,7 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Strings;
+import com.teamten.font.FontSize;
 import com.teamten.hyphen.HyphenDictionary;
 
 import java.io.IOException;

@@ -3,7 +3,7 @@ package com.teamten.typeset;
 /**
  * Simple class that implements the Dimensions interface.
  */
-class AbstractDimensions implements Dimensions {
+public class AbstractDimensions implements Dimensions {
     private final long mWidth;
     private final long mHeight;
     private final long mDepth;

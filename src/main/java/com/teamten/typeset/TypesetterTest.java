@@ -1,10 +1,13 @@
 package com.teamten.typeset;
 
+import com.teamten.font.FontManager;
+import com.teamten.font.FontSize;
+import com.teamten.font.FontVariant;
+import com.teamten.font.PdfBoxFontManager;
+import com.teamten.font.Typeface;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.IOException;
-
-import static com.teamten.typeset.SpaceUnit.IN;
 
 /**
  * Test app for trying various things with the typesetter. This gives us more control than using Markdown.

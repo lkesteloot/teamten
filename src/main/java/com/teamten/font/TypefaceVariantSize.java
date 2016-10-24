@@ -1,4 +1,6 @@
-package com.teamten.typeset;
+package com.teamten.font;
+
+import com.teamten.typeset.SpaceUnit;
 
 /**
  * Represents a typeface, a variant (e.g., bold), and a size (e.g., 11pt).

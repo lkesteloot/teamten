@@ -1,6 +1,7 @@
 
-package com.teamten.typeset;
+package com.teamten.font;
 
+import com.teamten.typeset.Ligatures;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.fontbox.ttf.CmapSubtable;
 import org.apache.fontbox.ttf.CmapTable;
