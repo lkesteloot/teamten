@@ -2,7 +2,6 @@ package com.teamten.tex;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.teamten.util.CodePoints;
 
 /**
  * The commands we know about, and how to encode them as code points.

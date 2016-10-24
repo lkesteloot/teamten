@@ -1,21 +1,21 @@
 package com.teamten.tex;
 
-import com.teamten.typeset.BookLayout;
-import com.teamten.typeset.Config;
-import com.teamten.typeset.element.Element;
 import com.teamten.font.FontManager;
 import com.teamten.font.FontSize;
 import com.teamten.font.FontVariant;
+import com.teamten.font.PdfBoxFontManager;
+import com.teamten.font.Typeface;
+import com.teamten.typeset.BookLayout;
+import com.teamten.typeset.Config;
+import com.teamten.typeset.SpaceUnit;
+import com.teamten.typeset.Typesetter;
+import com.teamten.typeset.VerticalList;
+import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
-import com.teamten.font.PdfBoxFontManager;
 import com.teamten.typeset.element.Penalty;
-import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.element.Text;
-import com.teamten.font.Typeface;
-import com.teamten.typeset.Typesetter;
 import com.teamten.typeset.element.VBox;
-import com.teamten.typeset.VerticalList;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.FileInputStream;

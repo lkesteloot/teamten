@@ -1,7 +1,6 @@
 package com.teamten.typeset.element;
 
 import com.teamten.typeset.PdfUtil;
-import com.teamten.typeset.element.Box;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
