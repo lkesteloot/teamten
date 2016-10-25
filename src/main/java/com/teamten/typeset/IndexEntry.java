@@ -2,6 +2,7 @@ package com.teamten.typeset;
 
 import java.io.PrintStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,8 +40,11 @@ public class IndexEntry implements Comparable<IndexEntry> {
         return mText;
     }
 
-    public Set<Integer> getPhysicalPageNumbers() {
-        return mPhysicalPageNumbers;
+    /**
+     * Return a sorted list of page numbers for this entry.
+     */
+    public List<Integer> getPhysicalPageNumbers() {
+        return mPhysicalPageNumbers.stream().sorted().collect(Collectors.toList());
     }
 
     public IndexEntries getSubEntries() {

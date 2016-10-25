@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.teamten.typeset.SpaceUnit.IN;
 import static com.teamten.typeset.SpaceUnit.PT;
@@ -668,6 +669,7 @@ public class Typesetter {
 
         FontSize titleFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_TITLE_FONT));
         titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
+        FontSize entryFont = fontManager.get(config.getFont(Config.Key.BODY_FONT));
         long boxWidth = IN.toSp(1.0);
         long boxHeight = PT.toSp(0.5);
 
@@ -695,7 +697,7 @@ public class Typesetter {
         // Space below line.
         verticalList.addElement(new Glue(paddingBelowTitle*2/3, 0, 0, false));
 
-        // Generate the index. First go through all bookmarks and pick out the index ones.
+        // Generate the index entries.
         IndexEntries indexEntries = new IndexEntries();
         bookmarks.entries().stream()
                 .filter((entry) -> (entry.getValue() instanceof IndexBookmark))
@@ -705,8 +707,69 @@ public class Typesetter {
                     indexEntries.add(indexBookmark.getEntries(), physicalPageNumber);
                 });
 
+        // Generate the paragraphs.
+        generateIndexEntries(indexEntries, config, bookLayout, verticalList, entryFont, 0);
+
         System.out.println("Index:");
         indexEntries.println(System.out, "    ");
+    }
+
+    /**
+     * Generate the paragraphs for this set of index entries and add them to the vertical list.
+     *
+     * @param depth the depth of the recursion, where 0 is for entries, 1 for sub-entries, etc.
+     */
+    private void generateIndexEntries(IndexEntries indexEntries, Config config,
+                                      BookLayout bookLayout, VerticalList verticalList,
+                                      FontSize font, int depth) throws IOException {
+        // Space between sections.
+        long sectionBreak = PT.toSp(6.0);
+
+        // How much to indent each sub-section. TODO this isn't really an indent, it's a first-line indent. Modify
+        // to indent every line.
+        long indent = PT.toSp(15.0);
+
+        // We want to put a space between sections, so keep track of the last section's category (first letter).
+        int previousCategory = -1;
+
+        for (IndexEntry indexEntry : indexEntries.getEntries()) {
+            String text = indexEntry.getText();
+            int firstCh = text.codePointAt(0);
+
+            // Use '@' to represent non-alphabetic first letters.
+            // Note we assume here that they all sort before the letters.
+            int category = Character.isAlphabetic(firstCh) ? firstCh : '@';
+            if (previousCategory != -1 && category != previousCategory && depth == 0) {
+                // Insert a small break.
+                verticalList.addElement(new Glue(sectionBreak, sectionBreak/2, 0, false));
+            }
+
+            // Add the item and its page numbers.
+            StringBuilder builder = new StringBuilder();
+            builder.append(text);
+
+            List<Integer> physicalPageNumbers = indexEntry.getPhysicalPageNumbers();
+            if (!physicalPageNumbers.isEmpty()) {
+                builder.append(physicalPageNumbers.stream()
+                        .map(bookLayout::getPageNumberLabel)
+                        .collect(Collectors.joining(", ", ", ", "")));
+            }
+
+            builder.append('.');
+            HorizontalList horizontalList = new HorizontalList();
+            if (depth > 0) {
+                horizontalList.addElement(new Box(indent*depth, 0, 0));
+            }
+            horizontalList.addText(builder.toString(), font);
+            horizontalList.addEndOfParagraph();
+            horizontalList.format(verticalList, config.getBodyWidth());
+
+            // Now do the children of this entry.
+            generateIndexEntries(indexEntry.getSubEntries(), config, bookLayout, verticalList, font, depth + 1);
+
+            // Kee track of the last category.
+            previousCategory = category;
+        }
     }
 
     /**

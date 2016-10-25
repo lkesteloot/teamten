@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Stores a set of index entries.
@@ -56,14 +57,19 @@ public class IndexEntries {
     }
 
     /**
+     * Return a sorted list of index entries.
+     */
+    public List<IndexEntry> getEntries() {
+        return mEntryMap.values().stream().sorted().collect(Collectors.toList());
+    }
+
+    /**
      * Print the entries to the stream.
      */
     public void println(PrintStream stream, String indent) {
-        mEntryMap.values().stream()
-                .sorted()
-                .forEach((indexEntry) -> {
-                    indexEntry.println(stream, indent);
-                });
+        getEntries().forEach((indexEntry) -> {
+            indexEntry.println(stream, indent);
+        });
     }
 
     /**
