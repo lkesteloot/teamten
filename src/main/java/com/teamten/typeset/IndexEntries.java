@@ -88,13 +88,18 @@ public class IndexEntries {
      */
     private void addFakeEntries(List<String> words, Random random, int count, int depth) {
         // Keep going until we have enough entries.
-        int size = 0;
-        while (size < count) {
+        while (count > 0) {
             // Add an entry with a random word.
             String word = words.get(random.nextInt(words.size()));
+            switch (random.nextInt(30)) {
+                case 0: word = "@lkesteloot"; break;
+                case 1: word = "|whatever"; break;
+                case 2: word = "&tc"; break;
+                case 3: word = "1914-1918"; break;
+            }
             IndexEntry indexEntry = new IndexEntry(word);
             add(indexEntry);
-            size++;
+            count--;
 
             // Add random number of page references.
             int pageCount = random.nextInt(8) + 1;
@@ -104,10 +109,10 @@ public class IndexEntries {
 
             // Occasionally add sub-entries.
             if (depth == 0 && random.nextInt(5) == 0) {
-                int subEntryCount= Math.min(random.nextInt(8) + 1, count - size);
+                int subEntryCount = Math.min(random.nextInt(8) + 1, count);
                 if (subEntryCount > 0) {
                     indexEntry.getSubEntries().addFakeEntries(words, random, subEntryCount, depth + 1);
-                    size += subEntryCount;
+                    count -= subEntryCount;
                 }
             }
         }

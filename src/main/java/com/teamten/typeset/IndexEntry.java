@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +72,15 @@ public class IndexEntry implements Comparable<IndexEntry> {
 
     @Override
     public int compareTo(IndexEntry o) {
-        return mText.compareTo(o.mText);
+        int ch1 = mText.codePointAt(0);
+        int ch2 = o.mText.codePointAt(0);
+
+        // If one is not alphabetic, put it first.
+        if (Character.isAlphabetic(ch1) != Character.isAlphabetic(ch2)) {
+            return Character.isAlphabetic(ch1) ? 1 : -1;
+        }
+
+        // Else compare case-insensitively.
+        return mText.compareToIgnoreCase(o.mText);
     }
 }

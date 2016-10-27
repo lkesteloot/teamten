@@ -744,8 +744,7 @@ public class Typesetter {
             int firstCh = text.codePointAt(0);
 
             // Use '@' to represent non-alphabetic first letters.
-            // Note we assume here that they all sort before the letters.
-            int category = Character.isAlphabetic(firstCh) ? firstCh : '@';
+            int category = Character.isAlphabetic(firstCh) ? Character.toLowerCase(firstCh) : '@';
             if (previousCategory != -1 && category != previousCategory && depth == 0) {
                 // Insert a small break.
                 verticalList.addElement(new Glue(sectionBreak, sectionBreak/2, 0, false));
