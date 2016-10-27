@@ -185,6 +185,8 @@ public class MarkdownParser {
                         } else if (tag.startsWith("@")) {
                             // Index entry.
                             builder.addSpan(new IndexSpan(tag.substring(1)));
+                        } else if (tag.startsWith("^")) {
+                            // Ignore footnote.
                         } else {
                             System.out.println("Warning: Unknown block type: " + tag);
                         }

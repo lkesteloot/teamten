@@ -1,9 +1,14 @@
 package com.teamten.typeset;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -61,6 +66,51 @@ public class IndexEntries {
      */
     public List<IndexEntry> getEntries() {
         return mEntryMap.values().stream().sorted().collect(Collectors.toList());
+    }
+
+    /**
+     * Fill this object with count entries or sub-entries.
+     */
+    public void makeFakeIndex(int count) throws IOException {
+        // Load a fake dictionary.
+        Path dictionaryPath = Paths.get("/usr/share/dict/web2");
+        List<String> words = Files.readAllLines(dictionaryPath);
+        Random random = new Random(0);
+        addFakeEntries(words, random, count, 0);
+    }
+
+    /**
+     * Add count entries to the index.
+     * @param words list of words to choose from.
+     * @param random the random number generator to use.
+     * @param count number of entries to add.
+     * @param depth the depth of the index, where 0 is entries and 1 is subentries.
+     */
+    private void addFakeEntries(List<String> words, Random random, int count, int depth) {
+        // Keep going until we have enough entries.
+        int size = 0;
+        while (size < count) {
+            // Add an entry with a random word.
+            String word = words.get(random.nextInt(words.size()));
+            IndexEntry indexEntry = new IndexEntry(word);
+            add(indexEntry);
+            size++;
+
+            // Add random number of page references.
+            int pageCount = random.nextInt(8) + 1;
+            for (int i = 0; i < pageCount; i++) {
+                indexEntry.addPage(random.nextInt(200) + 1);
+            }
+
+            // Occasionally add sub-entries.
+            if (depth == 0 && random.nextInt(5) == 0) {
+                int subEntryCount= Math.min(random.nextInt(8) + 1, count - size);
+                if (subEntryCount > 0) {
+                    indexEntry.getSubEntries().addFakeEntries(words, random, subEntryCount, depth + 1);
+                    size += subEntryCount;
+                }
+            }
+        }
     }
 
     /**

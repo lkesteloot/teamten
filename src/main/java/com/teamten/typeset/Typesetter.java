@@ -47,6 +47,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
 public class Typesetter {
     private static final boolean DRAW_MARGINS = false;
     private static final boolean DRAW_PAGE_BOUNDARY = true;
+    private static final int FAKE_INDEX_LENGTH = 200;
     /**
      * The maximum number of times that we'll typeset the document without it converging on a stable set
      * of page numbers.
@@ -115,7 +116,7 @@ public class Typesetter {
 
             // Get the full list of bookmarks.
             Bookmarks newBookmarks = Bookmarks.fromPages(pages);
-            newBookmarks.println(System.out);
+            /// newBookmarks.println(System.out);
             if (newBookmarks.equals(bookmarks)) {
                 // We've converged, we can stop.
                 break;
@@ -699,19 +700,25 @@ public class Typesetter {
 
         // Generate the index entries.
         IndexEntries indexEntries = new IndexEntries();
-        bookmarks.entries().stream()
-                .filter((entry) -> (entry.getValue() instanceof IndexBookmark))
-                .forEach((entry) -> {
-                    int physicalPageNumber = entry.getKey();
-                    IndexBookmark indexBookmark = (IndexBookmark) entry.getValue();
-                    indexEntries.add(indexBookmark.getEntries(), physicalPageNumber);
-                });
+        if (FAKE_INDEX_LENGTH > 0) {
+            indexEntries.makeFakeIndex(FAKE_INDEX_LENGTH);
+        } else {
+            bookmarks.entries().stream()
+                    .filter((entry) -> (entry.getValue() instanceof IndexBookmark))
+                    .forEach((entry) -> {
+                        int physicalPageNumber = entry.getKey();
+                        IndexBookmark indexBookmark = (IndexBookmark) entry.getValue();
+                        indexEntries.add(indexBookmark.getEntries(), physicalPageNumber);
+                    });
+        }
 
         // Generate the paragraphs.
         generateIndexEntries(indexEntries, config, bookLayout, verticalList, entryFont, 0);
 
-        System.out.println("Index:");
-        indexEntries.println(System.out, "    ");
+        if (false) {
+            System.out.println("Index:");
+            indexEntries.println(System.out, "    ");
+        }
     }
 
     /**
