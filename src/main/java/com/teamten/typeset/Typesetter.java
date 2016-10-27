@@ -36,7 +36,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.teamten.typeset.SpaceUnit.IN;
 import static com.teamten.typeset.SpaceUnit.PT;
@@ -47,7 +46,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
 public class Typesetter {
     private static final boolean DRAW_MARGINS = false;
     private static final boolean DRAW_PAGE_BOUNDARY = true;
-    private static final int FAKE_INDEX_LENGTH = 200;
+    private static final int FAKE_INDEX_LENGTH = 0;
     /**
      * The maximum number of times that we'll typeset the document without it converging on a stable set
      * of page numbers.
@@ -759,10 +758,26 @@ public class Typesetter {
 
             // And its page numbers.
             List<Integer> physicalPageNumbers = indexEntry.getPhysicalPageNumbers();
-            if (!physicalPageNumbers.isEmpty()) {
-                builder.append(physicalPageNumbers.stream()
-                        .map(bookLayout::getPageNumberLabel)
-                        .collect(Collectors.joining(", ", ", ", "")));
+            for (int i = 0; i < physicalPageNumbers.size(); i++) {
+                // Start with a range of a single page.
+                int firstPage = physicalPageNumbers.get(i);
+                int lastPage = firstPage;
+
+                // Walk further to extend the range, if they're contiguous.
+                while (i < physicalPageNumbers.size() - 1 &&
+                        physicalPageNumbers.get(i + 1) == lastPage + 1) {
+
+                    lastPage++;
+                    i++;
+                }
+
+                // Append the page or a range of pages.
+                builder.append(", ");
+                builder.append(bookLayout.getPageNumberLabel(firstPage));
+                if (lastPage > firstPage) {
+                    builder.append('\u2013'); // En-dash.
+                    builder.append(bookLayout.getPageNumberLabel(lastPage));
+                }
             }
 
             builder.append('.');
