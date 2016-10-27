@@ -712,8 +712,12 @@ public class Typesetter {
                     });
         }
 
+        int columnCount = 2;
+        long columnMargin = config.getBodyWidth() / 10;
+        long textWidth = (config.getBodyWidth() - columnMargin*(columnCount - 1)) / columnCount;
+
         // Generate the paragraphs.
-        generateIndexEntries(indexEntries, config, bookLayout, verticalList, entryFont, 0);
+        generateIndexEntries(indexEntries, bookLayout, verticalList, entryFont, textWidth, 0);
 
         if (false) {
             System.out.println("Index:");
@@ -726,9 +730,8 @@ public class Typesetter {
      *
      * @param depth the depth of the recursion, where 0 is for entries, 1 for sub-entries, etc.
      */
-    private void generateIndexEntries(IndexEntries indexEntries, Config config,
-                                      BookLayout bookLayout, VerticalList verticalList,
-                                      FontSize font, int depth) throws IOException {
+    private void generateIndexEntries(IndexEntries indexEntries, BookLayout bookLayout, VerticalList verticalList,
+                                      FontSize font, long textWidth, int depth) throws IOException {
         // Space between sections.
         long sectionBreak = PT.toSp(6.0);
 
@@ -750,10 +753,11 @@ public class Typesetter {
                 verticalList.addElement(new Glue(sectionBreak, sectionBreak/2, 0, false));
             }
 
-            // Add the item and its page numbers.
+            // Add the item texxt.
             StringBuilder builder = new StringBuilder();
             builder.append(text);
 
+            // And its page numbers.
             List<Integer> physicalPageNumbers = indexEntry.getPhysicalPageNumbers();
             if (!physicalPageNumbers.isEmpty()) {
                 builder.append(physicalPageNumbers.stream()
@@ -763,15 +767,17 @@ public class Typesetter {
 
             builder.append('.');
             HorizontalList horizontalList = new HorizontalList();
-            if (depth > 0) {
-                horizontalList.addElement(new Box(indent*depth, 0, 0));
+            long totalIndent = indent*depth;
+            if (totalIndent > 0) {
+                horizontalList.addElement(new Box(totalIndent, 0, 0));
             }
             horizontalList.addText(builder.toString(), font);
             horizontalList.addEndOfParagraph();
-            horizontalList.format(verticalList, config.getBodyWidth());
+            horizontalList.format(verticalList, textWidth);
 
             // Now do the children of this entry.
-            generateIndexEntries(indexEntry.getSubEntries(), config, bookLayout, verticalList, font, depth + 1);
+            generateIndexEntries(indexEntry.getSubEntries(), bookLayout, verticalList, font,
+                    textWidth - totalIndent, depth + 1);
 
             // Kee track of the last category.
             previousCategory = category;
