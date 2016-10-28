@@ -18,9 +18,16 @@ public class VBox extends Box {
     /**
      * The elements are listed top to bottom.
      */
-    public VBox(List<Element> elements) {
-        super(determineVBoxDimensions(elements));
+    public VBox(List<Element> elements, long shift) {
+        super(determineVBoxDimensions(elements), shift);
         mElements = elements;
+    }
+
+    /**
+     * The elements are listed top to bottom.
+     */
+    public VBox(List<Element> elements) {
+        this(elements, 0);
     }
 
     public List<Element> getElements() {

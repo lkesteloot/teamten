@@ -29,8 +29,8 @@ public class HorizontalList extends ElementList {
     private static final boolean DEBUG_LIGATURES = false;
 
     @Override
-    protected HBox makeOutputBox(List<Element> elements, int lineNumber) {
-        return new HBox(elements);
+    protected HBox makeOutputBox(List<Element> elements, int lineNumber, long shift) {
+        return new HBox(elements, shift);
     }
 
     @Override

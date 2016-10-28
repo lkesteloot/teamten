@@ -16,9 +16,13 @@ import java.util.function.Consumer;
 public class HBox extends Box {
     private final List<Element> mElements;
 
-    public HBox(List<Element> elements) {
-        super(Dimensions.horizontally(elements));
+    public HBox(List<Element> elements, long shift) {
+        super(Dimensions.horizontally(elements), shift);
         mElements = elements;
+    }
+
+    public HBox(List<Element> elements) {
+        this(elements, 0);
     }
 
     /**
@@ -83,7 +87,7 @@ public class HBox extends Box {
         y -= getHeight();
 
         // Lay out the elements horizontally.
-        layOutHorizontally(x, y, contents);
+        layOutHorizontally(x + getShift(), y, contents);
 
         // Our height is the combined height and depth.
         return getHeight() + getDepth();

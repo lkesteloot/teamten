@@ -89,6 +89,16 @@ public abstract class ElementList implements ElementSink {
      * and for vertical lists this makes pages.
      */
     public void format(ElementSink output, long maxSize) {
+        format(output, new OutputShape(maxSize));
+    }
+
+    /**
+     * Format the list and add the elements to the sync. For horizontal lists this makes paragraphs,
+     * and for vertical lists this makes pages.
+     *
+     * @param outputShape the shape of the output paragraph of pages.
+     */
+    public void format(ElementSink output, OutputShape outputShape) {
         // Find all the places that we could break a line or page.
         List<Breakpoint> breakpoints = findBreakpoints();
 
@@ -148,6 +158,10 @@ public abstract class ElementList implements ElementSink {
                         shrink.add(glue.getShrink());
                     }
                 }
+
+                // Get the size for this line or page.
+                int counter = beginBreakpoint.getCounter() + 1;
+                long maxSize = outputShape.getSize(counter);
 
                 // Compute difference between width and page width (or height and page height). This is positive
                 // if our line comes short and leaves extra space.
@@ -279,10 +293,10 @@ public abstract class ElementList implements ElementSink {
         }
 
         // Convert the final list of breakpoints into boxes.
-        Iterable<Box> boxes = makeAllFinalBoxes(breakpoints);
+        Iterable<Box> boxes = makeAllFinalBoxes(breakpoints, outputShape);
 
         // Send the boxes to the sync.
-        outputBoxes(boxes, output, maxSize);
+        outputBoxes(boxes, output, outputShape);
     }
 
     /**
@@ -451,7 +465,7 @@ public abstract class ElementList implements ElementSink {
     /**
      * Make a box with the specified elements stretched out by the given ratio.
      */
-    private Box makeBox(List<Element> lineElements, double ratio, boolean ratioIsInfinite, int counter) {
+    private Box makeBox(List<Element> lineElements, double ratio, boolean ratioIsInfinite, int counter, long shift) {
         List<Element> line = new ArrayList<>();
 
         // Non-null iff the previous element was a Text element.
@@ -515,21 +529,21 @@ public abstract class ElementList implements ElementSink {
             previousText = null;
         }
 
-        return makeOutputBox(line, counter);
+        return makeOutputBox(line, counter, shift);
     }
 
     /**
      * Make a box with zero stretching or shrinking.
      */
     Box makeBox(int counter) {
-        return makeBox(mElements, 0, false, counter);
+        return makeBox(mElements, 0, false, counter, 0);
     }
 
     /**
      * Go through our linked list of breakpoints, generating lines or pages. The list runs backward through
      * the data, so we build it up into a list in reverse order.
      */
-    private Iterable<Box> makeAllFinalBoxes(List<Breakpoint> breakpoints) {
+    private Iterable<Box> makeAllFinalBoxes(List<Breakpoint> breakpoints, OutputShape outputShape) {
         Deque<Box> boxes = new ArrayDeque<>();
 
         Breakpoint endBreakpoint = breakpoints.get(breakpoints.size() - 1);
@@ -540,10 +554,13 @@ public abstract class ElementList implements ElementSink {
                 break;
             }
 
+            // Get the indent for this line or page.
+            long indent = outputShape.getIndent(endBreakpoint.getCounter());
+
             // Make a new list with the glue set to specific widths.
             Box box = makeBox(getLineElements(beginBreakpoint, endBreakpoint),
                     endBreakpoint.getRatio(), endBreakpoint.isRatioIsInfinite(),
-                    endBreakpoint.getCounter());
+                    endBreakpoint.getCounter(), indent);
             if (printDebug()) {
                 box.println(System.out, "");
             }
@@ -561,8 +578,11 @@ public abstract class ElementList implements ElementSink {
     /**
      * Output all the boxes to the sync, warning if they're the wrong size.
      */
-    private void outputBoxes(Iterable<Box> boxes, ElementSink output, long maxSize) {
+    private void outputBoxes(Iterable<Box> boxes, ElementSink output, OutputShape outputShape) {
+        int counter = 1;
         for (Box box : boxes) {
+            long maxSize = outputShape.getSize(counter);
+
             // See if it's the right size.
             long boxSize = getElementSize(box);
             if (boxSize != maxSize) {
@@ -577,6 +597,8 @@ public abstract class ElementList implements ElementSink {
 
             // Add to the sink.
             output.addElement(box);
+
+            counter++;
         }
     }
 
@@ -596,8 +618,9 @@ public abstract class ElementList implements ElementSink {
      * @param elements the elements of the box.
      * @param counter the number of the box, starting from 0. For horizontal lists this is the line number
      *                of the paragraph. For vertical lists this is the physical page number.
+     * @param shift how much to shift the box in the final layout (up or to the right).
      */
-    protected abstract Box makeOutputBox(List<Element> elements, int counter);
+    protected abstract Box makeOutputBox(List<Element> elements, int counter, long shift);
 
     /**
      * Return the size (width for horizontal lists, height + depth for vertical lists) of the element.
@@ -726,6 +749,83 @@ public abstract class ElementList implements ElementSink {
          */
         public void setRatioIsInfinite(boolean ratioIsInfinite) {
             mRatioIsInfinite = ratioIsInfinite;
+        }
+    }
+
+    /**
+     * Records the shape of the output of this element list. This is typically used to give paragraphs
+     * heterogeneous line widths (e.g., hanging indents).
+     */
+    public static class OutputShape {
+        private final int mFirstLength;
+        private final long mFirstSize;
+        private final long mFirstIndent;
+        private final long mSecondSize;
+        private final long mSecondIndent;
+
+        public OutputShape(int firstLength, long firstSize, long firstIndent, long secondSize, long secondIndent) {
+            mFirstLength = firstLength;
+            mFirstSize = firstSize;
+            mFirstIndent = firstIndent;
+            mSecondSize = secondSize;
+            mSecondIndent = secondIndent;
+        }
+
+        /**
+         * Homogeneous output shape with no indent.
+         */
+        public OutputShape(long size) {
+            this(0, 0, 0, size, 0);
+        }
+
+        /**
+         * The number of lines or pages that are of first size and with first indent. The rest are of second
+         * size and with second indent. TODO remove these getters?
+         */
+        public int getFirstLength() {
+            return mFirstLength;
+        }
+
+        /**
+         * The size of the first "first length" lines or pages.
+         */
+        public long getFirstSize() {
+            return mFirstSize;
+        }
+
+        /**
+         * The indent (or top space) of the first "first length" lines or pages.
+         */
+        public long getFirstIndent() {
+            return mFirstIndent;
+        }
+
+        /**
+         * The size of the remaining lines or pages.
+         */
+        public long getSecondSize() {
+            return mSecondSize;
+        }
+
+        /**
+         * The indent (or top space) of the remaining lines or pages.
+         */
+        public long getSecondIndent() {
+            return mSecondIndent;
+        }
+
+        /**
+         * Get the size for the specified (1-based) line or page.
+         */
+        public long getSize(int counter) {
+            return counter <= mFirstLength ? mFirstSize : mSecondSize;
+        }
+
+        /**
+         * Get the indent for the specified (1-based) line or page.
+         */
+        public long getIndent(int counter) {
+            return counter <= mFirstLength ? mFirstIndent : mSecondIndent;
         }
     }
 }

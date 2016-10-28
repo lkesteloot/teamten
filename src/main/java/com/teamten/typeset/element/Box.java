@@ -16,15 +16,25 @@ public class Box extends NonDiscardableElement {
     private final long mWidth;
     private final long mHeight;
     private final long mDepth;
+    private final long mShift;
 
-    public Box(long width, long height, long depth) {
+    public Box(long width, long height, long depth, long shift) {
         mWidth = width;
         mHeight = height;
         mDepth = depth;
+        mShift = shift;
+    }
+
+    public Box(long width, long height, long depth) {
+        this(width, height, depth, 0);
+    }
+
+    protected Box(Dimensions dimensions, long shift) {
+        this(dimensions.getWidth(), dimensions.getHeight(), dimensions.getDepth(), shift);
     }
 
     protected Box(Dimensions dimensions) {
-        this(dimensions.getWidth(), dimensions.getHeight(), dimensions.getDepth());
+        this(dimensions, 0);
     }
 
     /**
@@ -59,6 +69,13 @@ public class Box extends NonDiscardableElement {
     @Override
     public long getDepth() {
         return mDepth;
+    }
+
+    /**
+     * The amount to shift this box, to the right during vertical layout and up during horizontal layout.
+     */
+    public long getShift() {
+        return mShift;
     }
 
     @Override

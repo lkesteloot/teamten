@@ -11,8 +11,8 @@ public class Page extends VBox {
     /**
      * The elements are listed top to bottom.
      */
-    public Page(List<Element> elements, int physicalPageNumber) {
-        super(elements);
+    public Page(List<Element> elements, int physicalPageNumber, long shift) {
+        super(elements, shift);
         mPhysicalPageNumber = physicalPageNumber;
     }
 
