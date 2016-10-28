@@ -22,7 +22,7 @@ public class BookLayout {
     private final NavigableMap<Integer,SectionBookmark> mPageToSectionMap = new TreeMap<>();
     private final Map<SectionBookmark.Type,Integer> mSectionToPageMap = new HashMap<>();
     private int mFirstFrontMatterPhysicalPage = 1;
-    private int mFirstBodyMatterPhysicalPage = 5;
+    private int mFirstBodyMatterPhysicalPage = 1;
 
     /**
      * Look through the bookmarks to figure out where the body starts and, for any given page, what

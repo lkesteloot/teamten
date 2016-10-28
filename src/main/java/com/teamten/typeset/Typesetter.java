@@ -78,6 +78,7 @@ public class Typesetter {
 
         // Add document metadata.
         Config config = new Config();
+        config.fillWithDefaults();
         for (Map.Entry<String,String> entry : doc.getMetadata()) {
             Config.Key key = Config.Key.fromHeader(entry.getKey());
             config.add(key, entry.getValue());

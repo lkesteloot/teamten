@@ -105,12 +105,26 @@ public class Config {
     public static Config testConfig() {
         Config config = new Config();
 
-        config.add(Config.Key.PAGE_WIDTH, "6in");
-        config.add(Config.Key.PAGE_HEIGHT, "9in");
-        config.add(Config.Key.PAGE_MARGIN, "1in");
-        config.add(Config.Key.PAGE_NUMBER_FONT, "Times New Roman, regular, 11pt");
+        config.add(Key.PAGE_WIDTH, "6in");
+        config.add(Key.PAGE_HEIGHT, "9in");
+        config.add(Key.PAGE_MARGIN, "1in");
+        config.add(Key.PAGE_NUMBER_FONT, "Times New Roman, regular, 11pt");
 
         return config;
+    }
+
+    /**
+     * Fill the configuration with default values so that each document doesn't have to define them all.
+     */
+    public void fillWithDefaults() {
+        add(Key.PAGE_WIDTH, "6in");
+        add(Key.PAGE_HEIGHT, "9in");
+        add(Key.PAGE_MARGIN, "1in");
+        add(Key.BODY_FONT, "Times New Roman, regular, 11pt");
+        add(Key.PART_HEADER_FONT, "Times New Roman, regular, 11pt");
+        add(Key.CHAPTER_HEADER_FONT, "Times New Roman, regular, 11pt");
+        add(Key.PAGE_NUMBER_FONT, "Times New Roman, regular, 11pt");
+        add(Key.HEADLINE_FONT, "Times New Roman, regular, 11pt");
     }
 
     /**
