@@ -229,7 +229,7 @@ public class Typesetter {
 
             long leading = PT.toSp(fontSize * 1.2f);
             long interParagraphSpacing = 0;
-            long firstLineSpacing = PT.toSp(indentFirstLine ? fontSize * 2 : 0);
+            long paragraphIndent = PT.toSp(fontSize * 2);
 
             // Set the distance between baselines based on the paragraph's main font.
             verticalList.setBaselineSkip(leading);
@@ -246,11 +246,6 @@ public class Typesetter {
 
             if (center) {
                 horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
-            }
-
-            // Paragraph indent.
-            if (firstLineSpacing != 0) {
-                horizontalList.addElement(new Box(firstLineSpacing, 0, 0));
             }
 
             // Each span in the paragraph.
@@ -303,7 +298,15 @@ public class Typesetter {
             horizontalList.addEndOfParagraph();
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
-            horizontalList.format(verticalList, config.getBodyWidth());
+            long bodyWidth = config.getBodyWidth();
+            ElementList.OutputShape outputShape;
+            if (indentFirstLine) {
+                outputShape = new ElementList.OutputShape(1, bodyWidth - paragraphIndent, paragraphIndent,
+                        bodyWidth, 0);
+            } else {
+                outputShape = new ElementList.OutputShape(bodyWidth);
+            }
+            horizontalList.format(verticalList, outputShape);
 
             if (ownPage) {
                 verticalList.oddPage();
@@ -735,9 +738,10 @@ public class Typesetter {
         // Space between sections.
         long sectionBreak = PT.toSp(6.0);
 
-        // How much to indent each sub-section. TODO this isn't really an indent, it's a first-line indent. Modify
-        // to indent every line.
+        // How much to indent each sub-section.
         long indent = PT.toSp(15.0);
+        long totalIndent = indent*depth;
+        long hangingIndent = indent*2; // Not depth-dependent; matches Knuth index.
 
         // We want to put a space between sections, so keep track of the last section's category (first letter).
         int previousCategory = -1;
@@ -783,17 +787,14 @@ public class Typesetter {
 
             builder.append('.');
             HorizontalList horizontalList = new HorizontalList();
-            long totalIndent = indent*depth;
-            if (totalIndent > 0) {
-                horizontalList.addElement(new Box(totalIndent, 0, 0));
-            }
             horizontalList.addText(builder.toString(), font);
             horizontalList.addEndOfParagraph();
-            horizontalList.format(verticalList, textWidth);
+            ElementList.OutputShape outputShape = new ElementList.OutputShape(1, textWidth - totalIndent, totalIndent,
+                    textWidth - hangingIndent, hangingIndent);
+            horizontalList.format(verticalList, outputShape);
 
             // Now do the children of this entry.
-            generateIndexEntries(indexEntry.getSubEntries(), bookLayout, verticalList, font,
-                    textWidth - totalIndent, depth + 1);
+            generateIndexEntries(indexEntry.getSubEntries(), bookLayout, verticalList, font, textWidth, depth + 1);
 
             // Kee track of the last category.
             previousCategory = category;
