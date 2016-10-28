@@ -172,7 +172,7 @@ public abstract class ElementList implements ElementSink {
                     }
                 } else if (extraSpace < 0) {
                     // Our line is long. Compute how much we'd have to shrink.
-                    if (!stretch.isInfinite() && -extraSpace > stretch.getAmount()) {
+                    if (!shrink.isInfinite() && -extraSpace > shrink.getAmount()) {
                         // Can't shrink more than shrink amount.
                         ratio = -1.0;
                         ratioIsInfinite = false;
@@ -571,6 +571,7 @@ public abstract class ElementList implements ElementSink {
                 if (percentOff < -0.001 || percentOff > 0.001) {
                     System.out.printf("Warning: %s is of wrong size (should be %,d but is %,d, off by %,d or %.3f%%)\n",
                             box.getClass().getSimpleName(), maxSize, boxSize, difference, percentOff);
+                    System.out.printf("    %s\n", box.toTextString());
                 }
             }
 

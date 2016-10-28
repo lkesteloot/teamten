@@ -471,7 +471,14 @@ public class HorizontalList extends ElementList {
      */
     public void addEndOfParagraph() {
         // Add a forced break at the end of the paragraph.
+
+        // First prevent a break at the infinite glue, or we'd be left with a line with just the penalty afterward.
+        addElement(new Penalty(Penalty.INFINITY));
+
+        // When add infinite glue to finish out the last line.
         addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+
+        // And force a break.
         addElement(new Penalty(-Penalty.INFINITY));
     }
 }

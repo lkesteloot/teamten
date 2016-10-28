@@ -187,6 +187,8 @@ public class MarkdownParser {
                             builder.addSpan(new IndexSpan(tag.substring(1)));
                         } else if (tag.startsWith("^")) {
                             // Ignore footnote.
+                        } else if (tag.startsWith("!")) {
+                            // Ignore image.
                         } else {
                             System.out.println("Warning: Unknown block type: " + tag);
                         }

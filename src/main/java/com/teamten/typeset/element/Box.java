@@ -71,6 +71,11 @@ public class Box extends NonDiscardableElement {
         return mHeight + mDepth;
     }
 
+    @Override
+    public String toString() {
+        return "Box" + getDimensionString();
+    }
+
     /**
      * A string that specifies the three dimensions of the box.
      */

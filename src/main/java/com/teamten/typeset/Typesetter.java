@@ -752,7 +752,7 @@ public class Typesetter {
                 verticalList.addElement(new Glue(sectionBreak, sectionBreak/2, 0, false));
             }
 
-            // Add the item texxt.
+            // Add the item text.
             StringBuilder builder = new StringBuilder();
             builder.append(text);
 
