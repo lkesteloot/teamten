@@ -42,6 +42,56 @@ public class IndexEntry implements Comparable<IndexEntry> {
     }
 
     /**
+     * Get the full paragraph to display for this entry in the index.
+     */
+    public String getIndexParagraph(BookLayout bookLayout) {
+        StringBuilder builder = new StringBuilder();
+
+        // Add the index text.
+        builder.append(mText);
+
+        // And its page numbers.
+        List<Integer> physicalPageNumbers = getPhysicalPageNumbers();
+        for (int i = 0; i < physicalPageNumbers.size(); i++) {
+            // Start with a range of a single page.
+            int firstPage = physicalPageNumbers.get(i);
+            int lastPage = firstPage;
+
+            // Walk further to extend the range, if they're contiguous.
+            while (i < physicalPageNumbers.size() - 1 && physicalPageNumbers.get(i + 1) == lastPage + 1) {
+                lastPage++;
+                i++;
+            }
+
+            // Append the page or a range of pages.
+            builder.append(", ");
+            builder.append(bookLayout.getPageNumberLabel(firstPage));
+            if (lastPage > firstPage) {
+                builder.append('\u2013'); // En-dash.
+                builder.append(bookLayout.getPageNumberLabel(lastPage));
+            }
+        }
+
+        builder.append('.');
+
+        return builder.toString();
+    }
+
+    /**
+     * Get the category for this index. This is based on the first letter of the text, so
+     * "Alpha" and "Beta" are in different categories, but "Alpha" and "alpha" are the same.
+     * All non-alphanumeric characters are in the same category. Returned values are
+     * non-negative.
+     */
+    public int getCategory() {
+        // Based on the first character.
+        int firstCh = mText.codePointAt(0);
+
+        // Use '@' to represent non-alphabetic first letters.
+        return Character.isAlphabetic(firstCh) ? Character.toLowerCase(firstCh) : '@';
+    }
+
+    /**
      * Return a sorted list of page numbers for this entry.
      */
     public List<Integer> getPhysicalPageNumbers() {

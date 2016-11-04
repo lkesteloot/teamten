@@ -9,6 +9,8 @@ import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.NonDiscardableElement;
 import com.teamten.typeset.element.Penalty;
 import com.teamten.typeset.element.Text;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
 import java.util.ArrayDeque;
@@ -44,6 +46,7 @@ public abstract class ElementList implements ElementSink {
     /**
      * Whether to print debugging information.
      */
+    @Contract(pure = true)
     private boolean printDebug() {
         return (DEBUG_HORIZONTAL_LIST && this instanceof HorizontalList) ||
                 (DEBUG_VERTICAL_LIST && this instanceof VerticalList);
@@ -54,6 +57,7 @@ public abstract class ElementList implements ElementSink {
      * @param beginBreakpoint the start of the line.
      * @param endBreakpoint the end of the line.
      */
+    @NotNull
     private String getDebugLinePrefix(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
         StringBuilder builder = new StringBuilder();
 
@@ -71,6 +75,7 @@ public abstract class ElementList implements ElementSink {
      * Get a string that can be used for debugging to represent the paragraph ending here.
      * @param endBreakpoint the end of the line.
      */
+    @NotNull
     private String getDebugLineSuffix(Breakpoint endBreakpoint) {
         StringBuilder builder = new StringBuilder();
 
@@ -142,13 +147,12 @@ public abstract class ElementList implements ElementSink {
                     continue;
                 }
 
-                // Find the sum of the sizes of all the elements in this line. Also compute the total stretch
-                // and shrink for the glue in that line.
-                // TODO: We could build this up incrementally instead of looping each time.
+                // Find the sum of the sizes of all the elements in this line or page. Also compute the total stretch
+                // and shrink for the glue in that line or page.
                 long width = 0;
                 Glue.ExpandabilitySum stretch = new Glue.ExpandabilitySum();
                 Glue.ExpandabilitySum shrink = new Glue.ExpandabilitySum();
-                for (Element element : getLineElements(beginBreakpoint, endBreakpoint)) {
+                for (Element element : getElementSublist(beginBreakpoint, endBreakpoint)) {
                     width += getElementSize(element);
 
                     // Sum up the stretch and shrink for glues.
@@ -373,7 +377,7 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Whether this breakpoint should be ignored altogether in this case.
+     * Whether this end breakpoint should be ignored altogether in this case.
      */
     private boolean shouldIgnoreBreakpoint(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
         // Get the element that we're proposing to break on.
@@ -397,11 +401,11 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Return the list of elements on this line, from beginBreakpoint (inclusive) to endBreakpoint
+     * Return the list of elements on this line or page, from beginBreakpoint (inclusive) to endBreakpoint
      * (inclusive only if it's a discretionary element). All discretionary elements are turned
      * into HBoxes depending on where they are.
      */
-    private List<Element> getLineElements(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
+    private List<Element> getElementSublist(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
         int beginIndex = beginBreakpoint.getStartIndex();
         int endIndex = endBreakpoint.getIndex();
 
@@ -426,6 +430,7 @@ public abstract class ElementList implements ElementSink {
                 }
                 elements.add(hbox);
             } else if (i < endIndex) {
+                // The end index is normally exclusive.
                 elements.add(element);
             }
         }
@@ -558,7 +563,7 @@ public abstract class ElementList implements ElementSink {
             long indent = outputShape.getIndent(endBreakpoint.getCounter());
 
             // Make a new list with the glue set to specific widths.
-            Box box = makeBox(getLineElements(beginBreakpoint, endBreakpoint),
+            Box box = makeBox(getElementSublist(beginBreakpoint, endBreakpoint),
                     endBreakpoint.getRatio(), endBreakpoint.isRatioIsInfinite(),
                     endBreakpoint.getCounter(), indent);
             if (printDebug()) {
@@ -763,6 +768,15 @@ public abstract class ElementList implements ElementSink {
         private final long mSecondSize;
         private final long mSecondIndent;
 
+        /**
+         * Creates an OutputShape object.
+         *
+         * @param firstLength number of lines that are of firstSize and firstIndent.
+         * @param firstSize width of the first firstLength lines.
+         * @param firstIndent indent of the first firstLength lines.
+         * @param secondSize width of the subsequent lines.
+         * @param secondIndent indent of the subsequent lines.
+         */
         public OutputShape(int firstLength, long firstSize, long firstIndent, long secondSize, long secondIndent) {
             mFirstLength = firstLength;
             mFirstSize = firstSize;
@@ -776,42 +790,6 @@ public abstract class ElementList implements ElementSink {
          */
         public OutputShape(long size) {
             this(0, 0, 0, size, 0);
-        }
-
-        /**
-         * The number of lines or pages that are of first size and with first indent. The rest are of second
-         * size and with second indent. TODO remove these getters?
-         */
-        public int getFirstLength() {
-            return mFirstLength;
-        }
-
-        /**
-         * The size of the first "first length" lines or pages.
-         */
-        public long getFirstSize() {
-            return mFirstSize;
-        }
-
-        /**
-         * The indent (or top space) of the first "first length" lines or pages.
-         */
-        public long getFirstIndent() {
-            return mFirstIndent;
-        }
-
-        /**
-         * The size of the remaining lines or pages.
-         */
-        public long getSecondSize() {
-            return mSecondSize;
-        }
-
-        /**
-         * The indent (or top space) of the remaining lines or pages.
-         */
-        public long getSecondIndent() {
-            return mSecondIndent;
         }
 
         /**

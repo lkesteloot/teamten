@@ -747,47 +747,19 @@ public class Typesetter {
         int previousCategory = -1;
 
         for (IndexEntry indexEntry : indexEntries.getEntries()) {
-            String text = indexEntry.getText();
-            int firstCh = text.codePointAt(0);
-
-            // Use '@' to represent non-alphabetic first letters.
-            int category = Character.isAlphabetic(firstCh) ? Character.toLowerCase(firstCh) : '@';
+            // See if we moved to a different category.
+            int category = indexEntry.getCategory();
             if (previousCategory != -1 && category != previousCategory && depth == 0) {
                 // Insert a small break.
                 verticalList.addElement(new Glue(sectionBreak, sectionBreak/2, 0, false));
             }
 
-            // Add the item text.
-            StringBuilder builder = new StringBuilder();
-            builder.append(text);
+            // The full text of the entry.
+            String entryParagraph = indexEntry.getIndexParagraph(bookLayout);
 
-            // And its page numbers.
-            List<Integer> physicalPageNumbers = indexEntry.getPhysicalPageNumbers();
-            for (int i = 0; i < physicalPageNumbers.size(); i++) {
-                // Start with a range of a single page.
-                int firstPage = physicalPageNumbers.get(i);
-                int lastPage = firstPage;
-
-                // Walk further to extend the range, if they're contiguous.
-                while (i < physicalPageNumbers.size() - 1 &&
-                        physicalPageNumbers.get(i + 1) == lastPage + 1) {
-
-                    lastPage++;
-                    i++;
-                }
-
-                // Append the page or a range of pages.
-                builder.append(", ");
-                builder.append(bookLayout.getPageNumberLabel(firstPage));
-                if (lastPage > firstPage) {
-                    builder.append('\u2013'); // En-dash.
-                    builder.append(bookLayout.getPageNumberLabel(lastPage));
-                }
-            }
-
-            builder.append('.');
+            // Build the horizontal list.
             HorizontalList horizontalList = new HorizontalList();
-            horizontalList.addText(builder.toString(), font);
+            horizontalList.addText(entryParagraph, font);
             horizontalList.addEndOfParagraph();
             ElementList.OutputShape outputShape = new ElementList.OutputShape(1, textWidth - totalIndent, totalIndent,
                     textWidth - hangingIndent, hangingIndent);
