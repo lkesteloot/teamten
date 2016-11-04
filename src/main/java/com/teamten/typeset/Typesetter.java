@@ -299,12 +299,11 @@ public class Typesetter {
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             long bodyWidth = config.getBodyWidth();
-            ElementList.OutputShape outputShape;
+            OutputShape outputShape;
             if (indentFirstLine) {
-                outputShape = new ElementList.OutputShape(1, bodyWidth - paragraphIndent, paragraphIndent,
-                        bodyWidth, 0);
+                outputShape = OutputShape.singleLine(bodyWidth, paragraphIndent, 0);
             } else {
-                outputShape = new ElementList.OutputShape(bodyWidth);
+                outputShape = OutputShape.fixed(bodyWidth);
             }
             horizontalList.format(verticalList, outputShape);
 
@@ -761,8 +760,7 @@ public class Typesetter {
             HorizontalList horizontalList = new HorizontalList();
             horizontalList.addText(entryParagraph, font);
             horizontalList.addEndOfParagraph();
-            ElementList.OutputShape outputShape = new ElementList.OutputShape(1, textWidth - totalIndent, totalIndent,
-                    textWidth - hangingIndent, hangingIndent);
+            OutputShape outputShape = OutputShape.singleLine(textWidth, totalIndent, hangingIndent);
             horizontalList.format(verticalList, outputShape);
 
             // Now do the children of this entry.

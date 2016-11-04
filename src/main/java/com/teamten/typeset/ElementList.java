@@ -94,7 +94,7 @@ public abstract class ElementList implements ElementSink {
      * and for vertical lists this makes pages.
      */
     public void format(ElementSink output, long maxSize) {
-        format(output, new OutputShape(maxSize));
+        format(output, OutputShape.fixed(maxSize));
     }
 
     /**
@@ -757,53 +757,4 @@ public abstract class ElementList implements ElementSink {
         }
     }
 
-    /**
-     * Records the shape of the output of this element list. This is typically used to give paragraphs
-     * heterogeneous line widths (e.g., hanging indents).
-     */
-    public static class OutputShape {
-        private final int mFirstLength;
-        private final long mFirstSize;
-        private final long mFirstIndent;
-        private final long mSecondSize;
-        private final long mSecondIndent;
-
-        /**
-         * Creates an OutputShape object.
-         *
-         * @param firstLength number of lines that are of firstSize and firstIndent.
-         * @param firstSize width of the first firstLength lines.
-         * @param firstIndent indent of the first firstLength lines.
-         * @param secondSize width of the subsequent lines.
-         * @param secondIndent indent of the subsequent lines.
-         */
-        public OutputShape(int firstLength, long firstSize, long firstIndent, long secondSize, long secondIndent) {
-            mFirstLength = firstLength;
-            mFirstSize = firstSize;
-            mFirstIndent = firstIndent;
-            mSecondSize = secondSize;
-            mSecondIndent = secondIndent;
-        }
-
-        /**
-         * Homogeneous output shape with no indent.
-         */
-        public OutputShape(long size) {
-            this(0, 0, 0, size, 0);
-        }
-
-        /**
-         * Get the size for the specified (1-based) line or page.
-         */
-        public long getSize(int counter) {
-            return counter <= mFirstLength ? mFirstSize : mSecondSize;
-        }
-
-        /**
-         * Get the indent for the specified (1-based) line or page.
-         */
-        public long getIndent(int counter) {
-            return counter <= mFirstLength ? mFirstIndent : mSecondIndent;
-        }
-    }
 }
