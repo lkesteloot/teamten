@@ -28,8 +28,8 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public abstract class ElementList implements ElementSink {
     private static final long LINE_PENALTY = 10;
-    private static final long BADNESS_TOLERANCE = 5000;
-    private static final long INFINITELY_BAD = 10000;
+    private static final long BADNESS_TOLERANCE = 8000;
+    private static final long INFINITELY_BAD = 100000;
     private static final boolean DEBUG_HORIZONTAL_LIST = false;
     private static final boolean DEBUG_VERTICAL_LIST = false;
     private final List<Element> mElements = new ArrayList<>();
@@ -418,8 +418,8 @@ public abstract class ElementList implements ElementSink {
             badness = INFINITELY_BAD;
         } else {
             // Normal case. Use 100*r^3, but max out at INFINITELY_BAD.
-            if (ratio < -5 || ratio > 5) {
-                // Avoid overflow. 5 = ceil((INFINITELY_BAD/100)^(1/3)).
+            if (ratio < -10 || ratio > 10) {
+                // Avoid overflow. 10 = ceil((INFINITELY_BAD/100)^(1/3)).
                 badness = INFINITELY_BAD;
             } else {
                 badness = Math.min(INFINITELY_BAD, (long) (100 * Math.pow(Math.abs(ratio), 3)));
