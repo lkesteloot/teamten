@@ -1,5 +1,6 @@
 package com.teamten.typeset;
 
+import com.teamten.typeset.element.Columns;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
@@ -97,23 +98,24 @@ public class VerticalList extends ElementList {
 
         for (int i = beginIndex; i < endIndex; i++) {
             Element element;
+            ColumnLayout columnLayout = getColumnLayoutForElement(i);
 
             // Treat multiple columns differently.
-            if (getColumnLayout(i).getColumnCount() > 1) {
-                // Find all the subsequent elements with this number of columns.
+            if (columnLayout.getColumnCount() > 1) {
+                // Find all the subsequent elements with these same columns.
                 int firstIndex = i;
                 int lastIndex = firstIndex;
                 while (lastIndex < endIndex - 1
-                        && getColumnLayout(firstIndex).equals(getColumnLayout(lastIndex + 1))) {
+                        && columnLayout.equals(getColumnLayoutForElement(lastIndex + 1))) {
 
                     lastIndex++;
                 }
                 i = lastIndex;
 
                 // Create a group for all these elements.
-                element = makeColumns(allElements.subList(firstIndex, lastIndex + 1),
-                        getColumnLayout(firstIndex));
+                element = new Columns(allElements.subList(firstIndex, lastIndex + 1), columnLayout);
             } else {
+                // One-column element, just add it.
                 element = allElements.get(i);
             }
 
@@ -128,38 +130,13 @@ public class VerticalList extends ElementList {
      *
      * @throws IllegalStateException if the element index does not correspond to a layout.
      */
-    private ColumnLayout getColumnLayout(int elementIndex) {
+    private ColumnLayout getColumnLayoutForElement(int elementIndex) {
         Map.Entry<Integer,ColumnLayout> entry = mColumnChanges.floorEntry(elementIndex);
         if (entry == null) {
             throw new IllegalStateException("must have column layout for all elements");
         }
 
         return entry.getValue();
-    }
-
-    /**
-     * Find the best decomposition of the elements into columns.
-     */
-    private HBox makeColumns(List<Element> elements, ColumnLayout columnLayout) {
-        int elementsPerColumn = (int) Math.ceil((double) elements.size() / columnLayout.getColumnCount());
-
-        List<Element> horizontalElements = new ArrayList<>();
-
-        int firstIndex = 0;
-        for (int i = 0; i < columnLayout.getColumnCount(); i++) {
-            int lastIndex = Math.min(firstIndex + elementsPerColumn, elements.size());
-            VBox vbox = new VBox(elements.subList(firstIndex, lastIndex));
-
-            if (!horizontalElements.isEmpty()) {
-                horizontalElements.add(new Glue(columnLayout.getMargin(), 0, 0, true));
-            }
-
-            horizontalElements.add(vbox);
-
-            firstIndex = lastIndex;
-        }
-
-        return new HBox(horizontalElements);
     }
 
     /**

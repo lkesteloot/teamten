@@ -28,8 +28,8 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public abstract class ElementList implements ElementSink {
     private static final long LINE_PENALTY = 10;
-    private static final long BADNESS_TOLERANCE = 8000;
-    private static final long INFINITELY_BAD = 100000;
+    private static final long BADNESS_TOLERANCE = 8_000;
+    private static final long INFINITELY_BAD = 100_000;
     private static final boolean DEBUG_HORIZONTAL_LIST = false;
     private static final boolean DEBUG_VERTICAL_LIST = false;
     private final List<Element> mElements = new ArrayList<>();
