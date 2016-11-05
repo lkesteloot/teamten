@@ -2,9 +2,7 @@ package com.teamten.typeset.element;
 
 import com.teamten.typeset.ColumnLayout;
 import com.teamten.typeset.ColumnVerticalList;
-import com.teamten.typeset.VerticalList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

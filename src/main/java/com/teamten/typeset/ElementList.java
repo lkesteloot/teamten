@@ -4,6 +4,7 @@ import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Flexibility;
+import com.teamten.typeset.element.Flexible;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.NonDiscardableElement;
@@ -156,11 +157,11 @@ public abstract class ElementList implements ElementSink {
                 for (Element element : getElementSublist(beginBreakpoint, endBreakpoint)) {
                     width += getElementSize(element);
 
-                    // Sum up the stretch and shrink for glues.
-                    if (element instanceof Glue) {
-                        Glue glue = (Glue) element;
-                        stretch.add(glue.getStretch());
-                        shrink.add(glue.getShrink());
+                    // Sum up the stretch and shrink for glues and other flexible objects.
+                    if (element instanceof Flexible) {
+                        Flexible flexible = (Flexible) element;
+                        stretch.add(flexible.getStretch());
+                        shrink.add(flexible.getShrink());
                     }
                 }
 
@@ -431,17 +432,17 @@ public abstract class ElementList implements ElementSink {
                     element = null;
                 }
             }
-            if (element instanceof Glue) {
-                Glue glue = (Glue) element;
+            if (element instanceof Flexible) {
+                Flexible flexible = (Flexible) element;
 
-                long glueSize = glue.getSize();
-                Flexibility flexibility = ratio >= 0 ? glue.getStretch() : glue.getShrink();
+                long glueSize = flexible.getSize();
+                Flexibility flexibility = ratio >= 0 ? flexible.getStretch() : flexible.getShrink();
                 if (flexibility.isInfinite() == ratioIsInfinite) {
                     glueSize += (long) (flexibility.getAmount() * ratio);
                 }
 
                 // Fix the glue.
-                element = glue.fixed(glueSize);
+                element = flexible.fixed(glueSize);
             }
 
             // Combine consecutive Text elements.

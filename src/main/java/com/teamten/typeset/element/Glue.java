@@ -11,7 +11,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
 /**
  * Whitespace that has a default width but can be shrunk or stretched.
  */
-public class Glue extends DiscardableElement {
+public class Glue extends DiscardableElement implements Flexible {
     private final long mSize;
     private final Flexibility mStretch;
     private final Flexibility mShrink;
@@ -53,27 +53,28 @@ public class Glue extends DiscardableElement {
         this(size, stretch, false, shrink, false, isHorizontal);
     }
 
+    @Override
     public long getSize() {
         return mSize;
     }
 
+    @Override
     public Flexibility getStretch() {
         return mStretch;
     }
 
+    @Override
     public Flexibility getShrink() {
         return mShrink;
     }
 
-    public boolean isHorizontal() {
-        return mIsHorizontal;
-    }
-
-    /**
-     * Fix the glue to the specified size. Subclasses can override to return a copy of themselves.
-     */
+    @Override
     public Glue fixed(long newSize) {
         return new Glue(newSize, 0, 0, mIsHorizontal);
+    }
+
+    public boolean isHorizontal() {
+        return mIsHorizontal;
     }
 
     @Override

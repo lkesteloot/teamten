@@ -34,7 +34,7 @@ public class Leader extends Glue {
     }
 
     @Override
-    public Glue fixed(long newSize) {
+    public Leader fixed(long newSize) {
         return new Leader(mFont, mPattern, newSize, 0);
     }
 
