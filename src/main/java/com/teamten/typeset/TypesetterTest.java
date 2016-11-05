@@ -9,6 +9,7 @@ import com.teamten.hyphen.HyphenDictionary;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static com.teamten.typeset.SpaceUnit.PT;
 
@@ -306,8 +307,9 @@ public class TypesetterTest {
         long paragraphIndent = PT.toSp(fontSize * 2);
         OutputShape outputShape = OutputShape.singleLine(textWidth, paragraphIndent, 0);
 
-        // Simple paragraph.
-        for (String paragraph : PARAGRAPHS) {
+        // Simple paragraphs.
+        int numParagraphs = PARAGRAPHS.length;
+        for (String paragraph : Arrays.asList(PARAGRAPHS).subList(0, numParagraphs)) {
             HorizontalList horizontalList = new HorizontalList();
             horizontalList.addText(paragraph, font, hyphenDictionary);
             horizontalList.addEndOfParagraph();

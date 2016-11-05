@@ -42,6 +42,9 @@ public class VerticalList extends ElementList {
         changeColumnLayout(ColumnLayout.single());
     }
 
+    /**
+     * Override this so that we can insert glues between lines to create an even baseline skip.
+     */
     @Override
     public void addElement(Element element) {
         // Add glue just before horizontal boxes so that the baselines are the right distance apart.

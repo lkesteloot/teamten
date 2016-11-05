@@ -95,4 +95,21 @@ public abstract class Element implements Dimensions {
 
         return builder.toString();
     }
+
+    /**
+     * Returns whether this element, at the beginning of a line or page, should be skipped.
+     */
+    public boolean shouldSkipElementAtStart() {
+        // Don't skip infinite glue at the start of lines or pages, since they could either
+        // be used to center text or to fill a whole page with glue (for an empty page).
+        if (this instanceof Glue) {
+            Glue glue = (Glue) this;
+            if (glue.getStretch().isInfinite()) {
+                return false;
+            }
+        }
+
+        // Otherwise we can skip all discardable elements.
+        return this instanceof DiscardableElement;
+    }
 }

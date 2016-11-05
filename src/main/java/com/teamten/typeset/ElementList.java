@@ -1,7 +1,6 @@
 package com.teamten.typeset;
 
 import com.teamten.typeset.element.Box;
-import com.teamten.typeset.element.DiscardableElement;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
@@ -299,7 +298,7 @@ public abstract class ElementList implements ElementSink {
         // Convert the final list of breakpoints into boxes.
         Iterable<Box> boxes = makeAllFinalBoxes(breakpoints, outputShape);
 
-        // Send the boxes to the sync.
+        // Send the boxes to the sink.
         outputBoxes(boxes, output, outputShape);
     }
 
@@ -351,29 +350,12 @@ public abstract class ElementList implements ElementSink {
                     breakpoints.get(breakpointIndex + 1).getIndex() : mElements.size();
 
             // See where the line would start by skipping discardable elements.
-            while (index < nextIndex && shouldSkipElementAtStart(mElements.get(index))) {
+            while (index < nextIndex && mElements.get(index).shouldSkipElementAtStart()) {
                 // Skip this element.
                 index++;
             }
             breakpoint.setStartIndex(index);
         }
-    }
-
-    /**
-     * Returns whether this element, at the beginning of a line or page, should be skipped.
-     */
-    private boolean shouldSkipElementAtStart(Element element) {
-        // Don't skip infinite glue at the start of lines or pages, since they could either
-        // be used to center text or to fill a whole page with glue (for an empty page).
-        if (element instanceof Glue) {
-            Glue glue = (Glue) element;
-            if (glue.getStretch().isInfinite()) {
-                return false;
-            }
-        }
-
-        // Otherwise we can skip all discardable elements.
-        return element instanceof DiscardableElement;
     }
 
     /**

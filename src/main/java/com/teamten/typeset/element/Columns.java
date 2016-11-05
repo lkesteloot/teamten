@@ -1,6 +1,8 @@
 package com.teamten.typeset.element;
 
 import com.teamten.typeset.ColumnLayout;
+import com.teamten.typeset.ColumnVerticalList;
+import com.teamten.typeset.VerticalList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,26 +19,11 @@ public class Columns extends HBox {
      * Find the best decomposition of the elements into columns.
      */
     private static List<Element> createColumns(List<Element> elements, ColumnLayout columnLayout) {
-        // Round up so that the last column has less stuff.
-        int elementsPerColumn = (int) Math.ceil((double) elements.size() / columnLayout.getColumnCount());
+        // Create a vertical list with all our elements.
+        ColumnVerticalList columnVerticalList = new ColumnVerticalList();
+        elements.forEach(columnVerticalList::addElement);
 
-        // Sequences of vertical boxes and glues (for the margins).
-        List<Element> horizontalElements = new ArrayList<>();
-
-        int beginIndex = 0;
-        for (int i = 0; i < columnLayout.getColumnCount(); i++) {
-            int endIndex = Math.min(beginIndex + elementsPerColumn, elements.size());
-            VBox vbox = new VBox(elements.subList(beginIndex, endIndex));
-
-            if (!horizontalElements.isEmpty()) {
-                horizontalElements.add(new Glue(columnLayout.getMargin(), 0, 0, true));
-            }
-
-            horizontalElements.add(vbox);
-
-            beginIndex = endIndex;
-        }
-
-        return horizontalElements;
+        // Returns a sequence of vertical boxes (columns) and glues (margins).
+        return columnVerticalList.formatIntoColumns(columnLayout);
     }
 }
