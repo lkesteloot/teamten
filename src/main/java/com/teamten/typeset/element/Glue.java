@@ -13,8 +13,8 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class Glue extends DiscardableElement {
     private final long mSize;
-    private final Expandability mStretch;
-    private final Expandability mShrink;
+    private final Flexibility mStretch;
+    private final Flexibility mShrink;
     private final boolean mIsHorizontal;
 
     /**
@@ -24,7 +24,7 @@ public class Glue extends DiscardableElement {
      * @param stretch the maximum extra space that can be added.
      * @param shrink the maximum extra space that can be removed.
      */
-    public Glue(long size, Expandability stretch, Expandability shrink, boolean isHorizontal) {
+    public Glue(long size, Flexibility stretch, Flexibility shrink, boolean isHorizontal) {
         mSize = size;
         mStretch = stretch;
         mShrink = shrink;
@@ -39,7 +39,7 @@ public class Glue extends DiscardableElement {
      * @param shrink the maximum extra space that can be removed (not infinite).
      */
     public Glue(long size, long stretch, boolean stretchIsInfinite, long shrink, boolean shrinkIsInfinite, boolean isHorizontal) {
-        this(size, new Expandability(stretch, stretchIsInfinite), new Expandability(shrink, shrinkIsInfinite), isHorizontal);
+        this(size, new Flexibility(stretch, stretchIsInfinite), new Flexibility(shrink, shrinkIsInfinite), isHorizontal);
     }
 
     /**
@@ -57,11 +57,11 @@ public class Glue extends DiscardableElement {
         return mSize;
     }
 
-    public Expandability getStretch() {
+    public Flexibility getStretch() {
         return mStretch;
     }
 
-    public Expandability getShrink() {
+    public Flexibility getShrink() {
         return mShrink;
     }
 
@@ -114,65 +114,4 @@ public class Glue extends DiscardableElement {
         return " ";
     }
 
-    public static class Expandability {
-        private final long mAmount;
-        private final boolean mIsInfinite;
-
-        public Expandability(long amount, boolean isInfinite) {
-            mAmount = amount;
-            mIsInfinite = isInfinite;
-        }
-
-        /**
-         * Amount by which we can stretch or shrink.
-         */
-        public long getAmount() {
-            return mAmount;
-        }
-
-        /**
-         * Whether this is an infinite stretch or shrink, meaning that non-infinite ones don't factor.
-         */
-        public boolean isInfinite() {
-            return mIsInfinite;
-        }
-
-        public String toString(String prefix) {
-            if (mAmount == 0) {
-                return "";
-            } else {
-                return String.format("%s%.1f%s", prefix, PT.fromSp(mAmount), mIsInfinite ? "inf" : "pt");
-            }
-        }
-    }
-
-    /**
-     * Keeps track of a sum of expandability, along with whether the infinite amount trumps the finite one.
-     */
-    public static class ExpandabilitySum {
-        private long mFiniteAmount = 0;
-        private long mInfiniteAmount = 0;
-
-        public void add(Expandability expandability) {
-            if (expandability.isInfinite()) {
-                mInfiniteAmount += expandability.getAmount();
-            } else {
-                mFiniteAmount += expandability.getAmount();
-            }
-        }
-
-        /**
-         * Whether there was non-zero infinite expandability.
-         */
-        public boolean isInfinite() {
-            return mInfiniteAmount != 0;
-        }
-
-        /**
-         * The expandability, where any finite amount trumps the finite one.
-         */
-        public long getAmount() {
-            return isInfinite() ? mInfiniteAmount : mFiniteAmount;
-        }
-    }
 }

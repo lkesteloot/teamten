@@ -11,6 +11,7 @@ import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.Typesetter;
 import com.teamten.typeset.VerticalList;
 import com.teamten.typeset.element.Element;
+import com.teamten.typeset.element.Flexibility;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Penalty;
@@ -212,27 +213,27 @@ public class TexParser {
      * Reads a glue until a closing }. Does not eat the closing brace.
      */
     private Glue parseGlue(boolean isHorizontal) throws IOException {
-        Glue.Expandability amount = parseDistance();
+        Flexibility amount = parseDistance();
         if (amount.isInfinite()) {
             throw new IllegalArgumentException("glue amount cannot be infinite");
         }
 
-        Glue.Expandability plus;
-        Glue.Expandability minus;
+        Flexibility plus;
+        Flexibility minus;
         skipWhitespace();
         if (mToken == Token.PLUS) {
             skip(Token.PLUS);
             plus = parseDistance();
             skipWhitespace();
         } else {
-            plus = new Glue.Expandability(0, false);
+            plus = new Flexibility(0, false);
         }
         if (mToken == Token.MINUS) {
             skip(Token.MINUS);
             minus = parseDistance();
             skipWhitespace();
         } else {
-            minus = new Glue.Expandability(0, false);
+            minus = new Flexibility(0, false);
         }
         expect('}');
 
@@ -251,7 +252,7 @@ public class TexParser {
      * @throws IOException from the Reader.
      * @throws NumberFormatException if the distance cannot be parsed.
      */
-    private Glue.Expandability parseDistance() throws IOException {
+    private Flexibility parseDistance() throws IOException {
         StringBuilder sb = new StringBuilder();
 
         skipWhitespace();
@@ -296,10 +297,10 @@ public class TexParser {
             throw new NumberFormatException("missing unit");
         }
 
-        Glue.Expandability expandability;
+        Flexibility expandability;
 
         if (unitString.toString().equals("inf")) {
-            expandability = new Glue.Expandability(PT.toSp(value), true);
+            expandability = new Flexibility(PT.toSp(value), true);
         } else {
             SpaceUnit unit;
             try {
@@ -310,7 +311,7 @@ public class TexParser {
                 throw new NumberFormatException("unknown unit " + unitString);
             }
 
-            expandability = new Glue.Expandability(unit.toSp(value), false);
+            expandability = new Flexibility(unit.toSp(value), false);
         }
 
         return expandability;

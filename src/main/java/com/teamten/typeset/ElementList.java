@@ -3,11 +3,13 @@ package com.teamten.typeset;
 import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
+import com.teamten.typeset.element.Flexibility;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.NonDiscardableElement;
 import com.teamten.typeset.element.Penalty;
 import com.teamten.typeset.element.Text;
+import com.teamten.typeset.element.TotalFlexibility;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -149,8 +151,8 @@ public abstract class ElementList implements ElementSink {
                 // Find the sum of the sizes of all the elements in this line or page. Also compute the total stretch
                 // and shrink for the glue in that line or page.
                 long width = 0;
-                Glue.ExpandabilitySum stretch = new Glue.ExpandabilitySum();
-                Glue.ExpandabilitySum shrink = new Glue.ExpandabilitySum();
+                TotalFlexibility stretch = new TotalFlexibility();
+                TotalFlexibility shrink = new TotalFlexibility();
                 for (Element element : getElementSublist(beginBreakpoint, endBreakpoint)) {
                     width += getElementSize(element);
 
@@ -433,9 +435,9 @@ public abstract class ElementList implements ElementSink {
                 Glue glue = (Glue) element;
 
                 long glueSize = glue.getSize();
-                Glue.Expandability expandability = ratio >= 0 ? glue.getStretch() : glue.getShrink();
-                if (expandability.isInfinite() == ratioIsInfinite) {
-                    glueSize += (long) (expandability.getAmount() * ratio);
+                Flexibility flexibility = ratio >= 0 ? glue.getStretch() : glue.getShrink();
+                if (flexibility.isInfinite() == ratioIsInfinite) {
+                    glueSize += (long) (flexibility.getAmount() * ratio);
                 }
 
                 // Fix the glue.
