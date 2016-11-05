@@ -109,6 +109,7 @@ public class Config {
         config.add(Key.PAGE_HEIGHT, "9in");
         config.add(Key.PAGE_MARGIN, "1in");
         config.add(Key.PAGE_NUMBER_FONT, "Times New Roman, regular, 11pt");
+        config.add(Key.HEADLINE_FONT, "Times New Roman, regular, 11pt");
 
         return config;
     }

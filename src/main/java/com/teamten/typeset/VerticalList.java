@@ -1,6 +1,5 @@
 package com.teamten.typeset;
 
-import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
