@@ -39,6 +39,46 @@ public class HorizontalList extends ElementList {
     }
 
     /**
+     * Return the list of elements on this line, from beginBreakpoint (inclusive) to endBreakpoint
+     * (inclusive only if it's a discretionary element). All discretionary elements are turned
+     * into HBoxes depending on where they are.
+     */
+    @Override
+    protected List<Element> getElementSublist(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
+        List<Element> allElements = getElements();
+        int beginIndex = beginBreakpoint.getStartIndex();
+        int endIndex = endBreakpoint.getIndex();
+
+        List<Element> elements = new ArrayList<>(Math.max(endIndex - beginIndex + 1, 10));
+
+        for (int i = beginIndex; i <= endIndex; i++) {
+            Element element = allElements.get(i);
+
+            // Include all discretionary elements, but convert them to HBoxes.
+            if (element instanceof Discretionary) {
+                Discretionary discretionary = (Discretionary) element;
+                HBox hbox;
+                if (i == beginIndex) {
+                    // This is the discretionary break at the beginning of the line. Use the "post" HBox.
+                    hbox = discretionary.getPostBreak();
+                } else if (i == endIndex) {
+                    // This is the discretionary break at the end of the line. Use the "pre" HBox.
+                    hbox = discretionary.getPreBreak();
+                } else {
+                    // This is a discretionary in the middle of the line. Use the "no" HBox.
+                    hbox = discretionary.getNoBreak();
+                }
+                elements.add(hbox);
+            } else if (i < endIndex) {
+                // The end index is normally exclusive.
+                elements.add(element);
+            }
+        }
+
+        return elements;
+    }
+
+    /**
      * Add the specified text, in the specified font, to the horizontal list.
      */
     public void addText(String text, FontSize font) throws IOException {

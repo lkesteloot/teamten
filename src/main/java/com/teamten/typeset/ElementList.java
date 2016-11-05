@@ -401,44 +401,6 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Return the list of elements on this line or page, from beginBreakpoint (inclusive) to endBreakpoint
-     * (inclusive only if it's a discretionary element). All discretionary elements are turned
-     * into HBoxes depending on where they are.
-     */
-    private List<Element> getElementSublist(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
-        int beginIndex = beginBreakpoint.getStartIndex();
-        int endIndex = endBreakpoint.getIndex();
-
-        List<Element> elements = new ArrayList<>(Math.max(endIndex - beginIndex + 1, 10));
-
-        for (int i = beginIndex; i <= endIndex; i++) {
-            Element element = mElements.get(i);
-
-            // Include all discretionary elements, but convert them to HBoxes.
-            if (element instanceof Discretionary) {
-                Discretionary discretionary = (Discretionary) element;
-                HBox hbox;
-                if (i == beginIndex) {
-                    // This is the discretionary break at the beginning of the line. Use the "post" HBox.
-                    hbox = discretionary.getPostBreak();
-                } else if (i == endIndex) {
-                    // This is the discretionary break at the end of the line. Use the "pre" HBox.
-                    hbox = discretionary.getPreBreak();
-                } else {
-                    // This is a discretionary in the middle of the line. Use the "no" HBox.
-                    hbox = discretionary.getNoBreak();
-                }
-                elements.add(hbox);
-            } else if (i < endIndex) {
-                // The end index is normally exclusive.
-                elements.add(element);
-            }
-        }
-
-        return elements;
-    }
-
-    /**
      * Given what we found about this line or page, compute the badness, which basically tells us how
      * much we had to stretch or shrink.
      */
@@ -600,7 +562,7 @@ public abstract class ElementList implements ElementSink {
                 }
             }
 
-            // Add to the sink.
+            // Add to the sink. For vertical lists this will also add the inter-line glue.
             output.addElement(box);
 
             counter++;
@@ -621,7 +583,7 @@ public abstract class ElementList implements ElementSink {
      * Generate the Box that will be sent to the output.
      *
      * @param elements the elements of the box.
-     * @param counter the number of the box, starting from 0. For horizontal lists this is the line number
+     * @param counter the number of the box, starting from 1. For horizontal lists this is the line number
      *                of the paragraph. For vertical lists this is the physical page number.
      * @param shift how much to shift the box in the final layout (up or to the right).
      */
@@ -633,10 +595,16 @@ public abstract class ElementList implements ElementSink {
     protected abstract long getElementSize(Element element);
 
     /**
+     * Return the list of elements on this line or page. Can process elements to make them more appropriate
+     * to this particular range.
+     */
+    protected abstract List<Element> getElementSublist(Breakpoint beginBreakpoint, Breakpoint endBreakpoint);
+
+    /**
      * Keeps track of possible breakpoints in our paragraph or page, their penalty, and their effects on the
      * whole paragraph or page.
      */
-    private static class Breakpoint {
+    protected static class Breakpoint {
         private final int mIndex;
         private final long mPenalty;
         private int mCounter;

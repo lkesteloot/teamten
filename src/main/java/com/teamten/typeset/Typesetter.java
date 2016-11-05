@@ -714,17 +714,15 @@ public class Typesetter {
                     });
         }
 
-        int columnCount = 2;
-        long columnMargin = config.getBodyWidth() / 10;
-        long textWidth = (config.getBodyWidth() - columnMargin*(columnCount - 1)) / columnCount;
+        // Switch to two columns.
+        ColumnLayout columnLayout = ColumnLayout.fromBodyWidth(2, config.getBodyWidth(), config.getBodyWidth() / 10);
+        verticalList.changeColumnLayout(columnLayout);
 
         // Generate the paragraphs.
-        generateIndexEntries(indexEntries, bookLayout, verticalList, entryFont, textWidth, 0);
+        generateIndexEntries(indexEntries, bookLayout, verticalList, entryFont, columnLayout.getColumnWidth(), 0);
 
-        if (false) {
-            System.out.println("Index:");
-            indexEntries.println(System.out, "    ");
-        }
+        // Switch back to a single column.
+        verticalList.changeColumnLayout(ColumnLayout.single());
     }
 
     /**

@@ -1,12 +1,17 @@
 package com.teamten.typeset;
 
+import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Page;
 import com.teamten.typeset.element.Penalty;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import static com.teamten.typeset.SpaceUnit.PT;
 
@@ -24,6 +29,16 @@ public class VerticalList extends ElementList {
      */
     private boolean mSawHBox = false;
     private long mBaselineSkip = PT.toSp(11*1.2); // Default for 11pt font.
+    /**
+     * Map from the element index to a column change. The specified element is the first
+     * with the new layout.
+     */
+    private final NavigableMap<Integer,ColumnLayout> mColumnChanges = new TreeMap<>();
+
+    public VerticalList() {
+        // Create a single column layout by default.
+        changeColumnLayout(ColumnLayout.single());
+    }
 
     @Override
     public void addElement(Element element) {
@@ -43,6 +58,13 @@ public class VerticalList extends ElementList {
     }
 
     /**
+     * Specify that there should be a new column layout after the last-inserted element.
+     */
+    public void changeColumnLayout(@NotNull ColumnLayout columnLayout) {
+        mColumnChanges.put(getElements().size(), columnLayout);
+    }
+
+    /**
      * Specify the distance between baselines. This is normally scaled by the font size,
      * for example 120% of font size. Set this between paragraphs when the font size changes.
      */
@@ -58,6 +80,27 @@ public class VerticalList extends ElementList {
     @Override
     protected long getElementSize(Element element) {
         return element.getHeight() + element.getDepth();
+    }
+
+    /**
+     * Return the list of elements on this page, from beginBreakpoint (inclusive) to endBreakpoint
+     * (exclusive). Combines elements of multiple columns into groups.
+     */
+    @Override
+    protected List<Element> getElementSublist(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
+        List<Element> allElements = getElements();
+        int beginIndex = beginBreakpoint.getStartIndex();
+        int endIndex = endBreakpoint.getIndex();
+
+        List<Element> elements = new ArrayList<>(Math.max(endIndex - beginIndex + 1, 10));
+
+        for (int i = beginIndex; i < endIndex; i++) {
+            Element element = allElements.get(i);
+
+            elements.add(element);
+        }
+
+        return elements;
     }
 
     /**
