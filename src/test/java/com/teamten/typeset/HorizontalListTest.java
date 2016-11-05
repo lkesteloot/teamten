@@ -3,6 +3,7 @@ package com.teamten.typeset;
 import com.teamten.font.DummyFont;
 import com.teamten.font.Font;
 import com.teamten.font.FontManager;
+import com.teamten.font.FontSize;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.Typeface;
@@ -33,15 +34,14 @@ public class HorizontalListTest {
     public void wrapTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
-        Font font = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
-        float fontSize = 11;
+        FontSize font = new FontSize(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
 
         MockVerticalList verticalList = new MockVerticalList();
         HorizontalList horizontalList = new HorizontalList();
 
         String s = "Hello there";
-        long width = font.getStringMetrics(s, fontSize).getWidth();
-        horizontalList.addElement(new Text(font, fontSize, s, width, PT.toSp(15), 0));
+        long width = font.getStringMetrics(s).getWidth();
+        horizontalList.addElement(new Text(font, s, width, PT.toSp(15), 0));
         horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
         horizontalList.addElement(new Penalty(-Penalty.INFINITY));
 
@@ -57,32 +57,31 @@ public class HorizontalListTest {
     public void ligatureTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
-        Font font = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
-        float fontSize = 11;
+        FontSize font = new FontSize(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
 
         // Fake font with "ffi" (and in fact all) ligatures.
-        Font fakeFont = new DummyFont(new Ligatures());
+        FontSize fakeFont = new FontSize(new DummyFont(new Ligatures()), font.getSize());
 
         Discretionary hyphen = new Discretionary(
-                HBox.makeOnlyString("-", font, fontSize),
-                HBox.makeOnlyString("", font, fontSize),
-                HBox.makeOnlyString("", font, fontSize),
+                HBox.makeOnlyString("-", font),
+                HBox.makeOnlyString("", font),
+                HBox.makeOnlyString("", font),
                 0);
         Discretionary empty = new Discretionary(
-                HBox.makeOnlyString("", font, fontSize),
-                HBox.makeOnlyString("", font, fontSize),
-                HBox.makeOnlyString("", font, fontSize),
+                HBox.makeOnlyString("", font),
+                HBox.makeOnlyString("", font),
+                HBox.makeOnlyString("", font),
                 0);
 
         // "difficult" with "fi" ligature. Does not affect discretionary.
         List<Element> origElements = Arrays.asList(
-                new Text("dif", font, fontSize),
+                new Text("dif", font),
                 hyphen,
-                new Text("fi", font, fontSize),
+                new Text("fi", font),
                 hyphen,
-                new Text("cult", font, fontSize));
+                new Text("cult", font));
 
-        List<Element> newElements = HorizontalList.transformLigatures(origElements, font, fontSize);
+        List<Element> newElements = HorizontalList.transformLigatures(origElements, font);
         assertEquals(5, newElements.size());
         assertEquals("dif", newElements.get(0).toTextString());
         assertEquals(hyphen, newElements.get(1));
@@ -91,7 +90,7 @@ public class HorizontalListTest {
         assertEquals("cult", newElements.get(4).toTextString());
 
         // "difficult" with "ffi" ligature. Complicates discretionary.
-        newElements = HorizontalList.transformLigatures(origElements, fakeFont, fontSize);
+        newElements = HorizontalList.transformLigatures(origElements, fakeFont);
         assertEquals(4, newElements.size());
         assertEquals("di", newElements.get(0).toTextString());
         discretionaryEquals(newElements.get(1), "f-", "\uFB01", "\uFB03");
@@ -100,10 +99,10 @@ public class HorizontalListTest {
 
         // Make sure that simple empty discretionary breaks aren't removed.
         origElements = Arrays.asList(
-                new Text("self-", font, fontSize),
+                new Text("self-", font),
                 empty,
-                new Text("help", font, fontSize));
-        newElements = HorizontalList.transformLigatures(origElements, font, fontSize);
+                new Text("help", font));
+        newElements = HorizontalList.transformLigatures(origElements, font);
         assertEquals(origElements, newElements);
 
         pdDoc.close();
@@ -113,15 +112,14 @@ public class HorizontalListTest {
     public void kerningTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
-        Font font = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR);
-        float fontSize = 11;
+        FontSize font = new FontSize(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
 
         // Test kerning internal to Text nodes and between them.
         List<Element> origElements = Arrays.asList(
-                new Text("AV", font, fontSize),
-                new Text("A", font, fontSize));
+                new Text("AV", font),
+                new Text("A", font));
 
-        List<Element> newElements = HorizontalList.addKerning(origElements, font, fontSize);
+        List<Element> newElements = HorizontalList.addKerning(origElements, font);
         assertEquals(5, newElements.size());
         assertEquals("A", newElements.get(0).toTextString());
         assertEquals(Kern.class, newElements.get(1).getClass());
@@ -131,15 +129,15 @@ public class HorizontalListTest {
 
         // Test discretionary.
         origElements = Arrays.asList(
-                new Text("A", font, fontSize),
+                new Text("A", font),
                 new Discretionary(
-                        HBox.makeOnlyString("Vo-", font, fontSize),
-                        HBox.makeOnlyString("V", font, fontSize),
-                        HBox.makeOnlyString("VoV", font, fontSize),
+                        HBox.makeOnlyString("Vo-", font),
+                        HBox.makeOnlyString("V", font),
+                        HBox.makeOnlyString("VoV", font),
                         0),
-                new Text("A", font, fontSize));
+                new Text("A", font));
 
-        newElements = HorizontalList.addKerning(origElements, font, fontSize);
+        newElements = HorizontalList.addKerning(origElements, font);
         // Expected result: T(A)D(H(KT(V)KT(o-)), H(T(V)), H(KT(V)KT(oV)))KT(A)
         // Where K is Kern, T(X) is Text, D(X,X,X) is Discretionary, and H(X) is HBox.
         assertEquals(4, newElements.size());
@@ -172,15 +170,15 @@ public class HorizontalListTest {
 
         // Try just-hyphen discretionary. See all the special handling for this in addKerning().
         origElements = Arrays.asList(
-                new Text("A", font, fontSize),
+                new Text("A", font),
                 new Discretionary(
-                        HBox.makeOnlyString("-", font, fontSize),
-                        HBox.makeOnlyString("", font, fontSize),
-                        HBox.makeOnlyString("", font, fontSize),
+                        HBox.makeOnlyString("-", font),
+                        HBox.makeOnlyString("", font),
+                        HBox.makeOnlyString("", font),
                         0),
-                new Text("V", font, fontSize));
+                new Text("V", font));
 
-        newElements = HorizontalList.addKerning(origElements, font, fontSize);
+        newElements = HorizontalList.addKerning(origElements, font);
         // Expected result: T(A)D(H(T(-)), H(T()), H(K))T(V)
         // Where K is Kern, T(X) is Text, D(X,X,X) is Discretionary, and H(X) is HBox.
         assertEquals(3, newElements.size());
