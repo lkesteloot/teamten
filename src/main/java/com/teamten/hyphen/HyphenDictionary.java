@@ -227,6 +227,9 @@ public class HyphenDictionary {
         // Fix up single hyphens.
         segments = mergeSingleHyphens(segments);
 
+        // Fix up hyphens on the wrong segment.
+        segments = moveHyphenPrefixes(segments);
+
         return segments;
     }
 
@@ -281,6 +284,29 @@ public class HyphenDictionary {
             if (i + 1 < segments.size() && segments.get(i + 1).equals("-")) {
                 newSegments.add(element + "-");
                 // Skip the hyphen.
+                i++;
+            } else {
+                newSegments.add(element);
+            }
+        }
+
+        return newSegments;
+    }
+
+    /**
+     * We once saw a problem with the word "back-end", which was hyphenated as
+     * "back" and "-end". Move the hyphen to the end of the previous segment.
+     */
+    private static List<String> moveHyphenPrefixes(List<String> segments) {
+        // Build up a new list.
+        List<String> newSegments = new ArrayList<>(segments.size());
+
+        for (int i = 0; i < segments.size(); i++) {
+            String element = segments.get(i);
+
+            if (i + 1 < segments.size() && segments.get(i + 1).startsWith("-")) {
+                newSegments.add(element + "-");
+                newSegments.add(segments.get(i + 1).substring(1));
                 i++;
             } else {
                 newSegments.add(element);

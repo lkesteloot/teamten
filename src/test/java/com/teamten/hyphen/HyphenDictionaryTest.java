@@ -76,6 +76,15 @@ public class HyphenDictionaryTest {
         checkHyphenation(d, "super-confort", "su", "per-", "confort");
     }
 
+    @Test
+    public void testEnglishDictionary() throws IOException {
+        HyphenDictionary d = HyphenDictionary.fromResource("en_US");
+
+        // This was once a problem where the hyphenator returned "back", "-end" for "back-end". The hyphen
+        // should be with the "back-".
+        checkHyphenation(d, "back-end", "back-", "end");
+    }
+
     private void checkHyphenation(HyphenDictionary d, String word, String ... expectedFragments) {
         List<String> actualFragments = d.hyphenate(word);
 

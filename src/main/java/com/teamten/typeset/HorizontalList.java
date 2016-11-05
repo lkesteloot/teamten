@@ -26,7 +26,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * elements is generated and added to a vertical list.
  */
 public class HorizontalList extends ElementList {
-    private static final boolean DEBUG_LIGATURES = false;
+    private static final boolean DEBUG_HYPHENATION = false;
 
     @Override
     protected HBox makeOutputBox(List<Element> elements, int lineNumber, long shift) {
@@ -291,8 +291,8 @@ public class HorizontalList extends ElementList {
                     throw new IllegalStateException("before and after text fonts don't match");
                 }
 
-                if (DEBUG_LIGATURES) {
-                    System.out.printf("%s %s %s%n", beforeText, discretionary, afterText);
+                if (DEBUG_HYPHENATION) {
+                    System.out.printf("%s, %s, %s%n", beforeText, discretionary, afterText);
                 }
 
                 // Generate the full prebreak, postbreak, and nobreak strings.
@@ -314,7 +314,7 @@ public class HorizontalList extends ElementList {
                 String commonSuffix = Strings.commonSuffix(entirePostBreak, entireNoBreak);
 
                 // Find what's left, to put in the discretionary.
-                if (DEBUG_LIGATURES) {
+                if (DEBUG_HYPHENATION) {
                     System.out.printf("<%s>  <%s>  <%s>  <%s>  <%s>%n",
                             entirePreBreak, entirePostBreak, entireNoBreak, commonPrefix, commonSuffix);
                 }
