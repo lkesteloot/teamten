@@ -6,6 +6,7 @@
 *.tex
 /libs/fontbox-*.jar
 /libs/pdfbox-*.jar
+out.log
 
 # For IDEA:
 /.idea/workspace.xml

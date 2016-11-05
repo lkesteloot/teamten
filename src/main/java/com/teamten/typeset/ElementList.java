@@ -305,7 +305,7 @@ public abstract class ElementList implements ElementSink {
     /**
      * Find all the places that we could break a line or page.
      */
-    private List<Breakpoint> findBreakpoints() {
+    protected List<Breakpoint> findBreakpoints() {
         List<Breakpoint> breakpoints = new ArrayList<>();
 
         // For convenience put a breakpoint at the very beginning, at the first element.
@@ -341,7 +341,7 @@ public abstract class ElementList implements ElementSink {
      * For each possible breakpoint, figure out the next displayed element (after the breakpoint). Modifies
      * the breakpoint objects.
      */
-    private void computeStartIndices(List<Breakpoint> breakpoints) {
+    protected void computeStartIndices(List<Breakpoint> breakpoints) {
         // Analyze every breakpoint.
         for (int breakpointIndex = 0; breakpointIndex < breakpoints.size(); breakpointIndex++) {
             Breakpoint breakpoint = breakpoints.get(breakpointIndex);
