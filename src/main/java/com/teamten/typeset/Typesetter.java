@@ -227,7 +227,8 @@ public class Typesetter {
                 spanSmallCapsFont = TrackingFont.create(spanSmallCapsFont, 0.1, 0.5);
             }
 
-            long leading = PT.toSp(fontSize * 1.2f);
+            // 135% recommended by http://practicaltypography.com/line-spacing.html
+            long leading = PT.toSp(fontSize * 1.35f);
             long interParagraphSpacing = 0;
             long paragraphIndent = PT.toSp(fontSize * 2);
 
