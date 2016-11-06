@@ -6,6 +6,7 @@ import com.teamten.tex.TexParser;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 
 /**
  * Represents various units to measure 1-dimensional space.
@@ -149,7 +150,7 @@ public enum SpaceUnit {
             return parseDistance(new StringReader(s));
         } catch (IOException e) {
             // Hopefully this can't happen.
-            throw new IllegalStateException("got exception parsing distance", e);
+            throw new UncheckedIOException("got exception parsing distance", e);
         }
     }
 }

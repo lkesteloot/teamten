@@ -19,6 +19,7 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import static com.teamten.typeset.SpaceUnit.PT;
 
@@ -145,7 +146,7 @@ public class PdfBoxFont extends AbstractFont {
             // Normally I don't like to convert checked exceptions to unchecked, but in this case I think
             // it's not possible for this to happen, and forcing a checked exception on this method causes
             // disruption all the way up the chain.
-            throw new IllegalStateException("got an exception getting the character metrics", e);
+            throw new UncheckedIOException("got an exception getting the character metrics", e);
         }
     }
 

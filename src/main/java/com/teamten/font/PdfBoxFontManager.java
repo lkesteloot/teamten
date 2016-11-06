@@ -3,6 +3,7 @@ package com.teamten.font;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 /**
  * A font manager for fonts loaded by PdfBox.
@@ -41,7 +42,7 @@ public class PdfBoxFontManager extends FontManager {
                 }
             } catch (IOException e) {
                 // I'd prefer an IOException, but the Function interface doesn't permit it.
-                throw new IllegalArgumentException("cannot load font " + typefaceVariant, e);
+                throw new UncheckedIOException("cannot load font " + typefaceVariant, e);
             }
         });
     }
