@@ -15,11 +15,19 @@ public class ColumnLayout {
     }
 
     /**
-     * Create a new single-column layout.
+     * Create a new single-column layout of zero width.
      */
     public static ColumnLayout single() {
         // We don't care about the width for single columns.
         return new ColumnLayout(1, 0, 0);
+    }
+
+    /**
+     * Create a new single-column layout of the specified width.
+     */
+    public static ColumnLayout single(long width) {
+        // We don't care about the width for single columns.
+        return new ColumnLayout(1, width, 0);
     }
 
     /**

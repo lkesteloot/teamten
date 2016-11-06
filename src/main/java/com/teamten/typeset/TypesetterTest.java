@@ -102,8 +102,8 @@ public class TypesetterTest {
             "“That can't be,” I said. “This is a fresh build of the official sources.”",
             "“They must have gotten infected. Perhaps someone broke into the download site and replaced them with modified sources.”",
             "“I would love to see that code,” I said, and opened my editor to a file in the compiler.",
-            "“That's going to take you forever,” Patrick said. “Put a breakpoint in <tt>write()</tt>, with a condition of the string containing this op-code.”",
-            "And this from the guy who pretends not to like debuggers! Setting the condition was not easy, and there were many false positives, but the following Monday morning I hit the <tt>write()</tt> that outputs the suspicious code. I popped up to the C code. It was a generic routine to output a buffer. I worked backwards to the code that had filled it, and it was all straightforward loops based on the translation table, which I knew was clean.",
+            "“That's going to take you forever,” Patrick said. “Put a breakpoint in write(), with a condition of the string containing this op-code.”",
+            "And this from the guy who pretends not to like debuggers! Setting the condition was not easy, and there were many false positives, but the following Monday morning I hit the write() that outputs the suspicious code. I popped up to the C code. It was a generic routine to output a buffer. I worked backwards to the code that had filled it, and it was all straightforward loops based on the translation table, which I knew was clean.",
             "In desperation, I started paging through every source file of the compiler looking for any code that might be responsible. Much of it was manipulating the abstract syntax tree. Then it occurred to me that the hack couldn't be there, since the back-end translation table was clean. The hack must be in the back-end itself. In fact, it would have to be after register assignment. This narrowed down the search considerably, and I spent an hour looking through these files before it was time for lunch.",
             "Monday was pho day. We always went to Pho World, which was so low-rent it didn't even have a menu, but it was a delicious way to spend four dollars.",
             "“Eye of round, no tripe, no cilantro,” said Dave to the little man, and we all followed suit. I don't know what cut “eye of round” is but I know it's safe.",
@@ -301,21 +301,44 @@ public class TypesetterTest {
 
         VerticalList verticalList = new VerticalList();
 
-        ColumnLayout columnLayout = ColumnLayout.fromBodyWidth(2, config.getBodyWidth(), config.getBodyWidth() / 20);
-        verticalList.changeColumnLayout(columnLayout);
-
-        long textWidth = columnLayout.getColumnWidth();
         long paragraphIndent = PT.toSp(fontSize * 2);
-        OutputShape outputShape = OutputShape.singleLine(textWidth, paragraphIndent, 0);
+        OutputShape outputShape = null;
 
         // Simple paragraphs.
-        boolean firstParagraph = true;
         int numParagraphs = PARAGRAPHS.length;
+        int numColumns = 0;
         for (String paragraph : Arrays.asList(PARAGRAPHS).subList(0, numParagraphs)) {
-            if (!firstParagraph && false) {
-                verticalList.addElement(new Glue(0, PT.toSp(3), 0, false));
-            } else {
-                firstParagraph = false;
+            int newNumColumns = numColumns;
+            if (Math.random() > 0.9 || numColumns == 0) {
+                if (Math.random() > 0.5) {
+                    newNumColumns = 1;
+                } else if (Math.random() > 0.5) {
+                    newNumColumns = 2;
+                } else {
+                    newNumColumns = 3;
+                }
+            }
+            if (newNumColumns != numColumns) {
+                if (numColumns != 1) {
+                    // Add spacing.
+                    ColumnLayout columnLayout = ColumnLayout.single(config.getBodyWidth());
+                    verticalList.changeColumnLayout(columnLayout);
+                }
+                // Here we're in one-column mode.
+                verticalList.addElement(new Glue(PT.toSp(10), PT.toSp(5), 0, false));
+
+                ColumnLayout columnLayout;
+                if (newNumColumns == 1) {
+                    columnLayout = ColumnLayout.single(config.getBodyWidth());
+                } else {
+                    columnLayout = ColumnLayout.fromBodyWidth(newNumColumns,
+                            config.getBodyWidth(), config.getBodyWidth() / 20);
+                }
+                if (newNumColumns != 1) {
+                    verticalList.changeColumnLayout(columnLayout);
+                }
+                outputShape = OutputShape.singleLine(columnLayout.getColumnWidth(), paragraphIndent, 0);
+                numColumns = newNumColumns;
             }
 
             HorizontalList horizontalList = new HorizontalList();
