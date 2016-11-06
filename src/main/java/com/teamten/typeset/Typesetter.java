@@ -761,6 +761,10 @@ public class Typesetter {
             OutputShape outputShape = OutputShape.singleLine(textWidth, totalIndent, hangingIndent);
             horizontalList.format(verticalList, outputShape);
 
+            // Add a bit of stretchability right after an entry. Otherwise the only stretchability is between
+            // sections, which may not happen on in a column. Match TeX's values.
+            verticalList.addElement(new Glue(0, PT.toSp(0.8), 0, false));
+
             // Now do the children of this entry.
             generateIndexEntries(indexEntry.getSubEntries(), bookLayout, verticalList, font, textWidth, depth + 1);
 
