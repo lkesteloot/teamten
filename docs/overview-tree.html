@@ -73,6 +73,7 @@
 <ul class="horizontal">
 <li><a href="com/teamten/chess/package-tree.html">com.teamten.chess</a>, </li>
 <li><a href="com/teamten/chess/server/package-tree.html">com.teamten.chess.server</a>, </li>
+<li><a href="com/teamten/font/package-tree.html">com.teamten.font</a>, </li>
 <li><a href="com/teamten/hyphen/package-tree.html">com.teamten.hyphen</a>, </li>
 <li><a href="com/teamten/image/package-tree.html">com.teamten.image</a>, </li>
 <li><a href="com/teamten/jawa/package-tree.html">com.teamten.jawa</a>, </li>
@@ -83,26 +84,33 @@
 <li><a href="com/teamten/tex/package-tree.html">com.teamten.tex</a>, </li>
 <li><a href="com/teamten/tictactoe/package-tree.html">com.teamten.tictactoe</a>, </li>
 <li><a href="com/teamten/typeset/package-tree.html">com.teamten.typeset</a>, </li>
+<li><a href="com/teamten/typeset/element/package-tree.html">com.teamten.typeset.element</a>, </li>
 <li><a href="com/teamten/util/package-tree.html">com.teamten.util</a></li>
 </ul>
 </div>
 <div class="contentContainer">
 <h2 title="Class Hierarchy">Class Hierarchy</h2>
 <ul>
-<li type="circle">java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Object</span></a>
+<li type="circle">java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Object</span></a>
 <ul>
-<li type="circle">com.teamten.image.<a href="com/teamten/image/AbstractBufferedImageOp.html" title="class in com.teamten.image"><span class="typeNameLink">AbstractBufferedImageOp</span></a> (implements java.awt.image.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/image/BufferedImageOp.html?is-external=true" title="class or interface in java.awt.image">BufferedImageOp</a>)
+<li type="circle">com.teamten.image.<a href="com/teamten/image/AbstractBufferedImageOp.html" title="class in com.teamten.image"><span class="typeNameLink">AbstractBufferedImageOp</span></a> (implements java.awt.image.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/image/BufferedImageOp.html?is-external=true" title="class or interface in java.awt.image">BufferedImageOp</a>)
 <ul>
 <li type="circle">com.teamten.image.<a href="com/teamten/image/DecomposableConvolveOp.html" title="class in com.teamten.image"><span class="typeNameLink">DecomposableConvolveOp</span></a></li>
 <li type="circle">com.teamten.image.<a href="com/teamten/image/ResizeOp.html" title="class in com.teamten.image"><span class="typeNameLink">ResizeOp</span></a></li>
 <li type="circle">com.teamten.image.<a href="com/teamten/image/StretchOp.html" title="class in com.teamten.image"><span class="typeNameLink">StretchOp</span></a></li>
 </ul>
 </li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/AbstractFont.html" title="class in com.teamten.typeset"><span class="typeNameLink">AbstractFont</span></a> (implements com.teamten.typeset.<a href="com/teamten/typeset/Font.html" title="interface in com.teamten.typeset">Font</a>)
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/AbstractDimensions.html" title="class in com.teamten.typeset"><span class="typeNameLink">AbstractDimensions</span></a> (implements com.teamten.typeset.<a href="com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>)
 <ul>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/DummyFont.html" title="class in com.teamten.typeset"><span class="typeNameLink">DummyFont</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/PdfBoxFont.html" title="class in com.teamten.typeset"><span class="typeNameLink">PdfBoxFont</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/TrackingFont.html" title="class in com.teamten.typeset"><span class="typeNameLink">TrackingFont</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/Font.Metrics.html" title="class in com.teamten.font"><span class="typeNameLink">Font.Metrics</span></a></li>
+</ul>
+</li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/AbstractFont.html" title="class in com.teamten.font"><span class="typeNameLink">AbstractFont</span></a> (implements com.teamten.font.<a href="com/teamten/font/Font.html" title="interface in com.teamten.font">Font</a>)
+<ul>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/DummyFont.html" title="class in com.teamten.font"><span class="typeNameLink">DummyFont</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/PdfBoxFont.html" title="class in com.teamten.font"><span class="typeNameLink">PdfBoxFont</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/SmallCapsFont.html" title="class in com.teamten.font"><span class="typeNameLink">SmallCapsFont</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/TrackingFont.html" title="class in com.teamten.font"><span class="typeNameLink">TrackingFont</span></a></li>
 </ul>
 </li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/AmbientOcclusionMaterial.html" title="class in com.teamten.render"><span class="typeNameLink">AmbientOcclusionMaterial</span></a> (implements com.teamten.render.<a href="com/teamten/render/Material.html" title="interface in com.teamten.render">Material</a>)</li>
@@ -116,21 +124,22 @@
 <li type="circle">com.teamten.chess.server.<a href="com/teamten/chess/server/ChessServer.html" title="class in com.teamten.chess.server"><span class="typeNameLink">ChessServer</span></a></li>
 <li type="circle">com.teamten.util.<a href="com/teamten/util/CodePoints.html" title="class in com.teamten.util"><span class="typeNameLink">CodePoints</span></a></li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/Color.html" title="class in com.teamten.render"><span class="typeNameLink">Color</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/ColumnLayout.html" title="class in com.teamten.typeset"><span class="typeNameLink">ColumnLayout</span></a></li>
 <li type="circle">com.teamten.math.<a href="com/teamten/math/Complex.html" title="class in com.teamten.math"><span class="typeNameLink">Complex</span></a></li>
-<li type="circle">java.awt.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/Component.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Component</span></a> (implements java.awt.image.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/image/ImageObserver.html?is-external=true" title="class or interface in java.awt.image">ImageObserver</a>, java.awt.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/MenuContainer.html?is-external=true" title="class or interface in java.awt">MenuContainer</a>, java.io.<a href="http://download.oracle.com/javase/8/docs/api/java/io/Serializable.html?is-external=true" title="class or interface in java.io">Serializable</a>)
+<li type="circle">java.awt.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/Component.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Component</span></a> (implements java.awt.image.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/image/ImageObserver.html?is-external=true" title="class or interface in java.awt.image">ImageObserver</a>, java.awt.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/MenuContainer.html?is-external=true" title="class or interface in java.awt">MenuContainer</a>, java.io.<a href="http://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html?is-external=true" title="class or interface in java.io">Serializable</a>)
 <ul>
-<li type="circle">java.awt.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/Canvas.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Canvas</span></a> (implements javax.accessibility.<a href="http://download.oracle.com/javase/8/docs/api/javax/accessibility/Accessible.html?is-external=true" title="class or interface in javax.accessibility">Accessible</a>)
+<li type="circle">java.awt.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/Canvas.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Canvas</span></a> (implements javax.accessibility.<a href="http://docs.oracle.com/javase/8/docs/api/javax/accessibility/Accessible.html?is-external=true" title="class or interface in javax.accessibility">Accessible</a>)
 <ul>
 <li type="circle">com.teamten.mario.<a href="com/teamten/mario/WorldDrawer.html" title="class in com.teamten.mario"><span class="typeNameLink">WorldDrawer</span></a></li>
 </ul>
 </li>
-<li type="circle">java.awt.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/Container.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Container</span></a>
+<li type="circle">java.awt.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/Container.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Container</span></a>
 <ul>
-<li type="circle">java.awt.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/Window.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Window</span></a> (implements javax.accessibility.<a href="http://download.oracle.com/javase/8/docs/api/javax/accessibility/Accessible.html?is-external=true" title="class or interface in javax.accessibility">Accessible</a>)
+<li type="circle">java.awt.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/Window.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Window</span></a> (implements javax.accessibility.<a href="http://docs.oracle.com/javase/8/docs/api/javax/accessibility/Accessible.html?is-external=true" title="class or interface in javax.accessibility">Accessible</a>)
 <ul>
-<li type="circle">java.awt.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/Frame.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Frame</span></a> (implements java.awt.<a href="http://download.oracle.com/javase/8/docs/api/java/awt/MenuContainer.html?is-external=true" title="class or interface in java.awt">MenuContainer</a>)
+<li type="circle">java.awt.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/Frame.html?is-external=true" title="class or interface in java.awt"><span class="typeNameLink">Frame</span></a> (implements java.awt.<a href="http://docs.oracle.com/javase/8/docs/api/java/awt/MenuContainer.html?is-external=true" title="class or interface in java.awt">MenuContainer</a>)
 <ul>
-<li type="circle">javax.swing.<a href="http://download.oracle.com/javase/8/docs/api/javax/swing/JFrame.html?is-external=true" title="class or interface in javax.swing"><span class="typeNameLink">JFrame</span></a> (implements javax.accessibility.<a href="http://download.oracle.com/javase/8/docs/api/javax/accessibility/Accessible.html?is-external=true" title="class or interface in javax.accessibility">Accessible</a>, javax.swing.<a href="http://download.oracle.com/javase/8/docs/api/javax/swing/RootPaneContainer.html?is-external=true" title="class or interface in javax.swing">RootPaneContainer</a>, javax.swing.<a href="http://download.oracle.com/javase/8/docs/api/javax/swing/WindowConstants.html?is-external=true" title="class or interface in javax.swing">WindowConstants</a>)
+<li type="circle">javax.swing.<a href="http://docs.oracle.com/javase/8/docs/api/javax/swing/JFrame.html?is-external=true" title="class or interface in javax.swing"><span class="typeNameLink">JFrame</span></a> (implements javax.accessibility.<a href="http://docs.oracle.com/javase/8/docs/api/javax/accessibility/Accessible.html?is-external=true" title="class or interface in javax.accessibility">Accessible</a>, javax.swing.<a href="http://docs.oracle.com/javase/8/docs/api/javax/swing/RootPaneContainer.html?is-external=true" title="class or interface in javax.swing">RootPaneContainer</a>, javax.swing.<a href="http://docs.oracle.com/javase/8/docs/api/javax/swing/WindowConstants.html?is-external=true" title="class or interface in javax.swing">WindowConstants</a>)
 <ul>
 <li type="circle">com.teamten.mario.<a href="com/teamten/mario/Mario.html" title="class in com.teamten.mario"><span class="typeNameLink">Mario</span></a></li>
 </ul>
@@ -147,62 +156,73 @@
 <li type="circle">com.teamten.tictactoe.<a href="com/teamten/tictactoe/ComputerPlayer.html" title="class in com.teamten.tictactoe"><span class="typeNameLink">ComputerPlayer</span></a></li>
 <li type="circle">com.teamten.chess.<a href="com/teamten/chess/ComputerPlayer.EvaluatedMove.html" title="class in com.teamten.chess"><span class="typeNameLink">ComputerPlayer.EvaluatedMove</span></a></li>
 <li type="circle">com.teamten.chess.<a href="com/teamten/chess/ComputerPlayer.Result.html" title="class in com.teamten.chess"><span class="typeNameLink">ComputerPlayer.Result</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Config.html" title="class in com.teamten.typeset"><span class="typeNameLink">Config</span></a></li>
 <li type="circle">com.teamten.util.<a href="com/teamten/util/Dates.html" title="class in com.teamten.util"><span class="typeNameLink">Dates</span></a></li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/DirectionalLight.html" title="class in com.teamten.render"><span class="typeNameLink">DirectionalLight</span></a> (implements com.teamten.render.<a href="com/teamten/render/Light.html" title="interface in com.teamten.render">Light</a>)</li>
 <li type="circle">com.teamten.markdown.<a href="com/teamten/markdown/Doc.html" title="class in com.teamten.markdown"><span class="typeNameLink">Doc</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Element.html" title="class in com.teamten.typeset"><span class="typeNameLink">Element</span></a> (implements com.teamten.typeset.<a href="com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>)
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Element.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Element</span></a> (implements com.teamten.typeset.<a href="com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>)
 <ul>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/DiscardableElement.html" title="class in com.teamten.typeset"><span class="typeNameLink">DiscardableElement</span></a>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/DiscardableElement.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">DiscardableElement</span></a>
 <ul>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Glue.html" title="class in com.teamten.typeset"><span class="typeNameLink">Glue</span></a>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Glue.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Glue</span></a> (implements com.teamten.typeset.element.<a href="com/teamten/typeset/element/Flexible.html" title="interface in com.teamten.typeset.element">Flexible</a>)
 <ul>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Leader.html" title="class in com.teamten.typeset"><span class="typeNameLink">Leader</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Leader.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Leader</span></a></li>
 </ul>
 </li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Kern.html" title="class in com.teamten.typeset"><span class="typeNameLink">Kern</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Penalty.html" title="class in com.teamten.typeset"><span class="typeNameLink">Penalty</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Kern.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Kern</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Penalty.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Penalty</span></a></li>
 </ul>
 </li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/NonDiscardableElement.html" title="class in com.teamten.typeset"><span class="typeNameLink">NonDiscardableElement</span></a>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/NonDiscardableElement.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">NonDiscardableElement</span></a>
 <ul>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Bookmark.html" title="class in com.teamten.typeset"><span class="typeNameLink">Bookmark</span></a>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Bookmark.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Bookmark</span></a>
 <ul>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/SectionBookmark.html" title="class in com.teamten.typeset"><span class="typeNameLink">SectionBookmark</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/IndexBookmark.html" title="class in com.teamten.typeset"><span class="typeNameLink">IndexBookmark</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/SectionBookmark.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">SectionBookmark</span></a></li>
 </ul>
 </li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Box.html" title="class in com.teamten.typeset"><span class="typeNameLink">Box</span></a>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Box.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Box</span></a>
 <ul>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/HBox.html" title="class in com.teamten.typeset"><span class="typeNameLink">HBox</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Rule.html" title="class in com.teamten.typeset"><span class="typeNameLink">Rule</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Text.html" title="class in com.teamten.typeset"><span class="typeNameLink">Text</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/VBox.html" title="class in com.teamten.typeset"><span class="typeNameLink">VBox</span></a>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/HBox.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">HBox</span></a>
 <ul>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Page.html" title="class in com.teamten.typeset"><span class="typeNameLink">Page</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Columns.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Columns</span></a> (implements com.teamten.typeset.element.<a href="com/teamten/typeset/element/Flexible.html" title="interface in com.teamten.typeset.element">Flexible</a>)</li>
+</ul>
+</li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Rule.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Rule</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Text.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Text</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/VBox.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">VBox</span></a>
+<ul>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Page</span></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Discretionary.html" title="class in com.teamten.typeset"><span class="typeNameLink">Discretionary</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Discretionary.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Discretionary</span></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/ElementList.html" title="class in com.teamten.typeset"><span class="typeNameLink">ElementList</span></a> (implements com.teamten.typeset.<a href="com/teamten/typeset/ElementSink.html" title="interface in com.teamten.typeset">ElementSink</a>)
 <ul>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/ColumnVerticalList.html" title="class in com.teamten.typeset"><span class="typeNameLink">ColumnVerticalList</span></a></li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/HorizontalList.html" title="class in com.teamten.typeset"><span class="typeNameLink">HorizontalList</span></a></li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset"><span class="typeNameLink">VerticalList</span></a></li>
 </ul>
 </li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/ElementList.Breakpoint.html" title="class in com.teamten.typeset"><span class="typeNameLink">ElementList.Breakpoint</span></a></li>
 <li type="circle">com.teamten.image.<a href="com/teamten/image/Engraver.html" title="class in com.teamten.image"><span class="typeNameLink">Engraver</span></a></li>
 <li type="circle">com.teamten.mario.<a href="com/teamten/mario/Env.html" title="class in com.teamten.mario"><span class="typeNameLink">Env</span></a></li>
 <li type="circle">com.teamten.tictactoe.<a href="com/teamten/tictactoe/EvaluatedMove.html" title="class in com.teamten.tictactoe"><span class="typeNameLink">EvaluatedMove</span></a></li>
 <li type="circle">com.teamten.util.<a href="com/teamten/util/Files.html" title="class in com.teamten.util"><span class="typeNameLink">Files</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Fitness.html" title="class in com.teamten.typeset"><span class="typeNameLink">Fitness</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Flexibility.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Flexibility</span></a></li>
 <li type="circle">com.teamten.mario.<a href="com/teamten/mario/Floor.html" title="class in com.teamten.mario"><span class="typeNameLink">Floor</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Font.Metrics.html" title="class in com.teamten.typeset"><span class="typeNameLink">Font.Metrics</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/FontManager.html" title="class in com.teamten.typeset"><span class="typeNameLink">FontManager</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/FontManager.html" title="class in com.teamten.font"><span class="typeNameLink">FontManager</span></a>
+<ul>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/PdfBoxFontManager.html" title="class in com.teamten.font"><span class="typeNameLink">PdfBoxFontManager</span></a></li>
+</ul>
+</li>
 <li type="circle">com.teamten.chess.<a href="com/teamten/chess/Game.html" title="class in com.teamten.chess"><span class="typeNameLink">Game</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Glue.Expandability.html" title="class in com.teamten.typeset"><span class="typeNameLink">Glue.Expandability</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Glue.ExpandabilitySum.html" title="class in com.teamten.typeset"><span class="typeNameLink">Glue.ExpandabilitySum</span></a></li>
 <li type="circle">HttpServlet
 <ul>
 <li type="circle">com.teamten.chess.server.<a href="com/teamten/chess/server/ChessServlet.html" title="class in com.teamten.chess.server"><span class="typeNameLink">ChessServlet</span></a></li>
@@ -210,6 +230,9 @@
 </li>
 <li type="circle">com.teamten.hyphen.<a href="com/teamten/hyphen/HyphenDictionary.html" title="class in com.teamten.hyphen"><span class="typeNameLink">HyphenDictionary</span></a></li>
 <li type="circle">com.teamten.image.<a href="com/teamten/image/ImageUtils.html" title="class in com.teamten.image"><span class="typeNameLink">ImageUtils</span></a></li>
+<li type="circle">com.teamten.util.<a href="com/teamten/util/IncreasingCounter.html" title="class in com.teamten.util"><span class="typeNameLink">IncreasingCounter</span></a> (implements java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;T&gt;, java.util.<a href="http://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html?is-external=true" title="class or interface in java.util">Iterator</a>&lt;E&gt;)</li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/IndexEntries.html" title="class in com.teamten.typeset"><span class="typeNameLink">IndexEntries</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/IndexEntry.html" title="class in com.teamten.typeset"><span class="typeNameLink">IndexEntry</span></a> (implements java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Comparable.html?is-external=true" title="class or interface in java.lang">Comparable</a>&lt;T&gt;)</li>
 <li type="circle">com.teamten.mario.<a href="com/teamten/mario/Input.html" title="class in com.teamten.mario"><span class="typeNameLink">Input</span></a></li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/Intersection.html" title="class in com.teamten.render"><span class="typeNameLink">Intersection</span></a></li>
 <li type="circle">com.teamten.jawa.<a href="com/teamten/jawa/Jawa.html" title="class in com.teamten.jawa"><span class="typeNameLink">Jawa</span></a></li>
@@ -222,6 +245,7 @@
 <li type="circle">com.teamten.chess.<a href="com/teamten/chess/Match.html" title="class in com.teamten.chess"><span class="typeNameLink">Match</span></a></li>
 <li type="circle">com.teamten.math.<a href="com/teamten/math/Matrix.html" title="class in com.teamten.math"><span class="typeNameLink">Matrix</span></a></li>
 <li type="circle">com.teamten.chess.<a href="com/teamten/chess/Move.html" title="class in com.teamten.chess"><span class="typeNameLink">Move</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/OutputShape.html" title="class in com.teamten.typeset"><span class="typeNameLink">OutputShape</span></a></li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/PdfTest.html" title="class in com.teamten.typeset"><span class="typeNameLink">PdfTest</span></a></li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/PdfUtil.html" title="class in com.teamten.typeset"><span class="typeNameLink">PdfUtil</span></a></li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/PhongMaterial.html" title="class in com.teamten.render"><span class="typeNameLink">PhongMaterial</span></a> (implements com.teamten.render.<a href="com/teamten/render/Material.html" title="interface in com.teamten.render">Material</a>)</li>
@@ -234,18 +258,24 @@
 <li type="circle">com.teamten.mario.<a href="com/teamten/mario/Searcher.html" title="class in com.teamten.mario"><span class="typeNameLink">Searcher</span></a></li>
 <li type="circle">com.teamten.mario.<a href="com/teamten/mario/Searcher.Results.html" title="class in com.teamten.mario"><span class="typeNameLink">Searcher.Results</span></a></li>
 <li type="circle">com.teamten.chess.<a href="com/teamten/chess/Side.html" title="class in com.teamten.chess"><span class="typeNameLink">Side</span></a></li>
-<li type="circle">com.teamten.markdown.<a href="com/teamten/markdown/Span.html" title="class in com.teamten.markdown"><span class="typeNameLink">Span</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/SizedFont.html" title="class in com.teamten.font"><span class="typeNameLink">SizedFont</span></a></li>
+<li type="circle">com.teamten.markdown.<a href="com/teamten/markdown/Span.html" title="class in com.teamten.markdown"><span class="typeNameLink">Span</span></a>
+<ul>
+<li type="circle">com.teamten.markdown.<a href="com/teamten/markdown/IndexSpan.html" title="class in com.teamten.markdown"><span class="typeNameLink">IndexSpan</span></a></li>
+<li type="circle">com.teamten.markdown.<a href="com/teamten/markdown/TextSpan.html" title="class in com.teamten.markdown"><span class="typeNameLink">TextSpan</span></a></li>
+</ul>
+</li>
 <li type="circle">com.teamten.jawa.<a href="com/teamten/jawa/TemplateProcessor.html" title="class in com.teamten.jawa"><span class="typeNameLink">TemplateProcessor</span></a></li>
 <li type="circle">com.teamten.tex.<a href="com/teamten/tex/TexParser.html" title="class in com.teamten.tex"><span class="typeNameLink">TexParser</span></a></li>
 <li type="circle">com.teamten.tex.<a href="com/teamten/tex/TexTokenizer.html" title="class in com.teamten.tex"><span class="typeNameLink">TexTokenizer</span></a></li>
-<li type="circle">java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Thread.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Thread</span></a> (implements java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>)
+<li type="circle">java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Thread.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Thread</span></a> (implements java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>)
 <ul>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/UrtConnection.html" title="class in com.teamten.render"><span class="typeNameLink">UrtConnection</span></a></li>
 </ul>
 </li>
-<li type="circle">java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Throwable</span></a> (implements java.io.<a href="http://download.oracle.com/javase/8/docs/api/java/io/Serializable.html?is-external=true" title="class or interface in java.io">Serializable</a>)
+<li type="circle">java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Throwable</span></a> (implements java.io.<a href="http://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html?is-external=true" title="class or interface in java.io">Serializable</a>)
 <ul>
-<li type="circle">java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Exception</span></a>
+<li type="circle">java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Exception</span></a>
 <ul>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/DegenerateTriangleException.html" title="class in com.teamten.render"><span class="typeNameLink">DegenerateTriangleException</span></a></li>
 <li type="circle">com.teamten.chess.<a href="com/teamten/chess/IllegalMoveException.html" title="class in com.teamten.chess"><span class="typeNameLink">IllegalMoveException</span></a></li>
@@ -254,9 +284,15 @@
 </ul>
 </li>
 <li type="circle">com.teamten.tex.<a href="com/teamten/tex/Token.html" title="class in com.teamten.tex"><span class="typeNameLink">Token</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/TotalFlexibility.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">TotalFlexibility</span></a></li>
 <li type="circle">com.teamten.mario.<a href="com/teamten/mario/Toy.html" title="class in com.teamten.mario"><span class="typeNameLink">Toy</span></a></li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/Triangle.html" title="class in com.teamten.render"><span class="typeNameLink">Triangle</span></a></li>
-<li type="circle">com.teamten.render.<a href="com/teamten/render/TriangleComparator.html" title="class in com.teamten.render"><span class="typeNameLink">TriangleComparator</span></a> (implements java.util.<a href="http://download.oracle.com/javase/8/docs/api/java/util/Comparator.html?is-external=true" title="class or interface in java.util">Comparator</a>&lt;T&gt;)</li>
+<li type="circle">com.teamten.render.<a href="com/teamten/render/TriangleComparator.html" title="class in com.teamten.render"><span class="typeNameLink">TriangleComparator</span></a> (implements java.util.<a href="http://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html?is-external=true" title="class or interface in java.util">Comparator</a>&lt;T&gt;)</li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/TypefaceVariant.html" title="class in com.teamten.font"><span class="typeNameLink">TypefaceVariant</span></a>
+<ul>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/TypefaceVariantSize.html" title="class in com.teamten.font"><span class="typeNameLink">TypefaceVariantSize</span></a></li>
+</ul>
+</li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset"><span class="typeNameLink">Typesetter</span></a></li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/TypesetterTest.html" title="class in com.teamten.typeset"><span class="typeNameLink">TypesetterTest</span></a></li>
 <li type="circle">com.teamten.chess.<a href="com/teamten/chess/UciParser.html" title="class in com.teamten.chess"><span class="typeNameLink">UciParser</span></a></li>
@@ -271,24 +307,29 @@
 <ul>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset"><span class="typeNameLink">Dimensions</span></a></li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/ElementSink.html" title="interface in com.teamten.typeset"><span class="typeNameLink">ElementSink</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Font.html" title="interface in com.teamten.typeset"><span class="typeNameLink">Font</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Fitness.ElementSizer.html" title="interface in com.teamten.typeset"><span class="typeNameLink">Fitness.ElementSizer</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/Flexible.html" title="interface in com.teamten.typeset.element"><span class="typeNameLink">Flexible</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/Font.html" title="interface in com.teamten.font"><span class="typeNameLink">Font</span></a></li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/Light.html" title="interface in com.teamten.render"><span class="typeNameLink">Light</span></a></li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/Material.html" title="interface in com.teamten.render"><span class="typeNameLink">Material</span></a></li>
 <li type="circle">com.teamten.render.<a href="com/teamten/render/RayTracer.html" title="interface in com.teamten.render"><span class="typeNameLink">RayTracer</span></a></li>
 </ul>
 <h2 title="Enum Hierarchy">Enum Hierarchy</h2>
 <ul>
-<li type="circle">java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Object</span></a>
+<li type="circle">java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Object</span></a>
 <ul>
-<li type="circle">java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Enum.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Enum</span></a>&lt;E&gt; (implements java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Comparable.html?is-external=true" title="class or interface in java.lang">Comparable</a>&lt;T&gt;, java.io.<a href="http://download.oracle.com/javase/8/docs/api/java/io/Serializable.html?is-external=true" title="class or interface in java.io">Serializable</a>)
+<li type="circle">java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html?is-external=true" title="class or interface in java.lang"><span class="typeNameLink">Enum</span></a>&lt;E&gt; (implements java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Comparable.html?is-external=true" title="class or interface in java.lang">Comparable</a>&lt;T&gt;, java.io.<a href="http://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html?is-external=true" title="class or interface in java.io">Serializable</a>)
 <ul>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/FontName.html" title="enum in com.teamten.font"><span class="typeNameLink">FontName</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/FontVariant.html" title="enum in com.teamten.font"><span class="typeNameLink">FontVariant</span></a></li>
+<li type="circle">com.teamten.font.<a href="com/teamten/font/Typeface.html" title="enum in com.teamten.font"><span class="typeNameLink">Typeface</span></a></li>
 <li type="circle">com.teamten.image.<a href="com/teamten/image/BlendingMode.html" title="enum in com.teamten.image"><span class="typeNameLink">BlendingMode</span></a></li>
 <li type="circle">com.teamten.image.<a href="com/teamten/image/Typeface.html" title="enum in com.teamten.image"><span class="typeNameLink">Typeface</span></a></li>
 <li type="circle">com.teamten.markdown.<a href="com/teamten/markdown/BlockType.html" title="enum in com.teamten.markdown"><span class="typeNameLink">BlockType</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/FontManager.FontName.html" title="enum in com.teamten.typeset"><span class="typeNameLink">FontManager.FontName</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/SectionBookmark.Type.html" title="enum in com.teamten.typeset"><span class="typeNameLink">SectionBookmark.Type</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Config.Key.html" title="enum in com.teamten.typeset"><span class="typeNameLink">Config.Key</span></a></li>
+<li type="circle">com.teamten.typeset.element.<a href="com/teamten/typeset/element/SectionBookmark.Type.html" title="enum in com.teamten.typeset.element"><span class="typeNameLink">SectionBookmark.Type</span></a></li>
 <li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/SpaceUnit.html" title="enum in com.teamten.typeset"><span class="typeNameLink">SpaceUnit</span></a></li>
-<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/Typeface.html" title="enum in com.teamten.typeset"><span class="typeNameLink">Typeface</span></a></li>
+<li type="circle">com.teamten.typeset.<a href="com/teamten/typeset/VerticalAlignment.html" title="enum in com.teamten.typeset"><span class="typeNameLink">VerticalAlignment</span></a></li>
 </ul>
 </li>
 </ul>

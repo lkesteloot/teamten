@@ -47,7 +47,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/teamten/typeset/Typeface.html" title="enum in com.teamten.typeset"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../com/teamten/typeset/SpaceUnit.html" title="enum in com.teamten.typeset"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../com/teamten/typeset/TypesetterTest.html" title="class in com.teamten.typeset"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li><a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
 <li>
 <ul class="inheritance">
 <li>com.teamten.typeset.Typesetter</li>
@@ -108,7 +108,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">Typesetter</span>
-extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
+extends <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Converts a document to a PDF.</div>
 </li>
 </ul>
@@ -147,24 +147,30 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#addPagesToPdf-java.util.List-com.teamten.typeset.BookLayout-PDDocument-">addPagesToPdf</a></span>(<a href="http://download.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../com/teamten/typeset/Page.html" title="class in com.teamten.typeset">Page</a>&gt;&nbsp;pages,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#addPagesToPdf-java.util.List-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">addPagesToPdf</a></span>(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>&gt;&nbsp;pages,
+             <a href="../../../com/teamten/typeset/Config.html" title="class in com.teamten.typeset">Config</a>&nbsp;config,
              <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
+             <a href="../../../com/teamten/font/FontManager.html" title="class in com.teamten.font">FontManager</a>&nbsp;fontManager,
              PDDocument&nbsp;pdDoc)</code>
 <div class="block">Send each page (with the given size) to the PDF.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#addPageToPdf-com.teamten.typeset.Page-com.teamten.typeset.BookLayout-PDDocument-">addPageToPdf</a></span>(<a href="../../../com/teamten/typeset/Page.html" title="class in com.teamten.typeset">Page</a>&nbsp;page,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#addPageToPdf-com.teamten.typeset.element.Page-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">addPageToPdf</a></span>(<a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>&nbsp;page,
+            <a href="../../../com/teamten/typeset/Config.html" title="class in com.teamten.typeset">Config</a>&nbsp;config,
             <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
+            <a href="../../../com/teamten/font/FontManager.html" title="class in com.teamten.font">FontManager</a>&nbsp;fontManager,
             PDDocument&nbsp;pdDoc)</code>
 <div class="block">Add the VBox as a page to the PDF.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#addVerticalListToPdf-com.teamten.typeset.VerticalList-com.teamten.typeset.BookLayout-PDDocument-">addVerticalListToPdf</a></span>(<a href="../../../com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset">VerticalList</a>&nbsp;verticalList,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#addVerticalListToPdf-com.teamten.typeset.VerticalList-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">addVerticalListToPdf</a></span>(<a href="../../../com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset">VerticalList</a>&nbsp;verticalList,
+                    <a href="../../../com/teamten/typeset/Config.html" title="class in com.teamten.typeset">Config</a>&nbsp;config,
                     <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
+                    <a href="../../../com/teamten/font/FontManager.html" title="class in com.teamten.font">FontManager</a>&nbsp;fontManager,
                     PDDocument&nbsp;pdDoc)</code>
 <div class="block">Adds the entire vertical list to the PDF, by first breaking it into pages and then adding the
  pages to the PDF.</div>
@@ -172,23 +178,24 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#generateTableOfContents-java.lang.String-com.teamten.typeset.BookLayout-com.teamten.typeset.VerticalList-com.teamten.typeset.FontManager-">generateTableOfContents</a></span>(<a href="http://download.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;tocTitle,
-                       <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
-                       <a href="../../../com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset">VerticalList</a>&nbsp;verticalList,
-                       <a href="../../../com/teamten/typeset/FontManager.html" title="class in com.teamten.typeset">FontManager</a>&nbsp;fontManager)</code>
-<div class="block">Adds the table of contents to the vertical list.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#drawHeadline-com.teamten.typeset.element.Page-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDPageContentStream-">drawHeadline</a></span>(<a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>&nbsp;page,
+            <a href="../../../com/teamten/typeset/Config.html" title="class in com.teamten.typeset">Config</a>&nbsp;config,
+            <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
+            <a href="../../../com/teamten/font/FontManager.html" title="class in com.teamten.font">FontManager</a>&nbsp;fontManager,
+            PDPageContentStream&nbsp;contents)</code>
+<div class="block">Draw the headline (page number of part or chapter title) at the top of the page.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#main-java.lang.String:A-">main</a></span>(<a href="http://download.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>[]&nbsp;args)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#main-java.lang.String:A-">main</a></span>(<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>[]&nbsp;args)</code>&nbsp;</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>PDDocument</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#typeset-com.teamten.markdown.Doc-">typeset</a></span>(<a href="../../../com/teamten/markdown/Doc.html" title="class in com.teamten.markdown">Doc</a>&nbsp;doc)</code>&nbsp;</td>
 </tr>
 <tr id="i6" class="altColor">
-<td class="colFirst"><code><a href="http://download.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../com/teamten/typeset/Page.html" title="class in com.teamten.typeset">Page</a>&gt;</code></td>
+<td class="colFirst"><code><a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Typesetter.html#verticalListToPages-com.teamten.typeset.VerticalList-long-">verticalListToPages</a></span>(<a href="../../../com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset">VerticalList</a>&nbsp;verticalList,
                    long&nbsp;textHeight)</code>
 <div class="block">Format the vertical list into a sequence of pages.</div>
@@ -199,8 +206,8 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
+<code><a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
 </ul>
 </li>
 </ul>
@@ -239,11 +246,11 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 <ul class="blockList">
 <li class="blockList">
 <h4>main</h4>
-<pre>public static&nbsp;void&nbsp;main(<a href="http://download.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>[]&nbsp;args)
-                 throws <a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<pre>public static&nbsp;void&nbsp;main(<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>[]&nbsp;args)
+                 throws <a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -254,28 +261,30 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 <li class="blockList">
 <h4>typeset</h4>
 <pre>public&nbsp;PDDocument&nbsp;typeset(<a href="../../../com/teamten/markdown/Doc.html" title="class in com.teamten.markdown">Doc</a>&nbsp;doc)
-                   throws <a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                   throws <a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
-<a name="addVerticalListToPdf-com.teamten.typeset.VerticalList-com.teamten.typeset.BookLayout-PDDocument-">
+<a name="addVerticalListToPdf-com.teamten.typeset.VerticalList-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>addVerticalListToPdf</h4>
 <pre>public&nbsp;void&nbsp;addVerticalListToPdf(<a href="../../../com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset">VerticalList</a>&nbsp;verticalList,
+                                 <a href="../../../com/teamten/typeset/Config.html" title="class in com.teamten.typeset">Config</a>&nbsp;config,
                                  <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
+                                 <a href="../../../com/teamten/font/FontManager.html" title="class in com.teamten.font">FontManager</a>&nbsp;fontManager,
                                  PDDocument&nbsp;pdDoc)
-                          throws <a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                          throws <a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block">Adds the entire vertical list to the PDF, by first breaking it into pages and then adding the
  pages to the PDF.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -285,7 +294,7 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 <ul class="blockList">
 <li class="blockList">
 <h4>verticalListToPages</h4>
-<pre>public&nbsp;<a href="http://download.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../com/teamten/typeset/Page.html" title="class in com.teamten.typeset">Page</a>&gt;&nbsp;verticalListToPages(<a href="../../../com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset">VerticalList</a>&nbsp;verticalList,
+<pre>public&nbsp;<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>&gt;&nbsp;verticalListToPages(<a href="../../../com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset">VerticalList</a>&nbsp;verticalList,
                                       long&nbsp;textHeight)</pre>
 <div class="block">Format the vertical list into a sequence of pages.</div>
 <dl>
@@ -294,55 +303,60 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 </dl>
 </li>
 </ul>
-<a name="addPagesToPdf-java.util.List-com.teamten.typeset.BookLayout-PDDocument-">
+<a name="addPagesToPdf-java.util.List-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>addPagesToPdf</h4>
-<pre>public&nbsp;void&nbsp;addPagesToPdf(<a href="http://download.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../com/teamten/typeset/Page.html" title="class in com.teamten.typeset">Page</a>&gt;&nbsp;pages,
+<pre>public&nbsp;void&nbsp;addPagesToPdf(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>&gt;&nbsp;pages,
+                          <a href="../../../com/teamten/typeset/Config.html" title="class in com.teamten.typeset">Config</a>&nbsp;config,
                           <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
+                          <a href="../../../com/teamten/font/FontManager.html" title="class in com.teamten.font">FontManager</a>&nbsp;fontManager,
                           PDDocument&nbsp;pdDoc)
-                   throws <a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                   throws <a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block">Send each page (with the given size) to the PDF.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
-<a name="addPageToPdf-com.teamten.typeset.Page-com.teamten.typeset.BookLayout-PDDocument-">
+<a name="addPageToPdf-com.teamten.typeset.element.Page-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>addPageToPdf</h4>
-<pre>public&nbsp;void&nbsp;addPageToPdf(<a href="../../../com/teamten/typeset/Page.html" title="class in com.teamten.typeset">Page</a>&nbsp;page,
+<pre>public&nbsp;void&nbsp;addPageToPdf(<a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>&nbsp;page,
+                         <a href="../../../com/teamten/typeset/Config.html" title="class in com.teamten.typeset">Config</a>&nbsp;config,
                          <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
+                         <a href="../../../com/teamten/font/FontManager.html" title="class in com.teamten.font">FontManager</a>&nbsp;fontManager,
                          PDDocument&nbsp;pdDoc)
-                  throws <a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+                  throws <a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block">Add the VBox as a page to the PDF.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
-<a name="generateTableOfContents-java.lang.String-com.teamten.typeset.BookLayout-com.teamten.typeset.VerticalList-com.teamten.typeset.FontManager-">
+<a name="drawHeadline-com.teamten.typeset.element.Page-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDPageContentStream-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>generateTableOfContents</h4>
-<pre>public&nbsp;void&nbsp;generateTableOfContents(<a href="http://download.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;tocTitle,
-                                    <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
-                                    <a href="../../../com/teamten/typeset/VerticalList.html" title="class in com.teamten.typeset">VerticalList</a>&nbsp;verticalList,
-                                    <a href="../../../com/teamten/typeset/FontManager.html" title="class in com.teamten.typeset">FontManager</a>&nbsp;fontManager)
-                             throws <a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
-<div class="block">Adds the table of contents to the vertical list. Does not eject the page.</div>
+<h4>drawHeadline</h4>
+<pre>public&nbsp;void&nbsp;drawHeadline(<a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>&nbsp;page,
+                         <a href="../../../com/teamten/typeset/Config.html" title="class in com.teamten.typeset">Config</a>&nbsp;config,
+                         <a href="../../../com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a>&nbsp;bookLayout,
+                         <a href="../../../com/teamten/font/FontManager.html" title="class in com.teamten.font">FontManager</a>&nbsp;fontManager,
+                         PDPageContentStream&nbsp;contents)
+                  throws <a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block">Draw the headline (page number of part or chapter title) at the top of the page.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="http://download.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+<dd><code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -373,7 +387,7 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/teamten/typeset/Typeface.html" title="enum in com.teamten.typeset"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../com/teamten/typeset/SpaceUnit.html" title="enum in com.teamten.typeset"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../com/teamten/typeset/TypesetterTest.html" title="class in com.teamten.typeset"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">

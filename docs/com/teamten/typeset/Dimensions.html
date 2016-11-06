@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":17};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":17,"i4":17,"i5":17,"i6":17};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],16:["t5","Default Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -47,8 +47,8 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/teamten/typeset/Box.html" title="class in com.teamten.typeset"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../com/teamten/typeset/DiscardableElement.html" title="class in com.teamten.typeset"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../com/teamten/typeset/Config.Key.html" title="enum in com.teamten.typeset"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../com/teamten/typeset/ElementList.html" title="class in com.teamten.typeset"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?com/teamten/typeset/Dimensions.html" target="_top">Frames</a></li>
@@ -99,7 +99,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../com/teamten/typeset/Bookmark.html" title="class in com.teamten.typeset">Bookmark</a>, <a href="../../../com/teamten/typeset/Box.html" title="class in com.teamten.typeset">Box</a>, <a href="../../../com/teamten/typeset/DiscardableElement.html" title="class in com.teamten.typeset">DiscardableElement</a>, <a href="../../../com/teamten/typeset/Discretionary.html" title="class in com.teamten.typeset">Discretionary</a>, <a href="../../../com/teamten/typeset/Element.html" title="class in com.teamten.typeset">Element</a>, <a href="../../../com/teamten/typeset/Font.Metrics.html" title="class in com.teamten.typeset">Font.Metrics</a>, <a href="../../../com/teamten/typeset/Glue.html" title="class in com.teamten.typeset">Glue</a>, <a href="../../../com/teamten/typeset/HBox.html" title="class in com.teamten.typeset">HBox</a>, <a href="../../../com/teamten/typeset/Kern.html" title="class in com.teamten.typeset">Kern</a>, <a href="../../../com/teamten/typeset/Leader.html" title="class in com.teamten.typeset">Leader</a>, <a href="../../../com/teamten/typeset/NonDiscardableElement.html" title="class in com.teamten.typeset">NonDiscardableElement</a>, <a href="../../../com/teamten/typeset/Page.html" title="class in com.teamten.typeset">Page</a>, <a href="../../../com/teamten/typeset/Penalty.html" title="class in com.teamten.typeset">Penalty</a>, <a href="../../../com/teamten/typeset/Rule.html" title="class in com.teamten.typeset">Rule</a>, <a href="../../../com/teamten/typeset/SectionBookmark.html" title="class in com.teamten.typeset">SectionBookmark</a>, <a href="../../../com/teamten/typeset/Text.html" title="class in com.teamten.typeset">Text</a>, <a href="../../../com/teamten/typeset/VBox.html" title="class in com.teamten.typeset">VBox</a></dd>
+<dd><a href="../../../com/teamten/typeset/AbstractDimensions.html" title="class in com.teamten.typeset">AbstractDimensions</a>, <a href="../../../com/teamten/typeset/element/Bookmark.html" title="class in com.teamten.typeset.element">Bookmark</a>, <a href="../../../com/teamten/typeset/element/Box.html" title="class in com.teamten.typeset.element">Box</a>, <a href="../../../com/teamten/typeset/element/Columns.html" title="class in com.teamten.typeset.element">Columns</a>, <a href="../../../com/teamten/typeset/element/DiscardableElement.html" title="class in com.teamten.typeset.element">DiscardableElement</a>, <a href="../../../com/teamten/typeset/element/Discretionary.html" title="class in com.teamten.typeset.element">Discretionary</a>, <a href="../../../com/teamten/typeset/element/Element.html" title="class in com.teamten.typeset.element">Element</a>, <a href="../../../com/teamten/font/Font.Metrics.html" title="class in com.teamten.font">Font.Metrics</a>, <a href="../../../com/teamten/typeset/element/Glue.html" title="class in com.teamten.typeset.element">Glue</a>, <a href="../../../com/teamten/typeset/element/HBox.html" title="class in com.teamten.typeset.element">HBox</a>, <a href="../../../com/teamten/typeset/IndexBookmark.html" title="class in com.teamten.typeset">IndexBookmark</a>, <a href="../../../com/teamten/typeset/element/Kern.html" title="class in com.teamten.typeset.element">Kern</a>, <a href="../../../com/teamten/typeset/element/Leader.html" title="class in com.teamten.typeset.element">Leader</a>, <a href="../../../com/teamten/typeset/element/NonDiscardableElement.html" title="class in com.teamten.typeset.element">NonDiscardableElement</a>, <a href="../../../com/teamten/typeset/element/Page.html" title="class in com.teamten.typeset.element">Page</a>, <a href="../../../com/teamten/typeset/element/Penalty.html" title="class in com.teamten.typeset.element">Penalty</a>, <a href="../../../com/teamten/typeset/element/Rule.html" title="class in com.teamten.typeset.element">Rule</a>, <a href="../../../com/teamten/typeset/element/SectionBookmark.html" title="class in com.teamten.typeset.element">SectionBookmark</a>, <a href="../../../com/teamten/typeset/element/Text.html" title="class in com.teamten.typeset.element">Text</a>, <a href="../../../com/teamten/typeset/element/VBox.html" title="class in com.teamten.typeset.element">VBox</a></dd>
 </dl>
 <hr>
 <br>
@@ -142,9 +142,28 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code>static &lt;E extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;<br><a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Dimensions.html#horizontally-java.util.List-">horizontally</a></span>(<a href="http://download.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;E&gt;&nbsp;items)</code>
+<td class="colFirst"><code>static <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Dimensions.html#horizontally-java.util.List-">horizontally</a></span>(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;? extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;items)</code>
 <div class="block">Computes the sum of the item widths and the max of the height and depth.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>static <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Dimensions.html#vertically-java.util.List-com.teamten.typeset.VerticalAlignment-">vertically</a></span>(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;? extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;elements,
+          <a href="../../../com/teamten/typeset/VerticalAlignment.html" title="enum in com.teamten.typeset">VerticalAlignment</a>&nbsp;verticalAlignment)</code>
+<div class="block">Compute the dimensions of a vertical stack of elements, aligning them according to the specified parameter.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code>static <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Dimensions.html#verticallyFirstBoxAligned-java.util.List-">verticallyFirstBoxAligned</a></span>(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;? extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;elements)</code>
+<div class="block">Computes the size of a vertical box where the baseline alignment is on the first box.</div>
+</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code>static <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/typeset/Dimensions.html#verticallyLastBoxAligned-java.util.List-">verticallyLastBoxAligned</a></span>(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;? extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;elements)</code>
+<div class="block">Computes the size of a vertical box where the baseline alignment is on the last box.</div>
 </td>
 </tr>
 </table>
@@ -195,11 +214,54 @@ var activeTableTab = "activeTableTab";
 <a name="horizontally-java.util.List-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>horizontally</h4>
-<pre>static&nbsp;&lt;E extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;<a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&nbsp;horizontally(<a href="http://download.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;E&gt;&nbsp;items)</pre>
+<pre>static&nbsp;<a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&nbsp;horizontally(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;? extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;items)</pre>
 <div class="block">Computes the sum of the item widths and the max of the height and depth.</div>
+</li>
+</ul>
+<a name="vertically-java.util.List-com.teamten.typeset.VerticalAlignment-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>vertically</h4>
+<pre>static&nbsp;<a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&nbsp;vertically(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;? extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;elements,
+                             <a href="../../../com/teamten/typeset/VerticalAlignment.html" title="enum in com.teamten.typeset">VerticalAlignment</a>&nbsp;verticalAlignment)</pre>
+<div class="block">Compute the dimensions of a vertical stack of elements, aligning them according to the specified parameter.</div>
+</li>
+</ul>
+<a name="verticallyFirstBoxAligned-java.util.List-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>verticallyFirstBoxAligned</h4>
+<pre>static&nbsp;<a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&nbsp;verticallyFirstBoxAligned(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;? extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;elements)</pre>
+<div class="block">Computes the size of a vertical box where the baseline alignment is on the first box.
+ The width is the max of the widths. The height is everything above the first box and the
+ height of the first box. The depth is the rest.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>elements</code> - the elements top to bottom.</dd>
+</dl>
+</li>
+</ul>
+<a name="verticallyLastBoxAligned-java.util.List-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>verticallyLastBoxAligned</h4>
+<pre>static&nbsp;<a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&nbsp;verticallyLastBoxAligned(<a href="http://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;? extends <a href="../../../com/teamten/typeset/Dimensions.html" title="interface in com.teamten.typeset">Dimensions</a>&gt;&nbsp;elements)</pre>
+<div class="block">Computes the size of a vertical box where the baseline alignment is on the last box.
+ The width is the max of the widths. The height is the sum of all the heights and depths
+ except for the last box's depth. The depth is the last box's depth and all glues after that.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>elements</code> - the elements top to bottom.</dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -229,8 +291,8 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../com/teamten/typeset/Box.html" title="class in com.teamten.typeset"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../com/teamten/typeset/DiscardableElement.html" title="class in com.teamten.typeset"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../com/teamten/typeset/Config.Key.html" title="enum in com.teamten.typeset"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../com/teamten/typeset/ElementList.html" title="class in com.teamten.typeset"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?com/teamten/typeset/Dimensions.html" target="_top">Frames</a></li>

@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li><a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
 <li>
 <ul class="inheritance">
 <li>com.teamten.markdown.Block.Builder</li>
@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public static class <span class="typeNameLabel">Block.Builder</span>
-extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
+extends <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Builds a Block one character at a time.</div>
 </li>
 </ul>
@@ -151,18 +151,25 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/markdown/Block.Builder.html#add-char-boolean-">add</a></span>(char&nbsp;ch,
-   boolean&nbsp;isItalic)</code>
-<div class="block">Add the character to the block.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/markdown/Block.Builder.html#addSpan-com.teamten.markdown.Span-">addSpan</a></span>(<a href="../../../com/teamten/markdown/Span.html" title="class in com.teamten.markdown">Span</a>&nbsp;span)</code>
+<div class="block">Add any span to this block.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/markdown/Block.Builder.html#addText-char-boolean-boolean-">addText</a></span>(char&nbsp;ch,
+       boolean&nbsp;isItalic,
+       boolean&nbsp;isSmallCaps)</code>
+<div class="block">Add the character to the block.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../com/teamten/markdown/Block.html" title="class in com.teamten.markdown">Block</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/markdown/Block.Builder.html#build--">build</a></span>()</code>
 <div class="block">Builds the block and returns it.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/markdown/Block.Builder.html#isEmpty--">isEmpty</a></span>()</code>
 <div class="block">Returns whether any characters have been added so far.</div>
@@ -173,8 +180,8 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
+<code><a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
 </ul>
 </li>
 </ul>
@@ -207,20 +214,32 @@ extends <a href="http://download.oracle.com/javase/8/docs/api/java/lang/Object.h
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="add-char-boolean-">
+<a name="addText-char-boolean-boolean-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>add</h4>
-<pre>public&nbsp;void&nbsp;add(char&nbsp;ch,
-                boolean&nbsp;isItalic)</pre>
+<h4>addText</h4>
+<pre>public&nbsp;void&nbsp;addText(char&nbsp;ch,
+                    boolean&nbsp;isItalic,
+                    boolean&nbsp;isSmallCaps)</pre>
 <div class="block">Add the character to the block.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>ch</code> - the character to add.</dd>
 <dd><code>isItalic</code> - whether the character should be displayed in italics.</dd>
+<dd><code>isSmallCaps</code> - whether the character should be displayed in small caps.</dd>
 </dl>
+</li>
+</ul>
+<a name="addSpan-com.teamten.markdown.Span-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addSpan</h4>
+<pre>public&nbsp;void&nbsp;addSpan(<a href="../../../com/teamten/markdown/Span.html" title="class in com.teamten.markdown">Span</a>&nbsp;span)</pre>
+<div class="block">Add any span to this block.</div>
 </li>
 </ul>
 <a name="isEmpty--">
