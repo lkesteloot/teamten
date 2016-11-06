@@ -344,8 +344,17 @@ public abstract class ElementList implements ElementSink {
             List<Element> looseElements = getElementSublist(beginBreakpoint, endBreakpoint);
             List<Element> fixedElements = endBreakpoint.getFitness().fixed(looseElements);
 
+            // Add indent. We used to do this with a shift, but shifts aren't taken into account
+            // when computing the dimensions of the vertical boxes.
+            if (indent > 0) {
+                List<Element> indentedElements = new ArrayList<>(fixedElements.size() + 1);
+                indentedElements.add(new Box(indent, 0, 0));
+                indentedElements.addAll(fixedElements);
+                fixedElements = indentedElements;
+            }
+
             // Pack them into a single box.
-            Box box = makeOutputBox(fixedElements, endBreakpoint.getCounter(), indent);
+            Box box = makeOutputBox(fixedElements, endBreakpoint.getCounter(), 0);
             if (printDebug()) {
                 box.println(System.out, "");
             }

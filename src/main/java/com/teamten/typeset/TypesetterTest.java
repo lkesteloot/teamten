@@ -310,7 +310,7 @@ public class TypesetterTest {
 
         // Simple paragraphs.
         boolean firstParagraph = true;
-        int numParagraphs = 6;//PARAGRAPHS.length;
+        int numParagraphs = PARAGRAPHS.length;
         for (String paragraph : Arrays.asList(PARAGRAPHS).subList(0, numParagraphs)) {
             if (!firstParagraph && false) {
                 verticalList.addElement(new Glue(0, PT.toSp(3), 0, false));
