@@ -27,7 +27,7 @@ public abstract class ElementList implements ElementSink {
     private static final long LINE_PENALTY = 10;
     private static final long BADNESS_TOLERANCE = 8_000;
     private static final boolean DEBUG_HORIZONTAL_LIST = false;
-    private static final boolean DEBUG_VERTICAL_LIST = true;
+    private static final boolean DEBUG_VERTICAL_LIST = false;
     private final List<Element> mElements = new ArrayList<>();
 
     @Override
@@ -148,7 +148,7 @@ public abstract class ElementList implements ElementSink {
                 long maxSize = outputShape.getSize(counter);
 
                 // Compute the fitness of this sublist.
-                Fitness fitness = Fitness.create(getElementSublist(beginBreakpoint, endBreakpoint), maxSize,
+                Fitness fitness = Fitness.create(getElementSublist(beginBreakpoint, endBreakpoint), maxSize, -1,
                         this::getElementSize);
 
                 // Compute badness for the line. This is based on how much we had to stretch or shrink.

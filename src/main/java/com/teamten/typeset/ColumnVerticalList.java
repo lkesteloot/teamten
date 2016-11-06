@@ -64,7 +64,12 @@ public class ColumnVerticalList extends ElementList {
                 int beginIndex = breakpoints.get(breaks[i]).getStartIndex();
                 int endIndex = i == breaks.length - 1 ? elements.size() : breakpoints.get(breaks[i + 1]).getIndex();
 
-                VBox vbox = new VBox(elements.subList(beginIndex, endIndex));
+                // Get rid of the depth of the last box, so that the last line is baseline-aligned across
+                // all columns.
+                List<Element> subElements = elements.subList(beginIndex, endIndex);
+                Dimensions dimensions = Dimensions.verticallyLastBoxAligned(subElements);
+                dimensions = new AbstractDimensions(dimensions.getWidth(), dimensions.getHeight(), 0);
+                VBox vbox = new VBox(subElements, dimensions, 0);
                 vboxes.add(vbox);
 
                 // Keep track of the longest column.

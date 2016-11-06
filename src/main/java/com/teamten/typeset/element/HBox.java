@@ -16,9 +16,13 @@ import java.util.function.Consumer;
 public class HBox extends Box {
     private final List<Element> mElements;
 
-    public HBox(List<Element> elements, long shift) {
-        super(Dimensions.horizontally(elements), shift);
+    protected HBox(List<Element> elements, Dimensions dimensions, long shift) {
+        super(dimensions, shift);
         mElements = elements;
+    }
+
+    public HBox(List<Element> elements, long shift) {
+        this(elements, Dimensions.horizontally(elements), shift);
     }
 
     public HBox(List<Element> elements) {

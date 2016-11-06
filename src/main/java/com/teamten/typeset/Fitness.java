@@ -56,9 +56,11 @@ public class Fitness {
 
     /**
      * Create a new Fitness object given a list of elements and a size they must fit into.
+     *
+     * @param actualSize the total size of the elements. Use -1 to have this method compute it.
      * @param elementSizer returns the size of an element.
      */
-    public static Fitness create(List<Element> elements, long maxSize, ElementSizer elementSizer) {
+    public static Fitness create(List<Element> elements, long maxSize, long actualSize, ElementSizer elementSizer) {
         // Find the sum of the sizes of all the elements in this line or page. Also compute the total stretch
         // and shrink for the glue in that line or page.
         long size = 0;
@@ -73,6 +75,11 @@ public class Fitness {
                 stretch.add(flexible.getStretch());
                 shrink.add(flexible.getShrink());
             }
+        }
+
+        // Override with actual size if provided.
+        if (actualSize != -1) {
+            size = actualSize;
         }
 
         // Compute difference between width and page width (or height and page height). This is positive

@@ -116,7 +116,7 @@ public class VerticalList extends ElementList {
                 i = lastIndex;
 
                 // Create a group for all these elements.
-                element = new Columns(allElements.subList(firstIndex, lastIndex + 1), columnLayout);
+                element = Columns.create(allElements.subList(firstIndex, lastIndex + 1), columnLayout);
             } else {
                 // One-column element, just add it.
                 element = allElements.get(i);

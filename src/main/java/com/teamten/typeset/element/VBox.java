@@ -19,7 +19,7 @@ public class VBox extends Box {
     /**
      * The elements are listed top to bottom.
      */
-    private VBox(List<Element> elements, Dimensions dimensions, long shift) {
+    public VBox(List<Element> elements, Dimensions dimensions, long shift) {
         super(dimensions, shift);
         mElements = elements;
     }
@@ -47,7 +47,7 @@ public class VBox extends Box {
      */
     public VBox fixed(long newSize, VerticalAlignment verticalAlignment) {
         // Figure out how well our existing elements fit in this new size.
-        Fitness fitness = Fitness.create(getElements(), newSize, Element::getVerticalSize);
+        Fitness fitness = Fitness.create(getElements(), newSize, getVerticalSize(), Element::getVerticalSize);
 
         // Stretch or shrink them to fit.
         List<Element> fixedElements = fitness.fixed(getElements());

@@ -1,7 +1,9 @@
 package com.teamten.typeset.element;
 
+import com.teamten.typeset.AbstractDimensions;
 import com.teamten.typeset.ColumnLayout;
 import com.teamten.typeset.ColumnVerticalList;
+import com.teamten.typeset.Dimensions;
 import com.teamten.typeset.VerticalAlignment;
 
 import java.util.List;
@@ -14,35 +16,45 @@ public class Columns extends HBox implements Flexible {
     private final Flexibility mStretch;
     private final Flexibility mShrink;
 
-    public Columns(List<Element> elements, ColumnLayout columnLayout) {
-        super(createColumns(elements, columnLayout));
+    private Columns(List<Element> elements, long shift, Flexibility stretch, Flexibility shrink) {
+        super(elements, shift);
 
-        TotalFlexibility stretch = new TotalFlexibility();
-        TotalFlexibility shrink = new TotalFlexibility();
+        mStretch = stretch;
+        mShrink = shrink;
+    }
+
+    public static Columns create(List<Element> elements, ColumnLayout columnLayout) {
+        List<Element> columns = createColumns(elements, columnLayout);
+
+        // Compute total flexibility.
+        TotalFlexibility totalStretch = new TotalFlexibility();
+        TotalFlexibility totalShrink = new TotalFlexibility();
 
         // Go through the elements of this horizontal box, picking out the columns.
-        for (Element element : getElements()) {
-            if (element instanceof VBox) {
-                VBox vbox = (VBox) element;
+        columns.stream()
+                .filter(element -> element instanceof VBox)
+                .forEach(element -> {
+                    VBox vbox = (VBox) element;
 
-                for (Element subelement : vbox.getElements()) {
-                    if (subelement instanceof Flexible) {
-                        Flexible flexible = (Flexible) subelement;
-                        stretch.add(flexible.getStretch());
-                        shrink.add(flexible.getShrink());
-                    }
-                }
-            }
-        }
+                    vbox.getElements().stream()
+                            .filter(subelement -> subelement instanceof Flexible)
+                            .forEach(subelement -> {
+                                Flexible flexible = (Flexible) subelement;
+                                totalStretch.add(flexible.getStretch());
+                                totalShrink.add(flexible.getShrink());
+                            });
+                });
 
-        if (stretch.isInfinite() || shrink.isInfinite()) {
+        if (totalStretch.isInfinite() || totalShrink.isInfinite()) {
             // This would only work if all columns were infinitely stretchable. Don't deal with that.
             throw new IllegalStateException("columns cannot contain infinitely flexible items");
         }
 
         // Set the flexibility to the average of the flexibilities of the columns.
-        mStretch = new Flexibility(stretch.getAmount()/columnLayout.getColumnCount(), false);
-        mShrink = new Flexibility(shrink.getAmount()/columnLayout.getColumnCount(), false);
+        Flexibility stretch = new Flexibility(totalStretch.getAmount()/columnLayout.getColumnCount(), false);
+        Flexibility shrink = new Flexibility(totalShrink.getAmount()/columnLayout.getColumnCount(), false);
+
+        return new Columns(columns, 0, stretch, shrink);
     }
 
     @Override
