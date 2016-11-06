@@ -375,7 +375,7 @@ public abstract class ElementList implements ElementSink {
     private void outputBoxes(Iterable<Box> boxes, ElementSink output, OutputShape outputShape) {
         int counter = 1;
         for (Box box : boxes) {
-            long maxSize = outputShape.getSize(counter);
+            long maxSize = outputShape.getIndent(counter) + outputShape.getSize(counter);
 
             // See if it's the right size.
             long boxSize = getElementSize(box);
