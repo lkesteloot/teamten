@@ -24,6 +24,7 @@ public class MarkdownParser {
         SKIP_WHITESPACE,
         COMMENT,
         IN_TAG,
+        NUMBERED_LIST,
     }
 
     static {
@@ -63,9 +64,11 @@ public class MarkdownParser {
         // Accumulated tag.
         StringBuilder tagBuilder = new StringBuilder();
         ParserState preTagState = null;
-        int chOrEof;
-        while ((chOrEof = reader.read()) != -1) {
+        boolean processSameCharacter = false;
+        int chOrEof = 0;
+        while (processSameCharacter || (chOrEof = reader.read()) != -1) {
             char ch = (char) chOrEof;
+            processSameCharacter = false;
 
             /// System.out.printf("%d (%c) %s %s%n", chOrEof, ch, state, builder);
             switch (state) {
@@ -75,6 +78,10 @@ public class MarkdownParser {
                     } else if (ch == '%') {
                         // Comment, skip rest of line.
                         state = ParserState.COMMENT;
+                    } else if (builder == null && Character.isDigit(ch)) {
+                        state = ParserState.NUMBERED_LIST;
+                        tagBuilder.setLength(0);
+                        tagBuilder.append(ch);
                     } else if (builder == null && ch == '#' && blockType == BlockType.BODY) {
                         blockType = BlockType.PART_HEADER;
                     } else if (builder == null && ch == '#' && blockType == BlockType.PART_HEADER) {
@@ -198,6 +205,24 @@ public class MarkdownParser {
                         preTagState = null;
                     } else {
                         tagBuilder.append(ch);
+                    }
+                    break;
+
+                case NUMBERED_LIST:
+                    // Parse a paragraph prefix like:   2)
+                    if (Character.isDigit(ch)) {
+                        tagBuilder.append(ch);
+                    } else if (ch == ')') {
+                        builder = new Block.Builder(BlockType.NUMBERED_LIST);
+                        state = ParserState.SKIP_WHITESPACE;
+                    } else {
+                        // Wasn't a numbered list. Start a normal paragraph.
+                        builder = new Block.Builder(BlockType.BODY);
+                        for (int i = 0; i < tagBuilder.length(); i++) {
+                            builder.addText(translateCharacter(tagBuilder.charAt(i)), isItalic, isSmallCaps);
+                        }
+                        state = ParserState.IN_LINE;
+                        processSameCharacter = true;
                     }
                     break;
             }

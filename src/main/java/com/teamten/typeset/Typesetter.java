@@ -19,11 +19,13 @@ import com.teamten.markdown.TextSpan;
 import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
+import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Leader;
 import com.teamten.typeset.element.Page;
 import com.teamten.typeset.element.Penalty;
 import com.teamten.typeset.element.Rule;
 import com.teamten.typeset.element.SectionBookmark;
+import com.teamten.typeset.element.Text;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -150,6 +152,7 @@ public class Typesetter {
         VerticalList verticalList = new VerticalList();
 
         BlockType previousBlockType = null;
+        int numberedListCounter = 1;
         for (Block block : doc.getBlocks()) {
             Config.Key regularFontKey;
             TypefaceVariantSize regularFontDesc;
@@ -162,12 +165,14 @@ public class Typesetter {
             boolean addTracking = false;
             long marginTop = 0;
             long marginBottom = 0;
-            HorizontalList horizontalList = new HorizontalList();
 
             switch (block.getBlockType()) {
                 case BODY:
                     regularFontKey = Config.Key.BODY_FONT;
                     indentFirstLine = previousBlockType == BlockType.BODY;
+                    if (previousBlockType == BlockType.NUMBERED_LIST) {
+                        marginTop = PT.toSp(4.0);
+                    }
                     break;
 
                 case PART_HEADER:
@@ -194,6 +199,17 @@ public class Typesetter {
                     center = true;
                     marginTop = IN.toSp(0.25);
                     marginBottom = IN.toSp(0.10);
+                    break;
+
+                case NUMBERED_LIST:
+                    regularFontKey = Config.Key.BODY_FONT;
+                    if (previousBlockType != BlockType.NUMBERED_LIST) {
+                        marginTop = PT.toSp(8.0);
+                        numberedListCounter = 1;
+                    } else {
+                        numberedListCounter++;
+                    }
+                    marginBottom = PT.toSp(4.0);
                     break;
 
                 case HALF_TITLE_PAGE:
@@ -252,8 +268,19 @@ public class Typesetter {
                 verticalList.addElement(new Box(0, marginTop, 0));
             }
 
+            HorizontalList horizontalList = new HorizontalList();
+
             if (center) {
                 horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+            }
+
+            // Add the counter at the front of a numbered list paragraph.
+            if (block.getBlockType() == BlockType.NUMBERED_LIST) {
+                List<Element> elements = new ArrayList<>();
+                elements.add(new Glue(0, PT.toSp(1.0), true, 0, false, true));
+                elements.add(new Text(numberedListCounter + ". ", spanRegularFont));
+                HBox hbox = HBox.ofWidth(elements, paragraphIndent);
+                horizontalList.addElement(hbox);
             }
 
             // Each span in the paragraph.
@@ -283,6 +310,7 @@ public class Typesetter {
             switch (block.getBlockType()) {
                 case BODY:
                 case MINOR_HEADER:
+                case NUMBERED_LIST:
                     // Nothing special.
                     break;
 
@@ -309,7 +337,9 @@ public class Typesetter {
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             long bodyWidth = config.getBodyWidth();
             OutputShape outputShape;
-            if (indentFirstLine) {
+            if (block.getBlockType() == BlockType.NUMBERED_LIST) {
+                outputShape = OutputShape.singleLine(bodyWidth, 0, paragraphIndent);
+            } else if (indentFirstLine) {
                 outputShape = OutputShape.singleLine(bodyWidth, paragraphIndent, 0);
             } else {
                 outputShape = OutputShape.fixed(bodyWidth);

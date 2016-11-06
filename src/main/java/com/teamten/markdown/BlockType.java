@@ -10,6 +10,7 @@ public enum BlockType {
     CHAPTER_HEADER,
     MINOR_SECTION_HEADER,
     MINOR_HEADER,
+    NUMBERED_LIST,
 
     // Specific pages:
     HALF_TITLE_PAGE,
