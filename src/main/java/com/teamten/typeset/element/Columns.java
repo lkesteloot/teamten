@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  * A horizontal box that contains multiple vertical columns.
  */
 public class Columns extends HBox implements Flexible {
+    private static final boolean DEBUG_FIXING = false;
     private final Flexibility mStretch;
     private final Flexibility mShrink;
 
@@ -74,17 +75,23 @@ public class Columns extends HBox implements Flexible {
 
     @Override
     public Element fixed(long newSize) {
-        System.out.println("Column fixing:");
-        System.out.printf("    Before vertical size: %,d\n", getVerticalSize());
-        System.out.printf("    Fixing to: %,d\n", newSize);
+        if (DEBUG_FIXING) {
+            System.out.println("Column fixing:");
+            System.out.printf("    Before vertical size: %,d\n", getVerticalSize());
+            System.out.printf("    Fixing to: %,d\n", newSize);
+        }
         List<Element> newElements = getElements().stream()
                 .map(element -> {
                     // Fix the columns.
                     if (element instanceof VBox) {
-                        System.out.printf("        VBox fixed from: %,d\n", element.getVerticalSize());
+                        if (DEBUG_FIXING) {
+                            System.out.printf("        VBox fixed from: %,d\n", element.getVerticalSize());
+                        }
                         VBox vbox = (VBox) element;
                         element = vbox.fixed(newSize, VerticalAlignment.FIRST_BOX);
-                        System.out.printf("        VBox fixed to: %,d\n", element.getVerticalSize());
+                        if (DEBUG_FIXING) {
+                            System.out.printf("        VBox fixed to: %,d\n", element.getVerticalSize());
+                        }
                     }
 
                     return element;
@@ -94,7 +101,9 @@ public class Columns extends HBox implements Flexible {
         // Create an HBox now that we're fixed. We could instead create a Columns if that mattered, but currently
         // Columns adds nothing once fixed.
         HBox hbox = new HBox(newElements);
-        System.out.printf("    After vertical size: %,d\n", hbox.getVerticalSize());
+        if (DEBUG_FIXING) {
+            System.out.printf("    After vertical size: %,d\n", hbox.getVerticalSize());
+        }
         return hbox;
     }
 

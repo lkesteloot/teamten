@@ -38,6 +38,10 @@ public class ColumnVerticalList extends ElementList {
      */
     public List<Element> formatIntoColumns(@NotNull ColumnLayout columnLayout) {
         List<Element> elements = getElements();
+        boolean debug = elements.size() > 0 && elements.get(0).toTextString().startsWith("FIRST LINE HERE");
+        if (debug) {
+            System.out.println("------------------------------------------");
+        }
 
         // Find all the places that we could break a column.
         List<Breakpoint> breakpoints = findBreakpoints();
@@ -49,7 +53,7 @@ public class ColumnVerticalList extends ElementList {
         int numBreaks = columnLayout.getColumnCount();
 
         // Go through each combination of breaks.
-        long minSumSquares = Long.MAX_VALUE;
+        long minDemerits = Long.MAX_VALUE;
         List<VBox> bestVboxes = null;
         for (int[] breaks : new IncreasingCounter(numBreaks, breakpoints.size())) {
             if (breaks[0] != 0) {
@@ -79,20 +83,33 @@ public class ColumnVerticalList extends ElementList {
                 }
             }
 
+
+            if (debug) {
+                Element.println(vboxes, System.out, "    ");
+            }
+
             // Find the sum of squares of differences between each column's size and the longest column's size.
             // Minimizing this should roughly equalize the columns.
-            long sumSquares = 0;
+            long demerits = 0;
+            int columnNumber = vboxes.size();
             for (VBox vbox : vboxes) {
                 long size = vbox.getVerticalSize();
                 long difference = maxSize - size;
 
-                // This would overflow if our difference were over 53 feet.
-                sumSquares += difference*difference;
+                // This would overflow if our difference were over 53 feet. Multiply by the column number
+                // as an additional penalty so that we push shorter columns to the end.
+                long demerit = difference*difference*columnNumber;
+                demerits += demerit;
+                if (debug) {
+                    System.out.printf("    %d: + %,d = %,d\n", columnNumber, demerit, demerits);
+                }
+
+                columnNumber--;
             }
 
             // Keep track of most equal division of columns.
-            if (sumSquares < minSumSquares) {
-                minSumSquares = sumSquares;
+            if (demerits < minDemerits) {
+                minDemerits = demerits;
                 bestVboxes = vboxes;
             }
         }

@@ -70,7 +70,7 @@ public abstract class Element implements Dimensions {
     /**
      * Convenience method for implementing {@link #println(PrintStream, String)} from a list of elements.
      */
-    public static void println(Iterable<Element> elements, PrintStream stream, String indent) {
+    public static void println(Iterable<? extends Element> elements, PrintStream stream, String indent) {
         for (Element element : elements) {
             element.println(stream, indent);
         }
