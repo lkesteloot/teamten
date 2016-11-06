@@ -54,6 +54,7 @@ public class Config {
         BODY_FONT(KeyType.FONT),
         PART_HEADER_FONT(KeyType.FONT),
         CHAPTER_HEADER_FONT(KeyType.FONT),
+        MINOR_HEADER_FONT(KeyType.FONT),
         PAGE_NUMBER_FONT(KeyType.FONT),
         HEADLINE_FONT(KeyType.FONT),
         HALF_TITLE_PAGE_TITLE_FONT(KeyType.FONT),

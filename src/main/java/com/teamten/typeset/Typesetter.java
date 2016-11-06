@@ -189,6 +189,13 @@ public class Typesetter {
                     addTracking = true;
                     break;
 
+                case MINOR_HEADER:
+                    regularFontKey = Config.Key.MINOR_HEADER_FONT;
+                    center = true;
+                    marginTop = IN.toSp(0.25);
+                    marginBottom = IN.toSp(0.10);
+                    break;
+
                 case HALF_TITLE_PAGE:
                     generateHalfTitlePage(config, sections, verticalList, fontManager);
                     continue;
@@ -275,6 +282,7 @@ public class Typesetter {
             // Potentially add bookmark if we're starting a new part or chapter.
             switch (block.getBlockType()) {
                 case BODY:
+                case MINOR_HEADER:
                     // Nothing special.
                     break;
 
