@@ -122,13 +122,27 @@ public class ColumnVerticalList extends ElementList {
             VBox vbox = new VBox(elements);
             horizontalElements.add(vbox);
         } else {
-            // Glue together the boxes.
+            // Glue together the boxes. Keep track of the actual width and ideal width so that we can
+            // compensate in the margins.
+            long actualWidth = 0;
+            long idealWidth = 0;
             for (VBox vbox : bestVboxes) {
                 if (!horizontalElements.isEmpty()) {
-                    horizontalElements.add(new Glue(columnLayout.getMargin(), 0, 0, true));
+                    // Shrink margin if the previous columns were too large.
+                    idealWidth += columnLayout.getMargin();
+
+                    long margin = idealWidth - actualWidth;
+                    if (margin > 0) {
+                        horizontalElements.add(new Glue(margin, 0, 0, true));
+                    }
+
+                    actualWidth += margin;
                 }
 
                 horizontalElements.add(vbox);
+
+                actualWidth += vbox.getWidth();
+                idealWidth += columnLayout.getColumnWidth();
             }
         }
 
