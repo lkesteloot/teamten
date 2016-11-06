@@ -5,7 +5,7 @@ import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.Typeface;
-import com.teamten.typeset.BookLayout;
+import com.teamten.typeset.Sections;
 import com.teamten.typeset.Config;
 import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.Typesetter;
@@ -47,7 +47,7 @@ public class TexParser {
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
 
         Config config = Config.testConfig();
-        BookLayout bookLayout = new BookLayout();
+        Sections sections = new Sections();
 
         Typesetter typesetter = new Typesetter();
         TexParser texParser = new TexParser(inputStream, fontManager);
@@ -56,7 +56,7 @@ public class TexParser {
         verticalList.println(System.out, "");
 
         // Add the vertical list to the PDF.
-        typesetter.addVerticalListToPdf(verticalList, config, bookLayout, fontManager, pdDoc);
+        typesetter.addVerticalListToPdf(verticalList, config, sections, fontManager, pdDoc);
 
         pdDoc.save(pdfFilename);
     }

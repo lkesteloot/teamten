@@ -179,11 +179,11 @@
 <dd>
 <div class="block">Add the specified page number to our set.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/Typesetter.html#addPagesToPdf-java.util.List-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">addPagesToPdf(List&lt;Page&gt;, Config, BookLayout, FontManager, PDDocument)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset">Typesetter</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Typesetter.html#addPagesToPdf-java.util.List-com.teamten.typeset.Config-com.teamten.typeset.Sections-com.teamten.font.FontManager-PDDocument-">addPagesToPdf(List&lt;Page&gt;, Config, Sections, FontManager, PDDocument)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset">Typesetter</a></dt>
 <dd>
 <div class="block">Send each page (with the given size) to the PDF.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/Typesetter.html#addPageToPdf-com.teamten.typeset.element.Page-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">addPageToPdf(Page, Config, BookLayout, FontManager, PDDocument)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset">Typesetter</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Typesetter.html#addPageToPdf-com.teamten.typeset.element.Page-com.teamten.typeset.Config-com.teamten.typeset.Sections-com.teamten.font.FontManager-PDDocument-">addPageToPdf(Page, Config, Sections, FontManager, PDDocument)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset">Typesetter</a></dt>
 <dd>
 <div class="block">Add the VBox as a page to the PDF.</div>
 </dd>
@@ -221,7 +221,7 @@
 <dd>
 <div class="block">Add a triangle to the geometry being rendered.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/Typesetter.html#addVerticalListToPdf-com.teamten.typeset.VerticalList-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDDocument-">addVerticalListToPdf(VerticalList, Config, BookLayout, FontManager, PDDocument)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset">Typesetter</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Typesetter.html#addVerticalListToPdf-com.teamten.typeset.VerticalList-com.teamten.typeset.Config-com.teamten.typeset.Sections-com.teamten.font.FontManager-PDDocument-">addVerticalListToPdf(VerticalList, Config, Sections, FontManager, PDDocument)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset">Typesetter</a></dt>
 <dd>
 <div class="block">Adds the entire vertical list to the PDF, by first breaking it into pages and then adding the
  pages to the PDF.</div>
@@ -309,12 +309,6 @@
 <div class="block">Represents a board of a Tic-Tac-Toe game.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/teamten/tictactoe/Board.html#Board--">Board()</a></span> - Constructor for class com.teamten.tictactoe.<a href="com/teamten/tictactoe/Board.html" title="class in com.teamten.tictactoe">Board</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset"><span class="typeNameLink">BookLayout</span></a> - Class in <a href="com/teamten/typeset/package-summary.html">com.teamten.typeset</a></dt>
-<dd>
-<div class="block">Manages the overall layout of the book.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/BookLayout.html#BookLayout--">BookLayout()</a></span> - Constructor for class com.teamten.typeset.<a href="com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/teamten/typeset/element/Bookmark.html" title="class in com.teamten.typeset.element"><span class="typeNameLink">Bookmark</span></a> - Class in <a href="com/teamten/typeset/element/package-summary.html">com.teamten.typeset.element</a></dt>
 <dd>
@@ -519,7 +513,7 @@
 <dd>
 <div class="block">Various keys that can be used in this configuration.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/BookLayout.html#configureFromBookmarks-com.teamten.typeset.Bookmarks-">configureFromBookmarks(Bookmarks)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Sections.html#configureFromBookmarks-com.teamten.typeset.Bookmarks-">configureFromBookmarks(Bookmarks)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Sections.html" title="class in com.teamten.typeset">Sections</a></dt>
 <dd>
 <div class="block">Look through the bookmarks to figure out where the body starts and, for any given page, what
  part and chapter it's in.</div>
@@ -697,7 +691,7 @@
 <dd>
 <div class="block">Draw a light gray rectangle at the specified scaled point coordinates.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/Typesetter.html#drawHeadline-com.teamten.typeset.element.Page-com.teamten.typeset.Config-com.teamten.typeset.BookLayout-com.teamten.font.FontManager-PDPageContentStream-">drawHeadline(Page, Config, BookLayout, FontManager, PDPageContentStream)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset">Typesetter</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Typesetter.html#drawHeadline-com.teamten.typeset.element.Page-com.teamten.typeset.Config-com.teamten.typeset.Sections-com.teamten.font.FontManager-PDPageContentStream-">drawHeadline(Page, Config, Sections, FontManager, PDPageContentStream)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Typesetter.html" title="class in com.teamten.typeset">Typesetter</a></dt>
 <dd>
 <div class="block">Draw the headline (page number of part or chapter title) at the top of the page.</div>
 </dd>
@@ -1323,7 +1317,7 @@
 <dd>
 <div class="block">Returns the source index.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/BookLayout.html#getHeadlineLabel-int-com.teamten.typeset.Config-">getHeadlineLabel(int, Config)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Sections.html#getHeadlineLabel-int-com.teamten.typeset.Config-">getHeadlineLabel(int, Config)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Sections.html" title="class in com.teamten.typeset">Sections</a></dt>
 <dd>
 <div class="block">Return the string to display at the top center of the page.</div>
 </dd>
@@ -1393,7 +1387,7 @@
 <dd>
 <div class="block">The index into the mElements array where this break would happen.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/IndexEntry.html#getIndexParagraph-com.teamten.typeset.BookLayout-">getIndexParagraph(BookLayout)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/IndexEntry.html" title="class in com.teamten.typeset">IndexEntry</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/IndexEntry.html#getIndexParagraph-com.teamten.typeset.Sections-">getIndexParagraph(Sections)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/IndexEntry.html" title="class in com.teamten.typeset">IndexEntry</a></dt>
 <dd>
 <div class="block">Get the full paragraph to display for this entry in the index.</div>
 </dd>
@@ -1526,7 +1520,7 @@
 <dd>
 <div class="block">Gets the page margin in scaled points from <a href="com/teamten/typeset/Config.Key.html#PAGE_MARGIN"><code>Config.Key.PAGE_MARGIN</code></a>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/BookLayout.html#getPageNumberLabel-int-">getPageNumberLabel(int)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Sections.html#getPageNumberLabel-int-">getPageNumberLabel(int)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Sections.html" title="class in com.teamten.typeset">Sections</a></dt>
 <dd>
 <div class="block">Returns the displayed page number label for the physical page number.</div>
 </dd>
@@ -2855,6 +2849,8 @@
 </a>
 <h2 class="title">R</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/HorizontalList.html#raggedRight--">raggedRight()</a></span> - Static method in class com.teamten.typeset.<a href="com/teamten/typeset/HorizontalList.html" title="class in com.teamten.typeset">HorizontalList</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/teamten/render/RayTracer.html" title="interface in com.teamten.render"><span class="typeNameLink">RayTracer</span></a> - Interface in <a href="com/teamten/render/package-summary.html">com.teamten.render</a></dt>
 <dd>
 <div class="block">Interface for tracing rays and shading points.</div>
@@ -2996,7 +2992,13 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/teamten/typeset/element/SectionBookmark.Type.html" title="enum in com.teamten.typeset.element"><span class="typeNameLink">SectionBookmark.Type</span></a> - Enum in <a href="com/teamten/typeset/element/package-summary.html">com.teamten.typeset.element</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/BookLayout.html#sections--">sections()</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a></dt>
+<dt><a href="com/teamten/typeset/Sections.html" title="class in com.teamten.typeset"><span class="typeNameLink">Sections</span></a> - Class in <a href="com/teamten/typeset/package-summary.html">com.teamten.typeset</a></dt>
+<dd>
+<div class="block">Keeps track of the positions of the sections (parts, chapters) of the book.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Sections.html#Sections--">Sections()</a></span> - Constructor for class com.teamten.typeset.<a href="com/teamten/typeset/Sections.html" title="class in com.teamten.typeset">Sections</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Sections.html#sections--">sections()</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Sections.html" title="class in com.teamten.typeset">Sections</a></dt>
 <dd>
 <div class="block">Returns an ordered sequence of the sections in this document.</div>
 </dd>
@@ -3125,7 +3127,7 @@
 <div class="block">Shade the point at the intersection (whose triangle is not null), given that
  the eye is coming in the direction of "eye".</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/teamten/typeset/BookLayout.html#shouldDrawHeadline-int-">shouldDrawHeadline(int)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/BookLayout.html" title="class in com.teamten.typeset">BookLayout</a></dt>
+<dt><span class="memberNameLink"><a href="com/teamten/typeset/Sections.html#shouldDrawHeadline-int-">shouldDrawHeadline(int)</a></span> - Method in class com.teamten.typeset.<a href="com/teamten/typeset/Sections.html" title="class in com.teamten.typeset">Sections</a></dt>
 <dd>
 <div class="block">Whether we should draw a headline on this page.</div>
 </dd>

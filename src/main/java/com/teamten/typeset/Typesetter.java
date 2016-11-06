@@ -74,7 +74,7 @@ public class Typesetter {
     public PDDocument typeset(Doc doc) throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
-        BookLayout bookLayout = new BookLayout();
+        Sections sections = new Sections();
 
         // Add document metadata.
         Config config = new Config();
@@ -105,7 +105,7 @@ public class Typesetter {
         for (pass = 0; pass < MAX_ITERATIONS; pass++) {
             System.out.printf("Pass %d:\n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
-            VerticalList verticalList = docToVerticalList(doc, config, bookLayout,
+            VerticalList verticalList = docToVerticalList(doc, config, sections,
                     fontManager, bookmarks, hyphenDictionary);
             System.out.println("  Horizontal layout: " + stopwatch);
 
@@ -126,7 +126,7 @@ public class Typesetter {
             bookmarks = newBookmarks;
 
             // Figure out where the sections are.
-            bookLayout.configureFromBookmarks(bookmarks);
+            sections.configureFromBookmarks(bookmarks);
         }
         if (pass == MAX_ITERATIONS) {
             throw new IllegalStateException("took too many passes to converge on stable page numbers");
@@ -134,7 +134,7 @@ public class Typesetter {
 
         // Send pages to PDF.
         Stopwatch stopwatch = Stopwatch.createStarted();
-        addPagesToPdf(pages, config, bookLayout, fontManager, pdDoc);
+        addPagesToPdf(pages, config, sections, fontManager, pdDoc);
         System.out.println("Adding to PDF: " + stopwatch);
 
         return pdDoc;
@@ -143,7 +143,7 @@ public class Typesetter {
     /**
      * Converts a DOM document to a vertical list.
      */
-    private VerticalList docToVerticalList(Doc doc, Config config, BookLayout bookLayout,
+    private VerticalList docToVerticalList(Doc doc, Config config, Sections sections,
                                            FontManager fontManager, Bookmarks bookmarks,
                                            HyphenDictionary hyphenDictionary) throws IOException {
 
@@ -190,23 +190,23 @@ public class Typesetter {
                     break;
 
                 case HALF_TITLE_PAGE:
-                    generateHalfTitlePage(config, bookLayout, verticalList, fontManager);
+                    generateHalfTitlePage(config, sections, verticalList, fontManager);
                     continue;
 
                 case TITLE_PAGE:
-                    generateTitlePage(config, bookLayout, verticalList, fontManager);
+                    generateTitlePage(config, sections, verticalList, fontManager);
                     continue;
 
                 case COPYRIGHT_PAGE:
-                    generateCopyrightPage(config, bookLayout, verticalList, fontManager);
+                    generateCopyrightPage(config, sections, verticalList, fontManager);
                     continue;
 
                 case TABLE_OF_CONTENTS:
-                    generateTableOfContents(config, bookLayout, verticalList, fontManager);
+                    generateTableOfContents(config, sections, verticalList, fontManager);
                     continue;
 
                 case INDEX:
-                    generateIndex(config, bookLayout, verticalList, fontManager, bookmarks);
+                    generateIndex(config, sections, verticalList, fontManager, bookmarks);
                     continue;
 
                 default:
@@ -332,14 +332,14 @@ public class Typesetter {
      * Adds the entire vertical list to the PDF, by first breaking it into pages and then adding the
      * pages to the PDF.
      */
-    public void addVerticalListToPdf(VerticalList verticalList, Config config, BookLayout bookLayout,
+    public void addVerticalListToPdf(VerticalList verticalList, Config config, Sections sections,
                                      FontManager fontManager, PDDocument pdDoc) throws IOException {
 
         // Format the vertical list into pages.
         List<Page> pages = verticalListToPages(verticalList, config.getBodyHeight());
 
         // Generate each page.
-        addPagesToPdf(pages, config, bookLayout, fontManager, pdDoc);
+        addPagesToPdf(pages, config, sections, fontManager, pdDoc);
     }
 
     /**
@@ -357,18 +357,18 @@ public class Typesetter {
     /**
      * Send each page (with the given size) to the PDF.
      */
-    public void addPagesToPdf(List<Page> pages, Config config, BookLayout bookLayout,
+    public void addPagesToPdf(List<Page> pages, Config config, Sections sections,
                               FontManager fontManager, PDDocument pdDoc) throws IOException {
 
         for (Page page : pages) {
-            addPageToPdf(page, config, bookLayout, fontManager, pdDoc);
+            addPageToPdf(page, config, sections, fontManager, pdDoc);
         }
     }
 
     /**
      * Add the VBox as a page to the PDF.
      */
-    public void addPageToPdf(Page page, Config config, BookLayout bookLayout,
+    public void addPageToPdf(Page page, Config config, Sections sections,
                              FontManager fontManager, PDDocument pdDoc) throws IOException {
 
         PDPage pdPage = new PDPage();
@@ -404,7 +404,7 @@ public class Typesetter {
         }
 
         // Draw the page number.
-        drawHeadline(page, config, bookLayout, fontManager, contents);
+        drawHeadline(page, config, sections, fontManager, contents);
 
         contents.close();
     }
@@ -412,7 +412,7 @@ public class Typesetter {
     /**
      * Adds the half-title page (the one with only the title on it) to the vertical list. Does not eject the page.
      */
-    private void generateHalfTitlePage(Config config, BookLayout bookLayout, VerticalList verticalList,
+    private void generateHalfTitlePage(Config config, Sections sections, VerticalList verticalList,
                                        FontManager fontManager) throws IOException {
 
         String title = config.getString(Config.Key.TITLE);
@@ -441,7 +441,7 @@ public class Typesetter {
     /**
      * Adds the title page to the vertical list. Does not eject the page.
      */
-    private void generateTitlePage(Config config, BookLayout bookLayout, VerticalList verticalList,
+    private void generateTitlePage(Config config, Sections sections, VerticalList verticalList,
                                    FontManager fontManager) throws IOException {
 
         String title = config.getString(Config.Key.TITLE);
@@ -510,7 +510,7 @@ public class Typesetter {
     /**
      * Adds the copyright page to the vertical list. Does not eject the page.
      */
-    private void generateCopyrightPage(Config config, BookLayout bookLayout, VerticalList verticalList,
+    private void generateCopyrightPage(Config config, Sections sections, VerticalList verticalList,
                                        FontManager fontManager) throws IOException {
 
         String copyright = config.getString(Config.Key.COPYRIGHT);
@@ -551,7 +551,7 @@ public class Typesetter {
     /**
      * Adds the table of contents to the vertical list. Does not eject the page.
      */
-    private void generateTableOfContents(Config config, BookLayout bookLayout, VerticalList verticalList,
+    private void generateTableOfContents(Config config, Sections sections, VerticalList verticalList,
                                          FontManager fontManager) throws IOException {
 
         long marginTop = IN.toSp(1.0);
@@ -602,7 +602,7 @@ public class Typesetter {
         Leader leader = new Leader(chapterFont, " .   ", PT.toSp(1));
 
         // List each section.
-        for (Map.Entry<Integer,SectionBookmark> entry : bookLayout.sections()) {
+        for (Map.Entry<Integer,SectionBookmark> entry : sections.sections()) {
             int physicalPageNumber = entry.getKey();
             SectionBookmark sectionBookmark = entry.getValue();
             if (sectionBookmark.getType().isIncludedInTableOfContents()) {
@@ -611,7 +611,7 @@ public class Typesetter {
                 long marginAbove = 0;
                 long marginBelow = 0;
                 String name = sectionBookmark.getName();
-                String pageLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
+                String pageLabel = sections.getPageNumberLabel(physicalPageNumber);
                 SizedFont sectionNameFont = chapterFont;
 
                 switch (sectionBookmark.getType()) {
@@ -660,7 +660,7 @@ public class Typesetter {
     /**
      * Adds the index to the vertical list. Does not eject the page.
      */
-    private void generateIndex(Config config, BookLayout bookLayout, VerticalList verticalList,
+    private void generateIndex(Config config, Sections sections, VerticalList verticalList,
                                FontManager fontManager, Bookmarks bookmarks) throws IOException {
 
         long marginTop = IN.toSp(1.0);
@@ -720,7 +720,7 @@ public class Typesetter {
         verticalList.changeColumnLayout(columnLayout);
 
         // Generate the paragraphs.
-        generateIndexEntries(indexEntries, bookLayout, verticalList, entryFont, columnLayout.getColumnWidth(), 0);
+        generateIndexEntries(indexEntries, sections, verticalList, entryFont, columnLayout.getColumnWidth(), 0);
 
         // Switch back to a single column.
         verticalList.changeColumnLayout(ColumnLayout.single());
@@ -731,7 +731,7 @@ public class Typesetter {
      *
      * @param depth the depth of the recursion, where 0 is for entries, 1 for sub-entries, etc.
      */
-    private void generateIndexEntries(IndexEntries indexEntries, BookLayout bookLayout, VerticalList verticalList,
+    private void generateIndexEntries(IndexEntries indexEntries, Sections sections, VerticalList verticalList,
                                       SizedFont font, long textWidth, int depth) throws IOException {
         // Space between sections.
         long sectionBreak = PT.toSp(6.0);
@@ -753,7 +753,7 @@ public class Typesetter {
             }
 
             // The full text of the entry.
-            String entryParagraph = indexEntry.getIndexParagraph(bookLayout);
+            String entryParagraph = indexEntry.getIndexParagraph(sections);
 
             // Build the horizontal list.
             HorizontalList horizontalList = HorizontalList.raggedRight();
@@ -767,7 +767,7 @@ public class Typesetter {
             verticalList.addElement(new Glue(0, PT.toSp(0.8), 0, false));
 
             // Now do the children of this entry.
-            generateIndexEntries(indexEntry.getSubEntries(), bookLayout, verticalList, font, textWidth, depth + 1);
+            generateIndexEntries(indexEntry.getSubEntries(), sections, verticalList, font, textWidth, depth + 1);
 
             // Kee track of the last category.
             previousCategory = category;
@@ -777,14 +777,14 @@ public class Typesetter {
     /**
      * Draw the headline (page number of part or chapter title) at the top of the page.
      */
-    public void drawHeadline(Page page, Config config, BookLayout bookLayout,
+    public void drawHeadline(Page page, Config config, Sections sections,
                              FontManager fontManager, PDPageContentStream contents) throws IOException {
 
         int physicalPageNumber = page.getPhysicalPageNumber();
 
-        if (bookLayout.shouldDrawHeadline(physicalPageNumber)) {
-            String pageNumberLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
-            String headlineLabel = bookLayout.getHeadlineLabel(physicalPageNumber, config);
+        if (sections.shouldDrawHeadline(physicalPageNumber)) {
+            String pageNumberLabel = sections.getPageNumberLabel(physicalPageNumber);
+            String headlineLabel = sections.getHeadlineLabel(physicalPageNumber, config);
             long pageMargin = config.getPageMargin();
             SizedFont pageNumberFont = fontManager.get(config.getFont(Config.Key.PAGE_NUMBER_FONT));
             SizedFont headlineFont = fontManager.get(config.getFont(Config.Key.HEADLINE_FONT));

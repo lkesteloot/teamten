@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +43,7 @@ public class IndexEntry implements Comparable<IndexEntry> {
     /**
      * Get the full paragraph to display for this entry in the index.
      */
-    public String getIndexParagraph(BookLayout bookLayout) {
+    public String getIndexParagraph(Sections sections) {
         StringBuilder builder = new StringBuilder();
 
         // Add the index text.
@@ -65,10 +64,10 @@ public class IndexEntry implements Comparable<IndexEntry> {
 
             // Append the page or a range of pages.
             builder.append(", ");
-            builder.append(bookLayout.getPageNumberLabel(firstPage));
+            builder.append(sections.getPageNumberLabel(firstPage));
             if (lastPage > firstPage) {
                 builder.append('\u2013'); // En-dash.
-                builder.append(bookLayout.getPageNumberLabel(lastPage));
+                builder.append(sections.getPageNumberLabel(lastPage));
             }
         }
 

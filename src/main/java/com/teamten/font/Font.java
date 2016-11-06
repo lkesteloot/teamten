@@ -72,6 +72,6 @@ public interface Font {
             super(width, height, depth);
         }
 
-        // Nothing else yet. TODO delete?
+        // Nothing else yet.
     }
 }

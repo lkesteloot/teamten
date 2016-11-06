@@ -295,7 +295,7 @@ public class TypesetterTest {
         Config config = Config.testConfig();
         double fontSize = 11;
         SizedFont font = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR, fontSize);
-        BookLayout bookLayout = new BookLayout();
+        Sections sections = new Sections();
 
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("en_US");
 
@@ -354,7 +354,7 @@ public class TypesetterTest {
         // verticalList.println(System.out, "");
 
         // Add the vertical list to the PDF.
-        typesetter.addVerticalListToPdf(verticalList, config, bookLayout, fontManager, pdDoc);
+        typesetter.addVerticalListToPdf(verticalList, config, sections, fontManager, pdDoc);
 
         pdDoc.save("foo.pdf");
     }

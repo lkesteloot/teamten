@@ -178,8 +178,6 @@ public class HyphenDictionary {
         for (int seqLength = 1; seqLength <= word.length(); seqLength++) {
             for (int start = 0; start <= word.length() - seqLength; start++) {
                 String seq = word.substring(start, start + seqLength);
-                // TODO The french dictionary has both straight apostrophes and curved ones,
-                // and is not consistent in which they use. Should normalize.
                 String value = mFragmentMap.get(seq.toLowerCase());
                 if (value != null) {
                     /// System.out.printf("%s: %s %s %s %d %d%n", word, seq, value, mFragmentMapDebug.get(seq.toLowerCase()), start, seqLength);

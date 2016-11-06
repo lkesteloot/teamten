@@ -50,8 +50,6 @@ public class FontManager {
     /**
      * Utility method that calls {@link #get(TypefaceVariant)} with a new {@link TypefaceVariant} object
      * created from the two parameters.
-     *
-     * TODO can eventually delete.
      */
     public Font get(Typeface typeface, FontVariant fontVariant) {
         return get(new TypefaceVariant(typeface, fontVariant));

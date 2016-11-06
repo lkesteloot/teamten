@@ -10,12 +10,9 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /**
- * Manages the overall layout of the book. This includes the position and format of the page numbers,
- * the section headers, etc.
- *
- * TODO this class has an awkward name. Maybe "Sections", since that's all it keeps track of.
+ * Keeps track of the positions of the sections (parts, chapters) of the book.
  */
-public class BookLayout {
+public class Sections {
     /**
      * From physical page number to section bookmark.
      */
