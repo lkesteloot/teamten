@@ -44,7 +44,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * Converts a document to a PDF.
  */
 public class Typesetter {
-    private static final boolean DRAW_MARGINS = true;
+    private static final boolean DRAW_MARGINS = false;
     private static final boolean DRAW_PAGE_BOUNDARY = true;
     private static final int FAKE_INDEX_LENGTH = 0;
     /**
@@ -756,7 +756,7 @@ public class Typesetter {
             String entryParagraph = indexEntry.getIndexParagraph(bookLayout);
 
             // Build the horizontal list.
-            HorizontalList horizontalList = new HorizontalList();
+            HorizontalList horizontalList = HorizontalList.raggedRight();
             horizontalList.addText(entryParagraph, font);
             horizontalList.addEndOfParagraph();
             OutputShape outputShape = OutputShape.singleLine(textWidth, totalIndent, hangingIndent);

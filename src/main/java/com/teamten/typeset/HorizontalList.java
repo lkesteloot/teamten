@@ -27,6 +27,19 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class HorizontalList extends ElementList {
     private static final boolean DEBUG_HYPHENATION = false;
+    private final boolean mRaggedRight;
+
+    private HorizontalList(boolean raggedRight) {
+        mRaggedRight = raggedRight;
+    }
+
+    public HorizontalList() {
+        this(false);
+    }
+
+    public static HorizontalList raggedRight() {
+        return new HorizontalList(true);
+    }
 
     @Override
     protected HBox makeOutputBox(List<Element> elements, int lineNumber, long shift) {
@@ -73,6 +86,13 @@ public class HorizontalList extends ElementList {
                 // The end index is normally exclusive.
                 elements.add(element);
             }
+        }
+
+        if (mRaggedRight) {
+            // This 10pt is a bit arbitrary. Could make it configurable later. Its purpose is to make it
+            // acceptable to leave a bunch of space on the right. It still causes inter-word spacing
+            // to spread out a bit, but almost none.
+            elements.add(new Glue(0, PT.toSp(10.0), false, 0, false, true));
         }
 
         return elements;
