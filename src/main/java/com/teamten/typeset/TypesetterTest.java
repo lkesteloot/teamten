@@ -6,6 +6,7 @@ import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.Typeface;
 import com.teamten.hyphen.HyphenDictionary;
+import com.teamten.typeset.element.Glue;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.IOException;
@@ -308,12 +309,20 @@ public class TypesetterTest {
         OutputShape outputShape = OutputShape.singleLine(textWidth, paragraphIndent, 0);
 
         // Simple paragraphs.
-        int numParagraphs = PARAGRAPHS.length;
+        boolean firstParagraph = true;
+        int numParagraphs = 6;//PARAGRAPHS.length;
         for (String paragraph : Arrays.asList(PARAGRAPHS).subList(0, numParagraphs)) {
+            if (!firstParagraph && false) {
+                verticalList.addElement(new Glue(0, PT.toSp(3), 0, false));
+            } else {
+                firstParagraph = false;
+            }
+
             HorizontalList horizontalList = new HorizontalList();
             horizontalList.addText(paragraph, font, hyphenDictionary);
             horizontalList.addEndOfParagraph();
             horizontalList.format(verticalList, outputShape);
+            verticalList.addElement(new Glue(0, PT.toSp(3), 0, false));
         }
 
         verticalList.changeColumnLayout(ColumnLayout.single());

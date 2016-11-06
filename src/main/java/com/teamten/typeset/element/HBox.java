@@ -90,7 +90,7 @@ public class HBox extends Box {
         layOutHorizontally(x + getShift(), y, contents);
 
         // Our height is the combined height and depth.
-        return getHeight() + getDepth();
+        return getVerticalSize();
     }
 
     @Override

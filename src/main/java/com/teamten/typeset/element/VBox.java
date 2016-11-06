@@ -1,7 +1,8 @@
 package com.teamten.typeset.element;
 
-import com.teamten.typeset.AbstractDimensions;
 import com.teamten.typeset.Dimensions;
+import com.teamten.typeset.Fitness;
+import com.teamten.typeset.VerticalAlignment;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
@@ -18,9 +19,16 @@ public class VBox extends Box {
     /**
      * The elements are listed top to bottom.
      */
-    public VBox(List<Element> elements, long shift) {
-        super(determineVBoxDimensions(elements), shift);
+    private VBox(List<Element> elements, Dimensions dimensions, long shift) {
+        super(dimensions, shift);
         mElements = elements;
+    }
+
+    /**
+     * The elements are listed top to bottom.
+     */
+    public VBox(List<Element> elements, long shift) {
+        this(elements, Dimensions.verticallyLastBoxAligned(elements), shift);
     }
 
     /**
@@ -32,6 +40,20 @@ public class VBox extends Box {
 
     public List<Element> getElements() {
         return mElements;
+    }
+
+    /**
+     * Return a new VBox with all the elements stretches or shrunk to be {@code newSize}.
+     */
+    public VBox fixed(long newSize, VerticalAlignment verticalAlignment) {
+        // Figure out how well our existing elements fit in this new size.
+        Fitness fitness = Fitness.create(getElements(), newSize, Element::getVerticalSize);
+
+        // Stretch or shrink them to fit.
+        List<Element> fixedElements = fitness.fixed(getElements());
+
+        // Package them in a vertical box.
+        return new VBox(fixedElements, Dimensions.vertically(fixedElements, verticalAlignment), 0);
     }
 
     @Override
@@ -62,42 +84,5 @@ public class VBox extends Box {
     public void println(PrintStream stream, String indent) {
         stream.println(indent + "VBox " + getDimensionString() + ":");
         Element.println(mElements, stream, indent + "    ");
-    }
-
-    /**
-     * Computes the size of the VBox. The width is the max of the widths. The height is the
-     * sum of all the heights and depths except for the last box's depth. The depth is the
-     * last box's depth.
-     *
-     * @param elements the elements top to bottom.
-     */
-    private static Dimensions determineVBoxDimensions(List<Element> elements) {
-        long boxWidth = 0;
-        long boxHeight = 0;
-        long boxDepth = 0;
-
-        Element lastBox = null;
-        for (Element element : elements) {
-            long width = element.getWidth();
-            long height = element.getHeight();
-            long depth = element.getDepth();
-
-            boxWidth = Math.max(boxWidth, width);
-            boxHeight += height + depth;
-
-            if (element instanceof Box) {
-                // Depth is the depth of the last box.
-                lastBox = element;
-            }
-        }
-
-        // Compute the overall box depth.
-        if (lastBox != null) {
-            long depth = lastBox.getDepth();
-            boxDepth = depth;
-            boxHeight -= depth;
-        }
-
-        return new AbstractDimensions(boxWidth, boxHeight, boxDepth);
     }
 }

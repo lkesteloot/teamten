@@ -22,7 +22,7 @@ public class ColumnVerticalList extends ElementList {
 
     @Override
     protected long getElementSize(Element element) {
-        return element.getHeight() + element.getDepth();
+        return element.getVerticalSize();
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ColumnVerticalList extends ElementList {
                 vboxes.add(vbox);
 
                 // Keep track of the longest column.
-                long size = vbox.getHeight() + vbox.getDepth();
+                long size = vbox.getVerticalSize();
                 if (size > maxSize) {
                     maxSize = size;
                 }
@@ -78,7 +78,7 @@ public class ColumnVerticalList extends ElementList {
             // Minimizing this should roughly equalize the columns.
             long sumSquares = 0;
             for (VBox vbox : vboxes) {
-                long size = vbox.getHeight() + vbox.getDepth();
+                long size = vbox.getVerticalSize();
                 long difference = maxSize - size;
 
                 // This would overflow if our difference were over 53 feet.

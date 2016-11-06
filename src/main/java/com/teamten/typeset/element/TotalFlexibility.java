@@ -28,4 +28,11 @@ public class TotalFlexibility {
     public long getAmount() {
         return isInfinite() ? mInfiniteAmount : mFiniteAmount;
     }
+
+    /**
+     * The total expressed as an immutable Flexibility object.
+     */
+    public Flexibility toFlexibility() {
+        return new Flexibility(getAmount(), isInfinite());
+    }
 }

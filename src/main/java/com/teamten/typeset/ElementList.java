@@ -3,14 +3,9 @@ package com.teamten.typeset;
 import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
-import com.teamten.typeset.element.Flexibility;
-import com.teamten.typeset.element.Flexible;
 import com.teamten.typeset.element.Glue;
-import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.NonDiscardableElement;
 import com.teamten.typeset.element.Penalty;
-import com.teamten.typeset.element.Text;
-import com.teamten.typeset.element.TotalFlexibility;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,9 +26,8 @@ import static com.teamten.typeset.SpaceUnit.PT;
 public abstract class ElementList implements ElementSink {
     private static final long LINE_PENALTY = 10;
     private static final long BADNESS_TOLERANCE = 8_000;
-    private static final long INFINITELY_BAD = 100_000;
     private static final boolean DEBUG_HORIZONTAL_LIST = false;
-    private static final boolean DEBUG_VERTICAL_LIST = false;
+    private static final boolean DEBUG_VERTICAL_LIST = true;
     private final List<Element> mElements = new ArrayList<>();
 
     @Override
@@ -149,72 +143,16 @@ public abstract class ElementList implements ElementSink {
                     continue;
                 }
 
-                // Find the sum of the sizes of all the elements in this line or page. Also compute the total stretch
-                // and shrink for the glue in that line or page.
-                long width = 0;
-                TotalFlexibility stretch = new TotalFlexibility();
-                TotalFlexibility shrink = new TotalFlexibility();
-                for (Element element : getElementSublist(beginBreakpoint, endBreakpoint)) {
-                    width += getElementSize(element);
-
-                    // Sum up the stretch and shrink for glues and other flexible objects.
-                    if (element instanceof Flexible) {
-                        Flexible flexible = (Flexible) element;
-                        stretch.add(flexible.getStretch());
-                        shrink.add(flexible.getShrink());
-                    }
-                }
-
                 // Get the size for this line or page.
                 int counter = beginBreakpoint.getCounter() + 1;
                 long maxSize = outputShape.getSize(counter);
 
-                // Compute difference between width and page width (or height and page height). This is positive
-                // if our line comes short and leaves extra space.
-                long extraSpace = maxSize - width;
-
-                // See whether we're short or long.
-                double ratio;
-                boolean ratioIsInfinite;
-                boolean canStretch = true;
-                boolean isOverfull = false;
-                if (extraSpace > 0) {
-                    // Our line is short. Compute how much we'd have to stretch.
-                    if (stretch.getAmount() > 0) {
-                        // Can stretch, figure out by how much.
-                        ratio = extraSpace / (double) stretch.getAmount();
-                        ratioIsInfinite = stretch.isInfinite();
-                    } else {
-                        // There's no glue to stretch.
-                        ratio = 0;
-                        ratioIsInfinite = false;
-                        canStretch = false;
-                    }
-                } else if (extraSpace < 0) {
-                    // Our line is long. Compute how much we'd have to shrink.
-                    if (!shrink.isInfinite() && -extraSpace > shrink.getAmount()) {
-                        // Can't shrink more than shrink amount.
-                        ratio = -1.0;
-                        ratioIsInfinite = false;
-                        isOverfull = true;
-                    } else if (shrink.getAmount() > 0) {
-                        // This will be negative.
-                        ratio = extraSpace / (double) shrink.getAmount();
-                        ratioIsInfinite = shrink.isInfinite();
-                    } else {
-                        // There's no glue to shrink.
-                        ratio = 0;
-                        ratioIsInfinite = false;
-                        canStretch = false;
-                    }
-                } else {
-                    // Our line is just right.
-                    ratio = 0;
-                    ratioIsInfinite = false;
-                }
+                // Compute the fitness of this sublist.
+                Fitness fitness = Fitness.create(getElementSublist(beginBreakpoint, endBreakpoint), maxSize,
+                        this::getElementSize);
 
                 // Compute badness for the line. This is based on how much we had to stretch or shrink.
-                long badness = computeBadness(ratio, ratioIsInfinite, canStretch, isOverfull);
+                long badness = fitness.computeBadness();
 
                 // Get the penalty for the break at the end of this line.
                 long penalty = endBreakpoint.getPenalty();
@@ -223,7 +161,7 @@ public abstract class ElementList implements ElementSink {
                 // if we've not found a break at all and we're overfull (to allow lines to break when a very
                 // long unbreakable word crosses the boundary). We'll allow allow it if we're being forced
                 // to break here by a penalty.
-                if (badness <= BADNESS_TOLERANCE || (endBreakpoint.getPreviousBreakpoint() == null && isOverfull) ||
+                if (badness <= BADNESS_TOLERANCE || (endBreakpoint.getPreviousBreakpoint() == null && fitness.isOverfull()) ||
                         penalty == -Penalty.INFINITY) {
 
                     // Compute demerits for this line.
@@ -245,15 +183,14 @@ public abstract class ElementList implements ElementSink {
                     if (printDebug()) {
                         System.out.printf("  from element %d (%s): %.1f - %.1f = %.1f (b = %,d, d = %,d, total d = %,d, r = %.3f)%n",
                                 beginBreakpoint.getStartIndex(), getDebugLinePrefix(beginBreakpoint, endBreakpoint),
-                                PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(extraSpace),
-                                badness, demerits, totalDemerits, ratio);
+                                PT.fromSp(maxSize), PT.fromSp(fitness.getSize()), PT.fromSp(fitness.getExtraSpace()),
+                                badness, demerits, totalDemerits, fitness.getRatio());
                     }
 
                     // If it's the best we've seen so far, remember it.
                     if (totalDemerits < endBreakpoint.getTotalDemerits()) {
                         endBreakpoint.setPreviousBreakpoint(beginBreakpoint);
-                        endBreakpoint.setRatio(ratio);
-                        endBreakpoint.setRatioIsInfinite(ratioIsInfinite);
+                        endBreakpoint.setFitness(fitness);
                         endBreakpoint.setTotalDemerits(totalDemerits);
 
                         if (printDebug()) {
@@ -265,14 +202,14 @@ public abstract class ElementList implements ElementSink {
                     if (printDebug()) {
                         System.out.printf("  ignored element %d (%s): %.1f - %.1f = %.1f (b = %,d, r = %.3f)%n",
                                 beginBreakpoint.getStartIndex(), getDebugLinePrefix(beginBreakpoint, endBreakpoint),
-                                PT.fromSp(maxSize), PT.fromSp(width), PT.fromSp(extraSpace),
-                                badness, ratio);
+                                PT.fromSp(maxSize), PT.fromSp(fitness.getSize()), PT.fromSp(fitness.getExtraSpace()),
+                                badness, fitness.getRatio());
                     }
                 }
 
                 // If we're overfull, then deactivate this breakpoint, since it'll be overfull for all
                 // subsequent end breakpoints too. TODO but what if they need it because they can't break?
-                if (isOverfull) {
+                if (fitness.isOverfull()) {
                     if (printDebug()) {
                         System.out.println("    XXX removing from active list");
                     }
@@ -386,112 +323,6 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Given what we found about this line or page, compute the badness, which basically tells us how
-     * much we had to stretch or shrink.
-     */
-    private long computeBadness(double ratio, boolean ratioIsInfinite, boolean canStretch, boolean isOverfull) {
-        long badness;
-
-        if (ratioIsInfinite) {
-            // No badness for infinite stretch or shrink.
-            badness = 0;
-        } else if (isOverfull) {
-            // We're overfull. This is infinitely bad.
-            badness = INFINITELY_BAD;
-        } else if (!canStretch) {
-            // We don't match the right size and we can't stretch or shrink. This is infinitely bad.
-            badness = INFINITELY_BAD;
-        } else {
-            // Normal case. Use 100*r^3, but max out at INFINITELY_BAD.
-            if (ratio < -10 || ratio > 10) {
-                // Avoid overflow. 10 = ceil((INFINITELY_BAD/100)^(1/3)).
-                badness = INFINITELY_BAD;
-            } else {
-                badness = Math.min(INFINITELY_BAD, (long) (100 * Math.pow(Math.abs(ratio), 3)));
-            }
-        }
-
-        return badness;
-    }
-
-    /**
-     * Make a box with the specified elements stretched out by the given ratio.
-     */
-    private Box makeBox(List<Element> lineElements, double ratio, boolean ratioIsInfinite, int counter, long shift) {
-        List<Element> line = new ArrayList<>();
-
-        // Non-null iff the previous element was a Text element.
-        Text previousText = null;
-
-        for (Element element : lineElements) {
-            if (element instanceof HBox) {
-                HBox hbox = (HBox) element;
-                if (hbox.isEmpty()) {
-                    // We can get this as a result of choosing a part of a discretionary that was empty.
-                    // Suppress them altogether so that they don't interfere with our text concatenation scheme.
-                    element = null;
-                }
-            }
-            if (element instanceof Flexible) {
-                Flexible flexible = (Flexible) element;
-
-                long glueSize = flexible.getSize();
-                Flexibility flexibility = ratio >= 0 ? flexible.getStretch() : flexible.getShrink();
-                if (flexibility.isInfinite() == ratioIsInfinite) {
-                    glueSize += (long) (flexibility.getAmount() * ratio);
-                }
-
-                // Fix the glue.
-                element = flexible.fixed(glueSize);
-            }
-
-            // Combine consecutive Text elements.
-            if (element instanceof Text) {
-                Text text = (Text) element;
-
-                // See if we can combine with previous text.
-                if (previousText == null) {
-                    previousText = text;
-                } else {
-                    if (text.isCompatibleWith(previousText)) {
-                        // Combine with previous text and get rid of this one.
-                        previousText = previousText.appendedWith(text);
-                    } else {
-                        // New text is not compatible. Output old text.
-                        line.add(previousText);
-                        previousText = text;
-                    }
-                }
-
-                // Suppress current element.
-                element = null;
-            } else if (previousText != null && element != null) {
-                // Not text, flush the previous text.
-                line.add(previousText);
-                previousText = null;
-            }
-
-            if (element != null) {
-                line.add(element);
-            }
-        }
-
-        if (previousText != null) {
-            line.add(previousText);
-            previousText = null;
-        }
-
-        return makeOutputBox(line, counter, shift);
-    }
-
-    /**
-     * Make a box with zero stretching or shrinking.
-     */
-    Box makeBox(int counter) {
-        return makeBox(mElements, 0, false, counter, 0);
-    }
-
-    /**
      * Go through our linked list of breakpoints, generating lines or pages. The list runs backward through
      * the data, so we build it up into a list in reverse order.
      */
@@ -510,9 +341,11 @@ public abstract class ElementList implements ElementSink {
             long indent = outputShape.getIndent(endBreakpoint.getCounter());
 
             // Make a new list with the glue set to specific widths.
-            Box box = makeBox(getElementSublist(beginBreakpoint, endBreakpoint),
-                    endBreakpoint.getRatio(), endBreakpoint.isRatioIsInfinite(),
-                    endBreakpoint.getCounter(), indent);
+            List<Element> looseElements = getElementSublist(beginBreakpoint, endBreakpoint);
+            List<Element> fixedElements = endBreakpoint.getFitness().fixed(looseElements);
+
+            // Pack them into a single box.
+            Box box = makeOutputBox(fixedElements, endBreakpoint.getCounter(), indent);
             if (printDebug()) {
                 box.println(System.out, "");
             }
@@ -596,8 +429,7 @@ public abstract class ElementList implements ElementSink {
         private int mStartIndex;
         private long mTotalDemerits;
         private Breakpoint mPreviousBreakpoint;
-        private double mRatio;
-        private boolean mRatioIsInfinite;
+        private Fitness mFitness;
 
         private Breakpoint(int index, long penalty) {
             mIndex = index;
@@ -606,8 +438,7 @@ public abstract class ElementList implements ElementSink {
             mStartIndex = 0;
             mTotalDemerits = 0;
             mPreviousBreakpoint = null;
-            mRatio = 0;
-            mRatioIsInfinite = false;
+            mFitness = null;
         }
 
         /**
@@ -682,32 +513,17 @@ public abstract class ElementList implements ElementSink {
         }
 
         /**
-         * The spread (positive) or shrink (ratio) for the line after this breakpoint.
+         * The fitness of the line or page ending at this breakpoint.
          */
-        public double getRatio() {
-            return mRatio;
+        public Fitness getFitness() {
+            return mFitness;
         }
 
         /**
-         * Set the spread (positive) or shrink (ratio) for the line after this breakpoint.
+         * Set the fitness of the line or page ending at this breakpoint.
          */
-        public void setRatio(double ratio) {
-            mRatio = ratio;
-        }
-
-        /**
-         * Whether the ratio is for infinite glue only.
-         */
-        public boolean isRatioIsInfinite() {
-            return mRatioIsInfinite;
-        }
-
-        /**
-         * Set whether the ratio is for infinite glue only.
-         */
-        public void setRatioIsInfinite(boolean ratioIsInfinite) {
-            mRatioIsInfinite = ratioIsInfinite;
+        public void setFitness(Fitness fitness) {
+            mFitness = fitness;
         }
     }
-
 }

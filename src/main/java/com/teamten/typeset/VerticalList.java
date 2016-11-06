@@ -84,7 +84,7 @@ public class VerticalList extends ElementList {
 
     @Override
     protected long getElementSize(Element element) {
-        return element.getHeight() + element.getDepth();
+        return element.getVerticalSize();
     }
 
     /**

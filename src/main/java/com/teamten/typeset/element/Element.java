@@ -84,6 +84,13 @@ public abstract class Element implements Dimensions {
     }
 
     /**
+     * Convenience method for adding the height and depth.
+     */
+    public final long getVerticalSize() {
+        return getHeight() + getDepth();
+    }
+
+    /**
      * Convenience method for implementing {@link #toTextString()} from a list of elements.
      */
     protected static String toTextString(List<Element> elements) {

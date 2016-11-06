@@ -24,6 +24,6 @@ public class Rule extends Box {
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
         PdfUtil.drawSolidRectangle(contents, x, y - getHeight() - getDepth(), getWidth(), getHeight());
 
-        return getHeight() + getDepth();
+        return getVerticalSize();
     }
 }
