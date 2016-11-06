@@ -1,7 +1,7 @@
 package com.teamten.tex;
 
 import com.teamten.font.FontManager;
-import com.teamten.font.FontSize;
+import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.Typeface;
@@ -35,7 +35,7 @@ public class TexParser {
     private final InputStream mInputStream;
     private final FontManager mFontManager;
     private final TexTokenizer mTexTokenizer;
-    private final FontSize mFont;
+    private final SizedFont mFont;
     private int mToken;
 
     public static void main(String[] args) throws IOException {

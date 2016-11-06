@@ -1,6 +1,6 @@
 package com.teamten.typeset.element;
 
-import com.teamten.font.FontSize;
+import com.teamten.font.SizedFont;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
@@ -12,11 +12,11 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * Like glue, but draws a pattern over and over (e.g., for table of contents).
  */
 public class Leader extends Glue {
-    private final FontSize mFont;
+    private final SizedFont mFont;
     private final String mPattern;
     private final long mPatternWidth;
 
-    private Leader(FontSize font, String pattern, long size, long stretch) {
+    private Leader(SizedFont font, String pattern, long size, long stretch) {
         super(size, stretch, stretch != 0, 0, false, true);
         mFont = font;
         mPattern = pattern;
@@ -29,7 +29,7 @@ public class Leader extends Glue {
      * @param pattern For table of contents you want something like " . "
      * @param stretch how much (infinite) stretchability. 1pt is good for this.
      */
-    public Leader(FontSize font, String pattern, long stretch) {
+    public Leader(SizedFont font, String pattern, long stretch) {
         this(font, pattern, 0, stretch);
     }
 

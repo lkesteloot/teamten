@@ -1,6 +1,6 @@
 package com.teamten.typeset.element;
 
-import com.teamten.font.FontSize;
+import com.teamten.font.SizedFont;
 import com.teamten.typeset.Dimensions;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
@@ -69,7 +69,7 @@ public class HBox extends Box {
     /**
      * Make an HBox that contains only a Text with the given string, font, and font size.
      */
-    public static HBox makeOnlyString(String text, FontSize font) {
+    public static HBox makeOnlyString(String text, SizedFont font) {
         return new HBox(Arrays.asList(new Text(text, font)));
     }
 

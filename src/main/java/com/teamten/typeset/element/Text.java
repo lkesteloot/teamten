@@ -1,7 +1,7 @@
 package com.teamten.typeset.element;
 
 import com.google.common.math.DoubleMath;
-import com.teamten.font.FontSize;
+import com.teamten.font.SizedFont;
 import com.teamten.util.CodePoints;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.jetbrains.annotations.NotNull;
@@ -13,13 +13,13 @@ import java.io.PrintStream;
  * A sequence of characters.
  */
 public class Text extends Box {
-    private final @NotNull FontSize mFont;
+    private final @NotNull SizedFont mFont;
     private final @NotNull String mText;
 
     /**
      * Constructor for string of any size.
      */
-    public Text(FontSize font, String text, long width, long height, long depth) {
+    public Text(SizedFont font, String text, long width, long height, long depth) {
         super(width, height, depth);
         mFont = font;
         mText = text;
@@ -28,7 +28,7 @@ public class Text extends Box {
     /**
      * Constructor for a string.
      */
-    public Text(String text, FontSize font) {
+    public Text(String text, SizedFont font) {
         super(font.getStringMetrics(text));
         mFont = font;
         mText = text;
@@ -37,7 +37,7 @@ public class Text extends Box {
     /**
      * Constructor for single character.
      */
-    public Text(int ch, FontSize font) {
+    public Text(int ch, SizedFont font) {
         super(font.getCharacterMetrics(ch));
         mFont = font;
         mText = CodePoints.toString(ch);
@@ -53,7 +53,7 @@ public class Text extends Box {
     /**
      * The font the text should be displayed in.
      */
-    public FontSize getFont() {
+    public SizedFont getFont() {
         return mFont;
     }
 

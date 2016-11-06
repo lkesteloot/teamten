@@ -9,11 +9,11 @@ import java.io.IOException;
  * The combination of a font and a size. Provides some {@link Font}-like methods that omit the font size,
  * since it's already part of this object's state.
  */
-public class FontSize {
+public class SizedFont {
     private final @NotNull Font mFont;
     private final double mSize;
 
-    public FontSize(Font font, double size) {
+    public SizedFont(Font font, double size) {
         mFont = font;
         mSize = size;
     }
@@ -35,8 +35,8 @@ public class FontSize {
     /**
      * Create a new object, replacing the font.
      */
-    public FontSize withFont(Font font) {
-        return new FontSize(font, mSize);
+    public SizedFont withFont(Font font) {
+        return new SizedFont(font, mSize);
     }
 
     /**
@@ -95,10 +95,10 @@ public class FontSize {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        FontSize fontSize = (FontSize) o;
+        SizedFont sizedFont = (SizedFont) o;
 
-        if (Double.compare(fontSize.mSize, mSize) != 0) return false;
-        return mFont.equals(fontSize.mFont);
+        if (Double.compare(sizedFont.mSize, mSize) != 0) return false;
+        return mFont.equals(sizedFont.mFont);
 
     }
 

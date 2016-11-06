@@ -43,12 +43,12 @@ public class TrackingFont extends AbstractFont {
     }
 
     /**
-     * Utility method to create a FontSize incorporating the TrackingFont and the same size.
+     * Utility method to create a SizedFont incorporating the TrackingFont and the same size.
      */
-    public static FontSize create(FontSize fontSize, double tracking, double kerning) {
-        return new FontSize(
-                new TrackingFont(fontSize.getFont(), tracking, kerning),
-                fontSize.getSize());
+    public static SizedFont create(SizedFont sizedFont, double tracking, double kerning) {
+        return new SizedFont(
+                new TrackingFont(sizedFont.getFont(), tracking, kerning),
+                sizedFont.getSize());
     }
 
     @Override

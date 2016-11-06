@@ -1,7 +1,7 @@
 package com.teamten.typeset;
 
 import com.teamten.font.FontManager;
-import com.teamten.font.FontSize;
+import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.Typeface;
@@ -294,7 +294,7 @@ public class TypesetterTest {
 
         Config config = Config.testConfig();
         double fontSize = 11;
-        FontSize font = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR, fontSize);
+        SizedFont font = fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR, fontSize);
         BookLayout bookLayout = new BookLayout();
 
         HyphenDictionary hyphenDictionary = HyphenDictionary.fromResource("en_US");

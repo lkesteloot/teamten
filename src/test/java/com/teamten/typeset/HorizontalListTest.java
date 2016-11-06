@@ -1,9 +1,8 @@
 package com.teamten.typeset;
 
 import com.teamten.font.DummyFont;
-import com.teamten.font.Font;
 import com.teamten.font.FontManager;
-import com.teamten.font.FontSize;
+import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.Typeface;
@@ -34,7 +33,7 @@ public class HorizontalListTest {
     public void wrapTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
-        FontSize font = new FontSize(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
+        SizedFont font = new SizedFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
 
         MockVerticalList verticalList = new MockVerticalList();
         HorizontalList horizontalList = new HorizontalList();
@@ -57,10 +56,10 @@ public class HorizontalListTest {
     public void ligatureTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
-        FontSize font = new FontSize(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
+        SizedFont font = new SizedFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
 
         // Fake font with "ffi" (and in fact all) ligatures.
-        FontSize fakeFont = new FontSize(new DummyFont(new Ligatures()), font.getSize());
+        SizedFont fakeFont = new SizedFont(new DummyFont(new Ligatures()), font.getSize());
 
         Discretionary hyphen = new Discretionary(
                 HBox.makeOnlyString("-", font),
@@ -112,7 +111,7 @@ public class HorizontalListTest {
     public void kerningTest() throws IOException {
         PDDocument pdDoc = new PDDocument();
         FontManager fontManager = new PdfBoxFontManager(pdDoc);
-        FontSize font = new FontSize(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
+        SizedFont font = new SizedFont(fontManager.get(Typeface.TIMES_NEW_ROMAN, FontVariant.REGULAR), 11);
 
         // Test kerning internal to Text nodes and between them.
         List<Element> origElements = Arrays.asList(

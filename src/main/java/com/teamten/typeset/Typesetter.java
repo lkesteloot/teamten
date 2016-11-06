@@ -3,7 +3,7 @@ package com.teamten.typeset;
 
 import com.google.common.base.Stopwatch;
 import com.teamten.font.FontManager;
-import com.teamten.font.FontSize;
+import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.TrackingFont;
@@ -216,9 +216,9 @@ public class Typesetter {
 
             regularFontDesc = config.getFont(regularFontKey);
 
-            FontSize spanRegularFont = fontManager.get(regularFontDesc);
-            FontSize spanItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.ITALIC));
-            FontSize spanSmallCapsFont = fontManager.get(regularFontDesc.withVariant(FontVariant.SMALL_CAPS));
+            SizedFont spanRegularFont = fontManager.get(regularFontDesc);
+            SizedFont spanItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.ITALIC));
+            SizedFont spanSmallCapsFont = fontManager.get(regularFontDesc.withVariant(FontVariant.SMALL_CAPS));
             double fontSize = regularFontDesc.getSize();
 
             if (addTracking) {
@@ -253,7 +253,7 @@ public class Typesetter {
                 if (span instanceof TextSpan) {
                     // Span for text that's part of the paragraph.
                     TextSpan textSpan = (TextSpan) span;
-                    FontSize font = textSpan.isSmallCaps() ? spanSmallCapsFont :
+                    SizedFont font = textSpan.isSmallCaps() ? spanSmallCapsFont :
                             textSpan.isItalic() ? spanItalicFont : spanRegularFont;
 
                     String text = textSpan.getText();
@@ -420,7 +420,7 @@ public class Typesetter {
         }
 
         long marginTop = IN.toSp(2.0);
-        FontSize titleFont = fontManager.get(config.getFont(Config.Key.HALF_TITLE_PAGE_TITLE_FONT));
+        SizedFont titleFont = fontManager.get(config.getFont(Config.Key.HALF_TITLE_PAGE_TITLE_FONT));
         titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
 
         // Assume we're at the very beginning of the book, and we want an entire blank page at the front.
@@ -455,13 +455,13 @@ public class Typesetter {
         long titleMargin = IN.toSp(1.5);
         long publisherNameMargin = IN.toSp(4.0);
         long publisherLocationMargin = IN.toSp(0.02);
-        FontSize authorFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_AUTHOR_FONT));
+        SizedFont authorFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_AUTHOR_FONT));
         authorFont = TrackingFont.create(authorFont, 0.1, 0.5);
-        FontSize titleFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_TITLE_FONT));
+        SizedFont titleFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_TITLE_FONT));
         titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
-        FontSize publisherNameFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_PUBLISHER_NAME_FONT));
+        SizedFont publisherNameFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_PUBLISHER_NAME_FONT));
         publisherNameFont = TrackingFont.create(publisherNameFont, 0.1, 0.5);
-        FontSize publisherLocationFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_PUBLISHER_LOCATION_FONT));
+        SizedFont publisherLocationFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_PUBLISHER_LOCATION_FONT));
 
         verticalList.oddPage();
         verticalList.addElement(new Box(0, marginTop, 0));
@@ -521,8 +521,8 @@ public class Typesetter {
 
         long marginTop = IN.toSp(2.5);
         long printingMargin = IN.toSp(4.0);
-        FontSize copyrightFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_COPYRIGHT_FONT));
-        FontSize printingFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_PRINTING_FONT));
+        SizedFont copyrightFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_COPYRIGHT_FONT));
+        SizedFont printingFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_PRINTING_FONT));
 
         verticalList.newPage();
         verticalList.addElement(new Box(0, marginTop, 0));
@@ -561,10 +561,10 @@ public class Typesetter {
             tocTitle = "Table of Contents";
         }
 
-        FontSize titleFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_TITLE_FONT));
+        SizedFont titleFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_TITLE_FONT));
         titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
-        FontSize partFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_PART_FONT));
-        FontSize chapterFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_CHAPTER_FONT));
+        SizedFont partFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_PART_FONT));
+        SizedFont chapterFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_CHAPTER_FONT));
         double entryFontSize = chapterFont.getSize();
         long boxWidth = IN.toSp(1.0);
         long boxHeight = PT.toSp(0.5);
@@ -611,7 +611,7 @@ public class Typesetter {
                 long marginBelow = 0;
                 String name = sectionBookmark.getName();
                 String pageLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
-                FontSize sectionNameFont = chapterFont;
+                SizedFont sectionNameFont = chapterFont;
 
                 switch (sectionBookmark.getType()) {
                     case PART:
@@ -670,9 +670,9 @@ public class Typesetter {
             indexTitle = "Index";
         }
 
-        FontSize titleFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_TITLE_FONT));
+        SizedFont titleFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_TITLE_FONT));
         titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
-        FontSize entryFont = fontManager.get(config.getFont(Config.Key.BODY_FONT));
+        SizedFont entryFont = fontManager.get(config.getFont(Config.Key.BODY_FONT));
         long boxWidth = IN.toSp(1.0);
         long boxHeight = PT.toSp(0.5);
 
@@ -731,7 +731,7 @@ public class Typesetter {
      * @param depth the depth of the recursion, where 0 is for entries, 1 for sub-entries, etc.
      */
     private void generateIndexEntries(IndexEntries indexEntries, BookLayout bookLayout, VerticalList verticalList,
-                                      FontSize font, long textWidth, int depth) throws IOException {
+                                      SizedFont font, long textWidth, int depth) throws IOException {
         // Space between sections.
         long sectionBreak = PT.toSp(6.0);
 
@@ -785,8 +785,8 @@ public class Typesetter {
             String pageNumberLabel = bookLayout.getPageNumberLabel(physicalPageNumber);
             String headlineLabel = bookLayout.getHeadlineLabel(physicalPageNumber, config);
             long pageMargin = config.getPageMargin();
-            FontSize pageNumberFont = fontManager.get(config.getFont(Config.Key.PAGE_NUMBER_FONT));
-            FontSize headlineFont = fontManager.get(config.getFont(Config.Key.HEADLINE_FONT));
+            SizedFont pageNumberFont = fontManager.get(config.getFont(Config.Key.PAGE_NUMBER_FONT));
+            SizedFont headlineFont = fontManager.get(config.getFont(Config.Key.HEADLINE_FONT));
 
             long y = config.getPageHeight() - pageMargin + PT.toSp(pageNumberFont.getSize()*2.5);
 

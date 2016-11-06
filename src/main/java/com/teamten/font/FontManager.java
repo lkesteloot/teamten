@@ -41,10 +41,10 @@ public class FontManager {
      *
      * @throws IllegalArgumentException if the font cannot be loaded.
      */
-    public FontSize get(TypefaceVariantSize typefaceVariantSize) {
+    public SizedFont get(TypefaceVariantSize typefaceVariantSize) {
         Font font = get((TypefaceVariant) typefaceVariantSize);
 
-        return new FontSize(font, typefaceVariantSize.getSize());
+        return new SizedFont(font, typefaceVariantSize.getSize());
     }
 
     /**
@@ -61,7 +61,7 @@ public class FontManager {
      * Utility method that calls {@link #get(TypefaceVariantSize)} with a new {@link TypefaceVariant} object
      * created from the two parameters.
      */
-    public FontSize get(Typeface typeface, FontVariant fontVariant, double fontSize) {
+    public SizedFont get(Typeface typeface, FontVariant fontVariant, double fontSize) {
         return get(new TypefaceVariantSize(typeface, fontVariant, fontSize));
     }
 }

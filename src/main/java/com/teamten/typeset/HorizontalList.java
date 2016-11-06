@@ -1,7 +1,7 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Strings;
-import com.teamten.font.FontSize;
+import com.teamten.font.SizedFont;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
@@ -81,7 +81,7 @@ public class HorizontalList extends ElementList {
     /**
      * Add the specified text, in the specified font, to the horizontal list.
      */
-    public void addText(String text, FontSize font) throws IOException {
+    public void addText(String text, SizedFont font) throws IOException {
         addText(text, font, null);
     }
 
@@ -90,7 +90,7 @@ public class HorizontalList extends ElementList {
      *
      * @param hyphenDictionary the dictionary to use for hyphenation, or null to skip hyphenation.
      */
-    public void addText(String text, FontSize font, HyphenDictionary hyphenDictionary) {
+    public void addText(String text, SizedFont font, HyphenDictionary hyphenDictionary) {
         // First, convert the single string to a sequence of elements, where each word
         // is a single Text element. There will be other elements, like glues and
         // penalties.
@@ -115,7 +115,7 @@ public class HorizontalList extends ElementList {
      * Take the single large string and break it into three kinds of elements: glue (for space and non-breaking
      * space); words; and sequences of non-word characters.
      */
-    private static List<Element> textToWords(String text, FontSize font) {
+    private static List<Element> textToWords(String text, SizedFont font) {
         List<Element> elements = new ArrayList<>();
 
         long spaceWidth = font.getSpaceWidth();
@@ -225,7 +225,7 @@ public class HorizontalList extends ElementList {
     /**
      * Return a new list of elements with ligatures converted to their one-character form.
      */
-    static List<Element> transformLigatures(List<Element> elements, FontSize font) {
+    static List<Element> transformLigatures(List<Element> elements, SizedFont font) {
         // If it weren't for hyphenation, we'd just go through the elements and substitute the
         // ligatures in the Text elements. But a discretionary break can cut in the middle of
         // a ligature, such as in the word "dif-fi-cult", cutting the "ffi" ligature.
@@ -358,7 +358,7 @@ public class HorizontalList extends ElementList {
     /**
      * Return a new list of elements with kerning added.
      */
-    static List<Element> addKerning(List<Element> origElements, FontSize font) {
+    static List<Element> addKerning(List<Element> origElements, SizedFont font) {
         // Make a new list of elements.
         List<Element> newElements = new ArrayList<>(origElements.size());
 
@@ -371,7 +371,7 @@ public class HorizontalList extends ElementList {
      * Adds the original elements to the new list, with the given previous element.
      * @return the new previous element.
      */
-    static int addKerningToList(List<Element> origElements, List<Element> newElements, int previousCh, FontSize font) {
+    static int addKerningToList(List<Element> origElements, List<Element> newElements, int previousCh, SizedFont font) {
         // Go through each element, keeping track of the previous character across them.
         for (int e = 0; e < origElements.size(); e++) {
             Element element = origElements.get(e);
