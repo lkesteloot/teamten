@@ -570,7 +570,7 @@ public class Typesetter {
                                        FontManager fontManager) throws IOException {
 
         String copyright = config.getString(Config.Key.COPYRIGHT);
-        String printing = config.getString(Config.Key.PRINTING);
+        String printing = config.getString(Config.Key.COLOPHON);
 
         if (copyright == null) {
             return;
@@ -579,7 +579,7 @@ public class Typesetter {
         long marginTop = IN.toSp(2.5);
         long printingMargin = IN.toSp(4.0);
         SizedFont copyrightFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_COPYRIGHT_FONT));
-        SizedFont printingFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_PRINTING_FONT));
+        SizedFont printingFont = fontManager.get(config.getFont(Config.Key.COPYRIGHT_PAGE_COLOPHON_FONT));
 
         verticalList.newPage();
         verticalList.addElement(new Box(0, marginTop, 0));

@@ -29,6 +29,15 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../libs/annotations-java8.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="Gradle: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Gradle: commons-io:commons-io:1.4" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.0.1" level="project" />
@@ -44,7 +53,16 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/redist/annotations-java8.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../libs/fontbox-2.0.0-sources.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../libs/pdfbox-2.0.0-sources.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
