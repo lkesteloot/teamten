@@ -54,6 +54,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -657,6 +658,14 @@ public class Typesetter {
         long interEntryMargin = PT.toSp(entryFontSize*0.8);
         Leader leader = new Leader(chapterFont, " .   ", PT.toSp(1));
 
+        // If we let each page number take as much space as it wants, then the dots of the leaders
+        // won't line up on the right. This looks bad and real books don't do this. So we must guess
+        // the widest page number and make them all take that much space.
+        String widestPageNumber = "888";
+        long widestPageNumberWidth = chapterFont.getStringMetrics(widestPageNumber).getWidth();
+        // Add some padding.
+        widestPageNumberWidth = 11*widestPageNumberWidth/10;
+
         // List each section.
         for (Map.Entry<Integer,SectionBookmark> entry : sections.sections()) {
             int physicalPageNumber = entry.getKey();
@@ -704,7 +713,10 @@ public class Typesetter {
                 }
                 horizontalList.addText(name, sectionNameFont, null);
                 horizontalList.addElement(leader);
-                horizontalList.addText(pageLabel, chapterFont, null);
+                horizontalList.addElement(HBox.ofWidth(Arrays.asList(
+                        Glue.infiniteHorizontal(),
+                        new Text(pageLabel, chapterFont)
+                ), widestPageNumberWidth));
                 horizontalList.addElement(new Penalty(-Penalty.INFINITY));
                 horizontalList.format(verticalList, config.getBodyWidth());
 
