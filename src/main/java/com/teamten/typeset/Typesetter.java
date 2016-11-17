@@ -30,6 +30,7 @@ import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
 import com.teamten.markdown.Doc;
+import com.teamten.markdown.ImageSpan;
 import com.teamten.markdown.IndexSpan;
 import com.teamten.markdown.MarkdownParser;
 import com.teamten.markdown.Span;
@@ -38,6 +39,7 @@ import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
+import com.teamten.typeset.element.Image;
 import com.teamten.typeset.element.Leader;
 import com.teamten.typeset.element.Page;
 import com.teamten.typeset.element.Penalty;
@@ -53,6 +55,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -126,7 +130,7 @@ public class Typesetter {
         for (pass = 0; pass < MAX_ITERATIONS; pass++) {
             System.out.printf("Pass %d:\n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
-            VerticalList verticalList = docToVerticalList(doc, config, sections,
+            VerticalList verticalList = docToVerticalList(doc, pdDoc, config, sections,
                     fontManager, bookmarks, hyphenDictionary);
             System.out.println("  Horizontal layout: " + stopwatch);
 
@@ -164,7 +168,7 @@ public class Typesetter {
     /**
      * Converts a DOM document to a vertical list.
      */
-    private VerticalList docToVerticalList(Doc doc, Config config, Sections sections,
+    private VerticalList docToVerticalList(Doc doc, PDDocument pdDoc, Config config, Sections sections,
                                            FontManager fontManager, Bookmarks bookmarks,
                                            HyphenDictionary hyphenDictionary) throws IOException {
 
@@ -322,6 +326,14 @@ public class Typesetter {
                     IndexSpan indexSpan = (IndexSpan) span;
 
                     horizontalList.addElement(new IndexBookmark(indexSpan.getEntries()));
+                } else if (span instanceof ImageSpan) {
+                    // Span to include an image, though not necessarily right here.
+                    ImageSpan imageSpan = (ImageSpan) span;
+
+                    Path imagePath = Paths.get(imageSpan.getPathname());
+                    horizontalList.addElement(Image.load(imagePath, imageSpan.getCaption(), pdDoc));
+                } else {
+                    System.out.println("Warning: Unknown span type " + span.getClass().getSimpleName());
                 }
             }
 

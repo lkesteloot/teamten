@@ -35,8 +35,8 @@ public class IndexSpan extends Span {
     /**
      * Create an index span from a single string, where the entries are separated by bars (|).
      */
-    public IndexSpan(String entries) {
-        this(Arrays.stream(entries.split("\\|")).map(String::trim).collect(Collectors.toList()));
+    public static IndexSpan fromBarSeparatedEntries(String entries) {
+        return new IndexSpan(Arrays.stream(entries.split("\\|")).map(String::trim).collect(Collectors.toList()));
     }
 
     /**

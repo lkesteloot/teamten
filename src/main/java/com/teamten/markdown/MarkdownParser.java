@@ -211,11 +211,11 @@ public class MarkdownParser {
                             // Nothing to do, the method added it.
                         } else if (tag.startsWith("@")) {
                             // Index entry.
-                            builder.addSpan(new IndexSpan(tag.substring(1)));
+                            builder.addSpan(IndexSpan.fromBarSeparatedEntries(tag.substring(1)));
                         } else if (tag.startsWith("^")) {
                             // Ignore footnote.
                         } else if (tag.startsWith("!")) {
-                            // Ignore image.
+                            builder.addSpan(ImageSpan.fromTag(tag.substring(1)));
                         } else {
                             System.out.println("Warning: Unknown block type: " + tag);
                         }
