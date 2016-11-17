@@ -89,7 +89,10 @@ public class Config {
         // Distances
         PAGE_WIDTH(KeyType.DISTANCE),
         PAGE_HEIGHT(KeyType.DISTANCE),
-        PAGE_MARGIN(KeyType.DISTANCE);
+        PAGE_MARGIN_TOP(KeyType.DISTANCE),
+        PAGE_MARGIN_BOTTOM(KeyType.DISTANCE),
+        PAGE_MARGIN_OUTER(KeyType.DISTANCE),
+        PAGE_MARGIN_INNER(KeyType.DISTANCE);
 
         private final KeyType mKeyType;
 
@@ -124,11 +127,7 @@ public class Config {
     public static Config testConfig() {
         Config config = new Config();
 
-        config.add(Key.PAGE_WIDTH, "6in");
-        config.add(Key.PAGE_HEIGHT, "9in");
-        config.add(Key.PAGE_MARGIN, "1in");
-        config.add(Key.PAGE_NUMBER_FONT, "Times New Roman, regular, 11pt");
-        config.add(Key.HEADLINE_FONT, "Times New Roman, regular, 11pt");
+        config.fillWithDefaults();
 
         return config;
     }
@@ -137,9 +136,12 @@ public class Config {
      * Fill the configuration with default values so that each document doesn't have to define them all.
      */
     public void fillWithDefaults() {
-        add(Key.PAGE_WIDTH, "6in");
-        add(Key.PAGE_HEIGHT, "9in");
-        add(Key.PAGE_MARGIN, "1in");
+        add(Key.PAGE_WIDTH, "8.5in");
+        add(Key.PAGE_HEIGHT, "11in");
+        add(Key.PAGE_MARGIN_TOP, "6pc");
+        add(Key.PAGE_MARGIN_BOTTOM, "6pc");
+        add(Key.PAGE_MARGIN_OUTER, "6pc");
+        add(Key.PAGE_MARGIN_INNER, "6pc");
         add(Key.BODY_FONT, "Times New Roman, regular, 11pt");
         add(Key.PART_HEADER_FONT, "Times New Roman, regular, 11pt");
         add(Key.CHAPTER_HEADER_FONT, "Times New Roman, regular, 11pt");
@@ -269,23 +271,44 @@ public class Config {
     }
 
     /**
-     * Gets the page margin in scaled points from {@link Key#PAGE_MARGIN}.
+     * Gets the page top margin in scaled points from {@link Key#PAGE_MARGIN_TOP}.
      */
-    public long getPageMargin() {
-        return getDistance(Key.PAGE_MARGIN);
+    public long getPageMarginTop() {
+        return getDistance(Key.PAGE_MARGIN_TOP);
+    }
+
+    /**
+     * Gets the page bottom margin in scaled points from {@link Key#PAGE_MARGIN_BOTTOM}.
+     */
+    public long getPageMarginBottom() {
+        return getDistance(Key.PAGE_MARGIN_BOTTOM);
+    }
+
+    /**
+     * Gets the page outer margin in scaled points from {@link Key#PAGE_MARGIN_OUTER}.
+     */
+    public long getPageMarginOuter() {
+        return getDistance(Key.PAGE_MARGIN_OUTER);
+    }
+
+    /**
+     * Gets the page inner margin in scaled points from {@link Key#PAGE_MARGIN_INNER}.
+     */
+    public long getPageMarginInner() {
+        return getDistance(Key.PAGE_MARGIN_INNER);
     }
 
     /**
      * The width of the text on the page. This is computed from the page width and page margin.
      */
     public long getBodyWidth() {
-        return getPageWidth() - 2*getPageMargin();
+        return getPageWidth() - getPageMarginOuter() - getPageMarginInner();
     }
 
     /**
      * The height of the text on the page. This is computed from the page height and page margin.
      */
     public long getBodyHeight() {
-        return getPageHeight() - 2*getPageMargin();
+        return getPageHeight() - getPageMarginTop() - getPageMarginBottom();
     }
 }

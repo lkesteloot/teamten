@@ -436,11 +436,14 @@ public class Typesetter {
 
         PDPageContentStream contents = new PDPageContentStream(pdDoc, pdPage);
 
+        // Compute the left margin of the page, which depends on whether it's a left or right page.
+        long leftMargin = page.isLeftPage() ? config.getPageMarginOuter() : config.getPageMarginInner();
+
         // Draw the margins for debugging.
         if (DRAW_MARGINS) {
             PdfUtil.drawDebugRectangle(contents,
-                    config.getPageMargin(),
-                    config.getPageMargin(),
+                    config.getPageMarginBottom(),
+                    leftMargin,
                     config.getBodyWidth(),
                     config.getBodyHeight());
         }
@@ -451,11 +454,11 @@ public class Typesetter {
         }
 
         // Start at top of page.
-        long y = config.getPageHeight() - config.getPageMargin();
+        long y = config.getPageHeight() - config.getPageMarginTop();
 
         // Lay out each element in the page.
         for (Element element : page.getElements()) {
-            long advanceY = element.layOutVertically(config.getPageMargin(), y, contents);
+            long advanceY = element.layOutVertically(leftMargin, y, contents);
 
             y -= advanceY;
         }
@@ -853,21 +856,20 @@ public class Typesetter {
         if (sections.shouldDrawHeadline(physicalPageNumber)) {
             String pageNumberLabel = sections.getPageNumberLabel(physicalPageNumber);
             String headlineLabel = sections.getHeadlineLabel(physicalPageNumber, config);
-            long pageMargin = config.getPageMargin();
             SizedFont pageNumberFont = fontManager.get(config.getFont(Config.Key.PAGE_NUMBER_FONT));
             SizedFont headlineFont = fontManager.get(config.getFont(Config.Key.HEADLINE_FONT));
 
-            long y = config.getPageHeight() - pageMargin + PT.toSp(pageNumberFont.getSize()*2.5);
+            long y = config.getPageHeight() - config.getPageMarginTop() + PT.toSp(pageNumberFont.getSize()*2.5);
 
             // Draw page number.
             long x;
-            if (physicalPageNumber % 2 == 0) {
+            if (page.isLeftPage()) {
                 // Even page, number on the left.
-                x = pageMargin;
+                x = config.getPageMarginOuter();
             } else {
                 // Odd page, number on the right.
                 long labelWidth = pageNumberFont.getStringMetrics(pageNumberLabel).getWidth();
-                x = config.getPageWidth() - pageMargin - labelWidth;
+                x = config.getPageWidth() - config.getPageMarginOuter() - labelWidth;
             }
             // TODO this doesn't kern.
             pageNumberFont.draw(pageNumberLabel, x, y, contents);
@@ -878,8 +880,10 @@ public class Typesetter {
                 headlineLabel = headlineLabel.toUpperCase();
 
                 // TODO this doesn't kern.
+                // Center the text.
                 long labelWidth = headlineFont.getStringMetrics(headlineLabel).getWidth();
-                x = pageMargin + (config.getBodyWidth() - labelWidth)/2;
+                long leftMargin = page.isLeftPage() ? config.getPageMarginOuter() : config.getPageMarginInner();
+                x = leftMargin + (config.getBodyWidth() - labelWidth)/2;
 
                 headlineFont.draw(headlineLabel, x, y, contents);
             }
