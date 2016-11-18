@@ -72,6 +72,20 @@ public class Glue extends DiscardableElement implements Flexible {
     }
 
     /**
+     * Return fixed horizontal glue.
+     */
+    public static Glue horizontal(long size) {
+        return new Glue(size, 0, 0, true);
+    }
+
+    /**
+     * Return fixed vertical glue.
+     */
+    public static Glue vertical(long size) {
+        return new Glue(size, 0, 0, false);
+    }
+
+    /**
      * Return infinite glue of zero size.
      */
     public static Glue infinite(boolean isHorizontal) {

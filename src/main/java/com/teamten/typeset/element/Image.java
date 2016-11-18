@@ -33,9 +33,9 @@ import static com.teamten.typeset.SpaceUnit.PT;
 public class Image extends Box {
     private final Path mImagePath;
     private final PDImageXObject mImageXObject;
-    private final String mCaption;
+    private final HBox mCaption;
 
-    public Image(Path imagePath, PDImageXObject imageXObject, String caption, long width, long height, long depth) {
+    private Image(Path imagePath, PDImageXObject imageXObject, HBox caption, long width, long height, long depth) {
         super(width, height, depth);
 
         mImagePath = imagePath;
@@ -44,16 +44,38 @@ public class Image extends Box {
     }
 
     /**
-     * Loads an image as a new element. The size of the box is the native size of the image on disk. The image is
-     * entirely height (no depth). In other words, the baseline is at the bottom of the image.
+     * The caption as a horizontal box, or null if there's no caption.
      */
-    public static Image load(Path imagePath, String caption, PDDocument pdDoc) throws IOException {
+    public HBox getCaption() {
+        return mCaption;
+    }
+
+    /**
+     * Loads an image as a new element. The size of the box is the aspect ratio of the image zoomed to fit in
+     * the specified max width and height. The image is entirely height (no depth). In other words, the baseline
+     * is at the bottom of the image.
+     */
+    public static Image load(Path imagePath, long maxWidth, long maxHeight,
+                             HBox caption, PDDocument pdDoc) throws IOException {
+
         PDImageXObject imageXObject = PDImageXObject.createFromFileByExtension(imagePath.toFile(), pdDoc);
 
-        int width = imageXObject.getWidth()/10;
-        int height = imageXObject.getHeight()/10;
+        // Get the native size of the image.
+        long width = PT.toSp(imageXObject.getWidth());
+        long height = PT.toSp(imageXObject.getHeight());
 
-        return new Image(imagePath, imageXObject, caption, PT.toSp(width), PT.toSp(height), 0);
+        // Fit in specified box.
+        if (width*maxHeight > maxWidth*height) {
+            // Sides will touch.
+            height = height*maxWidth/maxHeight;
+            width = maxWidth;
+        } else {
+            // Top and bottom will touch.
+            width = width*maxHeight/maxWidth;
+            height = maxHeight;
+        }
+
+        return new Image(imagePath, imageXObject, caption, width, height, 0);
     }
 
     @Override
@@ -66,9 +88,10 @@ public class Image extends Box {
 
     @Override
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
+        float height = PT.fromSpAsFloat(getHeight());
         contents.drawImage(mImageXObject,
-                PT.fromSpAsFloat(x), PT.fromSpAsFloat(y),
-                PT.fromSpAsFloat(getWidth()), PT.fromSpAsFloat(getHeight()));
+                PT.fromSpAsFloat(x), PT.fromSpAsFloat(y) - height,
+                PT.fromSpAsFloat(getWidth()), height);
         return super.layOutVertically(x, y, contents);
     }
 }

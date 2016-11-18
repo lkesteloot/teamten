@@ -65,10 +65,10 @@ public class VBox extends Box {
      */
     public VBox fixed(long newSize, VerticalAlignment verticalAlignment) {
         // Figure out how well our existing elements fit in this new size.
-        Fitness fitness = Fitness.create(getElements(), newSize, getVerticalSize(), Element::getVerticalSize);
+        Fitness fitness = Fitness.create(getElements(), newSize, getVerticalSize(), false, Element::getVerticalSize);
 
         // Stretch or shrink them to fit.
-        List<Element> fixedElements = fitness.fixed(getElements());
+        List<Element> fixedElements = fitness.fixed();
 
         // Package them in a vertical box.
         return new VBox(fixedElements, Dimensions.vertically(fixedElements, verticalAlignment), 0);

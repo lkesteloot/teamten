@@ -20,6 +20,7 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Strings;
 import com.teamten.font.FontManager;
 import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
@@ -331,7 +332,16 @@ public class Typesetter {
                     ImageSpan imageSpan = (ImageSpan) span;
 
                     Path imagePath = Paths.get(imageSpan.getPathname());
-                    horizontalList.addElement(Image.load(imagePath, imageSpan.getCaption(), pdDoc));
+                    HBox caption;
+                    if (Strings.isNullOrEmpty(imageSpan.getCaption())) {
+                        caption = null;
+                    } else {
+                        SizedFont captionFont = fontManager.get(config.getFont(Config.Key.CAPTION_FONT));
+                        caption = HBox.centered(new Text(imageSpan.getCaption(), captionFont), config.getBodyWidth());
+                    }
+                    long maxWidth = config.getBodyWidth();
+                    long maxHeight = config.getBodyHeight()*8/10;
+                    horizontalList.addElement(Image.load(imagePath, maxWidth, maxHeight, caption, pdDoc));
                 } else {
                     System.out.println("Warning: Unknown span type " + span.getClass().getSimpleName());
                 }
@@ -728,10 +738,7 @@ public class Typesetter {
                 }
                 horizontalList.addText(name, sectionNameFont, null);
                 horizontalList.addElement(leader);
-                horizontalList.addElement(HBox.ofWidth(Arrays.asList(
-                        Glue.infiniteHorizontal(),
-                        new Text(pageLabel, chapterFont)
-                ), widestPageNumberWidth));
+                horizontalList.addElement(HBox.rightAligned(new Text(pageLabel, chapterFont), widestPageNumberWidth));
                 horizontalList.addElement(new Penalty(-Penalty.INFINITY));
                 horizontalList.format(verticalList, config.getBodyWidth());
 

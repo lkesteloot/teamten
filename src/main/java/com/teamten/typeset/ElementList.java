@@ -18,18 +18,24 @@
 
 package com.teamten.typeset;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
+import com.teamten.typeset.element.HBox;
+import com.teamten.typeset.element.Image;
 import com.teamten.typeset.element.NonDiscardableElement;
 import com.teamten.typeset.element.Penalty;
+import com.teamten.typeset.element.Text;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -148,7 +154,7 @@ public abstract class ElementList implements ElementSink {
 
             // Initialize the current (end) breakpoint with max values.
             endBreakpoint.setTotalDemerits(Long.MAX_VALUE);
-            endBreakpoint.setPreviousBreakpoint(null);
+            endBreakpoint.setPreviousBreakpoint(null, 0);
 
             // We use an iterator so that we can easily and efficiently remove breakpoints that are too far away.
             Iterator<Breakpoint> itr = activeBreakpoints.iterator();
@@ -167,7 +173,7 @@ public abstract class ElementList implements ElementSink {
 
                 // Compute the fitness of this sublist.
                 Fitness fitness = Fitness.create(getElementSublist(beginBreakpoint, endBreakpoint), maxSize, -1,
-                        this::getElementSize);
+                        true, this::getElementSize);
 
                 // Compute badness for the line. This is based on how much we had to stretch or shrink.
                 long badness = fitness.computeBadness();
@@ -207,7 +213,7 @@ public abstract class ElementList implements ElementSink {
 
                     // If it's the best we've seen so far, remember it.
                     if (totalDemerits < endBreakpoint.getTotalDemerits()) {
-                        endBreakpoint.setPreviousBreakpoint(beginBreakpoint);
+                        endBreakpoint.setPreviousBreakpoint(beginBreakpoint, fitness.getImages().size() + 1);
                         endBreakpoint.setFitness(fitness);
                         endBreakpoint.setTotalDemerits(totalDemerits);
 
@@ -355,12 +361,42 @@ public abstract class ElementList implements ElementSink {
                 break;
             }
 
-            // Get the indent for this line or page.
-            long indent = outputShape.getIndent(endBreakpoint.getCounter());
+            Fitness fitness = endBreakpoint.getFitness();
+
+            // Get the indent and size for this line or page.
+            int counter = endBreakpoint.getCounter();
+            long indent = outputShape.getIndent(counter);
+            long size = outputShape.getSize(counter);
+
+            // See if we got any images.
+            List<Image> images = fitness.getImages();
+            if (!images.isEmpty()) {
+                if (this instanceof HorizontalList) {
+                    // Move them right after this line.
+                    images.forEach(boxes::addFirst);
+                } else if (this instanceof VerticalList) {
+                    // Create new pages for the images.
+                    // Must go backward since we want them in the right order and we're inserting at the front.
+                    for (Image image : Lists.reverse(images)) {
+                        //  TODO Perhaps this should be moved to VerticalList.
+                        List<Element> imagePage = new ArrayList<>();
+                        imagePage.add(Glue.infiniteVertical());
+                        imagePage.add(image);
+                        if (image.getCaption() != null) {
+                            imagePage.add(Glue.vertical(PT.toSp(8.0)));
+                            imagePage.add(image.getCaption());
+                        }
+                        imagePage.add(Glue.infiniteVertical());
+                        Fitness imageFitness = Fitness.create(imagePage, size, -1, false, this::getElementSize);
+                        imagePage = imageFitness.fixed();
+                        boxes.addFirst(makeOutputBox(imagePage, counter, 0));
+                        counter--;
+                    }
+                }
+            }
 
             // Make a new list with the glue set to specific widths.
-            List<Element> looseElements = getElementSublist(beginBreakpoint, endBreakpoint);
-            List<Element> fixedElements = endBreakpoint.getFitness().fixed(looseElements);
+            List<Element> fixedElements = fitness.fixed();
 
             // Add indent. We used to do this with a shift, but shifts aren't taken into account
             // when computing the dimensions of the vertical boxes.
@@ -372,7 +408,7 @@ public abstract class ElementList implements ElementSink {
             }
 
             // Pack them into a single box.
-            Box box = makeOutputBox(fixedElements, endBreakpoint.getCounter(), 0);
+            Box box = makeOutputBox(fixedElements, counter, 0);
             if (printDebug()) {
                 box.println(System.out, "");
             }
@@ -401,9 +437,12 @@ public abstract class ElementList implements ElementSink {
                 long difference = boxSize - maxSize;
                 double percentOff = difference*100.0/maxSize;
                 if (percentOff < -0.001 || percentOff > 0.001) {
-                    System.out.printf("Warning: %s is of wrong size (should be %,d but is %,d, off by %,d or %.3f%%)\n",
+                    System.out.printf("  Warning: %s is of wrong size (should be %,d but is %,d, off by %,d or %.3f%%)\n",
                             box.getClass().getSimpleName(), maxSize, boxSize, difference, percentOff);
-                    System.out.printf("    %s\n", box.toTextString());
+                    String boxString = box.toTextString().trim();
+                    if (!boxString.isEmpty()) {
+                        System.out.printf("    %s\n", boxString);
+                    }
                 }
             }
 
@@ -527,15 +566,16 @@ public abstract class ElementList implements ElementSink {
 
         /**
          * Set the previous breakpoint in the paragraph or page assuming we're selected as a breakpoint.
-         * Also updates the counter to be one more than the previous breakpoint's counter.
+         * Also updates the counter to be {@code increment} more than the previous breakpoint's counter.
+         * If the previous breakpoint is null, the counter is set to {@code increment}
          */
-        public void setPreviousBreakpoint(Breakpoint previousBreakpoint) {
+        public void setPreviousBreakpoint(Breakpoint previousBreakpoint, int increment) {
             mPreviousBreakpoint = previousBreakpoint;
 
             if (mPreviousBreakpoint == null) {
-                mCounter = 0;
+                mCounter = increment;
             } else {
-                mCounter = mPreviousBreakpoint.mCounter + 1;
+                mCounter = mPreviousBreakpoint.mCounter + increment;
             }
         }
 

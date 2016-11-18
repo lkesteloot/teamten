@@ -19,7 +19,6 @@
 package com.teamten.typeset.element;
 
 import com.teamten.font.SizedFont;
-import com.teamten.typeset.AbstractDimensions;
 import com.teamten.typeset.Dimensions;
 import com.teamten.typeset.Fitness;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -53,9 +52,30 @@ public class HBox extends Box {
      * Make a new HBox that's forced to be the specified width.
      */
     public static HBox ofWidth(List<Element> elements, long width) {
-        Fitness fitness = Fitness.create(elements, width, -1, Element::getWidth);
-        elements = fitness.fixed(elements);
+        Fitness fitness = Fitness.create(elements, width, -1, false, Element::getWidth);
+        elements = fitness.fixed();
         return new HBox(elements, 0);
+    }
+
+    /**
+     * Make a new HBox with the content left-aligned in a box of the specified width.
+     */
+    public static HBox leftAligned(Element element, long width) {
+        return ofWidth(Arrays.asList(element, Glue.infiniteHorizontal()), width);
+    }
+
+    /**
+     * Make a new HBox with the content centered in a box of the specified width.
+     */
+    public static HBox centered(Element element, long width) {
+        return ofWidth(Arrays.asList(Glue.infiniteHorizontal(), element, Glue.infiniteHorizontal()), width);
+    }
+
+    /**
+     * Make a new HBox with the content right-aligned in a box of the specified width.
+     */
+    public static HBox rightAligned(Element element, long width) {
+        return ofWidth(Arrays.asList(Glue.infiniteHorizontal(), element), width);
     }
 
     /**

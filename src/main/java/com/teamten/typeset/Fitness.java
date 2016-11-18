@@ -22,10 +22,12 @@ import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Flexibility;
 import com.teamten.typeset.element.Flexible;
 import com.teamten.typeset.element.HBox;
+import com.teamten.typeset.element.Image;
 import com.teamten.typeset.element.Text;
 import com.teamten.typeset.element.TotalFlexibility;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,6 +35,8 @@ import java.util.List;
  */
 public class Fitness {
     private static final long INFINITELY_BAD = 100_000;
+    private final List<Element> mElements;
+    private final List<Image> mImages;
     private final long mExtraSpace;
     private final long mSize;
     private final Flexibility mStretch;
@@ -42,10 +46,15 @@ public class Fitness {
     private final boolean mIsFlexible;
     private final boolean mIsOverfull;
 
-    private Fitness(long extraSpace, long size, Flexibility stretch, Flexibility shrink,
+    private Fitness(List<Element> elements,
+                    List<Image> images,
+                    long extraSpace,
+                    long size, Flexibility stretch, Flexibility shrink,
                     double ratio, boolean ratioIsInfinite,
                     boolean isFlexible, boolean isOverfull) {
 
+        mElements = elements;
+        mImages = images;
         mExtraSpace = extraSpace;
         mSize = size;
         mStretch = stretch;
@@ -54,6 +63,14 @@ public class Fitness {
         mRatioIsInfinite = ratioIsInfinite;
         mIsFlexible = isFlexible;
         mIsOverfull = isOverfull;
+    }
+
+    /**
+     * The list of images that were extracted from the original list of elements. If there were none,
+     * this returns an empty list.
+     */
+    public List<Image> getImages() {
+        return mImages;
     }
 
     public long getExtraSpace() {
@@ -76,9 +93,42 @@ public class Fitness {
      * Create a new Fitness object given a list of elements and a size they must fit into.
      *
      * @param actualSize the total size of the elements. Use -1 to have this method compute it.
+     * @param extractImages whether to pull images into the separate {@code images} property.
      * @param elementSizer returns the size of an element.
      */
-    public static Fitness create(List<Element> elements, long maxSize, long actualSize, ElementSizer elementSizer) {
+    public static Fitness create(List<Element> elements, long maxSize, long actualSize,
+                                 boolean extractImages, ElementSizer elementSizer) {
+
+        // See if our list has any images. These are never supposed to be in-line.
+        boolean hasImage = false;
+        if (extractImages) {
+            for (Element element : elements) {
+                if (element instanceof Image) {
+                    hasImage = true;
+                    break;
+                }
+            }
+        }
+
+        // If we had any images, pull them out into a separate list.
+        List<Image> images;
+        if (hasImage) {
+            // Don't modify the original, it might be used again by the caller.
+            List<Element> listWithoutImages = new ArrayList<>(elements.size());
+            images = new ArrayList<>();
+            for (Element element : elements) {
+                if (element instanceof Image) {
+                    images.add((Image) element);
+                } else {
+                    listWithoutImages.add(element);
+                }
+            }
+            // Replace original.
+            elements = listWithoutImages;
+        } else {
+            images = Collections.emptyList();
+        }
+
         // Find the sum of the sizes of all the elements in this line or page. Also compute the total stretch
         // and shrink for the glue in that line or page.
         long size = 0;
@@ -144,7 +194,8 @@ public class Fitness {
             ratioIsInfinite = false;
         }
 
-        return new Fitness(extraSpace, size, stretch.toFlexibility(), shrink.toFlexibility(),
+        return new Fitness(elements, images, extraSpace,
+                size, stretch.toFlexibility(), shrink.toFlexibility(),
                 ratio, ratioIsInfinite, isStretchable, isOverfull);
     }
 
@@ -182,13 +233,13 @@ public class Fitness {
      * Returns a copy of the element list but with the flexible element fixed so that all the elements
      * will fit properly in the size that was specified when this object was created.
      */
-    public List<Element> fixed(List<Element> elements) {
+    public List<Element> fixed() {
         List<Element> fixedElements = new ArrayList<>();
 
         // Non-null iff the previous element was a Text element.
         Text previousText = null;
 
-        for (Element element : elements) {
+        for (Element element : mElements) {
             if (element instanceof HBox) {
                 HBox hbox = (HBox) element;
                 if (hbox.isEmpty()) {
