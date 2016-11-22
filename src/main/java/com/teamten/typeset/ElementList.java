@@ -165,7 +165,7 @@ public abstract class ElementList implements ElementSink {
                     continue;
                 }
 
-                // Get the size for this line or page.
+                // Get the counter and size for this line or page.
                 int counter = beginBreakpoint.getCounter() + 1;
                 long maxSize = outputShape.getSize(counter);
 
@@ -181,22 +181,21 @@ public abstract class ElementList implements ElementSink {
 
                 // Don't consider breaks if the badness exceeds our tolerance. We'll accept really bad lines
                 // if we've not found a break at all and we're overfull (to allow lines to break when a very
-                // long unbreakable word crosses the boundary). We'll allow allow it if we're being forced
+                // long unbreakable word crosses the boundary). We'll also allow it if we're being forced
                 // to break here by a penalty.
-                if (badness <= BADNESS_TOLERANCE || (endBreakpoint.getPreviousBreakpoint() == null && chunk.isOverfull()) ||
+                if (badness <= BADNESS_TOLERANCE ||
+                        (endBreakpoint.getPreviousBreakpoint() == null && chunk.isOverfull()) ||
                         penalty == -Penalty.INFINITY) {
 
                     // Compute demerits for this line.
-                    long demerits = (LINE_PENALTY + badness);
+                    long demerits = LINE_PENALTY + badness;
                     demerits = demerits*demerits;
 
                     // Square the penalty (keeping the sign).
-                    if (penalty >= 0) {
-                        demerits += penalty*penalty;
-                    } else if (penalty > -Penalty.INFINITY) {
-                        demerits -= penalty*penalty;
+                    if (penalty > -Penalty.INFINITY) {
+                        demerits += Long.signum(penalty)*penalty*penalty;
                     } else {
-                        // No point in adding constant to a line we know we're going to break anyway.
+                        // No point in adding a constant to a line we know we're going to break anyway.
                     }
 
                     // Add the demerits for the paragraph or page ending at the beginning breakpoint.
@@ -287,7 +286,7 @@ public abstract class ElementList implements ElementSink {
                     breakpoints.add(new Breakpoint(i, penalty.getPenalty()));
                 }
             } else if (element instanceof Glue && previousElement instanceof NonDiscardableElement) {
-                // Can break at glues that preceded by non-discardable elements.
+                // Can break at glues that are preceded by non-discardable elements.
                 breakpoints.add(new Breakpoint(i, 0));
             } else if (element instanceof Discretionary) {
                 // Can break at discretionary elements (hyphenation).
