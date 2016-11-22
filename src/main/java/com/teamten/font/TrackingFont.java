@@ -29,12 +29,12 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * A font that wraps another font and adds tracking (inter-letter spacing). The tracking is defined in
  * units of the font size. Tracking of 0.1 on an 11pt font, for example, would add 1.1pt of space after
  * each letter.
- *
+ * <p>
  * <p>Note that the space is added after each letter, not between letters, because the font abstraction does
  * not know where the string of letter ends. This will cause right-aligned text to have a bit of space between
  * it and the margin, and centered text to be slightly to the left of where it should be. You can fix this
  * by using the underlying font for the last letter, at the cost of proper kerning and hyphenation.
- *
+ * <p>
  * <p>The font does not support ligatures, and kerning is optionally respected.
  */
 public class TrackingFont extends AbstractFont {

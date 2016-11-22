@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright 2016 Lawrence Kesteloot
@@ -63,7 +62,7 @@ public class PdfTest {
             contents.showText(letter);
             contents.endText();
 
-            x += PT.toSp(font.getPdFont().getStringWidth(letter) / 1000 * fontSize);
+            x += PT.toSp(font.getPdFont().getStringWidth(letter)/1000*fontSize);
         }
 
         // With kerning.
@@ -84,7 +83,7 @@ public class PdfTest {
             contents.showText(letter);
             contents.endText();
 
-            x += PT.toSp(font.getPdFont().getStringWidth(letter) / 1000 * fontSize);
+            x += PT.toSp(font.getPdFont().getStringWidth(letter)/1000*fontSize);
 
             previousCh = ch;
         }

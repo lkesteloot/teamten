@@ -75,7 +75,7 @@ public class SizedFont {
      * The width of a space in scaled points.
      */
     public long getSpaceWidth() {
-        return (long) (mFont.getSpaceWidth() * mSize + 0.5);
+        return (long) (mFont.getSpaceWidth()*mSize + 0.5);
     }
 
     /**
@@ -87,6 +87,7 @@ public class SizedFont {
 
     /**
      * Draw the text.
+     *
      * @param text the text to draw.
      * @param x the left-hand edge of the text in scaled points.
      * @param y the baseline of the text in scaled points.
@@ -110,12 +111,18 @@ public class SizedFont {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         SizedFont sizedFont = (SizedFont) o;
 
-        if (Double.compare(sizedFont.mSize, mSize) != 0) return false;
+        if (Double.compare(sizedFont.mSize, mSize) != 0) {
+            return false;
+        }
         return mFont.equals(sizedFont.mFont);
 
     }
@@ -126,7 +133,7 @@ public class SizedFont {
         long temp;
         result = mFont.hashCode();
         temp = Double.doubleToLongBits(mSize);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31*result + (int) (temp ^ (temp >>> 32));
         return result;
     }
 }

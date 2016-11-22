@@ -18,7 +18,6 @@
 
 package com.teamten.font;
 
-import com.teamten.font.AbstractFont;
 import com.teamten.typeset.Ligatures;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
@@ -36,6 +35,7 @@ public class DummyFont extends AbstractFont {
 
     /**
      * Dummy font with reasonable sizes.
+     *
      * @param ligatures the ligature list, or null for none.
      */
     public DummyFont(Ligatures ligatures) {

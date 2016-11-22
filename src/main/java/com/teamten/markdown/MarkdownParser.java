@@ -269,7 +269,7 @@ public class MarkdownParser {
 
     /**
      * Checks if the tag is in metadata form, and if so adds the key and value to the document.
-     *
+     * <p>
      * <p>Metadata form is similar to email header form: "Multi-Word-Key: Value"
      *
      * @return whether the tag was processed as metadata.

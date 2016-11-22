@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright 2016 Lawrence Kesteloot
@@ -62,12 +61,12 @@ public class Ligatures {
      */
     public Ligatures(Predicate<Integer> isCharInFont) {
         mOrderedList = FULL_LIST.stream()
-            // If it's in the font, add it to our map.
-            .filter(ligature -> isCharInFont.test(ligature.getSingleChar()))
-            // Sort the ordered list by decreasing size of multi, so that "ffi" is
-            // done before "fi".
-            .sorted((a, b) -> -Integer.compare(a.getMulti().length(), b.getMulti().length()))
-            .collect(Collectors.toList());
+                // If it's in the font, add it to our map.
+                .filter(ligature -> isCharInFont.test(ligature.getSingleChar()))
+                // Sort the ordered list by decreasing size of multi, so that "ffi" is
+                // done before "fi".
+                .sorted((a, b) -> -Integer.compare(a.getMulti().length(), b.getMulti().length()))
+                .collect(Collectors.toList());
     }
 
     /**

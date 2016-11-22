@@ -71,12 +71,18 @@ public class SectionBookmark extends Bookmark {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         SectionBookmark that = (SectionBookmark) o;
 
-        if (mType != that.mType) return false;
+        if (mType != that.mType) {
+            return false;
+        }
         return mName.equals(that.mName);
 
     }
@@ -84,7 +90,7 @@ public class SectionBookmark extends Bookmark {
     @Override
     public int hashCode() {
         int result = mType.hashCode();
-        result = 31 * result + mName.hashCode();
+        result = 31*result + mName.hashCode();
         return result;
     }
 

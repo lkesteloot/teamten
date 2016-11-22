@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright 2016 Lawrence Kesteloot
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +37,7 @@ import java.util.regex.Pattern;
  */
 public class HyphenDictionary {
     private static final Splitter FIELD_SPLITTER = Splitter.on(" ").
-        omitEmptyStrings().trimResults();
+            omitEmptyStrings().trimResults();
     private static final Joiner HYPHEN_JOINER = Joiner.on("-").skipNulls();
     private static final Pattern DIGITS_RE = Pattern.compile("[0-9]");
     // Descent defaults.
@@ -231,7 +229,7 @@ public class HyphenDictionary {
         List<String> segments = new ArrayList<>();
         int lastStart = 0;
         for (int i = 0; i < cutPoints.length; i++) {
-            if (cutPoints[i] % 2 != 0) {
+            if (cutPoints[i]%2 != 0) {
                 segments.add(word.substring(lastStart, i));
                 lastStart = i;
             }
@@ -249,11 +247,13 @@ public class HyphenDictionary {
         return segments;
     }
 
-    /* package */ static String removeDigits(String line) {
+    /* package */
+    static String removeDigits(String line) {
         return DIGITS_RE.matcher(line).replaceAll("");
     }
 
-    /* package */ static String removeNonDigits(String line) {
+    /* package */
+    static String removeNonDigits(String line) {
         StringBuilder builder = new StringBuilder(line);
 
         // Delete periods, they don't affect this operation.

@@ -24,7 +24,6 @@ import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Page;
 import com.teamten.typeset.element.Penalty;
-import com.teamten.typeset.element.VBox;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

@@ -60,7 +60,7 @@ public class Leader extends Glue {
     public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
         // Align the dots to the left size of the page. TeX does it to the left of the enclosing box,
         // but we don't have that and it doesn't matter anyway.
-        long startX = (x + mPatternWidth - 1) / mPatternWidth * mPatternWidth;
+        long startX = (x + mPatternWidth - 1)/mPatternWidth*mPatternWidth;
         long endX = x + getSize() - mPatternWidth;
 
         // Draw the pattern all along the glue length.

@@ -19,9 +19,9 @@
 package com.teamten.typeset;
 
 import com.teamten.font.FontManager;
-import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
+import com.teamten.font.SizedFont;
 import com.teamten.font.Typeface;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.typeset.element.Glue;
@@ -319,7 +319,7 @@ public class TypesetterTest {
 
         VerticalList verticalList = new VerticalList();
 
-        long paragraphIndent = PT.toSp(fontSize * 2);
+        long paragraphIndent = PT.toSp(fontSize*2);
         OutputShape outputShape = null;
 
         // Simple paragraphs.
@@ -350,7 +350,7 @@ public class TypesetterTest {
                     columnLayout = ColumnLayout.single(config.getBodyWidth());
                 } else {
                     columnLayout = ColumnLayout.fromBodyWidth(newNumColumns,
-                            config.getBodyWidth(), config.getBodyWidth() / 20);
+                            config.getBodyWidth(), config.getBodyWidth()/20);
                 }
                 if (newNumColumns != 1) {
                     verticalList.changeColumnLayout(columnLayout);

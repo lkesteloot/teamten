@@ -59,7 +59,7 @@ public class SmallCapsFont extends AbstractFont {
 
         // Average them. This will be correct if they're in the same class. Otherwise it'll get a font size
         // half way, which is probably close.
-        double effectiveFontSize = (leftFontSize + rightFontSize) / 2.0;
+        double effectiveFontSize = (leftFontSize + rightFontSize)/2.0;
 
         return mUnderlyingFont.getKerning(leftChar, rightChar, effectiveFontSize);
     }

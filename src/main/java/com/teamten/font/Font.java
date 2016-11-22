@@ -51,7 +51,8 @@ public interface Font {
 
     /**
      * Draw the text.
-     *  @param text the text to draw.
+     *
+     * @param text the text to draw.
      * @param fontSize the size in points.
      * @param x the left-hand edge of the text in scaled points.
      * @param y the baseline of the text in scaled points.

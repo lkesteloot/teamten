@@ -42,6 +42,6 @@ public class Page extends VBox {
      * Whether this page is on the left of the spread.
      */
     public boolean isLeftPage() {
-        return mPhysicalPageNumber % 2 == 0;
+        return mPhysicalPageNumber%2 == 0;
     }
 }

@@ -100,14 +100,24 @@ public class Discretionary extends NonDiscardableElement {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Discretionary that = (Discretionary) o;
 
-        if (mPenalty != that.mPenalty) return false;
-        if (!mPreBreak.equals(that.mPreBreak)) return false;
-        if (!mPostBreak.equals(that.mPostBreak)) return false;
+        if (mPenalty != that.mPenalty) {
+            return false;
+        }
+        if (!mPreBreak.equals(that.mPreBreak)) {
+            return false;
+        }
+        if (!mPostBreak.equals(that.mPostBreak)) {
+            return false;
+        }
         return mNoBreak.equals(that.mNoBreak);
 
     }
@@ -115,9 +125,9 @@ public class Discretionary extends NonDiscardableElement {
     @Override
     public int hashCode() {
         int result = mPreBreak.hashCode();
-        result = 31 * result + mPostBreak.hashCode();
-        result = 31 * result + mNoBreak.hashCode();
-        result = 31 * result + mPenalty;
+        result = 31*result + mPostBreak.hashCode();
+        result = 31*result + mNoBreak.hashCode();
+        result = 31*result + mPenalty;
         return result;
     }
 }

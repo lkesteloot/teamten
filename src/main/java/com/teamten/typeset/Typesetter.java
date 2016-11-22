@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright 2016 Lawrence Kesteloot
@@ -22,9 +21,9 @@ package com.teamten.typeset;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.teamten.font.FontManager;
-import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
+import com.teamten.font.SizedFont;
 import com.teamten.font.TrackingFont;
 import com.teamten.font.TypefaceVariantSize;
 import com.teamten.hyphen.HyphenDictionary;
@@ -59,7 +58,6 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -275,9 +273,9 @@ public class Typesetter {
             }
 
             // 135% recommended by http://practicaltypography.com/line-spacing.html
-            long leading = PT.toSp(fontSize * 1.35f);
+            long leading = PT.toSp(fontSize*1.35f);
             long interParagraphSpacing = 0;
-            long paragraphIndent = PT.toSp(fontSize * 2);
+            long paragraphIndent = PT.toSp(fontSize*2);
 
             // Set the distance between baselines based on the paragraph's main font.
             verticalList.setBaselineSkip(leading);
@@ -394,7 +392,7 @@ public class Typesetter {
                 previousBlockType = null;
             } else {
                 if (marginBottom != 0) {
-                    verticalList.addElement(new Glue(marginBottom, marginBottom / 4, 0, false));
+                    verticalList.addElement(new Glue(marginBottom, marginBottom/4, 0, false));
                 }
                 verticalList.addElement(new Glue(interParagraphSpacing, PT.toSp(3), 0, false));
                 previousBlockType = block.getBlockType();
@@ -423,6 +421,7 @@ public class Typesetter {
 
     /**
      * Format the vertical list into a sequence of pages.
+     *
      * @param textHeight the max height of the text on a page.
      */
     public List<Page> verticalListToPages(VerticalList verticalList, long textHeight) {
@@ -676,7 +675,7 @@ public class Typesetter {
         // Space below line.
         verticalList.addElement(new Glue(paddingBelowTitle*2/3, 0, 0, false));
 
-        long leading = PT.toSp(entryFontSize * 1.2f);
+        long leading = PT.toSp(entryFontSize*1.2f);
         verticalList.setBaselineSkip(leading);
 
         long previousMarginBelow = 0;
@@ -806,7 +805,7 @@ public class Typesetter {
         }
 
         // Switch to two columns.
-        ColumnLayout columnLayout = ColumnLayout.fromBodyWidth(2, config.getBodyWidth(), config.getBodyWidth() / 10);
+        ColumnLayout columnLayout = ColumnLayout.fromBodyWidth(2, config.getBodyWidth(), config.getBodyWidth()/10);
         verticalList.changeColumnLayout(columnLayout);
 
         // Generate the paragraphs.

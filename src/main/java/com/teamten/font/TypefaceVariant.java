@@ -54,12 +54,18 @@ public class TypefaceVariant {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         TypefaceVariant that = (TypefaceVariant) o;
 
-        if (mTypeface != that.mTypeface) return false;
+        if (mTypeface != that.mTypeface) {
+            return false;
+        }
         return mFontVariant == that.mFontVariant;
 
     }
@@ -67,7 +73,7 @@ public class TypefaceVariant {
     @Override
     public int hashCode() {
         int result = mTypeface.hashCode();
-        result = 31 * result + mFontVariant.hashCode();
+        result = 31*result + mFontVariant.hashCode();
         return result;
     }
 }

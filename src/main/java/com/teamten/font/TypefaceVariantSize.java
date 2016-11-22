@@ -52,9 +52,15 @@ public class TypefaceVariantSize extends TypefaceVariant {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
 
         TypefaceVariantSize that = (TypefaceVariantSize) o;
 
@@ -67,7 +73,7 @@ public class TypefaceVariantSize extends TypefaceVariant {
         int result = super.hashCode();
         long temp;
         temp = Double.doubleToLongBits(mSize);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31*result + (int) (temp ^ (temp >>> 32));
         return result;
     }
 

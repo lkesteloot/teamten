@@ -19,12 +19,12 @@
 package com.teamten.tex;
 
 import com.teamten.font.FontManager;
-import com.teamten.font.SizedFont;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
+import com.teamten.font.SizedFont;
 import com.teamten.font.Typeface;
-import com.teamten.typeset.Sections;
 import com.teamten.typeset.Config;
+import com.teamten.typeset.Sections;
 import com.teamten.typeset.SpaceUnit;
 import com.teamten.typeset.Typesetter;
 import com.teamten.typeset.VerticalList;
@@ -121,8 +121,9 @@ public class TexParser {
 
     /**
      * Parse a vertical list.
+     *
      * @param internal whether the list is internal (within an HBox) or global. If internal, stops on a close
-     *                 brace, not eating the brace. If global, stops on end of file.
+     * brace, not eating the brace. If global, stops on end of file.
      */
     private VerticalList parseVerticalList(boolean internal) throws IOException {
         VerticalList verticalList = new VerticalList();
@@ -267,6 +268,7 @@ public class TexParser {
      * unit.
      *
      * @return the distance in scaled points.
+     *
      * @throws IOException from the Reader.
      * @throws NumberFormatException if the distance cannot be parsed.
      */

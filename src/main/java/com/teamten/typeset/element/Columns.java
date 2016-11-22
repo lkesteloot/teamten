@@ -18,10 +18,8 @@
 
 package com.teamten.typeset.element;
 
-import com.teamten.typeset.AbstractDimensions;
 import com.teamten.typeset.ColumnLayout;
 import com.teamten.typeset.ColumnVerticalList;
-import com.teamten.typeset.Dimensions;
 import com.teamten.typeset.VerticalAlignment;
 
 import java.util.List;

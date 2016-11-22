@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright 2016 Lawrence Kesteloot
@@ -54,6 +53,7 @@ public abstract class Element implements Dimensions {
      * @param x the left-most point of the element.
      * @param y the baseline of the element.
      * @param contents the stream to add the element to.
+     *
      * @return how much to move right afterward.
      */
     public abstract long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException;
@@ -72,6 +72,7 @@ public abstract class Element implements Dimensions {
      * @param x the left-most point of the element.
      * @param y the upper-left point of the element.
      * @param contents the stream to add the element to.
+     *
      * @return how much to move down afterward.
      */
     public abstract long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException;

@@ -63,6 +63,7 @@ public class Token {
 
     /**
      * Return the pseudo-codepoint for the character command.
+     *
      * @throws IllegalArgumentException if the character is too large to fit in the private use area.
      */
     public static int fromCharacter(int ch) {

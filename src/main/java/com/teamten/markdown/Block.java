@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright 2016 Lawrence Kesteloot
@@ -85,6 +84,7 @@ public class Block {
 
         /**
          * Add the character to the block.
+         *
          * @param ch the character to add.
          * @param isItalic whether the character should be displayed in italics.
          * @param isSmallCaps whether the character should be displayed in small caps.

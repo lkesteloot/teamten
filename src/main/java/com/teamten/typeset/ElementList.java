@@ -18,24 +18,20 @@
 
 package com.teamten.typeset;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Glue;
-import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Image;
 import com.teamten.typeset.element.NonDiscardableElement;
 import com.teamten.typeset.element.Penalty;
-import com.teamten.typeset.element.Text;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -74,6 +70,7 @@ public abstract class ElementList implements ElementSink {
 
     /**
      * Get a string that can be used for debugging to represent the paragraph starting here.
+     *
      * @param beginBreakpoint the start of the line.
      * @param endBreakpoint the end of the line.
      */
@@ -93,6 +90,7 @@ public abstract class ElementList implements ElementSink {
 
     /**
      * Get a string that can be used for debugging to represent the paragraph ending here.
+     *
      * @param endBreakpoint the end of the line.
      */
     @NotNull
@@ -194,9 +192,9 @@ public abstract class ElementList implements ElementSink {
 
                     // Square the penalty (keeping the sign).
                     if (penalty >= 0) {
-                        demerits += penalty * penalty;
+                        demerits += penalty*penalty;
                     } else if (penalty > -Penalty.INFINITY) {
-                        demerits -= penalty * penalty;
+                        demerits -= penalty*penalty;
                     } else {
                         // No point in adding constant to a line we know we're going to break anyway.
                     }
@@ -335,7 +333,7 @@ public abstract class ElementList implements ElementSink {
             if (penalty.isEvenPageOnly()) {
                 // Okay, check if we're on an even page.
                 int page = beginBreakpoint.getCounter() + 1;
-                if (page % 2 != 0) {
+                if (page%2 != 0) {
                     // We're on an odd page, ignore the penalty that's for even pages only.
                     return true;
                 }
@@ -468,7 +466,7 @@ public abstract class ElementList implements ElementSink {
      *
      * @param elements the elements of the box.
      * @param counter the number of the box, starting from 1. For horizontal lists this is the line number
-     *                of the paragraph. For vertical lists this is the physical page number.
+     * of the paragraph. For vertical lists this is the physical page number.
      * @param shift how much to shift the box in the final layout (up or to the right).
      */
     protected abstract Box makeOutputBox(List<Element> elements, int counter, long shift);

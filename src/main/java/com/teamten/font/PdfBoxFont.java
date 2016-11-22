@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright 2016 Lawrence Kesteloot
@@ -114,7 +113,7 @@ public class PdfBoxFont extends AbstractFont {
             int leftGlyph = mCmapSubtable.getGlyphId(leftChar);
             int rightGlyph = mCmapSubtable.getGlyphId(rightChar);
 
-            return PT.toSp(mKerningSubtable.getKerning(leftGlyph, rightGlyph) * fontSize / mUnitsPerEm);
+            return PT.toSp(mKerningSubtable.getKerning(leftGlyph, rightGlyph)*fontSize/mUnitsPerEm);
         }
     }
 
@@ -143,7 +142,7 @@ public class PdfBoxFont extends AbstractFont {
             int glyphId = mCmapSubtable.getGlyphId(ch);
 
             // Width we can get directly.
-            long width = PT.toSp(mPdFont.getWidth(glyphId) / 1000 * fontSize);
+            long width = PT.toSp(mPdFont.getWidth(glyphId)/1000*fontSize);
 
             // Height and depth we get from the glyph data.
             GlyphData glyphData = mGlyphTable.getGlyph(glyphId);
@@ -155,8 +154,8 @@ public class PdfBoxFont extends AbstractFont {
                 height = 0;
                 depth = 0;
             } else {
-                height = Math.max(PT.toSp(glyphData.getYMaximum() * fontSize / mUnitsPerEm), 0);
-                depth = Math.max(-PT.toSp(glyphData.getYMinimum() * fontSize / mUnitsPerEm), 0);
+                height = Math.max(PT.toSp(glyphData.getYMaximum()*fontSize/mUnitsPerEm), 0);
+                depth = Math.max(-PT.toSp(glyphData.getYMinimum()*fontSize/mUnitsPerEm), 0);
             }
 
             return new Metrics(width, height, depth);

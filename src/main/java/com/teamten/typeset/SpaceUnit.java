@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright 2016 Lawrence Kesteloot
@@ -95,10 +94,11 @@ public enum SpaceUnit {
      * Only abbreviations are permitted (e.g., "inch" is left after "in" and
      * "centimeter" is rejected). The reader is left immediately after the
      * unit.
-     *
+     * <p>
      * TODO merge with {@link TexParser#parseDistance()}?
      *
      * @return the distance in scaled points.
+     *
      * @throws IOException from the Reader.
      * @throws NumberFormatException if the distance cannot be parsed.
      */

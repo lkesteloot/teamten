@@ -130,12 +130,18 @@ public class Text extends Box {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Text text = (Text) o;
 
-        if (!mFont.equals(text.mFont)) return false;
+        if (!mFont.equals(text.mFont)) {
+            return false;
+        }
         return mText.equals(text.mText);
 
     }
@@ -143,7 +149,7 @@ public class Text extends Box {
     @Override
     public int hashCode() {
         int result = mFont.hashCode();
-        result = 31 * result + mText.hashCode();
+        result = 31*result + mText.hashCode();
         return result;
     }
 }

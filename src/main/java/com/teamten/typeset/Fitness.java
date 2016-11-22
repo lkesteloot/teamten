@@ -163,7 +163,7 @@ public class Fitness {
             // Our line is short. Compute how much we'd have to stretch.
             if (stretch.getAmount() > 0) {
                 // Can stretch, figure out by how much.
-                ratio = extraSpace / (double) stretch.getAmount();
+                ratio = extraSpace/(double) stretch.getAmount();
                 ratioIsInfinite = stretch.isInfinite();
             } else {
                 // There's no glue to stretch.
@@ -180,7 +180,7 @@ public class Fitness {
                 isOverfull = true;
             } else if (shrink.getAmount() > 0) {
                 // This will be negative.
-                ratio = extraSpace / (double) shrink.getAmount();
+                ratio = extraSpace/(double) shrink.getAmount();
                 ratioIsInfinite = shrink.isInfinite();
             } else {
                 // There's no glue to shrink.
@@ -222,7 +222,7 @@ public class Fitness {
                 // Avoid overflow. 10 = ceil((INFINITELY_BAD/100)^(1/3)).
                 badness = INFINITELY_BAD;
             } else {
-                badness = Math.min(INFINITELY_BAD, (long) (100 * Math.pow(Math.abs(mRatio), 3)));
+                badness = Math.min(INFINITELY_BAD, (long) (100*Math.pow(Math.abs(mRatio), 3)));
             }
         }
 
@@ -254,7 +254,7 @@ public class Fitness {
                 long glueSize = flexible.getSize();
                 Flexibility flexibility = mRatio >= 0 ? flexible.getStretch() : flexible.getShrink();
                 if (flexibility.isInfinite() == mRatioIsInfinite) {
-                    glueSize += (long) (flexibility.getAmount() * mRatio);
+                    glueSize += (long) (flexibility.getAmount()*mRatio);
                 }
 
                 // Fix the glue.

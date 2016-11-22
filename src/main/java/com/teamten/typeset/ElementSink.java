@@ -33,6 +33,7 @@ public interface ElementSink {
 
     /**
      * Convenience method for making a sink that writes to a list.
+     *
      * @param list the list to write elements to.
      * @param elementClass the class of the elements being put into the list.
      */

@@ -138,9 +138,9 @@ public class Sections {
             headlineLabel = "";
         }
 
-        if (physicalPageNumber % 2 == 1) {
+        if (physicalPageNumber%2 == 1) {
             // Use section name on right-hand (odd) pages.
-            Map.Entry<Integer, SectionBookmark> entry = mPageToSectionMap.floorEntry(physicalPageNumber);
+            Map.Entry<Integer,SectionBookmark> entry = mPageToSectionMap.floorEntry(physicalPageNumber);
             if (entry != null) {
                 SectionBookmark bookmark = entry.getValue();
                 headlineLabel = bookmark.getName();

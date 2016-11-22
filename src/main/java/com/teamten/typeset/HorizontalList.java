@@ -159,7 +159,7 @@ public class HorizontalList extends ElementList {
         long spaceWidth = font.getSpaceWidth();
 
         // Roughly copy TeX.
-        Glue spaceGlue = new Glue(spaceWidth, spaceWidth / 2, spaceWidth / 3, true);
+        Glue spaceGlue = new Glue(spaceWidth, spaceWidth/2, spaceWidth/3, true);
 
         for (int i = 0; i < text.length(); ) {
             // Pick out the code point at this location. Could take two chars.
@@ -407,6 +407,7 @@ public class HorizontalList extends ElementList {
 
     /**
      * Adds the original elements to the new list, with the given previous element.
+     *
      * @return the new previous element.
      */
     static int addKerningToList(List<Element> origElements, List<Element> newElements, int previousCh, SizedFont font) {

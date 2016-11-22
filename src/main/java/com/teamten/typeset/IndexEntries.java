@@ -99,6 +99,7 @@ public class IndexEntries {
 
     /**
      * Add count entries to the index.
+     *
      * @param words list of words to choose from.
      * @param random the random number generator to use.
      * @param count number of entries to add.
@@ -110,10 +111,18 @@ public class IndexEntries {
             // Add an entry with a random word.
             String word = words.get(random.nextInt(words.size()));
             switch (random.nextInt(30)) {
-                case 0: word = "@lkesteloot"; break;
-                case 1: word = "|whatever"; break;
-                case 2: word = "&tc"; break;
-                case 3: word = "1914-1918"; break;
+                case 0:
+                    word = "@lkesteloot";
+                    break;
+                case 1:
+                    word = "|whatever";
+                    break;
+                case 2:
+                    word = "&tc";
+                    break;
+                case 3:
+                    word = "1914-1918";
+                    break;
             }
             IndexEntry indexEntry = new IndexEntry(word);
             add(indexEntry);

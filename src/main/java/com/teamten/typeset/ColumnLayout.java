@@ -52,7 +52,7 @@ public class ColumnLayout {
      * Create a multi-column layout from the specified body width and margin.
      */
     public static ColumnLayout fromBodyWidth(int columnCount, long bodyWidth, long margin) {
-        long columnWidth = (bodyWidth - margin*(columnCount - 1)) / columnCount;
+        long columnWidth = (bodyWidth - margin*(columnCount - 1))/columnCount;
         return new ColumnLayout(columnCount, columnWidth, margin);
     }
 
@@ -79,13 +79,21 @@ public class ColumnLayout {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ColumnLayout that = (ColumnLayout) o;
 
-        if (mColumnCount != that.mColumnCount) return false;
-        if (mColumnWidth != that.mColumnWidth) return false;
+        if (mColumnCount != that.mColumnCount) {
+            return false;
+        }
+        if (mColumnWidth != that.mColumnWidth) {
+            return false;
+        }
         return mMargin == that.mMargin;
 
     }
@@ -93,8 +101,8 @@ public class ColumnLayout {
     @Override
     public int hashCode() {
         int result = mColumnCount;
-        result = 31 * result + (int) (mColumnWidth ^ (mColumnWidth >>> 32));
-        result = 31 * result + (int) (mMargin ^ (mMargin >>> 32));
+        result = 31*result + (int) (mColumnWidth ^ (mColumnWidth >>> 32));
+        result = 31*result + (int) (mMargin ^ (mMargin >>> 32));
         return result;
     }
 }
