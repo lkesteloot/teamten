@@ -146,9 +146,9 @@ public class VerticalList extends ElementList {
     }
 
     @Override
-    protected int getFitnessIncrement(Fitness fitness) {
+    protected int getChunkExtraIncrement(Chunk chunk) {
         // Each image will take up one page.
-        return fitness.getImages().size();
+        return chunk.getImages().size();
     }
 
     /**

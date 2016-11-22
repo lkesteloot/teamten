@@ -117,7 +117,7 @@ public class HorizontalList extends ElementList {
     }
 
     @Override
-    protected int getFitnessIncrement(Fitness fitness) {
+    protected int getChunkExtraIncrement(Chunk chunk) {
         // The auxiliary elements like images don't take up space because they're removed when processing
         // horizontal elements.
         return 0;

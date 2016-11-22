@@ -31,34 +31,30 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Represents how well a set of elements can fit into a space.
+ * Represents a sequence of elements being considered for fitting into a space, either horizontally
+ * into a line or vertically into a page.
  */
-public class Fitness {
+public class Chunk {
     private static final long INFINITELY_BAD = 100_000;
     private final List<Element> mElements;
     private final List<Image> mImages;
     private final long mExtraSpace;
     private final long mSize;
-    private final Flexibility mStretch;
-    private final Flexibility mShrink;
     private final double mRatio;
     private final boolean mRatioIsInfinite;
     private final boolean mIsFlexible;
     private final boolean mIsOverfull;
 
-    private Fitness(List<Element> elements,
-                    List<Image> images,
-                    long extraSpace,
-                    long size, Flexibility stretch, Flexibility shrink,
-                    double ratio, boolean ratioIsInfinite,
-                    boolean isFlexible, boolean isOverfull) {
+    private Chunk(List<Element> elements,
+                  List<Image> images,
+                  long extraSpace, long size,
+                  double ratio, boolean ratioIsInfinite,
+                  boolean isFlexible, boolean isOverfull) {
 
         mElements = elements;
         mImages = images;
         mExtraSpace = extraSpace;
         mSize = size;
-        mStretch = stretch;
-        mShrink = shrink;
         mRatio = ratio;
         mRatioIsInfinite = ratioIsInfinite;
         mIsFlexible = isFlexible;
@@ -90,14 +86,14 @@ public class Fitness {
     }
 
     /**
-     * Create a new Fitness object given a list of elements and a size they must fit into.
+     * Create a new Chunk object given a list of elements and a size they must fit into.
      *
      * @param actualSize the total size of the elements. Use -1 to have this method compute it.
      * @param extractImages whether to pull images into the separate {@code images} property.
      * @param elementSizer returns the size of an element.
      */
-    public static Fitness create(List<Element> elements, long maxSize, long actualSize,
-                                 boolean extractImages, ElementSizer elementSizer) {
+    public static Chunk create(List<Element> elements, long maxSize, long actualSize,
+                               boolean extractImages, ElementSizer elementSizer) {
 
         // See if our list has any images. These are never supposed to be in-line.
         boolean hasImage = false;
@@ -194,11 +190,9 @@ public class Fitness {
             ratioIsInfinite = false;
         }
 
-        return new Fitness(elements, images, extraSpace,
-                size, stretch.toFlexibility(), shrink.toFlexibility(),
+        return new Chunk(elements, images, extraSpace, size,
                 ratio, ratioIsInfinite, isStretchable, isOverfull);
     }
-
 
     /**
      * Given what we found about this line or page, compute the badness, which basically tells us how
@@ -306,7 +300,7 @@ public class Fitness {
     @FunctionalInterface
     public interface ElementSizer {
         /**
-         * Returns the size of the element in the appropriate dimension, depending on how this Fitness
+         * Returns the size of the element in the appropriate dimension, depending on how this Chunk
          * is being computed.
          */
         long getElementSize(Element element);

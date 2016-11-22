@@ -169,12 +169,12 @@ public abstract class ElementList implements ElementSink {
                 int counter = beginBreakpoint.getCounter() + 1;
                 long maxSize = outputShape.getSize(counter);
 
-                // Compute the fitness of this sublist.
-                Fitness fitness = Fitness.create(getElementSublist(beginBreakpoint, endBreakpoint), maxSize, -1,
+                // Compute the chunk of this sublist.
+                Chunk chunk = Chunk.create(getElementSublist(beginBreakpoint, endBreakpoint), maxSize, -1,
                         true, this::getElementSize);
 
                 // Compute badness for the line. This is based on how much we had to stretch or shrink.
-                long badness = fitness.computeBadness();
+                long badness = chunk.computeBadness();
 
                 // Get the penalty for the break at the end of this line.
                 long penalty = endBreakpoint.getPenalty();
@@ -183,7 +183,7 @@ public abstract class ElementList implements ElementSink {
                 // if we've not found a break at all and we're overfull (to allow lines to break when a very
                 // long unbreakable word crosses the boundary). We'll allow allow it if we're being forced
                 // to break here by a penalty.
-                if (badness <= BADNESS_TOLERANCE || (endBreakpoint.getPreviousBreakpoint() == null && fitness.isOverfull()) ||
+                if (badness <= BADNESS_TOLERANCE || (endBreakpoint.getPreviousBreakpoint() == null && chunk.isOverfull()) ||
                         penalty == -Penalty.INFINITY) {
 
                     // Compute demerits for this line.
@@ -205,17 +205,17 @@ public abstract class ElementList implements ElementSink {
                     if (printDebug()) {
                         System.out.printf("  from element %d (%s): %.1f - %.1f = %.1f (b = %,d, d = %,d, total d = %,d, r = %.3f)%n",
                                 beginBreakpoint.getStartIndex(), getDebugLinePrefix(beginBreakpoint, endBreakpoint),
-                                PT.fromSp(maxSize), PT.fromSp(fitness.getSize()), PT.fromSp(fitness.getExtraSpace()),
-                                badness, demerits, totalDemerits, fitness.getRatio());
+                                PT.fromSp(maxSize), PT.fromSp(chunk.getSize()), PT.fromSp(chunk.getExtraSpace()),
+                                badness, demerits, totalDemerits, chunk.getRatio());
                     }
 
                     // If it's the best we've seen so far, remember it.
                     if (totalDemerits < endBreakpoint.getTotalDemerits()) {
                         // Figure out how much to increase the counter for this particular case.
-                        // Add one because we have to include this fitness.
-                        int increment = getFitnessIncrement(fitness) + 1;
+                        // Add one because we have to include this chunk.
+                        int increment = getChunkExtraIncrement(chunk) + 1;
                         endBreakpoint.setPreviousBreakpoint(beginBreakpoint, increment);
-                        endBreakpoint.setFitness(fitness);
+                        endBreakpoint.setChunk(chunk);
                         endBreakpoint.setTotalDemerits(totalDemerits);
 
                         if (printDebug()) {
@@ -227,14 +227,14 @@ public abstract class ElementList implements ElementSink {
                     if (printDebug()) {
                         System.out.printf("  ignored element %d (%s): %.1f - %.1f = %.1f (b = %,d, r = %.3f)%n",
                                 beginBreakpoint.getStartIndex(), getDebugLinePrefix(beginBreakpoint, endBreakpoint),
-                                PT.fromSp(maxSize), PT.fromSp(fitness.getSize()), PT.fromSp(fitness.getExtraSpace()),
-                                badness, fitness.getRatio());
+                                PT.fromSp(maxSize), PT.fromSp(chunk.getSize()), PT.fromSp(chunk.getExtraSpace()),
+                                badness, chunk.getRatio());
                     }
                 }
 
                 // If we're overfull, then deactivate this breakpoint, since it'll be overfull for all
                 // subsequent end breakpoints too. TODO but what if they need it because they can't break?
-                if (fitness.isOverfull()) {
+                if (chunk.isOverfull()) {
                     if (printDebug()) {
                         System.out.println("    XXX removing from active list");
                     }
@@ -362,7 +362,7 @@ public abstract class ElementList implements ElementSink {
                 break;
             }
 
-            Fitness fitness = endBreakpoint.getFitness();
+            Chunk chunk = endBreakpoint.getChunk();
 
             // Get the indent and size for this line or page.
             int counter = endBreakpoint.getCounter();
@@ -370,7 +370,7 @@ public abstract class ElementList implements ElementSink {
             long size = outputShape.getSize(counter);
 
             // See if we got any images.
-            List<Image> images = fitness.getImages();
+            List<Image> images = chunk.getImages();
             if (!images.isEmpty()) {
                 if (this instanceof HorizontalList) {
                     // Move them right after this line.
@@ -388,8 +388,8 @@ public abstract class ElementList implements ElementSink {
                             imagePage.add(image.getCaption());
                         }
                         imagePage.add(Glue.infiniteVertical());
-                        Fitness imageFitness = Fitness.create(imagePage, size, -1, false, this::getElementSize);
-                        imagePage = imageFitness.fixed();
+                        Chunk imageChunk = Chunk.create(imagePage, size, -1, false, this::getElementSize);
+                        imagePage = imageChunk.fixed();
                         boxes.addFirst(makeOutputBox(imagePage, counter, 0));
                         counter--;
                     }
@@ -397,7 +397,7 @@ public abstract class ElementList implements ElementSink {
             }
 
             // Make a new list with the glue set to specific widths.
-            List<Element> fixedElements = fitness.fixed();
+            List<Element> fixedElements = chunk.fixed();
 
             // Add indent. We used to do this with a shift, but shifts aren't taken into account
             // when computing the dimensions of the vertical boxes.
@@ -486,10 +486,10 @@ public abstract class ElementList implements ElementSink {
     protected abstract List<Element> getElementSublist(Breakpoint beginBreakpoint, Breakpoint endBreakpoint);
 
     /**
-     * When generating breakpoints, if there are images and other things in a fitness, we must adjust the counter
+     * When generating breakpoints, if there are images and other things in a chunk, we must adjust the counter
      * if those images will take up space (such as a space).
      */
-    protected abstract int getFitnessIncrement(Fitness fitness);
+    protected abstract int getChunkExtraIncrement(Chunk chunk);
 
     /**
      * Keeps track of possible breakpoints in our paragraph or page, their penalty, and their effects on the
@@ -502,7 +502,7 @@ public abstract class ElementList implements ElementSink {
         private int mStartIndex;
         private long mTotalDemerits;
         private Breakpoint mPreviousBreakpoint;
-        private Fitness mFitness;
+        private Chunk mChunk;
 
         private Breakpoint(int index, long penalty) {
             mIndex = index;
@@ -511,7 +511,7 @@ public abstract class ElementList implements ElementSink {
             mStartIndex = 0;
             mTotalDemerits = 0;
             mPreviousBreakpoint = null;
-            mFitness = null;
+            mChunk = null;
         }
 
         /**
@@ -587,17 +587,17 @@ public abstract class ElementList implements ElementSink {
         }
 
         /**
-         * The fitness of the line or page ending at this breakpoint.
+         * The chunk of the line or page ending at this breakpoint.
          */
-        public Fitness getFitness() {
-            return mFitness;
+        public Chunk getChunk() {
+            return mChunk;
         }
 
         /**
-         * Set the fitness of the line or page ending at this breakpoint.
+         * Set the chunk of the line or page ending at this breakpoint.
          */
-        public void setFitness(Fitness fitness) {
-            mFitness = fitness;
+        public void setChunk(Chunk chunk) {
+            mChunk = chunk;
         }
     }
 }

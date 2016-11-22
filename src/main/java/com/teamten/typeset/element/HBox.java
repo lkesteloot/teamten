@@ -20,7 +20,7 @@ package com.teamten.typeset.element;
 
 import com.teamten.font.SizedFont;
 import com.teamten.typeset.Dimensions;
-import com.teamten.typeset.Fitness;
+import com.teamten.typeset.Chunk;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
@@ -52,8 +52,8 @@ public class HBox extends Box {
      * Make a new HBox that's forced to be the specified width.
      */
     public static HBox ofWidth(List<Element> elements, long width) {
-        Fitness fitness = Fitness.create(elements, width, -1, false, Element::getWidth);
-        elements = fitness.fixed();
+        Chunk chunk = Chunk.create(elements, width, -1, false, Element::getWidth);
+        elements = chunk.fixed();
         return new HBox(elements, 0);
     }
 

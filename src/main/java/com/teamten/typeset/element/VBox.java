@@ -18,8 +18,8 @@
 
 package com.teamten.typeset.element;
 
+import com.teamten.typeset.Chunk;
 import com.teamten.typeset.Dimensions;
-import com.teamten.typeset.Fitness;
 import com.teamten.typeset.VerticalAlignment;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
@@ -65,10 +65,10 @@ public class VBox extends Box {
      */
     public VBox fixed(long newSize, VerticalAlignment verticalAlignment) {
         // Figure out how well our existing elements fit in this new size.
-        Fitness fitness = Fitness.create(getElements(), newSize, getVerticalSize(), false, Element::getVerticalSize);
+        Chunk chunk = Chunk.create(getElements(), newSize, getVerticalSize(), false, Element::getVerticalSize);
 
         // Stretch or shrink them to fit.
-        List<Element> fixedElements = fitness.fixed();
+        List<Element> fixedElements = chunk.fixed();
 
         // Package them in a vertical box.
         return new VBox(fixedElements, Dimensions.vertically(fixedElements, verticalAlignment), 0);

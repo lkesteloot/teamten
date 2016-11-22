@@ -168,8 +168,8 @@ public class ColumnVerticalList extends ElementList {
     }
 
     @Override
-    protected int getFitnessIncrement(Fitness fitness) {
-        int increment = fitness.getImages().size();
+    protected int getChunkExtraIncrement(Chunk chunk) {
+        int increment = chunk.getImages().size();
 
         if (increment != 0) {
             throw new IllegalStateException("images in columns are not yet handled");
