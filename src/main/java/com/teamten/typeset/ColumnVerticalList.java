@@ -166,4 +166,15 @@ public class ColumnVerticalList extends ElementList {
 
         return horizontalElements;
     }
+
+    @Override
+    protected int getFitnessIncrement(Fitness fitness) {
+        int increment = fitness.getImages().size();
+
+        if (increment != 0) {
+            throw new IllegalStateException("images in columns are not yet handled");
+        }
+
+        return increment;
+    }
 }

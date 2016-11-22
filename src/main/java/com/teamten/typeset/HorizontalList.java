@@ -116,6 +116,13 @@ public class HorizontalList extends ElementList {
         return elements;
     }
 
+    @Override
+    protected int getFitnessIncrement(Fitness fitness) {
+        // The auxiliary elements like images don't take up space because they're removed when processing
+        // horizontal elements.
+        return 0;
+    }
+
     /**
      * Add the specified text, in the specified font, to the horizontal list.
      */

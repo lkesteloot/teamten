@@ -145,6 +145,12 @@ public class VerticalList extends ElementList {
         return elements;
     }
 
+    @Override
+    protected int getFitnessIncrement(Fitness fitness) {
+        // Each image will take up one page.
+        return fitness.getImages().size();
+    }
+
     /**
      * Returns the column layout for the specified element index.
      *

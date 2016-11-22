@@ -211,7 +211,10 @@ public abstract class ElementList implements ElementSink {
 
                     // If it's the best we've seen so far, remember it.
                     if (totalDemerits < endBreakpoint.getTotalDemerits()) {
-                        endBreakpoint.setPreviousBreakpoint(beginBreakpoint, fitness.getImages().size() + 1);
+                        // Figure out how much to increase the counter for this particular case.
+                        // Add one because we have to include this fitness.
+                        int increment = getFitnessIncrement(fitness) + 1;
+                        endBreakpoint.setPreviousBreakpoint(beginBreakpoint, increment);
                         endBreakpoint.setFitness(fitness);
                         endBreakpoint.setTotalDemerits(totalDemerits);
 
@@ -481,6 +484,12 @@ public abstract class ElementList implements ElementSink {
      * to this particular range.
      */
     protected abstract List<Element> getElementSublist(Breakpoint beginBreakpoint, Breakpoint endBreakpoint);
+
+    /**
+     * When generating breakpoints, if there are images and other things in a fitness, we must adjust the counter
+     * if those images will take up space (such as a space).
+     */
+    protected abstract int getFitnessIncrement(Fitness fitness);
 
     /**
      * Keeps track of possible breakpoints in our paragraph or page, their penalty, and their effects on the
