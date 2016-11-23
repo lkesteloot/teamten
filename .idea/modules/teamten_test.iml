@@ -22,7 +22,16 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../libs/pdfbox-2.0.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../libs/fontbox-2.0.0-sources.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../libs/pdfbox-2.0.0-sources.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -32,6 +41,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../../libs/annotations-java8.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../libs/pdfbox-2.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -51,24 +69,6 @@
     <orderEntry type="library" name="Gradle: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-io:7.1.6.v20100715" level="project" />
     <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-util:7.1.6.v20100715" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../libs/fontbox-2.0.0-sources.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../libs/pdfbox-2.0.0-sources.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
   <component name="TestModuleProperties" production-module="teamten_main" />
 </module>

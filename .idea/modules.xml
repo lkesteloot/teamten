@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/projects/klat_cover/klat_cover.iml" filepath="$PROJECT_DIR$/projects/klat_cover/klat_cover.iml" group="teamten" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/teamten.iml" filepath="$PROJECT_DIR$/.idea/modules/teamten.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/teamten_main.iml" filepath="$PROJECT_DIR$/.idea/modules/teamten_main.iml" group="teamten" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/teamten_test.iml" filepath="$PROJECT_DIR$/.idea/modules/teamten_test.iml" group="teamten" />

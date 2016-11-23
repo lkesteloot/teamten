@@ -36,6 +36,7 @@ import java.awt.image.Kernel;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -1489,6 +1490,9 @@ public class ImageUtils {
         log("Loading font \"%s\"", filename);
 
         InputStream inputStream = ImageUtils.class.getResourceAsStream(filename);
+        if (inputStream == null) {
+            throw new FileNotFoundException("cannot find font file " + filename);
+        }
 
         Font font;
         try {
