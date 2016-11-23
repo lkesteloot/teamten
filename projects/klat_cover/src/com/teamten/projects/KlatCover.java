@@ -93,10 +93,6 @@ public class KlatCover {
     private final int mDpi;
 
     public static void main(String[] args) throws IOException, FontFormatException {
-        new KlatCover(args).run();
-    }
-
-    private KlatCover(String[] args) {
         int count = 0;
         int dpi = SCREEN_DPI;
 
@@ -110,7 +106,11 @@ public class KlatCover {
             System.exit(-1);
         }
 
-        mFilename = args[count];
+        new KlatCover(args[count], dpi).run();
+    }
+
+    private KlatCover(String filename, int dpi) {
+        mFilename = filename;
         mDpi = dpi;
     }
 

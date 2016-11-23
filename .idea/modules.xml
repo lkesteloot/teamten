@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/teamten.iml" filepath="$PROJECT_DIR$/.idea/modules/teamten.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/teamten_main.iml" filepath="$PROJECT_DIR$/.idea/modules/teamten_main.iml" group="teamten" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/teamten_test.iml" filepath="$PROJECT_DIR$/.idea/modules/teamten_test.iml" group="teamten" />
+      <module fileurl="file://$PROJECT_DIR$/tools/engrave/tools.iml" filepath="$PROJECT_DIR$/tools/engrave/tools.iml" group="teamten" />
     </modules>
   </component>
 </project>
