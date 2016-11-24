@@ -18,6 +18,8 @@
 
 package com.teamten.font;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,41 +28,41 @@ import java.util.Map;
  * Tracks sets of fonts for a given typeface.
  */
 public enum Typeface {
-    TIMES_NEW_ROMAN(new MapBuilder()
-            .with(FontVariant.REGULAR, FontName.TIMES_NEW_ROMAN)
-            .with(FontVariant.BOLD, FontName.TIMES_NEW_ROMAN_BOLD)
-            .with(FontVariant.ITALIC, FontName.TIMES_NEW_ROMAN_ITALIC)
-            .with(FontVariant.BOLD_ITALIC, FontName.TIMES_NEW_ROMAN_BOLD_ITALIC)
+    TIMES_NEW_ROMAN(ImmutableMap.<FontVariant,FontName>builder()
+            .put(FontVariant.REGULAR, FontName.TIMES_NEW_ROMAN)
+            .put(FontVariant.BOLD, FontName.TIMES_NEW_ROMAN_BOLD)
+            .put(FontVariant.ITALIC, FontName.TIMES_NEW_ROMAN_ITALIC)
+            .put(FontVariant.BOLD_ITALIC, FontName.TIMES_NEW_ROMAN_BOLD_ITALIC)
             .build()),
-    MINION(new MapBuilder()
-            .with(FontVariant.REGULAR, FontName.MINION)
-            .with(FontVariant.BOLD, FontName.MINION_BOLD)
-            .with(FontVariant.ITALIC, FontName.MINION_ITALIC)
-            .with(FontVariant.BOLD_ITALIC, FontName.MINION_BOLD_ITALIC)
-            .with(FontVariant.SMALL_CAPS, FontName.MINION_SMALL_CAPS)
+    MINION(ImmutableMap.<FontVariant,FontName>builder()
+            .put(FontVariant.REGULAR, FontName.MINION)
+            .put(FontVariant.BOLD, FontName.MINION_BOLD)
+            .put(FontVariant.ITALIC, FontName.MINION_ITALIC)
+            .put(FontVariant.BOLD_ITALIC, FontName.MINION_BOLD_ITALIC)
+            .put(FontVariant.SMALL_CAPS, FontName.MINION_SMALL_CAPS)
             .build()),
     /**
      * https://fonts.google.com/specimen/Alegreya
      */
-    ALEGREYA(new MapBuilder()
-            .with(FontVariant.REGULAR, FontName.ALEGREYA_REGULAR)
-            .with(FontVariant.ITALIC, FontName.ALEGREYA_ITALIC)
-            .with(FontVariant.SMALL_CAPS, FontName.ALEGREYA_SMALL_CAPS)
+    ALEGREYA(ImmutableMap.<FontVariant,FontName>builder()
+            .put(FontVariant.REGULAR, FontName.ALEGREYA_REGULAR)
+            .put(FontVariant.ITALIC, FontName.ALEGREYA_ITALIC)
+            .put(FontVariant.SMALL_CAPS, FontName.ALEGREYA_SMALL_CAPS)
             .build()),
     /**
      * https://fonts.google.com/specimen/IM+Fell+English
      */
-    IM_FELL_ENGLISH(new MapBuilder()
-            .with(FontVariant.REGULAR, FontName.IM_FELL_ENGLISH_REGULAR)
-            .with(FontVariant.ITALIC, FontName.IM_FELL_ENGLISH_ITALIC)
-            .with(FontVariant.SMALL_CAPS, FontName.IM_FELL_ENGLISH_SMALL_CAPS)
+    IM_FELL_ENGLISH(ImmutableMap.<FontVariant,FontName>builder()
+            .put(FontVariant.REGULAR, FontName.IM_FELL_ENGLISH_REGULAR)
+            .put(FontVariant.ITALIC, FontName.IM_FELL_ENGLISH_ITALIC)
+            .put(FontVariant.SMALL_CAPS, FontName.IM_FELL_ENGLISH_SMALL_CAPS)
             .build()),
     /**
      * https://fonts.google.com/specimen/Sorts+Mill+Goudy
      */
-    SORTS_MILL_GOUDY(new MapBuilder()
-            .with(FontVariant.REGULAR, FontName.SORTS_MILL_GOUDY_REGULAR)
-            .with(FontVariant.ITALIC, FontName.SORTS_MILL_GOUDY_ITALIC)
+    SORTS_MILL_GOUDY(ImmutableMap.<FontVariant,FontName>builder()
+            .put(FontVariant.REGULAR, FontName.SORTS_MILL_GOUDY_REGULAR)
+            .put(FontVariant.ITALIC, FontName.SORTS_MILL_GOUDY_ITALIC)
             .build());
 
     private final Map<FontVariant,FontName> mFontMap;
@@ -74,28 +76,6 @@ public enum Typeface {
      */
     public FontName get(FontVariant fontVariant) {
         return mFontMap.get(fontVariant);
-    }
-
-    /**
-     * Utility class to help build the map of font variants.
-     */
-    private static class MapBuilder {
-        private final Map<FontVariant,FontName> mFontMap = new HashMap<>();
-
-        /**
-         * Fluid method to add an entry to the map.
-         */
-        MapBuilder with(FontVariant fontVariant, FontName fontName) {
-            mFontMap.put(fontVariant, fontName);
-            return this;
-        }
-
-        /**
-         * Returns an unmodifiable version of the map.
-         */
-        Map<FontVariant,FontName> build() {
-            return Collections.unmodifiableMap(mFontMap);
-        }
     }
 
     /**

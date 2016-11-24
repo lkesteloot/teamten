@@ -44,8 +44,6 @@ public class KlatCover {
     // DPI from http://en.wikipedia.org/wiki/List_of_displays_by_pixel_density
     private static final int SCREEN_DPI = 109; // Dell U2713HM (2560px / 23.5")
     private static final int PRINT_DPI = 300;
-    // Important text/images must be 0.375" away from edge.
-    // http://connect.lulu.com/t5/Cover-Formatting/What-dimensions-should-my-book-cover-images-have/ta-p/33279
     private static final double BLEED_IN = 0.125;
     private static final double PAGE_WIDTH_IN = 6; // Not including bleed, including margin.
     private static final double PAGE_HEIGHT_IN = 9;
@@ -74,7 +72,7 @@ public class KlatCover {
     private static final double SPINE_LINE1_POS_IN = FRAME_MARGIN_TOP;
     private static final double SPINE_LINE2_POS_IN = PAGE_HEIGHT_IN - FRAME_MARGIN_BOTTOM;
     // Spine text.
-    private static final double SPINE_TEXT_FONT_SIZE_IN = 0.130;
+    private static final double SPINE_TEXT_FONT_SIZE_IN = 0.200;
     private static final double SPINE_AUTHOR_POS_IN = 2.25;
     private static final double SPINE_TITLE_POS_IN = 5.00;
 
@@ -195,8 +193,8 @@ public class KlatCover {
 
         // Red lines.
         g.setPaint(HIGHLIGHT_COLOR);
-        g.drawRect(spineX, bleed + toPixels(SPINE_LINE1_POS_IN), spineWidth, toPixels(SPINE_LINE_WIDTH_IN));
-        g.drawRect(spineX, bleed + toPixels(SPINE_LINE2_POS_IN), spineWidth, toPixels(SPINE_LINE_WIDTH_IN));
+        g.fillRect(spineX, bleed + toPixels(SPINE_LINE1_POS_IN), spineWidth, toPixels(SPINE_LINE_WIDTH_IN));
+        g.fillRect(spineX, bleed + toPixels(SPINE_LINE2_POS_IN), spineWidth, toPixels(SPINE_LINE_WIDTH_IN));
 
         // Rotate the whole thing so we're in the spine's transform. (0,0) is the upper-right
         // of the spine when the cover is seen normally.
