@@ -60,10 +60,10 @@ public class KlatCover {
     private static final double FRAME_INSIDE_THICKNESS = 0.006;
     // Author.
     private static final double AUTHOR_POS_IN = 1.5;
-    private static final double AUTHOR_FONT_SIZE_IN = 0.130;
+    private static final double AUTHOR_FONT_SIZE_IN = 0.15;
     // Title.
-    private static final double TITLE_POS_IN = 3.0;
-    private static final double TITLE_FONT_SIZE_IN = 0.25;
+    private static final double TITLE_POS_IN = 3.2;
+    private static final double TITLE_FONT_SIZE_IN = 0.30;
     // Date.
     private static final double DATE_POS_IN = 7.50;
     private static final double DATE_FONT_SIZE_IN = 0.120;
@@ -127,30 +127,16 @@ public class KlatCover {
         int bleed = toPixels(BLEED_IN);
 
         // Frame.
-        g.setPaint(HIGHLIGHT_COLOR);
-        g.fillRect(
+        drawRect(g, HIGHLIGHT_COLOR, toPixels(FRAME_OUTSIDE_THICKNESS),
                 pageLeft + toPixels(FRAME_MARGIN_LEFT),
                 bleed + toPixels(FRAME_MARGIN_TOP),
                 toPixels(PAGE_WIDTH_IN - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT),
                 toPixels(PAGE_HEIGHT_IN - FRAME_MARGIN_TOP - FRAME_MARGIN_BOTTOM));
-        g.setPaint(BACKGROUND_COLOR);
-        g.fillRect(
-                pageLeft + toPixels(FRAME_MARGIN_LEFT + FRAME_OUTSIDE_THICKNESS),
-                bleed + toPixels(FRAME_MARGIN_TOP + FRAME_OUTSIDE_THICKNESS),
-                toPixels(PAGE_WIDTH_IN - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT - 2*FRAME_OUTSIDE_THICKNESS),
-                toPixels(PAGE_HEIGHT_IN - FRAME_MARGIN_TOP - FRAME_MARGIN_BOTTOM - 2*FRAME_OUTSIDE_THICKNESS));
-        g.setPaint(HIGHLIGHT_COLOR);
-        g.fillRect(
+        drawRect(g, HIGHLIGHT_COLOR, toPixels(FRAME_INSIDE_THICKNESS),
                 pageLeft + toPixels(FRAME_MARGIN_LEFT + FRAME_OUTSIDE_THICKNESS + FRAME_PADDING),
                 bleed + toPixels(FRAME_MARGIN_TOP + FRAME_OUTSIDE_THICKNESS + FRAME_PADDING),
                 toPixels(PAGE_WIDTH_IN - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT - 2*(FRAME_OUTSIDE_THICKNESS + FRAME_PADDING)),
                 toPixels(PAGE_HEIGHT_IN - FRAME_MARGIN_TOP - FRAME_MARGIN_BOTTOM - 2*(FRAME_OUTSIDE_THICKNESS + FRAME_PADDING)));
-        g.setPaint(BACKGROUND_COLOR);
-        g.fillRect(
-                pageLeft + toPixels(FRAME_MARGIN_LEFT + FRAME_OUTSIDE_THICKNESS + FRAME_PADDING + FRAME_INSIDE_THICKNESS),
-                bleed + toPixels(FRAME_MARGIN_TOP + FRAME_OUTSIDE_THICKNESS + FRAME_PADDING + FRAME_INSIDE_THICKNESS),
-                toPixels(PAGE_WIDTH_IN - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT - 2*(FRAME_OUTSIDE_THICKNESS + FRAME_PADDING + FRAME_INSIDE_THICKNESS)),
-                toPixels(PAGE_HEIGHT_IN - FRAME_MARGIN_TOP - FRAME_MARGIN_BOTTOM - 2*(FRAME_OUTSIDE_THICKNESS + FRAME_PADDING + FRAME_INSIDE_THICKNESS)));
 
         int y;
         Font font;
@@ -283,6 +269,18 @@ public class KlatCover {
 
         g.setPaint(color);
         g.fill(glyphVector.getOutline(x1, y));
+    }
+
+    /**
+     * Draws a rectangle outline of the given thickness.
+     */
+    private void drawRect(Graphics2D g, Color color, int thickness, int x, int y, int width, int height) {
+        g.setPaint(color);
+
+        g.fillRect(x, y, thickness, height);
+        g.fillRect(x, y, width, thickness);
+        g.fillRect(x + width - thickness, y, thickness, height);
+        g.fillRect(x, y + height - thickness, width, thickness);
     }
 
     private int toPixels(double inches) {
