@@ -63,30 +63,3 @@ uploadArchives {
     }
 }
 
-// For running test classes.
-task parseMarkdown(type:JavaExec) {
-    main = 'com.teamten.markdown.MarkdownParser'
-    classpath = sourceSets.main.runtimeClasspath
-    args 'foo.md'
-}
-task typeset(type:JavaExec) {
-    main = 'com.teamten.typeset.Typesetter'
-    classpath = sourceSets.main.runtimeClasspath
-    args 'foo.md'
-    args 'foo.pdf'
-}
-task pdftest(type:JavaExec) {
-    main = 'com.teamten.typeset.PdfTest'
-    classpath = sourceSets.main.runtimeClasspath
-    args 'foo.pdf'
-}
-task simple(type:JavaExec) {
-    main = 'com.teamten.typeset.Typesetter'
-    classpath = sourceSets.main.runtimeClasspath
-    args 'simple.md'
-    args 'foo.pdf'
-}
-task mario(type:JavaExec) {
-    main = 'com.teamten.mario.Mario'
-    classpath = sourceSets.main.runtimeClasspath
-}

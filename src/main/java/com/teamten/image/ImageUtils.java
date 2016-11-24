@@ -34,6 +34,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Kernel;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -66,6 +67,7 @@ import org.w3c.dom.Node;
  */
 public class ImageUtils {
     public static boolean PRINT_LOG = true;
+    private static final File MY_FONT_DIR = new File("/Users/lk/Dropbox/Personal/Fonts");
     private static final String FONT_DIR = System.getProperty("user.home") +
         File.separator + "fonts";
     private static final Color TRANSPARENT = new Color(0, 0, 0, 0);
@@ -1408,7 +1410,8 @@ public class ImageUtils {
             double size) throws FontFormatException, IOException {
 
         // Figure out which filename to load.
-        String filename;
+        String filename = null;
+        File file = null;
 
         switch (typeface) {
             case HELVETICA:
@@ -1483,15 +1486,32 @@ public class ImageUtils {
                 }
                 break;
 
+            case MINION:
+                if (bold && italic) {
+                    throw new IllegalArgumentException("bold italic Minion not supported");
+                } else if (bold) {
+                    throw new IllegalArgumentException("bold Minion not supported");
+                } else if (italic) {
+                    file = new File(MY_FONT_DIR, "Minion/MinionPro-It.ttf");
+                } else {
+                    file = new File(MY_FONT_DIR, "Minion/MinionPro-Regular.ttf");
+                }
+                break;
+
             default:
                 throw new IllegalArgumentException("Unknown typeface " + typeface);
         }
 
-        log("Loading font \"%s\"", filename);
-
-        InputStream inputStream = ImageUtils.class.getResourceAsStream(filename);
-        if (inputStream == null) {
-            throw new FileNotFoundException("cannot find font file " + filename);
+        InputStream inputStream;
+        if (file != null) {
+            log("Loading font \"%s\"", file);
+            inputStream = new BufferedInputStream(new FileInputStream(file));
+        } else {
+            log("Loading font \"%s\"", filename);
+            inputStream = ImageUtils.class.getResourceAsStream(filename);
+            if (inputStream == null) {
+                throw new FileNotFoundException("cannot find font file " + filename);
+            }
         }
 
         Font font;

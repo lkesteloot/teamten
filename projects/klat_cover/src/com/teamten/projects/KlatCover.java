@@ -82,6 +82,9 @@ public class KlatCover {
     private static final Color DEBUG_COLOR = Color.GRAY;
     private static final Color BLACK_TEXT_COLOR = Color.BLACK;
 
+    // Typefaces.
+    private static final Typeface TYPEFACE = Typeface.MINION;
+
     // Flags.
     private static final boolean DRAW_BLEED = true;
 
@@ -156,7 +159,7 @@ public class KlatCover {
         int textHeight;
 
         // Author.
-        font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false, toPixels(AUTHOR_FONT_SIZE_IN));
+        font = ImageUtils.getFont(TYPEFACE, false, false, false, toPixels(AUTHOR_FONT_SIZE_IN));
         g.setColor(BLACK_TEXT_COLOR);
         g.setFont(font);
         textLayout = new TextLayout(AUTHOR, font, g.getFontRenderContext());
@@ -166,7 +169,7 @@ public class KlatCover {
         textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2, y + textHeight/2);
 
         // Title.
-        font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false, toPixels(TITLE_FONT_SIZE_IN));
+        font = ImageUtils.getFont(TYPEFACE, false, false, false, toPixels(TITLE_FONT_SIZE_IN));
         g.setColor(HIGHLIGHT_COLOR);
         g.setFont(font);
         textLayout = new TextLayout(TITLE, font, g.getFontRenderContext());
@@ -176,7 +179,7 @@ public class KlatCover {
         textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2, y + textHeight/2);
 
         // Date.
-        font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false, toPixels(DATE_FONT_SIZE_IN));
+        font = ImageUtils.getFont(TYPEFACE, false, false, false, toPixels(DATE_FONT_SIZE_IN));
         g.setColor(BLACK_TEXT_COLOR);
         g.setFont(font);
         textLayout = new TextLayout(DATE, font, g.getFontRenderContext());
@@ -203,7 +206,7 @@ public class KlatCover {
         g.rotate(-Math.PI/2);
 
         // Author.
-        font = ImageUtils.getFont(Typeface.GARAMOND, false, false, false, toPixels(SPINE_TEXT_FONT_SIZE_IN));
+        font = ImageUtils.getFont(TYPEFACE, false, false, false, toPixels(SPINE_TEXT_FONT_SIZE_IN));
         g.setColor(BLACK_TEXT_COLOR);
         g.setFont(font);
         textLayout = new TextLayout(AUTHOR, font, g.getFontRenderContext());

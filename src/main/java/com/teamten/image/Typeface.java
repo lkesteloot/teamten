@@ -28,4 +28,5 @@ public enum Typeface {
     FUTURA,
     COURIER,
     GARAMOND,
+    MINION,
 }
