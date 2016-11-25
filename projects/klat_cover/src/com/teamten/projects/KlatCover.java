@@ -21,11 +21,13 @@ package com.teamten.projects;
 import com.teamten.image.ImageUtils;
 import com.teamten.image.Typeface;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.Graphics2D;
 import java.awt.font.GlyphMetrics;
 import java.awt.font.GlyphVector;
 import java.awt.font.TextLayout;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -43,7 +45,7 @@ public class KlatCover {
     // Sizes.
     // DPI from http://en.wikipedia.org/wiki/List_of_displays_by_pixel_density
     private static final int SCREEN_DPI = 109; // Dell U2713HM (2560px / 23.5")
-    private static final int PRINT_DPI = 300;
+    private static final int PRINT_DPI = 300; // Print at 24% scale (72/300)
     private static final double BLEED_IN = 0.125;
     private static final double PAGE_WIDTH_IN = 6; // Not including bleed, including margin.
     private static final double PAGE_HEIGHT_IN = 9;
@@ -55,18 +57,18 @@ public class KlatCover {
     private static final double FRAME_MARGIN_RIGHT = 0.75;
     private static final double FRAME_MARGIN_TOP = 0.875;
     private static final double FRAME_MARGIN_BOTTOM = 0.875;
-    private static final double FRAME_OUTSIDE_THICKNESS = 0.015;
-    private static final double FRAME_PADDING = 0.009;
+    private static final double FRAME_OUTSIDE_THICKNESS = 0.012;
+    private static final double FRAME_PADDING = 0.0135;
     private static final double FRAME_INSIDE_THICKNESS = 0.006;
     // Author.
     private static final double AUTHOR_POS_IN = 1.5;
-    private static final double AUTHOR_FONT_SIZE_IN = 0.15;
+    private static final double AUTHOR_FONT_SIZE_IN = 0.20;
     // Title.
     private static final double TITLE_POS_IN = 3.2;
-    private static final double TITLE_FONT_SIZE_IN = 0.30;
+    private static final double TITLE_FONT_SIZE_IN = 0.39;
     // Date.
-    private static final double DATE_POS_IN = 7.50;
-    private static final double DATE_FONT_SIZE_IN = 0.120;
+    private static final double DATE_POS_IN = 7.60;
+    private static final double DATE_FONT_SIZE_IN = 0.15;
     // Spine lines.
     private static final double SPINE_LINE_WIDTH_IN = 0.006;
     private static final double SPINE_LINE1_POS_IN = FRAME_MARGIN_TOP;
@@ -126,17 +128,24 @@ public class KlatCover {
         int pageLeft = toPixels(BLEED_IN + PAGE_WIDTH_IN + SPINE_WIDTH_IN);
         int bleed = toPixels(BLEED_IN);
 
-        // Frame.
-        drawRect(g, HIGHLIGHT_COLOR, toPixels(FRAME_OUTSIDE_THICKNESS),
-                pageLeft + toPixels(FRAME_MARGIN_LEFT),
-                bleed + toPixels(FRAME_MARGIN_TOP),
-                toPixels(PAGE_WIDTH_IN - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT),
-                toPixels(PAGE_HEIGHT_IN - FRAME_MARGIN_TOP - FRAME_MARGIN_BOTTOM));
-        drawRect(g, HIGHLIGHT_COLOR, toPixels(FRAME_INSIDE_THICKNESS),
-                pageLeft + toPixels(FRAME_MARGIN_LEFT + FRAME_OUTSIDE_THICKNESS + FRAME_PADDING),
-                bleed + toPixels(FRAME_MARGIN_TOP + FRAME_OUTSIDE_THICKNESS + FRAME_PADDING),
-                toPixels(PAGE_WIDTH_IN - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT - 2*(FRAME_OUTSIDE_THICKNESS + FRAME_PADDING)),
-                toPixels(PAGE_HEIGHT_IN - FRAME_MARGIN_TOP - FRAME_MARGIN_BOTTOM - 2*(FRAME_OUTSIDE_THICKNESS + FRAME_PADDING)));
+        // Frame. Use integer math to avoid round-off errors.
+        int frameX = pageLeft + toPixels(FRAME_MARGIN_LEFT);
+        int frameY = bleed + toPixels(FRAME_MARGIN_TOP);
+        int frameWidth = toPixels(PAGE_WIDTH_IN - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT);
+        int frameHeight = toPixels(PAGE_HEIGHT_IN - FRAME_MARGIN_TOP - FRAME_MARGIN_BOTTOM);
+        int frameOutsideThickness = toPixels(FRAME_OUTSIDE_THICKNESS);
+        int framePadding = toPixels(FRAME_PADDING);
+        int frameInsideThickness = toPixels(FRAME_INSIDE_THICKNESS);
+        drawRect(g, HIGHLIGHT_COLOR, frameOutsideThickness,
+                frameX,
+                frameY,
+                frameWidth,
+                frameHeight);
+        drawRect(g, HIGHLIGHT_COLOR, frameInsideThickness,
+                frameX + frameOutsideThickness + framePadding,
+                frameY + frameOutsideThickness + framePadding,
+                frameWidth - 2*(frameOutsideThickness + framePadding),
+                frameHeight - 2*(frameOutsideThickness + framePadding));
 
         int y;
         Font font;
@@ -185,29 +194,23 @@ public class KlatCover {
         g.fillRect(spineX, bleed + toPixels(SPINE_LINE1_POS_IN), spineWidth, toPixels(SPINE_LINE_WIDTH_IN));
         g.fillRect(spineX, bleed + toPixels(SPINE_LINE2_POS_IN), spineWidth, toPixels(SPINE_LINE_WIDTH_IN));
 
-        // Rotate the whole thing so we're in the spine's transform. (0,0) is the upper-right
-        // of the spine when the cover is seen normally.
-        AffineTransform saveTransform = g.getTransform();
-        g.translate(spineX, height - bleed);
-        g.rotate(-Math.PI/2);
-
-        // Author.
+        // Get text parameters. Use the height of an "A" for centering.
+        BufferedImage textImage;
         font = ImageUtils.getFont(TYPEFACE, false, false, false, toPixels(SPINE_TEXT_FONT_SIZE_IN));
-        g.setColor(BLACK_TEXT_COLOR);
-        g.setFont(font);
-        textLayout = new TextLayout(AUTHOR, font, g.getFontRenderContext());
+        textLayout = new TextLayout("A", font, g.getFontRenderContext());
         textHeight = (int) textLayout.getBounds().getHeight();
-        textLayout.draw(g, toPixels(SPINE_AUTHOR_POS_IN), spineWidth/2 + textHeight/2);
 
         // Author.
-        g.setColor(HIGHLIGHT_COLOR);
-        g.setFont(font);
-        textLayout = new TextLayout(TITLE, font, g.getFontRenderContext());
-        textHeight = (int) textLayout.getBounds().getHeight();
-        textLayout.draw(g, toPixels(SPINE_TITLE_POS_IN), spineWidth/2 + textHeight/2);
+        textImage = renderText(g, font, BLACK_TEXT_COLOR, AUTHOR);
+        textImage = ImageUtils.rotate(textImage, -Math.PI/2, true);
+        g.drawImage(textImage, spineX + spineWidth/2 + textHeight/2 - textImage.getWidth(),
+                height - bleed - toPixels(SPINE_AUTHOR_POS_IN) - textImage.getHeight(), null);
 
-        // Rotate back.
-        g.setTransform(saveTransform);
+        // Title.
+        textImage = renderText(g, font, HIGHLIGHT_COLOR, TITLE);
+        textImage = ImageUtils.rotate(textImage, -Math.PI/2, true);
+        g.drawImage(textImage, spineX + spineWidth/2 + textHeight/2 - textImage.getWidth(),
+                height - bleed - toPixels(SPINE_TITLE_POS_IN) - textImage.getHeight(), null);
 
         // ----------------------------------------------------------------------------------
         // Debug
@@ -220,6 +223,27 @@ public class KlatCover {
 
         g.dispose();
         ImageUtils.save(image, mFilename);
+    }
+
+    /**
+     * Draw text into an image, trimming the result.
+     */
+    private BufferedImage renderText(Graphics2D parentG, Font font, Color color, String text) {
+        TextLayout textLayout = new TextLayout(text, font, parentG.getFontRenderContext());
+        int width = (int) textLayout.getBounds().getWidth();
+        int height = (int) textLayout.getBounds().getHeight();
+
+        BufferedImage image = ImageUtils.make(width*2, height*2, BACKGROUND_COLOR);
+        Graphics2D g = ImageUtils.createGraphics(image);
+
+        g.setColor(color);
+        g.setFont(font);
+        textLayout.draw(g, width/2, height*3/2);
+        g.dispose();
+
+        image = ImageUtils.trim(image);
+
+        return image;
     }
 
     /**
