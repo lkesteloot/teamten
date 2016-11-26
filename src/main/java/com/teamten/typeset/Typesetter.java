@@ -402,6 +402,9 @@ public class Typesetter {
         // Eject the last page.
         verticalList.ejectPage();
 
+        // At least one blank page after the last page.
+        verticalList.ejectPage();
+
         return verticalList;
     }
 

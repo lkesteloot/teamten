@@ -49,7 +49,7 @@ public class KlatCover {
     private static final double BLEED_IN = 0.125;
     private static final double PAGE_WIDTH_IN = 6; // Not including bleed, including margin.
     private static final double PAGE_HEIGHT_IN = 9;
-    private static final double SPINE_WIDTH_IN = 0.489; // Get from Lulu, depends on page count
+    private static final double SPINE_WIDTH_IN = 0.572; // Get from Lulu, depends on page count
     private static final double WIDTH_IN = 2*PAGE_WIDTH_IN + SPINE_WIDTH_IN + 2*BLEED_IN;
     private static final double HEIGHT_IN = PAGE_HEIGHT_IN + 2*BLEED_IN;
     // Red frame.
@@ -62,13 +62,13 @@ public class KlatCover {
     private static final double FRAME_INSIDE_THICKNESS = 0.006;
     // Author.
     private static final double AUTHOR_POS_IN = 1.5;
-    private static final double AUTHOR_FONT_SIZE_IN = 0.20;
+    private static final double AUTHOR_FONT_SIZE_IN = 0.18;
     // Title.
     private static final double TITLE_POS_IN = 3.2;
-    private static final double TITLE_FONT_SIZE_IN = 0.39;
+    private static final double TITLE_FONT_SIZE_IN = 0.37;
     // Date.
     private static final double DATE_POS_IN = 7.60;
-    private static final double DATE_FONT_SIZE_IN = 0.15;
+    private static final double DATE_FONT_SIZE_IN = 0.14;
     // Spine lines.
     private static final double SPINE_LINE_WIDTH_IN = 0.006;
     private static final double SPINE_LINE1_POS_IN = FRAME_MARGIN_TOP;
@@ -83,12 +83,14 @@ public class KlatCover {
     private static final Color HIGHLIGHT_COLOR = new Color(0.8f, 0.0f, 0.0f, 1.0f);
     private static final Color DEBUG_COLOR = Color.GRAY;
     private static final Color BLACK_TEXT_COLOR = Color.BLACK;
+    private static final Color LIGHT_YELLOW_COLOR = new Color(203, 193, 166);
+    private static final Color DARK_YELLOW_COLOR = new Color(181, 148, 95);
 
     // Typefaces.
     private static final Typeface TYPEFACE = Typeface.MINION;
 
     // Flags.
-    private static final boolean DRAW_BLEED = true;
+    private static final boolean DRAW_BLEED = false;
 
     private final String mFilename;
     private final int mDpi;
@@ -122,11 +124,45 @@ public class KlatCover {
         BufferedImage image = ImageUtils.make(width, height, BACKGROUND_COLOR);
         Graphics2D g = ImageUtils.createGraphics(image);
 
-        // ----------------------------------------------------------------------------------
-        // Front page
-
         int pageLeft = toPixels(BLEED_IN + PAGE_WIDTH_IN + SPINE_WIDTH_IN);
         int bleed = toPixels(BLEED_IN);
+        int spineX = toPixels(BLEED_IN + PAGE_WIDTH_IN);
+        int spineWidth = toPixels(SPINE_WIDTH_IN);
+
+        // ----------------------------------------------------------------------------------
+        // Background
+
+        g.setColor(LIGHT_YELLOW_COLOR);
+        g.fillRect(0, 0, width, height);
+        int region = toPixels(1.0);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int dist = region;
+                dist = Math.min(dist, width - bleed - x);
+                dist = Math.min(dist, x - bleed);
+                dist = Math.min(dist, height - bleed - y);
+                dist = Math.min(dist, y - bleed);
+                if (x < spineX) {
+                    dist = Math.min(dist, spineX - x);
+                } else if (x > spineX + spineWidth) {
+                    dist = Math.min(dist, x - (spineX + spineWidth));
+                } else {
+                    dist = 0;
+                }
+                dist = Math.max(dist, 0);
+
+                double t = (double) dist / region;
+
+                t = t/2 + 0.5;
+
+                Color c = ImageUtils.interpolateColor(DARK_YELLOW_COLOR, LIGHT_YELLOW_COLOR, t);
+                image.setRGB(x, y, c.getRGB());
+            }
+        }
+
+
+        // ----------------------------------------------------------------------------------
+        // Front page
 
         // Frame. Use integer math to avoid round-off errors.
         int frameX = pageLeft + toPixels(FRAME_MARGIN_LEFT);
@@ -186,9 +222,6 @@ public class KlatCover {
         // ----------------------------------------------------------------------------------
         // Spine
 
-        int spineX = toPixels(BLEED_IN + PAGE_WIDTH_IN);
-        int spineWidth = toPixels(SPINE_WIDTH_IN);
-
         // Red lines.
         g.setPaint(HIGHLIGHT_COLOR);
         g.fillRect(spineX, bleed + toPixels(SPINE_LINE1_POS_IN), spineWidth, toPixels(SPINE_LINE_WIDTH_IN));
@@ -233,7 +266,7 @@ public class KlatCover {
         int width = (int) textLayout.getBounds().getWidth();
         int height = (int) textLayout.getBounds().getHeight();
 
-        BufferedImage image = ImageUtils.make(width*2, height*2, BACKGROUND_COLOR);
+        BufferedImage image = ImageUtils.makeTransparent(width*2, height*2);
         Graphics2D g = ImageUtils.createGraphics(image);
 
         g.setColor(color);
