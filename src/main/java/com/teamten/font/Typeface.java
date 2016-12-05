@@ -38,6 +38,12 @@ public enum Typeface {
             .put(FontVariant.ITALIC, FontName.COURIER_NEW_ITALIC)
             .put(FontVariant.BOLD_ITALIC, FontName.COURIER_NEW_BOLD_ITALIC)
             .build()),
+    ROBOTO_MONO(ImmutableMap.<FontVariant,FontName>builder()
+            .put(FontVariant.REGULAR, FontName.ROBOTO_MONO)
+            .put(FontVariant.BOLD, FontName.ROBOTO_MONO_BOLD)
+            .put(FontVariant.ITALIC, FontName.ROBOTO_MONO_ITALIC)
+            .put(FontVariant.BOLD_ITALIC, FontName.ROBOTO_MONO_BOLD_ITALIC)
+            .build()),
     MINION(ImmutableMap.<FontVariant,FontName>builder()
             .put(FontVariant.REGULAR, FontName.MINION)
             .put(FontVariant.BOLD, FontName.MINION_BOLD)
