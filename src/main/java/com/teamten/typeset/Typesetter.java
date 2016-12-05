@@ -242,7 +242,15 @@ public class Typesetter {
 
                 case OUTPUT:
                     regularFontKey = Config.Key.OUTPUT_FONT;
-                    if (previousBlockType != BlockType.OUTPUT) {
+                    if (!previousBlockType.isConsole()) {
+                        marginTop = PT.toSp(8.0);
+                    }
+                    indentFirstLine = true;
+                    break;
+
+                case INPUT:
+                    regularFontKey = Config.Key.INPUT_FONT;
+                    if (!previousBlockType.isConsole()) {
                         marginTop = PT.toSp(8.0);
                     }
                     indentFirstLine = true;
@@ -277,7 +285,7 @@ public class Typesetter {
             if (block.getBlockType() != BlockType.CODE && previousBlockType == BlockType.CODE) {
                 marginTop = Math.max(marginTop, PT.toSp(8.0));
             }
-            if (block.getBlockType() != BlockType.OUTPUT && previousBlockType == BlockType.OUTPUT) {
+            if (!block.getBlockType().isConsole() && previousBlockType != null && previousBlockType.isConsole()) {
                 marginTop = Math.max(marginTop, PT.toSp(8.0));
             }
 

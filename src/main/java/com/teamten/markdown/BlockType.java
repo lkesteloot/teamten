@@ -30,11 +30,19 @@ public enum BlockType {
     NUMBERED_LIST,
     CODE,
     OUTPUT,
+    INPUT,
 
     // Specific pages:
     HALF_TITLE_PAGE,
     TITLE_PAGE,
     COPYRIGHT_PAGE,
     TABLE_OF_CONTENTS,
-    INDEX,
+    INDEX;
+
+    /**
+     * Whether this represents what you might see on a console.
+     */
+    public boolean isConsole() {
+        return this == OUTPUT || this == INPUT;
+    }
 }

@@ -169,9 +169,15 @@ public class MarkdownParser {
                     break;
 
                 case THREE_SPACES:
-                    if (ch == ' ' || ch == '>') {
+                    if (ch == ' ') {
                         state = ParserState.LINE_OF_CODE;
-                        builder = new Block.Builder(ch == '>' ? BlockType.OUTPUT : BlockType.CODE);
+                        builder = new Block.Builder(BlockType.CODE);
+                    } else if (ch == '>') {
+                        state = ParserState.LINE_OF_CODE;
+                        builder = new Block.Builder(BlockType.OUTPUT);
+                    } else if (ch == '<') {
+                        state = ParserState.LINE_OF_CODE;
+                        builder = new Block.Builder(BlockType.INPUT);
                     } else {
                         state = ParserState.START_OF_LINE;
                         processSameCharacter = true;
