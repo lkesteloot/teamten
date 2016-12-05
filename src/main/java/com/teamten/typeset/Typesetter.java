@@ -388,6 +388,7 @@ public class Typesetter {
                 case NUMBERED_LIST:
                 case CODE:
                 case OUTPUT:
+                case INPUT:
                     // Nothing special.
                     break;
 
@@ -678,6 +679,7 @@ public class Typesetter {
 
         long marginTop = IN.toSp(1.0);
         long paddingBelowTitle = IN.toSp(0.75);
+        boolean hasParts = sections.hasParts();
 
         String tocTitle = config.getString(Config.Key.TOC_TITLE);
         if (tocTitle == null) {
@@ -752,7 +754,12 @@ public class Typesetter {
                         break;
 
                     case CHAPTER:
-                        indent = PT.toSp(entryFontSize);
+                        if (hasParts) {
+                            indent = PT.toSp(entryFontSize);
+                        } else {
+                            marginAbove = interEntryMargin;
+                            marginBelow = interEntryMargin;
+                        }
                         break;
 
                     case MINOR_SECTION:

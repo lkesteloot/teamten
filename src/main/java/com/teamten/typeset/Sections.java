@@ -111,6 +111,19 @@ public class Sections {
     }
 
     /**
+     * Whether we have any parts.
+     */
+    public boolean hasParts() {
+        for (SectionBookmark sectionBookmark : mPageToSectionMap.values()) {
+            if (sectionBookmark.getType() == SectionBookmark.Type.PART) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Whether we should draw a headline on this page.
      */
     public boolean shouldDrawHeadline(int physicalPageNumber) {
