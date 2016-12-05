@@ -111,6 +111,8 @@ public class MarkdownParser {
                         state = ParserState.COMMENT;
                     } else if (builder == null && Character.isDigit(ch)) {
                         state = ParserState.NUMBERED_LIST;
+                        // Not really a tag, but we use the builder to keep the number in case it ends up
+                        // not being a numbered list (just a line that starts with a number).
                         tagBuilder.setLength(0);
                         tagBuilder.append(ch);
                     } else if (builder == null && ch == '#' && blockType == BlockType.BODY) {
@@ -281,7 +283,9 @@ public class MarkdownParser {
                     if (Character.isDigit(ch)) {
                         tagBuilder.append(ch);
                     } else if (ch == '.') {
-                        builder = new Block.Builder(BlockType.NUMBERED_LIST);
+                        // It was a numbered list.
+                        int counter = Integer.parseInt(tagBuilder.toString(), 10);
+                        builder = Block.numberedListBuilder(counter);
                         state = ParserState.SKIP_WHITESPACE;
                     } else {
                         // Wasn't a numbered list. Start a normal paragraph.

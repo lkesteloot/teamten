@@ -27,14 +27,23 @@ import java.util.stream.Collectors;
  */
 public class Block {
     private final BlockType mBlockType;
+    private final int mCounter;
     private final List<Span> mSpans = new ArrayList<>();
 
-    public Block(BlockType blockType) {
+    public Block(BlockType blockType, int counter) {
         mBlockType = blockType;
+        mCounter = counter;
     }
 
     public BlockType getBlockType() {
         return mBlockType;
+    }
+
+    /**
+     * Get the counter for numbered lists.
+     */
+    public int getCounter() {
+        return mCounter;
     }
 
     public List<Span> getSpans() {
@@ -70,6 +79,13 @@ public class Block {
     }
 
     /**
+     * Make a builder for numbered lists.
+     */
+    public static Builder numberedListBuilder(int counter) {
+        return new Builder(BlockType.NUMBERED_LIST, counter);
+    }
+
+    /**
      * Builds a Block one character at a time.
      */
     public static class Builder {
@@ -78,8 +94,12 @@ public class Block {
         private boolean mIsItalic;
         private boolean mIsSmallCaps;
 
+        private Builder(BlockType blockType, int counter) {
+            mBlock = new Block(blockType, counter);
+        }
+
         public Builder(BlockType blockType) {
-            mBlock = new Block(blockType);
+            this(blockType, 0);
         }
 
         /**

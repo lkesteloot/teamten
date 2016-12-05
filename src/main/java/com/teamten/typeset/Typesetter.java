@@ -174,7 +174,6 @@ public class Typesetter {
         VerticalList verticalList = new VerticalList();
 
         BlockType previousBlockType = null;
-        int numberedListCounter = 1;
         for (Block block : doc.getBlocks()) {
             Config.Key regularFontKey;
             TypefaceVariantSize regularFontDesc;
@@ -228,9 +227,6 @@ public class Typesetter {
                     regularFontKey = Config.Key.BODY_FONT;
                     if (previousBlockType != BlockType.NUMBERED_LIST) {
                         marginTop = PT.toSp(8.0);
-                        numberedListCounter = 1;
-                    } else {
-                        numberedListCounter++;
                     }
                     marginBottom = PT.toSp(4.0);
                     break;
@@ -332,7 +328,7 @@ public class Typesetter {
             if (block.getBlockType() == BlockType.NUMBERED_LIST) {
                 List<Element> elements = new ArrayList<>();
                 elements.add(new Glue(0, PT.toSp(1.0), true, 0, false, true));
-                elements.add(new Text(numberedListCounter + ". ", spanRegularFont));
+                elements.add(new Text(block.getCounter() + ". ", spanRegularFont));
                 HBox hbox = HBox.ofWidth(elements, paragraphIndent);
                 horizontalList.addElement(hbox);
             }
