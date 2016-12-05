@@ -91,6 +91,7 @@ public class Block {
     public static class Builder {
         private final Block mBlock;
         private final StringBuilder mStringBuilder = new StringBuilder();
+        private boolean mInsideQuotation;
         private boolean mIsBold;
         private boolean mIsItalic;
         private boolean mIsSmallCaps;
@@ -112,6 +113,19 @@ public class Block {
          * @param isSmallCaps whether the character should be displayed in small caps.
          */
         public void addText(char ch, boolean isBold, boolean isItalic, boolean isSmallCaps) {
+            // Simple character translations.
+            if (mBlock.getBlockType() != BlockType.CODE) {
+                if (ch == '~') {
+                    // No-break space.
+                    ch = '\u00A0';
+                } else if (ch == '\'') {
+                    ch = '’';
+                } else if (ch == '"') {
+                    ch = mInsideQuotation ? '”' : '“';
+                    mInsideQuotation = !mInsideQuotation;
+                }
+            }
+
             if (isBold != mIsBold || isItalic != mIsItalic || isSmallCaps != mIsSmallCaps) {
                 emitSpan();
                 mIsBold = isBold;
@@ -142,6 +156,9 @@ public class Block {
          */
         public Block build() {
             emitSpan();
+            if (mInsideQuotation) {
+                System.out.println("Warning: Block ends without closing quotation: " + mBlock);
+            }
             return mBlock;
         }
 

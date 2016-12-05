@@ -147,7 +147,7 @@ public class MarkdownParser {
                             builder.addText(' ', newlineSpaceIsBold, newlineSpaceIsItalic, newlineSpaceIsSmallCaps);
                             newlineSpace = false;
                         }
-                        builder.addText(translateCharacter(ch), isBold, isItalic, isSmallCaps);
+                        builder.addText(ch, isBold, isItalic, isSmallCaps);
                         state = ParserState.IN_LINE;
                     }
                     break;
@@ -216,7 +216,7 @@ public class MarkdownParser {
                         preTagState = state;
                         state = ParserState.IN_TAG;
                     } else {
-                        builder.addText(translateCharacter(ch), isBold, isItalic, isSmallCaps);
+                        builder.addText(ch, isBold, isItalic, isSmallCaps);
                     }
                     break;
 
@@ -234,7 +234,7 @@ public class MarkdownParser {
                         state = ParserState.IN_TAG;
                     } else {
                         state = ParserState.IN_LINE;
-                        builder.addText(translateCharacter(ch), isBold, isItalic, isSmallCaps);
+                        builder.addText(ch, isBold, isItalic, isSmallCaps);
                     }
                     break;
 
@@ -300,7 +300,7 @@ public class MarkdownParser {
                         // Wasn't a numbered list. Start a normal paragraph.
                         builder = new Block.Builder(BlockType.BODY);
                         for (int i = 0; i < tagBuilder.length(); i++) {
-                            builder.addText(translateCharacter(tagBuilder.charAt(i)), isBold, isItalic, isSmallCaps);
+                            builder.addText(tagBuilder.charAt(i), isBold, isItalic, isSmallCaps);
                         }
                         state = ParserState.IN_LINE;
                         processSameCharacter = true;
@@ -317,7 +317,7 @@ public class MarkdownParser {
                             // Toggle bold.
                             isBold = !isBold;
                         } else {
-                            builder.addText(translateCharacter(ch), isBold, false, false);
+                            builder.addText(ch, isBold, false, false);
                         }
                     }
                     break;
@@ -331,18 +331,6 @@ public class MarkdownParser {
         }
 
         return doc;
-    }
-
-    /**
-     * Do some simple in-place translations of individual characters.
-     */
-    private static char translateCharacter(char ch) {
-        if (ch == '~') {
-            // No-break space.
-            ch = '\u00A0';
-        }
-
-        return ch;
     }
 
     /**
