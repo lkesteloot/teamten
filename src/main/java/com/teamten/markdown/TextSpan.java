@@ -23,17 +23,23 @@ package com.teamten.markdown;
  */
 public class TextSpan extends Span {
     private final String mText;
+    private final boolean mIsBold;
     private final boolean mIsItalic;
     private final boolean mIsSmallCaps;
 
-    public TextSpan(String text, boolean isItalic, boolean isSmallCaps) {
+    public TextSpan(String text, boolean isBold, boolean isItalic, boolean isSmallCaps) {
         mText = text;
+        mIsBold = isBold;
         mIsItalic = isItalic;
         mIsSmallCaps = isSmallCaps;
     }
 
     public String getText() {
         return mText;
+    }
+
+    public boolean isBold() {
+        return mIsBold;
     }
 
     public boolean isItalic() {

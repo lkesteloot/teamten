@@ -77,10 +77,12 @@ public class MarkdownParser {
         ParserState state = ParserState.START_OF_LINE;
         BlockType blockType = BlockType.BODY;
         Block.Builder builder = null;
+        boolean isBold = false;
         boolean isItalic = false;
         boolean isSmallCaps = false;
         // Whether we're owed a space from the end of the previous line.
         boolean newlineSpace = false;
+        boolean newlineSpaceIsBold = false;
         boolean newlineSpaceIsItalic = false;
         boolean newlineSpaceIsSmallCaps = false;
         // Accumulated tag.
@@ -142,10 +144,10 @@ public class MarkdownParser {
                             builder = new Block.Builder(blockType);
                         }
                         if (newlineSpace) {
-                            builder.addText(' ', newlineSpaceIsItalic, newlineSpaceIsSmallCaps);
+                            builder.addText(' ', newlineSpaceIsBold, newlineSpaceIsItalic, newlineSpaceIsSmallCaps);
                             newlineSpace = false;
                         }
-                        builder.addText(translateCharacter(ch), isItalic, isSmallCaps);
+                        builder.addText(translateCharacter(ch), isBold, isItalic, isSmallCaps);
                         state = ParserState.IN_LINE;
                     }
                     break;
@@ -200,12 +202,13 @@ public class MarkdownParser {
                             // add it later if the next line continues with more text. This also properly handles the
                             // case of the next line being a comment.
                             newlineSpace = true;
+                            newlineSpaceIsBold = isBold;
                             newlineSpaceIsItalic = isItalic;
                             newlineSpaceIsSmallCaps = isSmallCaps;
                         }
                     } else if (ch == ' ') {
                         state = ParserState.SKIP_WHITESPACE;
-                        builder.addText(' ', isItalic, isSmallCaps);
+                        builder.addText(' ', isBold, isItalic, isSmallCaps);
                     } else if (ch == '*') {
                         isItalic = !isItalic;
                     } else if (ch == '[') {
@@ -213,7 +216,7 @@ public class MarkdownParser {
                         preTagState = state;
                         state = ParserState.IN_TAG;
                     } else {
-                        builder.addText(translateCharacter(ch), isItalic, isSmallCaps);
+                        builder.addText(translateCharacter(ch), isBold, isItalic, isSmallCaps);
                     }
                     break;
 
@@ -231,7 +234,7 @@ public class MarkdownParser {
                         state = ParserState.IN_TAG;
                     } else {
                         state = ParserState.IN_LINE;
-                        builder.addText(translateCharacter(ch), isItalic, isSmallCaps);
+                        builder.addText(translateCharacter(ch), isBold, isItalic, isSmallCaps);
                     }
                     break;
 
@@ -297,7 +300,7 @@ public class MarkdownParser {
                         // Wasn't a numbered list. Start a normal paragraph.
                         builder = new Block.Builder(BlockType.BODY);
                         for (int i = 0; i < tagBuilder.length(); i++) {
-                            builder.addText(translateCharacter(tagBuilder.charAt(i)), isItalic, isSmallCaps);
+                            builder.addText(translateCharacter(tagBuilder.charAt(i)), isBold, isItalic, isSmallCaps);
                         }
                         state = ParserState.IN_LINE;
                         processSameCharacter = true;
@@ -310,7 +313,12 @@ public class MarkdownParser {
                         builder = null;
                         state = ParserState.START_OF_LINE;
                     } else {
-                        builder.addText(translateCharacter(ch), false, false);
+                        if (ch == '`') {
+                            // Toggle bold.
+                            isBold = !isBold;
+                        } else {
+                            builder.addText(translateCharacter(ch), isBold, false, false);
+                        }
                     }
                     break;
             }

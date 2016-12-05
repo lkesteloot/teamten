@@ -292,13 +292,17 @@ public class Typesetter {
             regularFontDesc = config.getFont(regularFontKey);
 
             SizedFont spanRegularFont = fontManager.get(regularFontDesc);
+            SizedFont spanBoldFont = fontManager.get(regularFontDesc.withVariant(FontVariant.BOLD));
             SizedFont spanItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.ITALIC));
+            SizedFont spanBoldItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.BOLD_ITALIC));
             SizedFont spanSmallCapsFont = fontManager.get(regularFontDesc.withVariant(FontVariant.SMALL_CAPS));
             double fontSize = regularFontDesc.getSize();
 
             if (addTracking) {
                 spanRegularFont = TrackingFont.create(spanRegularFont, 0.1, 0.5);
+                spanBoldFont = TrackingFont.create(spanBoldFont, 0.1, 0.5);
                 spanItalicFont = TrackingFont.create(spanItalicFont, 0.1, 0.5);
+                spanBoldItalicFont = TrackingFont.create(spanBoldItalicFont, 0.1, 0.5);
                 spanSmallCapsFont = TrackingFont.create(spanSmallCapsFont, 0.1, 0.5);
             }
 
@@ -346,8 +350,11 @@ public class Typesetter {
                 if (span instanceof TextSpan) {
                     // Span for text that's part of the paragraph.
                     TextSpan textSpan = (TextSpan) span;
-                    SizedFont font = textSpan.isSmallCaps() ? spanSmallCapsFont :
-                            textSpan.isItalic() ? spanItalicFont : spanRegularFont;
+                    SizedFont font = textSpan.isSmallCaps() ? spanSmallCapsFont
+                            : textSpan.isBold() && textSpan.isItalic() ? spanBoldItalicFont
+                            : textSpan.isBold() ? spanBoldFont
+                            : textSpan.isItalic() ? spanItalicFont
+                            : spanRegularFont;
 
                     String text = textSpan.getText();
                     if (allCaps) {
