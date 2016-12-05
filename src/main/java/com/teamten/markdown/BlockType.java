@@ -28,6 +28,8 @@ public enum BlockType {
     MINOR_SECTION_HEADER,
     MINOR_HEADER,
     NUMBERED_LIST,
+    CODE,
+    OUTPUT,
 
     // Specific pages:
     HALF_TITLE_PAGE,

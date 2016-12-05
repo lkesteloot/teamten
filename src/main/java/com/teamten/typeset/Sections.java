@@ -36,7 +36,13 @@ public class Sections {
      */
     private final NavigableMap<Integer,SectionBookmark> mPageToSectionMap = new TreeMap<>();
     private final Map<SectionBookmark.Type,Integer> mSectionToPageMap = new HashMap<>();
+    /**
+     * Where we start numbering with roman numerals. This is always 1.
+     */
     private int mFirstFrontMatterPhysicalPage = 1;
+    /**
+     * Where we start numbering with arabic numerals. This depends on where the first part or first chapter is.
+     */
     private int mFirstBodyMatterPhysicalPage = 1;
 
     /**
@@ -49,9 +55,10 @@ public class Sections {
 
         mFirstFrontMatterPhysicalPage = 1;
         mFirstBodyMatterPhysicalPage = Integer.MAX_VALUE;
+        int firstChapterPhysicalPage = Integer.MAX_VALUE;
 
         // Go through each bookmark and capture all sections.
-        bookmarks.entries().forEach((entry) -> {
+        for (Map.Entry<Integer,Bookmark> entry : bookmarks.entries()) {
             Integer physicalPageNumber = entry.getKey();
             Bookmark bookmark = entry.getValue();
 
@@ -62,9 +69,12 @@ public class Sections {
                 // and only chapters, we'd need a way to be told explicitly which chapter starts the body, perhaps
                 // by having a different section type for front matter sections.
                 if (sectionBookmark.getType() == SectionBookmark.Type.PART) {
-                    if (physicalPageNumber < mFirstBodyMatterPhysicalPage) {
-                        mFirstBodyMatterPhysicalPage = physicalPageNumber;
-                    }
+                    mFirstBodyMatterPhysicalPage = Math.min(mFirstBodyMatterPhysicalPage, physicalPageNumber);
+                }
+
+                // Keep track of the first chapter's page, in case there are no parts.
+                if (sectionBookmark.getType() == SectionBookmark.Type.CHAPTER) {
+                    firstChapterPhysicalPage = Math.min(firstChapterPhysicalPage, physicalPageNumber);
                 }
 
                 // Make sure that two sections don't start on the same page.
@@ -78,7 +88,12 @@ public class Sections {
                     mSectionToPageMap.put(sectionBookmark.getType(), physicalPageNumber);
                 }
             }
-        });
+        };
+
+        // If no parts, pick first chapter.
+        if (mFirstBodyMatterPhysicalPage == Integer.MAX_VALUE) {
+            mFirstBodyMatterPhysicalPage = firstChapterPhysicalPage;
+        }
 
         // Never found the body.
         if (mFirstBodyMatterPhysicalPage == Integer.MAX_VALUE) {

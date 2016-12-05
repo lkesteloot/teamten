@@ -46,17 +46,29 @@ import static com.teamten.typeset.SpaceUnit.PT;
 public class HorizontalList extends ElementList {
     private static final boolean DEBUG_HYPHENATION = false;
     private final boolean mRaggedRight;
+    private final boolean mAllowLineBreaks;
 
-    private HorizontalList(boolean raggedRight) {
+    private HorizontalList(boolean raggedRight, boolean allowLineBreaks) {
         mRaggedRight = raggedRight;
+        mAllowLineBreaks = allowLineBreaks;
     }
 
     public HorizontalList() {
-        this(false);
+        this(false, true);
     }
 
+    /**
+     * Create a new object that has a ragged right edge (no justification).
+     */
     public static HorizontalList raggedRight() {
-        return new HorizontalList(true);
+        return new HorizontalList(true, true);
+    }
+
+    /**
+     * Create a new object that does not permit line breaks at spaces. This implicitly is also ragged right.
+     */
+    public static HorizontalList noLineBreaks() {
+        return new HorizontalList(true, false);
     }
 
     @Override
@@ -139,7 +151,7 @@ public class HorizontalList extends ElementList {
         // First, convert the single string to a sequence of elements, where each word
         // is a single Text element. There will be other elements, like glues and
         // penalties.
-        List<Element> elements = textToWords(text, font);
+        List<Element> elements = textToWords(text, font, mAllowLineBreaks);
 
         // Second, go through the text elements and add discretionary hyphens.
         if (hyphenDictionary != null) {
@@ -160,7 +172,7 @@ public class HorizontalList extends ElementList {
      * Take the single large string and break it into three kinds of elements: glue (for space and non-breaking
      * space); words; and sequences of non-word characters.
      */
-    private static List<Element> textToWords(String text, SizedFont font) {
+    private static List<Element> textToWords(String text, SizedFont font, boolean allowLineBreaks) {
         List<Element> elements = new ArrayList<>();
 
         long spaceWidth = font.getSpaceWidth();
@@ -175,9 +187,9 @@ public class HorizontalList extends ElementList {
             // Advance to the next code point.
             i += Character.charCount(ch);
 
-            if (ch == ' ') {
+            if (ch == ' ' && allowLineBreaks) {
                 elements.add(spaceGlue);
-            } else if (ch == '\u00A0') {
+            } else if (ch == '\u00A0' && allowLineBreaks) {
                 // Non-break space. Precede with infinite penalty.
                 elements.add(new Penalty(Penalty.INFINITY));
                 elements.add(spaceGlue);
@@ -191,7 +203,7 @@ public class HorizontalList extends ElementList {
                 // Look forward and grab all the letters of the word (or not word).
                 while (i < text.length()) {
                     ch = text.codePointAt(i);
-                    if (isWord != isWordCharacter(ch) || ch == ' ' || ch == '\u00A0') {
+                    if (isWord != isWordCharacter(ch) || ((ch == ' ' || ch == '\u00A0') && allowLineBreaks)) {
                         break;
                     }
 

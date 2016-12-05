@@ -75,6 +75,8 @@ public class Config {
         CHAPTER_HEADER_FONT(KeyType.FONT),
         MINOR_HEADER_FONT(KeyType.FONT),
         PAGE_NUMBER_FONT(KeyType.FONT),
+        CODE_FONT(KeyType.FONT),
+        OUTPUT_FONT(KeyType.FONT),
         HEADLINE_FONT(KeyType.FONT),
         HALF_TITLE_PAGE_TITLE_FONT(KeyType.FONT),
         TITLE_PAGE_AUTHOR_FONT(KeyType.FONT),
@@ -148,6 +150,8 @@ public class Config {
         add(Key.PART_HEADER_FONT, "Times New Roman, regular, 11pt");
         add(Key.CHAPTER_HEADER_FONT, "Times New Roman, regular, 11pt");
         add(Key.PAGE_NUMBER_FONT, "Times New Roman, regular, 11pt");
+        add(Key.CODE_FONT, "Courier New, regular, 10pt");
+        add(Key.OUTPUT_FONT, "Courier New, bold, 10pt");
         add(Key.HEADLINE_FONT, "Times New Roman, regular, 11pt");
     }
 

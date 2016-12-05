@@ -38,11 +38,15 @@ public class MarkdownParser {
 
     private enum ParserState {
         START_OF_LINE,
+        ONE_SPACE,
+        TWO_SPACES,
+        THREE_SPACES,
         IN_LINE,
         SKIP_WHITESPACE,
         COMMENT,
         IN_TAG,
         NUMBERED_LIST,
+        LINE_OF_CODE,
     }
 
     static {
@@ -88,11 +92,20 @@ public class MarkdownParser {
             char ch = (char) chOrEof;
             processSameCharacter = false;
 
+            if (Character.isWhitespace(ch) && ch != '\n' && ch != ' ') {
+                System.out.printf("Warning: Skipped whitespace character 0x%02x\n", (int) ch);
+                continue;
+            }
+
             /// System.out.printf("%d (%c) %s %s%n", chOrEof, ch, state, builder);
             switch (state) {
                 case START_OF_LINE:
-                    if (Character.isWhitespace(ch) && ch != '\n') {
-                        // Skip initial white-space.
+                    if (ch == ' ') {
+                        if (blockType == BlockType.BODY) {
+                            state = ParserState.ONE_SPACE;
+                        } else {
+                            // Skip initial whitespace, probably after "#" or similar.
+                        }
                     } else if (ch == '%') {
                         // Comment, skip rest of line.
                         state = ParserState.COMMENT;
@@ -135,17 +148,54 @@ public class MarkdownParser {
                     }
                     break;
 
+                case ONE_SPACE:
+                    if (ch == ' ') {
+                        state = ParserState.TWO_SPACES;
+                    } else {
+                        state = ParserState.START_OF_LINE;
+                        processSameCharacter = true;
+                    }
+                    break;
+
+                case TWO_SPACES:
+                    if (ch == ' ') {
+                        state = ParserState.THREE_SPACES;
+                    } else {
+                        state = ParserState.START_OF_LINE;
+                        processSameCharacter = true;
+                    }
+                    break;
+
+                case THREE_SPACES:
+                    if (ch == ' ' || ch == '>') {
+                        state = ParserState.LINE_OF_CODE;
+                        builder = new Block.Builder(ch == '>' ? BlockType.OUTPUT : BlockType.CODE);
+                    } else {
+                        state = ParserState.START_OF_LINE;
+                        processSameCharacter = true;
+                    }
+                    break;
+
                 case IN_LINE:
                     if (ch == '\n') {
                         state = ParserState.START_OF_LINE;
-                        // Here we should treat the newline as a space, but we don't want to actually add the space
-                        // if the next line ends the paragraph. So we just remember that we're owed a space, and
-                        // add it later if the next line continues with more text. This also properly handles the
-                        // case of the next line being a comment.
-                        newlineSpace = true;
-                        newlineSpaceIsItalic = isItalic;
-                        newlineSpaceIsSmallCaps = isSmallCaps;
-                    } else if (Character.isWhitespace(ch)) {
+                        if (blockType == BlockType.CODE) {
+                            // Code blocks don't wrap.
+                            if (builder != null && !builder.isEmpty()) {
+                                doc.addBlock(builder.build());
+                            }
+                            builder = null;
+                            blockType = BlockType.BODY;
+                        } else {
+                            // Here we should treat the newline as a space, but we don't want to actually add the space
+                            // if the next line ends the paragraph. So we just remember that we're owed a space, and
+                            // add it later if the next line continues with more text. This also properly handles the
+                            // case of the next line being a comment.
+                            newlineSpace = true;
+                            newlineSpaceIsItalic = isItalic;
+                            newlineSpaceIsSmallCaps = isSmallCaps;
+                        }
+                    } else if (ch == ' ') {
                         state = ParserState.SKIP_WHITESPACE;
                         builder.addText(' ', isItalic, isSmallCaps);
                     } else if (ch == '*') {
@@ -162,7 +212,7 @@ public class MarkdownParser {
                 case SKIP_WHITESPACE:
                     if (ch == '\n') {
                         state = ParserState.START_OF_LINE;
-                    } else if (Character.isWhitespace(ch)) {
+                    } else if (ch == ' ') {
                         // Skip.
                     } else if (ch == '*') {
                         state = ParserState.IN_LINE;
@@ -227,10 +277,10 @@ public class MarkdownParser {
                     break;
 
                 case NUMBERED_LIST:
-                    // Parse a paragraph prefix like:   2)
+                    // Parse a paragraph prefix like:   2.
                     if (Character.isDigit(ch)) {
                         tagBuilder.append(ch);
-                    } else if (ch == ')') {
+                    } else if (ch == '.') {
                         builder = new Block.Builder(BlockType.NUMBERED_LIST);
                         state = ParserState.SKIP_WHITESPACE;
                     } else {
@@ -241,6 +291,16 @@ public class MarkdownParser {
                         }
                         state = ParserState.IN_LINE;
                         processSameCharacter = true;
+                    }
+                    break;
+
+                case LINE_OF_CODE:
+                    if (ch == '\n') {
+                        doc.addBlock(builder.build());
+                        builder = null;
+                        state = ParserState.START_OF_LINE;
+                    } else {
+                        builder.addText(translateCharacter(ch), false, false);
                     }
                     break;
             }

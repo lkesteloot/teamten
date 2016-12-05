@@ -185,6 +185,7 @@ public class Typesetter {
             boolean oddPage = false;
             boolean ownPage = false;
             boolean addTracking = false;
+            boolean allowLineBreaks = true;
             long marginTop = 0;
             long marginBottom = 0;
 
@@ -234,6 +235,23 @@ public class Typesetter {
                     marginBottom = PT.toSp(4.0);
                     break;
 
+                case CODE:
+                    regularFontKey = Config.Key.CODE_FONT;
+                    if (previousBlockType != BlockType.CODE) {
+                        marginTop = PT.toSp(8.0);
+                    }
+                    indentFirstLine = true;
+                    allowLineBreaks = false;
+                    break;
+
+                case OUTPUT:
+                    regularFontKey = Config.Key.OUTPUT_FONT;
+                    if (previousBlockType != BlockType.OUTPUT) {
+                        marginTop = PT.toSp(8.0);
+                    }
+                    indentFirstLine = true;
+                    break;
+
                 case HALF_TITLE_PAGE:
                     generateHalfTitlePage(config, sections, verticalList, fontManager);
                     continue;
@@ -257,6 +275,14 @@ public class Typesetter {
                 default:
                     System.out.println("Warning: Unknown block type " + block.getBlockType());
                     continue;
+            }
+
+            // Margin below code blocks.
+            if (block.getBlockType() != BlockType.CODE && previousBlockType == BlockType.CODE) {
+                marginTop = Math.max(marginTop, PT.toSp(8.0));
+            }
+            if (block.getBlockType() != BlockType.OUTPUT && previousBlockType == BlockType.OUTPUT) {
+                marginTop = Math.max(marginTop, PT.toSp(8.0));
             }
 
             regularFontDesc = config.getFont(regularFontKey);
@@ -290,7 +316,13 @@ public class Typesetter {
                 verticalList.addElement(new Box(0, marginTop, 0));
             }
 
-            HorizontalList horizontalList = new HorizontalList();
+            HorizontalList horizontalList;
+
+            if (allowLineBreaks) {
+                horizontalList = new HorizontalList();
+            } else {
+                horizontalList = HorizontalList.noLineBreaks();
+            }
 
             if (center) {
                 horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
@@ -350,6 +382,8 @@ public class Typesetter {
                 case BODY:
                 case MINOR_HEADER:
                 case NUMBERED_LIST:
+                case CODE:
+                case OUTPUT:
                     // Nothing special.
                     break;
 

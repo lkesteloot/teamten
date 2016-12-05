@@ -40,7 +40,7 @@ public class Doc {
     /**
      * Return an iterable of all the blocks in this document.
      */
-    public Iterable<Block> getBlocks() {
+    public List<Block> getBlocks() {
         return mBlocks;
     }
 
