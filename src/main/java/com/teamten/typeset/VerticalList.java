@@ -89,9 +89,15 @@ public class VerticalList extends ElementList {
     /**
      * Specify the distance between baselines. This is normally scaled by the font size,
      * for example 120% of font size. Set this between paragraphs when the font size changes.
+     *
+     * @return the previous baseline skip.
      */
-    public void setBaselineSkip(long baselineSkip) {
+    public long setBaselineSkip(long baselineSkip) {
+        long oldBaselineSkip = mBaselineSkip;
+
         mBaselineSkip = baselineSkip;
+
+        return oldBaselineSkip;
     }
 
     @Override

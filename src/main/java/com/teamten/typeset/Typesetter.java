@@ -330,14 +330,12 @@ public class Typesetter {
 
             HorizontalList horizontalList;
 
-            if (allowLineBreaks) {
+            if (center) {
+                horizontalList = HorizontalList.centered();
+            } else if (allowLineBreaks) {
                 horizontalList = new HorizontalList();
             } else {
                 horizontalList = HorizontalList.noLineBreaks();
-            }
-
-            if (center) {
-                horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
             }
 
             // Add the counter at the front of a numbered list paragraph.
@@ -422,7 +420,11 @@ public class Typesetter {
             }
 
             // Eject the paragraph.
-            horizontalList.addEndOfParagraph();
+            if (center) {
+                horizontalList.addElement(new Penalty(-Penalty.INFINITY));
+            } else {
+                horizontalList.addEndOfParagraph();
+            }
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             long bodyWidth = config.getBodyWidth();
@@ -565,12 +567,14 @@ public class Typesetter {
         verticalList.addElement(new Box(0, marginTop, 0));
 
         // Title.
-        HorizontalList horizontalList = new HorizontalList();
-        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        long leading = PT.toSp(titleFont.getSize()*1.2f);
+        long oldLeading = verticalList.setBaselineSkip(leading);
+        HorizontalList horizontalList = HorizontalList.centered();
         horizontalList.addText(title, titleFont, null);
         horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.HALF_TITLE_PAGE, title));
-        horizontalList.addEndOfParagraph();
+        horizontalList.addElement(new Penalty(-Penalty.INFINITY));
         horizontalList.format(verticalList, config.getBodyWidth());
+        verticalList.setBaselineSkip(oldLeading);
     }
 
     /**
@@ -613,14 +617,16 @@ public class Typesetter {
         verticalList.addElement(new Box(0, titleMargin, 0));
 
         // Title.
-        horizontalList = new HorizontalList();
-        horizontalList.addElement(new Glue(0, PT.toSp(1), true, 0, false, true));
+        long leading = PT.toSp(titleFont.getSize()*1.2f);
+        long oldLeading = verticalList.setBaselineSkip(leading);
+        horizontalList = HorizontalList.centered();
         horizontalList.addText(title, titleFont, null);
-        horizontalList.addEndOfParagraph();
+        horizontalList.addElement(new Penalty(-Penalty.INFINITY));
         horizontalList.format(verticalList, config.getBodyWidth());
+        verticalList.setBaselineSkip(oldLeading);
 
         if (publisherName != null) {
-            verticalList.addElement(new Box(0, publisherNameMargin, 0));
+            verticalList.addElement(Glue.infiniteVertical());
 
             // Publisher name.
             horizontalList = new HorizontalList();

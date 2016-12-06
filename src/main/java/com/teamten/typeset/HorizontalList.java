@@ -45,30 +45,39 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class HorizontalList extends ElementList {
     private static final boolean DEBUG_HYPHENATION = false;
+    private final boolean mRaggedLeft;
     private final boolean mRaggedRight;
     private final boolean mAllowLineBreaks;
 
-    private HorizontalList(boolean raggedRight, boolean allowLineBreaks) {
+    private HorizontalList(boolean raggedLeft, boolean raggedRight, boolean allowLineBreaks) {
+        mRaggedLeft = raggedLeft;
         mRaggedRight = raggedRight;
         mAllowLineBreaks = allowLineBreaks;
     }
 
     public HorizontalList() {
-        this(false, true);
+        this(false, false, true);
     }
 
     /**
      * Create a new object that has a ragged right edge (no justification).
      */
     public static HorizontalList raggedRight() {
-        return new HorizontalList(true, true);
+        return new HorizontalList(false, true, true);
+    }
+
+    /**
+     * Create a new object that's centered.
+     */
+    public static HorizontalList centered() {
+        return new HorizontalList(true, true, true);
     }
 
     /**
      * Create a new object that does not permit line breaks at spaces. This implicitly is also ragged right.
      */
     public static HorizontalList noLineBreaks() {
-        return new HorizontalList(true, false);
+        return new HorizontalList(false, true, false);
     }
 
     @Override
@@ -93,6 +102,13 @@ public class HorizontalList extends ElementList {
         int endIndex = endBreakpoint.getIndex();
 
         List<Element> elements = new ArrayList<>(Math.max(endIndex - beginIndex + 1, 10));
+
+        if (mRaggedLeft) {
+            // This 10pt is a bit arbitrary. Could make it configurable later. Its purpose is to make it
+            // acceptable to leave a bunch of space on the left. It still causes inter-word spacing
+            // to spread out a bit, but almost none.
+            elements.add(new Glue(0, PT.toSp(10.0), false, 0, false, true));
+        }
 
         for (int i = beginIndex; i <= endIndex; i++) {
             Element element = allElements.get(i);
