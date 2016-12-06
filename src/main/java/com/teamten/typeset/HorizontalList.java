@@ -154,7 +154,7 @@ public class HorizontalList extends ElementList {
         List<Element> elements = textToWords(text, font, mAllowLineBreaks);
 
         // Second, go through the text elements and add discretionary hyphens.
-        if (hyphenDictionary != null) {
+        if (hyphenDictionary != null && mAllowLineBreaks) {
             elements = hyphenate(elements, hyphenDictionary);
         }
 
