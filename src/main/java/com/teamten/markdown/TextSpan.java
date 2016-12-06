@@ -26,12 +26,14 @@ public class TextSpan extends Span {
     private final boolean mIsBold;
     private final boolean mIsItalic;
     private final boolean mIsSmallCaps;
+    private final boolean mIsCode;
 
-    public TextSpan(String text, boolean isBold, boolean isItalic, boolean isSmallCaps) {
+    public TextSpan(String text, boolean isBold, boolean isItalic, boolean isSmallCaps, boolean isCode) {
         mText = text;
         mIsBold = isBold;
         mIsItalic = isItalic;
         mIsSmallCaps = isSmallCaps;
+        mIsCode = isCode;
     }
 
     public String getText() {
@@ -48,5 +50,9 @@ public class TextSpan extends Span {
 
     public boolean isSmallCaps() {
         return mIsSmallCaps;
+    }
+
+    public boolean isCode() {
+        return mIsCode;
     }
 }

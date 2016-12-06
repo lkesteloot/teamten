@@ -80,11 +80,13 @@ public class MarkdownParser {
         boolean isBold = false;
         boolean isItalic = false;
         boolean isSmallCaps = false;
+        boolean isCode = false;
         // Whether we're owed a space from the end of the previous line.
         boolean newlineSpace = false;
         boolean newlineSpaceIsBold = false;
         boolean newlineSpaceIsItalic = false;
         boolean newlineSpaceIsSmallCaps = false;
+        boolean newlineSpaceIsCode = false;
         // Accumulated tag.
         StringBuilder tagBuilder = new StringBuilder();
         ParserState preTagState = null;
@@ -127,6 +129,8 @@ public class MarkdownParser {
                         blockType = BlockType.MINOR_HEADER;
                     } else if (ch == '*') {
                         isItalic = true;
+                    } else if (ch == '`') {
+                        isCode = true;
                     } else if (ch == '\n') {
                         // Blank line, end of chunk.
                         newlineSpace = false;
@@ -144,10 +148,11 @@ public class MarkdownParser {
                             builder = new Block.Builder(blockType);
                         }
                         if (newlineSpace) {
-                            builder.addText(' ', newlineSpaceIsBold, newlineSpaceIsItalic, newlineSpaceIsSmallCaps);
+                            builder.addText(' ', newlineSpaceIsBold, newlineSpaceIsItalic, newlineSpaceIsSmallCaps,
+                                    newlineSpaceIsCode);
                             newlineSpace = false;
                         }
-                        builder.addText(ch, isBold, isItalic, isSmallCaps);
+                        builder.addText(ch, isBold, isItalic, isSmallCaps, isCode);
                         state = ParserState.IN_LINE;
                     }
                     break;
@@ -205,18 +210,21 @@ public class MarkdownParser {
                             newlineSpaceIsBold = isBold;
                             newlineSpaceIsItalic = isItalic;
                             newlineSpaceIsSmallCaps = isSmallCaps;
+                            newlineSpaceIsCode = isCode;
                         }
                     } else if (ch == ' ') {
                         state = ParserState.SKIP_WHITESPACE;
-                        builder.addText(' ', isBold, isItalic, isSmallCaps);
+                        builder.addText(' ', isBold, isItalic, isSmallCaps, isCode);
                     } else if (ch == '*') {
                         isItalic = !isItalic;
+                    } else if (ch == '`') {
+                        isCode = !isCode;
                     } else if (ch == '[') {
                         tagBuilder.setLength(0);
                         preTagState = state;
                         state = ParserState.IN_TAG;
                     } else {
-                        builder.addText(ch, isBold, isItalic, isSmallCaps);
+                        builder.addText(ch, isBold, isItalic, isSmallCaps, isCode);
                     }
                     break;
 
@@ -228,13 +236,16 @@ public class MarkdownParser {
                     } else if (ch == '*') {
                         state = ParserState.IN_LINE;
                         isItalic = !isItalic;
+                    } else if (ch == '`') {
+                        state = ParserState.IN_LINE;
+                        isCode = !isCode;
                     } else if (ch == '[') {
                         tagBuilder.setLength(0);
                         preTagState = state;
                         state = ParserState.IN_TAG;
                     } else {
                         state = ParserState.IN_LINE;
-                        builder.addText(ch, isBold, isItalic, isSmallCaps);
+                        builder.addText(ch, isBold, isItalic, isSmallCaps, isCode);
                     }
                     break;
 
@@ -300,7 +311,7 @@ public class MarkdownParser {
                         // Wasn't a numbered list. Start a normal paragraph.
                         builder = new Block.Builder(BlockType.BODY);
                         for (int i = 0; i < tagBuilder.length(); i++) {
-                            builder.addText(tagBuilder.charAt(i), isBold, isItalic, isSmallCaps);
+                            builder.addText(tagBuilder.charAt(i), isBold, isItalic, isSmallCaps, isCode);
                         }
                         state = ParserState.IN_LINE;
                         processSameCharacter = true;
@@ -317,7 +328,7 @@ public class MarkdownParser {
                             // Toggle bold.
                             isBold = !isBold;
                         } else {
-                            builder.addText(ch, isBold, false, false);
+                            builder.addText(ch, isBold, false, false, false);
                         }
                     }
                     break;

@@ -95,6 +95,7 @@ public class Block {
         private boolean mIsBold;
         private boolean mIsItalic;
         private boolean mIsSmallCaps;
+        private boolean mIsCode;
 
         private Builder(BlockType blockType, int counter) {
             mBlock = new Block(blockType, counter);
@@ -111,8 +112,9 @@ public class Block {
          * @param isBold whether the character should be displayed in bold.
          * @param isItalic whether the character should be displayed in italics.
          * @param isSmallCaps whether the character should be displayed in small caps.
+         * @param isCode whether the character should be displayed as code.
          */
-        public void addText(char ch, boolean isBold, boolean isItalic, boolean isSmallCaps) {
+        public void addText(char ch, boolean isBold, boolean isItalic, boolean isSmallCaps, boolean isCode) {
             // Simple character translations.
             if (mBlock.getBlockType() != BlockType.CODE) {
                 if (ch == '~') {
@@ -126,11 +128,12 @@ public class Block {
                 }
             }
 
-            if (isBold != mIsBold || isItalic != mIsItalic || isSmallCaps != mIsSmallCaps) {
+            if (isBold != mIsBold || isItalic != mIsItalic || isSmallCaps != mIsSmallCaps || isCode != mIsCode) {
                 emitSpan();
                 mIsBold = isBold;
                 mIsItalic = isItalic;
                 mIsSmallCaps = isSmallCaps;
+                mIsCode = isCode;
             }
 
             mStringBuilder.append(ch);
@@ -156,9 +159,16 @@ public class Block {
          */
         public Block build() {
             emitSpan();
+
             if (mInsideQuotation) {
                 System.out.println("Warning: Block ends without closing quotation: " + mBlock);
             }
+
+            // Note that we can't warn if the block is built while inside bold or italic, because we
+            // can't be sure that those weren't closed. If the last character of a block is the
+            // character to stop bold, we'll never know about it because we won't get another
+            // character that's not bold.
+
             return mBlock;
         }
 
@@ -167,7 +177,7 @@ public class Block {
          */
         private void emitSpan() {
             if (mStringBuilder.length() > 0) {
-                TextSpan span = new TextSpan(mStringBuilder.toString(), mIsBold, mIsItalic, mIsSmallCaps);
+                TextSpan span = new TextSpan(mStringBuilder.toString(), mIsBold, mIsItalic, mIsSmallCaps, mIsCode);
                 mStringBuilder.setLength(0);
                 mBlock.addSpan(span);
             }

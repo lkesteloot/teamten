@@ -176,7 +176,8 @@ public class Typesetter {
         BlockType previousBlockType = null;
         for (Block block : doc.getBlocks()) {
             Config.Key regularFontKey;
-            TypefaceVariantSize regularFontDesc;
+            // Move this to the switch statement if we end up with code in headers, etc.:
+            Config.Key codeFontKey = Config.Key.BODY_CODE_FONT;
             boolean indentFirstLine = false;
             boolean allCaps = false;
             boolean center = false;
@@ -289,13 +290,15 @@ public class Typesetter {
                 marginTop = Math.max(marginTop, PT.toSp(8.0));
             }
 
-            regularFontDesc = config.getFont(regularFontKey);
+            TypefaceVariantSize regularFontDesc = config.getFont(regularFontKey);
+            TypefaceVariantSize codeFontDesc = config.getFont(codeFontKey);
 
             SizedFont spanRegularFont = fontManager.get(regularFontDesc);
             SizedFont spanBoldFont = fontManager.get(regularFontDesc.withVariant(FontVariant.BOLD));
             SizedFont spanItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.ITALIC));
             SizedFont spanBoldItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.BOLD_ITALIC));
             SizedFont spanSmallCapsFont = fontManager.get(regularFontDesc.withVariant(FontVariant.SMALL_CAPS));
+            SizedFont spanCodeFont = fontManager.get(codeFontDesc);
             double fontSize = regularFontDesc.getSize();
 
             if (addTracking) {
@@ -304,6 +307,7 @@ public class Typesetter {
                 spanItalicFont = TrackingFont.create(spanItalicFont, 0.1, 0.5);
                 spanBoldItalicFont = TrackingFont.create(spanBoldItalicFont, 0.1, 0.5);
                 spanSmallCapsFont = TrackingFont.create(spanSmallCapsFont, 0.1, 0.5);
+                spanCodeFont = TrackingFont.create(spanCodeFont, 0.1, 0.5);
             }
 
             // 135% recommended by http://practicaltypography.com/line-spacing.html
@@ -354,6 +358,7 @@ public class Typesetter {
                             : textSpan.isBold() && textSpan.isItalic() ? spanBoldItalicFont
                             : textSpan.isBold() ? spanBoldFont
                             : textSpan.isItalic() ? spanItalicFont
+                            : textSpan.isCode() ? spanCodeFont
                             : spanRegularFont;
 
                     String text = textSpan.getText();

@@ -70,6 +70,7 @@ public class Config {
 
         // Fonts.
         BODY_FONT(KeyType.FONT),
+        BODY_CODE_FONT(KeyType.FONT),
         CAPTION_FONT(KeyType.FONT),
         PART_HEADER_FONT(KeyType.FONT),
         CHAPTER_HEADER_FONT(KeyType.FONT),
@@ -147,6 +148,7 @@ public class Config {
         add(Key.PAGE_MARGIN_OUTER, "6pc");
         add(Key.PAGE_MARGIN_INNER, "6pc");
         add(Key.BODY_FONT, "Times New Roman, regular, 11pt");
+        add(Key.BODY_CODE_FONT, "Courier New, regular, 9pt");
         add(Key.CAPTION_FONT, "Times New Roman, regular, 11pt");
         add(Key.PART_HEADER_FONT, "Times New Roman, regular, 11pt");
         add(Key.CHAPTER_HEADER_FONT, "Times New Roman, regular, 11pt");
