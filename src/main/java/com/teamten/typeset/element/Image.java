@@ -67,11 +67,11 @@ public class Image extends Box {
         // Fit in specified box.
         if (width*maxHeight > maxWidth*height) {
             // Sides will touch.
-            height = height*maxWidth/maxHeight;
+            height = height*maxWidth/width;
             width = maxWidth;
         } else {
             // Top and bottom will touch.
-            width = width*maxHeight/maxWidth;
+            width = width*maxHeight/height;
             height = maxHeight;
         }
 
