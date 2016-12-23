@@ -18,6 +18,9 @@
 
 package com.teamten.typeset;
 
+import com.teamten.markdown.Block;
+import com.teamten.markdown.BlockType;
+
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.List;
@@ -28,12 +31,14 @@ import java.util.stream.Collectors;
  * Stores a single index entry, its physical pages, and its sub-entries.
  */
 public class IndexEntry implements Comparable<IndexEntry> {
-    private final String mText;
+    private final Block mText;
+    private final String mTextAsString;
     private final Set<Integer> mPhysicalPageNumbers = new HashSet<>();
     private final IndexEntries mSubEntries = new IndexEntries();
 
-    public IndexEntry(String text) {
+    public IndexEntry(Block text) {
         mText = text;
+        mTextAsString = text.toBriefString();
     }
 
     /**
@@ -54,18 +59,18 @@ public class IndexEntry implements Comparable<IndexEntry> {
     /**
      * Get the text to display in the index.
      */
-    public String getText() {
+    public Block getText() {
         return mText;
     }
 
     /**
      * Get the full paragraph to display for this entry in the index.
      */
-    public String getIndexParagraph(Sections sections) {
-        StringBuilder builder = new StringBuilder();
+    public Block getIndexParagraph(Sections sections) {
+        Block.Builder builder = new Block.Builder(BlockType.BODY);
 
         // Add the index text.
-        builder.append(mText);
+        builder.addBlock(mText);
 
         // And its page numbers.
         List<Integer> physicalPageNumbers = getPhysicalPageNumbers();
@@ -81,17 +86,17 @@ public class IndexEntry implements Comparable<IndexEntry> {
             }
 
             // Append the page or a range of pages.
-            builder.append(", ");
-            builder.append(sections.getPageNumberLabel(firstPage));
+            builder.addText(", ");
+            builder.addText(sections.getPageNumberLabel(firstPage));
             if (lastPage > firstPage) {
-                builder.append('\u2013'); // En-dash.
-                builder.append(sections.getPageNumberLabel(lastPage));
+                builder.addText("\u2013"); // En-dash.
+                builder.addText(sections.getPageNumberLabel(lastPage));
             }
         }
 
-        builder.append('.');
+        builder.addText(".");
 
-        return builder.toString();
+        return builder.build();
     }
 
     /**
@@ -102,7 +107,7 @@ public class IndexEntry implements Comparable<IndexEntry> {
      */
     public int getCategory() {
         // Based on the first character.
-        int firstCh = mText.codePointAt(0);
+        int firstCh = mTextAsString.codePointAt(0);
 
         // Use '@' to represent non-alphabetic first letters.
         return Character.isAlphabetic(firstCh) ? Character.toLowerCase(firstCh) : '@';
@@ -139,8 +144,8 @@ public class IndexEntry implements Comparable<IndexEntry> {
 
     @Override
     public int compareTo(IndexEntry o) {
-        int ch1 = mText.codePointAt(0);
-        int ch2 = o.mText.codePointAt(0);
+        int ch1 = mTextAsString.codePointAt(0);
+        int ch2 = o.mTextAsString.codePointAt(0);
 
         // If one is not alphabetic, put it first.
         if (Character.isAlphabetic(ch1) != Character.isAlphabetic(ch2)) {
@@ -148,6 +153,6 @@ public class IndexEntry implements Comparable<IndexEntry> {
         }
 
         // Else compare case-insensitively.
-        return mText.compareToIgnoreCase(o.mText);
+        return mTextAsString.compareToIgnoreCase(o.mTextAsString);
     }
 }

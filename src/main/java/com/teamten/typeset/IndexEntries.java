@@ -18,6 +18,8 @@
 
 package com.teamten.typeset;
 
+import com.teamten.markdown.Block;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -33,13 +35,13 @@ import java.util.stream.Collectors;
  * Stores a set of index entries.
  */
 public class IndexEntries {
-    private final Map<String,IndexEntry> mEntryMap = new HashMap<>();
+    private final Map<Block,IndexEntry> mEntryMap = new HashMap<>();
 
     /**
      * Adds an entry to the set.
      */
     public void add(IndexEntry indexEntry) {
-        String text = indexEntry.getText();
+        Block text = indexEntry.getText();
 
         // See if we already have an entry for this text.
         IndexEntry existingEntry = mEntryMap.get(text);
@@ -55,7 +57,7 @@ public class IndexEntries {
     /**
      * Add an entry by a list of text (entry, sub-entry, etc.) and page number.
      */
-    public void add(List<String> texts, int physicalPageNumber) {
+    public void add(List<Block> texts, int physicalPageNumber) {
         if (texts.isEmpty()) {
             throw new IllegalArgumentException("texts should not be empty");
         }
@@ -67,7 +69,7 @@ public class IndexEntries {
         if (texts.size() == 1) {
             indexEntry.addPage(physicalPageNumber);
         } else {
-            List<String> subEntries = texts.subList(1, texts.size());
+            List<Block> subEntries = texts.subList(1, texts.size());
             indexEntry.getSubEntries().add(subEntries, physicalPageNumber);
         }
     }
@@ -110,6 +112,8 @@ public class IndexEntries {
         while (count > 0) {
             // Add an entry with a random word.
             String word = words.get(random.nextInt(words.size()));
+
+            // Add some known problem cases.
             switch (random.nextInt(30)) {
                 case 0:
                     word = "@lkesteloot";
@@ -124,7 +128,8 @@ public class IndexEntries {
                     word = "1914-1918";
                     break;
             }
-            IndexEntry indexEntry = new IndexEntry(word);
+
+            IndexEntry indexEntry = new IndexEntry(Block.bodyBlock(word));
             add(indexEntry);
             count--;
 
@@ -157,13 +162,7 @@ public class IndexEntries {
     /**
      * Get an existing entry or create one.
      */
-    private IndexEntry getOrCreate(String text) {
-        IndexEntry indexEntry = mEntryMap.get(text);
-        if (indexEntry == null) {
-            indexEntry = new IndexEntry(text);
-            mEntryMap.put(text, indexEntry);
-        }
-
-        return indexEntry;
+    private IndexEntry getOrCreate(Block text) {
+        return mEntryMap.computeIfAbsent(text, IndexEntry::new);
     }
 }

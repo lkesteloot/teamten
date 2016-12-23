@@ -18,6 +18,8 @@
 
 package com.teamten.markdown;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,9 +28,9 @@ import java.util.stream.Collectors;
  * A block is a paragraph (similar to a block in HTML DOM). It's a sequence of spans.
  */
 public class Block {
-    private final BlockType mBlockType;
+    private final @NotNull BlockType mBlockType;
     private final int mCounter;
-    private final List<Span> mSpans = new ArrayList<>();
+    private final @NotNull List<Span> mSpans = new ArrayList<>();
 
     public Block(BlockType blockType, int counter) {
         mBlockType = blockType;
@@ -65,6 +67,23 @@ public class Block {
         mSpans.add(span);
     }
 
+    /**
+     * Return just the text of the block.
+     */
+    public String toBriefString() {
+        // Join the individual spans.
+        String s = mSpans.stream()
+                .map(Span::toString)
+                .collect(Collectors.joining());
+
+        // Prefix counter if it's a numbered list.
+        if (mBlockType == BlockType.NUMBERED_LIST) {
+            s = mCounter + ". " + s;
+        }
+
+        return s;
+    }
+
     @Override // Object
     public String toString() {
         if (mSpans.isEmpty()) {
@@ -78,11 +97,47 @@ public class Block {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Block block = (Block) o;
+
+        if (mCounter != block.mCounter) {
+            return false;
+        }
+        if (mBlockType != block.mBlockType) {
+            return false;
+        }
+        return mSpans.equals(block.mSpans);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mBlockType.hashCode();
+        result = 31*result + mCounter;
+        result = 31*result + mSpans.hashCode();
+        return result;
+    }
+
     /**
      * Make a builder for numbered lists.
      */
     public static Builder numberedListBuilder(int counter) {
         return new Builder(BlockType.NUMBERED_LIST, counter);
+    }
+
+    /**
+     * Make a plain body block from a string.
+     */
+    public static Block bodyBlock(String text) {
+        Span span = new TextSpan(text, false, false, false, false);
+        return new Builder(BlockType.BODY).addSpan(span).build();
     }
 
     /**
@@ -140,11 +195,38 @@ public class Block {
         }
 
         /**
+         * Add a string. See {@link #addText(char, boolean, boolean, boolean, boolean)} for details.
+         */
+        public void addText(String text, boolean isBold, boolean isItalic, boolean isSmallCaps, boolean isCode) {
+            for (char ch : text.toCharArray()) {
+                addText(ch, isBold, isItalic, isSmallCaps, isCode);
+            }
+        }
+
+        /**
+         * Add a plain string (no markup).
+         */
+        public void addText(String text) {
+            addText(text, false, false, false, false);
+        }
+
+        /**
          * Add any span to this block.
          */
-        public void addSpan(Span span) {
+        public Builder addSpan(Span span) {
             emitSpan();
             mBlock.addSpan(span);
+
+            return this;
+        }
+
+        /**
+         * Add a whole block to this block. The block's type and counter are ignored.
+         */
+        public Builder addBlock(Block block) {
+            // Add each span.
+            block.getSpans().forEach(this::addSpan);
+            return this;
         }
 
         /**

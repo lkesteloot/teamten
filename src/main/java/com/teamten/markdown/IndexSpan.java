@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
  * Stores an index reference.
  */
 public class IndexSpan extends Span {
-    private final List<String> mEntries;
+    private final List<Block> mEntries;
 
-    public IndexSpan(List<String> entries) {
+    public IndexSpan(List<Block> entries) {
         mEntries = entries;
     }
 
@@ -36,13 +36,16 @@ public class IndexSpan extends Span {
      * Create an index span from a single string, where the entries are separated by bars (|).
      */
     public static IndexSpan fromBarSeparatedEntries(String entries) {
-        return new IndexSpan(Arrays.stream(entries.split("\\|")).map(String::trim).collect(Collectors.toList()));
+        return new IndexSpan(Arrays.stream(entries.split("\\|"))
+                .map(String::trim)
+                .map(MarkdownParser::parseSingleBlock)
+                .collect(Collectors.toList()));
     }
 
     /**
      * Return the entries, where the first entry is the primary one, the second is the subentry, etc.
      */
-    public List<String> getEntries() {
+    public List<Block> getEntries() {
         return mEntries;
     }
 }

@@ -21,6 +21,7 @@ package com.teamten.typeset;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.teamten.font.FontManager;
+import com.teamten.font.FontPack;
 import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.SizedFont;
@@ -127,7 +128,7 @@ public class Typesetter {
         Bookmarks bookmarks = Bookmarks.empty();
         int pass;
         for (pass = 0; pass < MAX_ITERATIONS; pass++) {
-            System.out.printf("Pass %d:\n", pass + 1);
+            System.out.printf("Pass %d:%n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
             VerticalList verticalList = docToVerticalList(doc, pdDoc, config, sections,
                     fontManager, bookmarks, hyphenDictionary);
@@ -179,7 +180,6 @@ public class Typesetter {
             // Move this to the switch statement if we end up with code in headers, etc.:
             Config.Key codeFontKey = Config.Key.BODY_CODE_FONT;
             boolean indentFirstLine = false;
-            boolean allCaps = false;
             boolean center = false;
             boolean newPage = false;
             boolean oddPage = false;
@@ -274,7 +274,7 @@ public class Typesetter {
                     continue;
 
                 case INDEX:
-                    generateIndex(config, sections, verticalList, fontManager, bookmarks);
+                    generateIndex(config, sections, verticalList, fontManager, bookmarks, hyphenDictionary);
                     continue;
 
                 default:
@@ -293,21 +293,12 @@ public class Typesetter {
             TypefaceVariantSize regularFontDesc = config.getFont(regularFontKey);
             TypefaceVariantSize codeFontDesc = config.getFont(codeFontKey);
 
-            SizedFont spanRegularFont = fontManager.get(regularFontDesc);
-            SizedFont spanBoldFont = fontManager.get(regularFontDesc.withVariant(FontVariant.BOLD));
-            SizedFont spanItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.ITALIC));
-            SizedFont spanBoldItalicFont = fontManager.get(regularFontDesc.withVariant(FontVariant.BOLD_ITALIC));
-            SizedFont spanSmallCapsFont = fontManager.get(regularFontDesc.withVariant(FontVariant.SMALL_CAPS));
-            SizedFont spanCodeFont = fontManager.get(codeFontDesc);
+            FontPack fontPack = FontPack.create(fontManager, regularFontDesc, codeFontDesc);
             double fontSize = regularFontDesc.getSize();
 
             if (addTracking) {
-                spanRegularFont = TrackingFont.create(spanRegularFont, 0.1, 0.5);
-                spanBoldFont = TrackingFont.create(spanBoldFont, 0.1, 0.5);
-                spanItalicFont = TrackingFont.create(spanItalicFont, 0.1, 0.5);
-                spanBoldItalicFont = TrackingFont.create(spanBoldItalicFont, 0.1, 0.5);
-                spanSmallCapsFont = TrackingFont.create(spanSmallCapsFont, 0.1, 0.5);
-                spanCodeFont = TrackingFont.create(spanCodeFont, 0.1, 0.5);
+                // Add tracking (space between letters).
+                fontPack = fontPack.withTracking(0.1, 0.5);
             }
 
             // 135% recommended by http://practicaltypography.com/line-spacing.html
@@ -342,7 +333,7 @@ public class Typesetter {
             if (block.getBlockType() == BlockType.NUMBERED_LIST) {
                 List<Element> elements = new ArrayList<>();
                 elements.add(new Glue(0, PT.toSp(1.0), true, 0, false, true));
-                elements.add(new Text(block.getCounter() + ". ", spanRegularFont));
+                elements.add(new Text(block.getCounter() + ". ", fontPack.getRegularFont()));
                 HBox hbox = HBox.ofWidth(elements, paragraphIndent);
                 horizontalList.addElement(hbox);
             }
@@ -351,21 +342,7 @@ public class Typesetter {
             for (Span span : block.getSpans()) {
                 if (span instanceof TextSpan) {
                     // Span for text that's part of the paragraph.
-                    TextSpan textSpan = (TextSpan) span;
-                    SizedFont font = textSpan.isSmallCaps() ? spanSmallCapsFont
-                            : textSpan.isBold() && textSpan.isItalic() ? spanBoldItalicFont
-                            : textSpan.isBold() ? spanBoldFont
-                            : textSpan.isItalic() ? spanItalicFont
-                            : textSpan.isCode() ? spanCodeFont
-                            : spanRegularFont;
-
-                    String text = textSpan.getText();
-                    if (allCaps) {
-                        text = text.toUpperCase();
-                    }
-
-                    // Add the text to the current horizontal list.
-                    horizontalList.addText(text, font, hyphenDictionary);
+                    addTextSpanToHorizontalList((TextSpan) span, horizontalList, fontPack, hyphenDictionary);
                 } else if (span instanceof IndexSpan) {
                     // Span that creates an index entry.
                     IndexSpan indexSpan = (IndexSpan) span;
@@ -459,6 +436,35 @@ public class Typesetter {
         verticalList.ejectPage();
 
         return verticalList;
+    }
+
+    /**
+     * Add all the spans from the block to the horizontal list.
+     */
+    private void addBlockToHorizontalList(PDDocument pdDoc, Config config, FontManager fontManager,
+                                          HyphenDictionary hyphenDictionary, Block block, FontPack fontPack,
+                                          HorizontalList horizontalList) throws IOException {
+
+    }
+
+    /**
+     * Add the text span to the horizontal list, properly picking the font.
+     */
+    private void addTextSpanToHorizontalList(TextSpan textSpan, HorizontalList horizontalList,
+                                             FontPack fontPack, HyphenDictionary hyphenDictionary) {
+
+        // Pick the right font.
+        SizedFont font = textSpan.isSmallCaps() ? fontPack.getSmallCapsFont()
+                : textSpan.isBold() && textSpan.isItalic() ? fontPack.getBoldItalicFont()
+                : textSpan.isBold() ? fontPack.getBoldFont()
+                : textSpan.isItalic() ? fontPack.getItalicFont()
+                : textSpan.isCode() ? fontPack.getCodeFont()
+                : fontPack.getRegularFont();
+
+        String text = textSpan.getText();
+
+        // Add the text to the current horizontal list.
+        horizontalList.addText(text, font, hyphenDictionary);
     }
 
     /**
@@ -593,7 +599,6 @@ public class Typesetter {
 
         long marginTop = IN.toSp(0.5);
         long titleMargin = IN.toSp(1.5);
-        long publisherNameMargin = IN.toSp(4.0);
         long publisherLocationMargin = IN.toSp(0.02);
         SizedFont authorFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_AUTHOR_FONT));
         authorFont = TrackingFont.create(authorFont, 0.1, 0.5);
@@ -816,7 +821,8 @@ public class Typesetter {
      * Adds the index to the vertical list. Does not eject the page.
      */
     private void generateIndex(Config config, Sections sections, VerticalList verticalList,
-                               FontManager fontManager, Bookmarks bookmarks) throws IOException {
+                               FontManager fontManager, Bookmarks bookmarks,
+                               HyphenDictionary hyphenDictionary) throws IOException {
 
         long marginTop = IN.toSp(1.0);
         long paddingBelowTitle = IN.toSp(0.75);
@@ -828,7 +834,8 @@ public class Typesetter {
 
         SizedFont titleFont = fontManager.get(config.getFont(Config.Key.TOC_PAGE_TITLE_FONT));
         titleFont = TrackingFont.create(titleFont, 0.1, 0.5);
-        SizedFont entryFont = fontManager.get(config.getFont(Config.Key.BODY_FONT));
+        FontPack entryFontPack = FontPack.create(fontManager, config.getFont(Config.Key.BODY_FONT),
+                config.getFont(Config.Key.BODY_CODE_FONT));
         long boxWidth = IN.toSp(1.0);
         long boxHeight = PT.toSp(0.5);
 
@@ -875,7 +882,8 @@ public class Typesetter {
         verticalList.changeColumnLayout(columnLayout);
 
         // Generate the paragraphs.
-        generateIndexEntries(indexEntries, sections, verticalList, entryFont, columnLayout.getColumnWidth(), 0);
+        generateIndexEntries(indexEntries, sections, verticalList, entryFontPack, hyphenDictionary,
+                columnLayout.getColumnWidth(), 0);
 
         // Switch back to a single column.
         verticalList.changeColumnLayout(ColumnLayout.single());
@@ -887,7 +895,8 @@ public class Typesetter {
      * @param depth the depth of the recursion, where 0 is for entries, 1 for sub-entries, etc.
      */
     private void generateIndexEntries(IndexEntries indexEntries, Sections sections, VerticalList verticalList,
-                                      SizedFont font, long textWidth, int depth) throws IOException {
+                                      FontPack fontPack, HyphenDictionary hyphenDictionary,
+                                      long textWidth, int depth) throws IOException {
         // Space between sections.
         long sectionBreak = PT.toSp(6.0);
 
@@ -908,11 +917,18 @@ public class Typesetter {
             }
 
             // The full text of the entry.
-            String entryParagraph = indexEntry.getIndexParagraph(sections);
+            Block block = indexEntry.getIndexParagraph(sections);
 
             // Build the horizontal list.
             HorizontalList horizontalList = HorizontalList.raggedRight();
-            horizontalList.addText(entryParagraph, font);
+            for (Span span : block.getSpans()) {
+                if (span instanceof TextSpan) {
+                    // Span for text that's part of the paragraph.
+                    addTextSpanToHorizontalList((TextSpan) span, horizontalList, fontPack, hyphenDictionary);
+                } else {
+                    throw new IllegalStateException("index spans must be text");
+                }
+            }
             horizontalList.addEndOfParagraph();
             OutputShape outputShape = OutputShape.singleLine(textWidth, totalIndent, hangingIndent);
             horizontalList.format(verticalList, outputShape);
@@ -922,7 +938,8 @@ public class Typesetter {
             verticalList.addElement(new Glue(0, PT.toSp(0.8), 0, false));
 
             // Now do the children of this entry.
-            generateIndexEntries(indexEntry.getSubEntries(), sections, verticalList, font, textWidth, depth + 1);
+            generateIndexEntries(indexEntry.getSubEntries(), sections, verticalList, fontPack, hyphenDictionary,
+                    textWidth, depth + 1);
 
             // Kee track of the last category.
             previousCategory = category;

@@ -54,4 +54,9 @@ public class ImageSpan extends Span {
     public String getCaption() {
         return mCaption;
     }
+
+    @Override
+    public String toString() {
+        return "[!" + mCaption + "]";
+    }
 }

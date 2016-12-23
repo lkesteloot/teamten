@@ -55,4 +55,45 @@ public class TextSpan extends Span {
     public boolean isCode() {
         return mIsCode;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        TextSpan textSpan = (TextSpan) o;
+
+        if (mIsBold != textSpan.mIsBold) {
+            return false;
+        }
+        if (mIsItalic != textSpan.mIsItalic) {
+            return false;
+        }
+        if (mIsSmallCaps != textSpan.mIsSmallCaps) {
+            return false;
+        }
+        if (mIsCode != textSpan.mIsCode) {
+            return false;
+        }
+        return mText.equals(textSpan.mText);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mText.hashCode();
+        result = 31*result + (mIsBold ? 1 : 0);
+        result = 31*result + (mIsItalic ? 1 : 0);
+        result = 31*result + (mIsSmallCaps ? 1 : 0);
+        result = 31*result + (mIsCode ? 1 : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return mText;
+    }
 }

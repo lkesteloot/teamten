@@ -18,6 +18,7 @@
 
 package com.teamten.typeset;
 
+import com.teamten.markdown.Block;
 import com.teamten.typeset.element.Bookmark;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,13 +29,13 @@ import java.util.stream.Collectors;
  * Represents a reference from an index entry.
  */
 public class IndexBookmark extends Bookmark {
-    private final @NotNull List<String> mEntries;
+    private final @NotNull List<Block> mEntries;
 
-    public IndexBookmark(List<String> entries) {
+    public IndexBookmark(List<Block> entries) {
         mEntries = entries;
     }
 
-    public List<String> getEntries() {
+    public List<Block> getEntries() {
         return mEntries;
     }
 
@@ -60,7 +61,9 @@ public class IndexBookmark extends Bookmark {
 
     @Override
     public String toString() {
-        String entries = mEntries.stream().collect(Collectors.joining(", "));
+        String entries = mEntries.stream()
+                .map(Block::toBriefString)
+                .collect(Collectors.joining(", "));
 
         return "Index entry \"" + entries + "\"";
     }

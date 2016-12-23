@@ -19,12 +19,15 @@
 package com.teamten.markdown;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +38,7 @@ import java.util.regex.Pattern;
 public class MarkdownParser {
     private static final Map<String,BlockType> TAG_BLOCK_TYPE_MAP = new HashMap<>();
     private static final Pattern mMetadataPattern = Pattern.compile("([A-Za-z-]+): (.*)");
+    private boolean mForceBody;
 
     private enum ParserState {
         START_OF_LINE,
@@ -66,6 +70,18 @@ public class MarkdownParser {
         for (Block block : doc.getBlocks()) {
             System.out.println("Block: " + block);
         }
+    }
+
+    public MarkdownParser() {
+        mForceBody = false;
+    }
+
+    /**
+     * Whether to force the parse as a body block. Setting this to true causes characters like # to be treated
+     * like any other. Defaults to false.
+     */
+    public void setForceBody(boolean forceBody) {
+        mForceBody = forceBody;
     }
 
     public Doc parse(InputStream inputStream) throws IOException {
@@ -104,28 +120,28 @@ public class MarkdownParser {
             /// System.out.printf("%d (%c) %s %s%n", chOrEof, ch, state, builder);
             switch (state) {
                 case START_OF_LINE:
-                    if (ch == ' ') {
+                    if (ch == ' ' && !mForceBody) {
                         if (blockType == BlockType.BODY) {
                             state = ParserState.ONE_SPACE;
                         } else {
                             // Skip initial whitespace, probably after "#" or similar.
                         }
-                    } else if (ch == '%') {
+                    } else if (ch == '%' && !mForceBody) {
                         // Comment, skip rest of line.
                         state = ParserState.COMMENT;
-                    } else if (builder == null && Character.isDigit(ch)) {
+                    } else if (builder == null && Character.isDigit(ch) && !mForceBody) {
                         state = ParserState.NUMBERED_LIST;
                         // Not really a tag, but we use the builder to keep the number in case it ends up
                         // not being a numbered list (just a line that starts with a number).
                         tagBuilder.setLength(0);
                         tagBuilder.append(ch);
-                    } else if (builder == null && ch == '#' && blockType == BlockType.BODY) {
+                    } else if (builder == null && ch == '#' && blockType == BlockType.BODY && !mForceBody) {
                         blockType = BlockType.PART_HEADER;
-                    } else if (builder == null && ch == '#' && blockType == BlockType.PART_HEADER) {
+                    } else if (builder == null && ch == '#' && blockType == BlockType.PART_HEADER && !mForceBody) {
                         blockType = BlockType.CHAPTER_HEADER;
-                    } else if (builder == null && ch == '#' && blockType == BlockType.CHAPTER_HEADER) {
+                    } else if (builder == null && ch == '#' && blockType == BlockType.CHAPTER_HEADER && !mForceBody) {
                         blockType = BlockType.MINOR_SECTION_HEADER;
-                    } else if (builder == null && ch == '#' && blockType == BlockType.MINOR_SECTION_HEADER) {
+                    } else if (builder == null && ch == '#' && blockType == BlockType.MINOR_SECTION_HEADER && !mForceBody) {
                         blockType = BlockType.MINOR_HEADER;
                     } else if (ch == '*') {
                         isItalic = true;
@@ -342,6 +358,33 @@ public class MarkdownParser {
         }
 
         return doc;
+    }
+
+    /**
+     * Parse a single block from a string, returning the block. This does not support comments in
+     * the Markdown.
+     *
+     * @throws IllegalArgumentException if the text cannot be parsed to exactly one block.
+     */
+    public static Block parseSingleBlock(String text) {
+        try {
+            InputStream inputStream = new ByteArrayInputStream(text.getBytes("UTF-8"));
+            MarkdownParser parser = new MarkdownParser();
+            parser.setForceBody(true);
+
+            Doc doc = parser.parse(inputStream);
+
+            List<Block> blocks = doc.getBlocks();
+
+            if (blocks.size() != 1) {
+                throw new IllegalArgumentException("text was not a single block: " + text);
+            }
+
+            return blocks.get(0);
+        } catch (IOException e) {
+            // Shouldn't happen, we don't do any actual I/O.
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
