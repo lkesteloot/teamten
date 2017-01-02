@@ -28,6 +28,7 @@ public enum BlockType {
     MINOR_SECTION_HEADER,
     MINOR_HEADER,
     NUMBERED_LIST,
+    BULLET_LIST,
     CODE,
     OUTPUT,
     INPUT,

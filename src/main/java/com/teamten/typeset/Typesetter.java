@@ -193,7 +193,7 @@ public class Typesetter {
                 case BODY:
                     regularFontKey = Config.Key.BODY_FONT;
                     indentFirstLine = previousBlockType == BlockType.BODY;
-                    if (previousBlockType == BlockType.NUMBERED_LIST) {
+                    if (previousBlockType == BlockType.NUMBERED_LIST || previousBlockType == BlockType.BULLET_LIST) {
                         marginTop = PT.toSp(4.0);
                     }
                     break;
@@ -227,6 +227,14 @@ public class Typesetter {
                 case NUMBERED_LIST:
                     regularFontKey = Config.Key.BODY_FONT;
                     if (previousBlockType != BlockType.NUMBERED_LIST) {
+                        marginTop = PT.toSp(8.0);
+                    }
+                    marginBottom = PT.toSp(4.0);
+                    break;
+
+                case BULLET_LIST:
+                    regularFontKey = Config.Key.BODY_FONT;
+                    if (previousBlockType != BlockType.BULLET_LIST) {
                         marginTop = PT.toSp(8.0);
                     }
                     marginBottom = PT.toSp(4.0);
@@ -338,6 +346,15 @@ public class Typesetter {
                 horizontalList.addElement(hbox);
             }
 
+            // Add bullet at the front of a bullet paragraph.
+            if (block.getBlockType() == BlockType.BULLET_LIST) {
+                List<Element> elements = new ArrayList<>();
+                elements.add(new Glue(0, PT.toSp(1.0), true, 0, false, true));
+                elements.add(new Text("– ", fontPack.getRegularFont()));
+                HBox hbox = HBox.ofWidth(elements, paragraphIndent);
+                horizontalList.addElement(hbox);
+            }
+
             // Each span in the paragraph.
             for (Span span : block.getSpans()) {
                 if (span instanceof TextSpan) {
@@ -373,6 +390,7 @@ public class Typesetter {
                 case BODY:
                 case MINOR_HEADER:
                 case NUMBERED_LIST:
+                case BULLET_LIST:
                 case CODE:
                 case OUTPUT:
                 case INPUT:
@@ -406,7 +424,7 @@ public class Typesetter {
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             long bodyWidth = config.getBodyWidth();
             OutputShape outputShape;
-            if (block.getBlockType() == BlockType.NUMBERED_LIST) {
+            if (block.getBlockType() == BlockType.NUMBERED_LIST || block.getBlockType() == BlockType.BULLET_LIST) {
                 outputShape = OutputShape.singleLine(bodyWidth, 0, paragraphIndent);
             } else if (indentFirstLine) {
                 outputShape = OutputShape.singleLine(bodyWidth, paragraphIndent, 0);

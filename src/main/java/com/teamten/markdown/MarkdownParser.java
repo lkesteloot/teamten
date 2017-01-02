@@ -135,6 +135,11 @@ public class MarkdownParser {
                         // not being a numbered list (just a line that starts with a number).
                         tagBuilder.setLength(0);
                         tagBuilder.append(ch);
+                    } else if (builder == null && ch == '•' && !mForceBody) {
+                        // This is a real bullet symbol. On Mac, use Alt-8 to type it.
+                        state = ParserState.SKIP_WHITESPACE;
+                        blockType = BlockType.BULLET_LIST;
+                        builder = new Block.Builder(blockType);
                     } else if (builder == null && ch == '#' && blockType == BlockType.BODY && !mForceBody) {
                         blockType = BlockType.PART_HEADER;
                     } else if (builder == null && ch == '#' && blockType == BlockType.PART_HEADER && !mForceBody) {
