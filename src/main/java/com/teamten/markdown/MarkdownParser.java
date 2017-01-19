@@ -362,6 +362,15 @@ public class MarkdownParser {
             builder = null;
         }
 
+        // Post-process the blocks to replace apostrophes, quotes, etc.
+        long before = System.currentTimeMillis();
+        for (Block block : doc.getBlocks()) {
+            block.postProcessText();
+        }
+        if (doc.getBlocks().size() > 10) {
+            System.out.println("Post-processing time: " + (System.currentTimeMillis() - before) + " ms");
+        }
+
         return doc;
     }
 

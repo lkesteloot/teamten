@@ -68,6 +68,54 @@ public class Block {
     }
 
     /**
+     * Convert apostrophes, quotes, etc.
+     */
+    public void postProcessText() {
+        if (getBlockType() != BlockType.CODE) {
+            boolean insideQuotation = false;
+            int previousCh = -1;
+
+            for (int i = 0; i < mSpans.size(); i++) {
+                Span span = mSpans.get(i);
+                if (span instanceof TextSpan) {
+                    TextSpan textSpan = (TextSpan) span;
+                    StringBuilder builder = new StringBuilder();
+                    String text = textSpan.getText();
+
+                    for (int j = 0; j < text.length(); ) {
+                        int ch = text.codePointAt(j);
+
+                        // Simple character translations.
+                        if (ch == '~') {
+                            // No-break space.
+                            builder.append('\u00A0');
+                        } else if (ch == '\'') {
+                            builder.append('’');
+                        } else if (ch == '"') {
+                            // TODO make this configurable.
+//                            builder.append(insideQuotation ? '”' : '“');
+                            builder.append(insideQuotation ? "\u00A0»" : "«\u00A0");
+                            insideQuotation = !insideQuotation;
+                        } else {
+                            builder.appendCodePoint(ch);
+                        }
+
+                        previousCh = ch;
+                        j += Character.charCount(ch);
+                    }
+
+                    mSpans.set(i, new TextSpan(builder.toString(), textSpan.isBold(), textSpan.isItalic(),
+                            textSpan.isSmallCaps(), textSpan.isCode()));
+                }
+            }
+
+            if (insideQuotation) {
+                System.out.println("Warning: Block ends without closing quotation: " + this);
+            }
+        }
+    }
+
+    /**
      * Return just the text of the block.
      */
     public String toBriefString() {
@@ -146,7 +194,6 @@ public class Block {
     public static class Builder {
         private final Block mBlock;
         private final StringBuilder mStringBuilder = new StringBuilder();
-        private boolean mInsideQuotation;
         private boolean mIsBold;
         private boolean mIsItalic;
         private boolean mIsSmallCaps;
@@ -170,19 +217,7 @@ public class Block {
          * @param isCode whether the character should be displayed as code.
          */
         public void addText(char ch, boolean isBold, boolean isItalic, boolean isSmallCaps, boolean isCode) {
-            // Simple character translations.
-            if (mBlock.getBlockType() != BlockType.CODE) {
-                if (ch == '~') {
-                    // No-break space.
-                    ch = '\u00A0';
-                } else if (ch == '\'') {
-                    ch = '’';
-                } else if (ch == '"') {
-                    ch = mInsideQuotation ? '”' : '“';
-                    mInsideQuotation = !mInsideQuotation;
-                }
-            }
-
+            // Switch style if necessary.
             if (isBold != mIsBold || isItalic != mIsItalic || isSmallCaps != mIsSmallCaps || isCode != mIsCode) {
                 emitSpan();
                 mIsBold = isBold;
@@ -242,10 +277,6 @@ public class Block {
         public Block build() {
             emitSpan();
 
-            if (mInsideQuotation) {
-                System.out.println("Warning: Block ends without closing quotation: " + mBlock);
-            }
-
             // Note that we can't warn if the block is built while inside bold or italic, because we
             // can't be sure that those weren't closed. If the last character of a block is the
             // character to stop bold, we'll never know about it because we won't get another
@@ -264,6 +295,5 @@ public class Block {
                 mBlock.addSpan(span);
             }
         }
-
     }
 }
