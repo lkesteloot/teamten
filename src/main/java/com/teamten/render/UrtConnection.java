@@ -94,7 +94,7 @@ public class UrtConnection extends Thread {
                         int skipping = length - 4;
                         System.err.println("Request type " + requestType +
                                 " unknown, skipping " + skipping + " bytes");
-                        is.skipBytes(skipping);
+                        int unused = is.skipBytes(skipping);
                         break;
                 }
 

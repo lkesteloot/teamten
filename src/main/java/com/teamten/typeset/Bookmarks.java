@@ -22,6 +22,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.teamten.typeset.element.Bookmark;
 import com.teamten.typeset.element.Page;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.Set;
  * Keeps track of a set of bookmarks and which physical page they're on.
  */
 public class Bookmarks {
-    private final SetMultimap<Integer,Bookmark> mPhysicalPageNumberToBookmark = HashMultimap.create();
+    private final @NotNull SetMultimap<Integer,Bookmark> mPhysicalPageNumberToBookmark = HashMultimap.create();
 
     private Bookmarks() {
         // Private constructor.
@@ -95,6 +96,10 @@ public class Bookmarks {
         Bookmarks bookmarks = (Bookmarks) o;
 
         return mPhysicalPageNumberToBookmark.equals(bookmarks.mPhysicalPageNumberToBookmark);
+    }
 
+    @Override
+    public int hashCode() {
+        return mPhysicalPageNumberToBookmark.hashCode();
     }
 }

@@ -59,7 +59,7 @@ public abstract class PieceType {
             }
 
             // Captures.
-            int otherIndex = board.getRelativeIndex(index, -1, rankDirection);
+            int otherIndex = Board.getRelativeIndex(index, -1, rankDirection);
             if (otherIndex != -1) {
                 Piece piece = board.getPiece(otherIndex);
                 if (piece.isOtherSide(side)) {
@@ -67,7 +67,7 @@ public abstract class PieceType {
                 }
             }
 
-            otherIndex = board.getRelativeIndex(index, 1, rankDirection);
+            otherIndex = Board.getRelativeIndex(index, 1, rankDirection);
             if (otherIndex != -1) {
                 Piece piece = board.getPiece(otherIndex);
                 if (piece.isOtherSide(side)) {
@@ -77,14 +77,14 @@ public abstract class PieceType {
 
             // Moves.
             if (!capturesOnly) {
-                otherIndex = board.getRelativeIndex(index, 0, rankDirection);
+                otherIndex = Board.getRelativeIndex(index, 0, rankDirection);
                 if (otherIndex != -1 && board.getPiece(otherIndex) == Piece.EMPTY) {
                     moveList.add(Move.makePromotion(board, index, otherIndex, promotedPiece));
 
                     if ((side == Side.WHITE && Board.getRank(index) == 2) ||
                             (side == Side.BLACK && Board.getRank(index) == 7)) {
 
-                        otherIndex = board.getRelativeIndex(index, 0, rankDirection*2);
+                        otherIndex = Board.getRelativeIndex(index, 0, rankDirection*2);
                         if (otherIndex != -1 && board.getPiece(otherIndex) == Piece.EMPTY) {
                             moveList.add(Move.makePromotion(board, index,
                                         otherIndex, promotedPiece));
@@ -289,7 +289,7 @@ public abstract class PieceType {
         // Try each direction.
         for (int i = 0; i < fileDeltas.length; i++) {
             for (int j = 1; j < Board.SIZE; j++) {
-                int otherIndex = board.getRelativeIndex(index,
+                int otherIndex = Board.getRelativeIndex(index,
                         fileDeltas[i]*j, rankDeltas[i]*j);
                 if (otherIndex == -1) {
                     // Went off the board.
@@ -321,7 +321,7 @@ public abstract class PieceType {
 
         // Try each direction.
         for (int i = 0; i < fileDeltas.length; i++) {
-            int otherIndex = board.getRelativeIndex(index, fileDeltas[i], rankDeltas[i]);
+            int otherIndex = Board.getRelativeIndex(index, fileDeltas[i], rankDeltas[i]);
             if (otherIndex != -1) {
                 Piece piece = board.getPiece(otherIndex);
                 if ((piece == Piece.EMPTY && !capturesOnly) || piece.isOtherSide(side)) {

@@ -316,20 +316,40 @@ public class Move {
         */
     }
 
-    @Override // Object
-    public boolean equals(Object other) {
-        if (!(other instanceof Move)) {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
-        Move otherMove = (Move) other;
+        Move move = (Move) o;
 
-        return mFromIndex == otherMove.mFromIndex
-            && mToIndex == otherMove.mToIndex
-            && mMovingPiece == otherMove.mMovingPiece
-            && mCapturedPiece == otherMove.mCapturedPiece
-            && mPromotedPiece == otherMove.mPromotedPiece;
-        // Don't check "mCheck".
+        if (mFromIndex != move.mFromIndex) {
+            return false;
+        }
+        if (mToIndex != move.mToIndex) {
+            return false;
+        }
+        if (mMovingPiece != null ? !mMovingPiece.equals(move.mMovingPiece) : move.mMovingPiece != null) {
+            return false;
+        }
+        if (mCapturedPiece != null ? !mCapturedPiece.equals(move.mCapturedPiece) : move.mCapturedPiece != null) {
+            return false;
+        }
+        return mPromotedPiece != null ? mPromotedPiece.equals(move.mPromotedPiece) : move.mPromotedPiece == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mFromIndex;
+        result = 31*result + mToIndex;
+        result = 31*result + (mMovingPiece != null ? mMovingPiece.hashCode() : 0);
+        result = 31*result + (mCapturedPiece != null ? mCapturedPiece.hashCode() : 0);
+        result = 31*result + (mPromotedPiece != null ? mPromotedPiece.hashCode() : 0);
+        return result;
     }
 
     /**
