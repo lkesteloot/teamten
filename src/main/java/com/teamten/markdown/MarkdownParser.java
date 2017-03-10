@@ -109,7 +109,7 @@ public class MarkdownParser {
 
             // We only accept space and newline as whitespace. Avoid tabs, carriage returns, etc.
             if (Character.isWhitespace(ch) && ch != '\n' && ch != ' ') {
-                System.out.printf("Warning: Skipped whitespace character 0x%02x\n", (int) ch);
+                System.out.printf("Warning (line " + lineNumber + "): Skipped whitespace character 0x%02x\n", (int) ch);
                 continue;
             }
 
@@ -291,12 +291,12 @@ public class MarkdownParser {
                             doc.addBlock(new Block.Builder(tagBlockType, lineNumber).build());
                         } else if (tag.equals("sc")) {
                             if (flags.isSmallCaps()) {
-                                System.out.println("Warning: [sc] within [sc]");
+                                System.out.println("Warning (line " + lineNumber + "): [sc] within [sc]");
                             }
                             flags = flags.withSmallCaps(true);
                         } else if (tag.equals("/sc")) {
                             if (!flags.isSmallCaps()) {
-                                System.out.println("Warning: [/sc] not within [sc]");
+                                System.out.println("Warning (line " + lineNumber + "): [/sc] not within [sc]");
                             }
                             flags = flags.withSmallCaps(false);
                         } else if (addMetadataTag(tag, doc)) {
@@ -309,7 +309,7 @@ public class MarkdownParser {
                         } else if (tag.startsWith("!")) {
                             builder.addSpan(ImageSpan.fromTag(tag.substring(1)));
                         } else {
-                            System.out.println("Warning: Unknown block type: " + tag);
+                            System.out.println("Warning (line " + lineNumber + "): Unknown block type: " + tag);
                         }
                         state = preTagState;
                         preTagState = null;
