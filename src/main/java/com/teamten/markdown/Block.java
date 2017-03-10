@@ -29,16 +29,25 @@ import java.util.stream.Collectors;
  */
 public class Block {
     private final @NotNull BlockType mBlockType;
+    private final int mLineNumber;
     private final int mCounter;
     private final @NotNull List<Span> mSpans = new ArrayList<>();
 
-    public Block(BlockType blockType, int counter) {
+    public Block(BlockType blockType, int lineNumber, int counter) {
         mBlockType = blockType;
+        mLineNumber = lineNumber;
         mCounter = counter;
     }
 
     public BlockType getBlockType() {
         return mBlockType;
+    }
+
+    /**
+     * Get line in source where this block started.
+     */
+    public int getLineNumber() {
+        return mLineNumber;
     }
 
     /**
@@ -109,7 +118,7 @@ public class Block {
             }
 
             if (insideQuotation) {
-                System.out.println("Warning: Block ends without closing quotation: " + this);
+                System.out.println("Warning (line " + mLineNumber + "): Block ends without closing quotation: " + this);
             }
         }
     }
@@ -184,7 +193,7 @@ public class Block {
      */
     public static Block bodyBlock(String text) {
         Span span = new TextSpan(text, FontVariantFlags.PLAIN);
-        return new Builder(BlockType.BODY).addSpan(span).build();
+        return new Builder(BlockType.BODY, 0).addSpan(span).build();
     }
 
     /**
@@ -195,12 +204,12 @@ public class Block {
         private final StringBuilder mStringBuilder = new StringBuilder();
         private FontVariantFlags mFlags = FontVariantFlags.PLAIN;
 
-        private Builder(BlockType blockType, int counter) {
-            mBlock = new Block(blockType, counter);
+        private Builder(BlockType blockType, int lineNumber, int counter) {
+            mBlock = new Block(blockType, lineNumber, counter);
         }
 
-        public Builder(BlockType blockType) {
-            this(blockType, 0);
+        public Builder(BlockType blockType, int lineNumber) {
+            this(blockType, lineNumber, 0);
         }
 
         /**

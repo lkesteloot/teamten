@@ -92,6 +92,7 @@ public class MarkdownParser {
 
         ParserState state = ParserState.START_OF_LINE;
         BlockType blockType = BlockType.BODY;
+        int lineNumber = 1;
         Block.Builder builder = null;
         FontVariantFlags flags = FontVariantFlags.PLAIN;
         // Whether we're owed a space from the end of the previous line.
@@ -106,6 +107,7 @@ public class MarkdownParser {
             char ch = (char) chOrEof;
             processSameCharacter = false;
 
+            // We only accept space and newline as whitespace. Avoid tabs, carriage returns, etc.
             if (Character.isWhitespace(ch) && ch != '\n' && ch != ' ') {
                 System.out.printf("Warning: Skipped whitespace character 0x%02x\n", (int) ch);
                 continue;
@@ -133,7 +135,7 @@ public class MarkdownParser {
                         // This is a real bullet symbol. On Mac, use Alt-8 to type it.
                         state = ParserState.SKIP_WHITESPACE;
                         blockType = BlockType.BULLET_LIST;
-                        builder = new Block.Builder(blockType);
+                        builder = new Block.Builder(blockType, lineNumber);
                     } else if (builder == null && ch == '#' && blockType == BlockType.BODY && !mForceBody) {
                         blockType = BlockType.PART_HEADER;
                     } else if (builder == null && ch == '#' && blockType == BlockType.PART_HEADER && !mForceBody) {
@@ -148,6 +150,7 @@ public class MarkdownParser {
                         flags = flags.toggleCode();
                     } else if (ch == '\n') {
                         // Blank line, end of chunk.
+                        lineNumber++;
                         newlineSpace = false;
                         if (builder != null && !builder.isEmpty()) {
                             doc.addBlock(builder.build());
@@ -161,7 +164,7 @@ public class MarkdownParser {
                         state = ParserState.IN_TAG;
                     } else {
                         if (builder == null) {
-                            builder = new Block.Builder(blockType);
+                            builder = new Block.Builder(blockType, lineNumber);
                         }
                         if (newlineSpace) {
                             builder.addText(' ', newlineSpaceFlags);
@@ -193,13 +196,13 @@ public class MarkdownParser {
                 case THREE_SPACES:
                     if (ch == ' ') {
                         state = ParserState.LINE_OF_CODE;
-                        builder = new Block.Builder(BlockType.CODE);
+                        builder = new Block.Builder(BlockType.CODE, lineNumber);
                     } else if (ch == '>') {
                         state = ParserState.LINE_OF_CODE;
-                        builder = new Block.Builder(BlockType.OUTPUT);
+                        builder = new Block.Builder(BlockType.OUTPUT, lineNumber);
                     } else if (ch == '<') {
                         state = ParserState.LINE_OF_CODE;
-                        builder = new Block.Builder(BlockType.INPUT);
+                        builder = new Block.Builder(BlockType.INPUT, lineNumber);
                     } else {
                         state = ParserState.START_OF_LINE;
                         processSameCharacter = true;
@@ -208,6 +211,7 @@ public class MarkdownParser {
 
                 case IN_LINE:
                     if (ch == '\n') {
+                        lineNumber++;
                         state = ParserState.START_OF_LINE;
                         if (blockType == BlockType.CODE) {
                             // Code blocks don't wrap.
@@ -243,6 +247,7 @@ public class MarkdownParser {
 
                 case SKIP_WHITESPACE:
                     if (ch == '\n') {
+                        lineNumber++;
                         state = ParserState.START_OF_LINE;
                     } else if (ch == ' ') {
                         // Skip.
@@ -265,6 +270,7 @@ public class MarkdownParser {
                 case COMMENT:
                     if (ch == '\n') {
                         // Back to normal.
+                        lineNumber++;
                         state = ParserState.START_OF_LINE;
                     } else {
                         // Skip comment character.
@@ -282,7 +288,7 @@ public class MarkdownParser {
                                 builder = null;
                                 flags = FontVariantFlags.PLAIN;
                             }
-                            doc.addBlock(new Block.Builder(tagBlockType).build());
+                            doc.addBlock(new Block.Builder(tagBlockType, lineNumber).build());
                         } else if (tag.equals("sc")) {
                             if (flags.isSmallCaps()) {
                                 System.out.println("Warning: [sc] within [sc]");
@@ -323,7 +329,7 @@ public class MarkdownParser {
                         state = ParserState.SKIP_WHITESPACE;
                     } else {
                         // Wasn't a numbered list. Start a normal paragraph.
-                        builder = new Block.Builder(BlockType.BODY);
+                        builder = new Block.Builder(BlockType.BODY, lineNumber);
                         for (int i = 0; i < tagBuilder.length(); i++) {
                             builder.addText(tagBuilder.charAt(i), flags);
                         }
@@ -334,6 +340,7 @@ public class MarkdownParser {
 
                 case LINE_OF_CODE:
                     if (ch == '\n') {
+                        lineNumber++;
                         doc.addBlock(builder.build());
                         builder = null;
                         flags = FontVariantFlags.PLAIN;

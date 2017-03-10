@@ -67,7 +67,7 @@ public class IndexEntry implements Comparable<IndexEntry> {
      * Get the full paragraph to display for this entry in the index.
      */
     public Block getIndexParagraph(Sections sections) {
-        Block.Builder builder = new Block.Builder(BlockType.BODY);
+        Block.Builder builder = new Block.Builder(BlockType.BODY, 0);
 
         // Add the index text.
         builder.addBlock(mText);
