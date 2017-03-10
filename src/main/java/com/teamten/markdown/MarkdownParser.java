@@ -152,6 +152,7 @@ public class MarkdownParser {
                         if (builder != null && !builder.isEmpty()) {
                             doc.addBlock(builder.build());
                             builder = null;
+                            flags = FontVariantFlags.PLAIN;
                             blockType = BlockType.BODY;
                         }
                     } else if (ch == '[') {
@@ -214,6 +215,7 @@ public class MarkdownParser {
                                 doc.addBlock(builder.build());
                             }
                             builder = null;
+                            flags = FontVariantFlags.PLAIN;
                             blockType = BlockType.BODY;
                         } else {
                             // Here we should treat the newline as a space, but we don't want to actually add the space
@@ -278,6 +280,7 @@ public class MarkdownParser {
                             if (builder != null && !builder.isEmpty()) {
                                 doc.addBlock(builder.build());
                                 builder = null;
+                                flags = FontVariantFlags.PLAIN;
                             }
                             doc.addBlock(new Block.Builder(tagBlockType).build());
                         } else if (tag.equals("sc")) {
@@ -333,6 +336,7 @@ public class MarkdownParser {
                     if (ch == '\n') {
                         doc.addBlock(builder.build());
                         builder = null;
+                        flags = FontVariantFlags.PLAIN;
                         state = ParserState.START_OF_LINE;
                     } else {
                         if (ch == '`') {
@@ -350,6 +354,7 @@ public class MarkdownParser {
         if (builder != null && !builder.isEmpty()) {
             doc.addBlock(builder.build());
             builder = null;
+            flags = FontVariantFlags.PLAIN;
         }
 
         // Post-process the blocks to replace apostrophes, quotes, etc.
