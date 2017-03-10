@@ -18,42 +18,42 @@
 
 package com.teamten.markdown;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A text span is a horizontal sequence of letters with a specific set of attributes, like font.
  */
 public class TextSpan extends Span {
-    private final String mText;
-    private final boolean mIsBold;
-    private final boolean mIsItalic;
-    private final boolean mIsSmallCaps;
-    private final boolean mIsCode;
+    private final @NotNull String mText;
+    private final @NotNull FontVariantFlags mFlags;
 
-    public TextSpan(String text, boolean isBold, boolean isItalic, boolean isSmallCaps, boolean isCode) {
+    public TextSpan(String text, FontVariantFlags flags) {
         mText = text;
-        mIsBold = isBold;
-        mIsItalic = isItalic;
-        mIsSmallCaps = isSmallCaps;
-        mIsCode = isCode;
+        mFlags = flags;
     }
 
     public String getText() {
         return mText;
     }
 
+    public FontVariantFlags getFlags() {
+        return mFlags;
+    }
+
     public boolean isBold() {
-        return mIsBold;
+        return mFlags.isBold();
     }
 
     public boolean isItalic() {
-        return mIsItalic;
+        return mFlags.isItalic();
     }
 
     public boolean isSmallCaps() {
-        return mIsSmallCaps;
+        return mFlags.isSmallCaps();
     }
 
     public boolean isCode() {
-        return mIsCode;
+        return mFlags.isCode();
     }
 
     @Override
@@ -67,28 +67,16 @@ public class TextSpan extends Span {
 
         TextSpan textSpan = (TextSpan) o;
 
-        if (mIsBold != textSpan.mIsBold) {
+        if (!mText.equals(textSpan.mText)) {
             return false;
         }
-        if (mIsItalic != textSpan.mIsItalic) {
-            return false;
-        }
-        if (mIsSmallCaps != textSpan.mIsSmallCaps) {
-            return false;
-        }
-        if (mIsCode != textSpan.mIsCode) {
-            return false;
-        }
-        return mText.equals(textSpan.mText);
+        return mFlags.equals(textSpan.mFlags);
     }
 
     @Override
     public int hashCode() {
         int result = mText.hashCode();
-        result = 31*result + (mIsBold ? 1 : 0);
-        result = 31*result + (mIsItalic ? 1 : 0);
-        result = 31*result + (mIsSmallCaps ? 1 : 0);
-        result = 31*result + (mIsCode ? 1 : 0);
+        result = 31*result + mFlags.hashCode();
         return result;
     }
 

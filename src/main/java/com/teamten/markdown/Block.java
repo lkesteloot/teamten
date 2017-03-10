@@ -104,8 +104,7 @@ public class Block {
                         j += Character.charCount(ch);
                     }
 
-                    mSpans.set(i, new TextSpan(builder.toString(), textSpan.isBold(), textSpan.isItalic(),
-                            textSpan.isSmallCaps(), textSpan.isCode()));
+                    mSpans.set(i, new TextSpan(builder.toString(), textSpan.getFlags()));
                 }
             }
 
@@ -184,7 +183,7 @@ public class Block {
      * Make a plain body block from a string.
      */
     public static Block bodyBlock(String text) {
-        Span span = new TextSpan(text, false, false, false, false);
+        Span span = new TextSpan(text, FontVariantFlags.PLAIN);
         return new Builder(BlockType.BODY).addSpan(span).build();
     }
 
@@ -194,10 +193,7 @@ public class Block {
     public static class Builder {
         private final Block mBlock;
         private final StringBuilder mStringBuilder = new StringBuilder();
-        private boolean mIsBold;
-        private boolean mIsItalic;
-        private boolean mIsSmallCaps;
-        private boolean mIsCode;
+        private FontVariantFlags mFlags = FontVariantFlags.PLAIN;
 
         private Builder(BlockType blockType, int counter) {
             mBlock = new Block(blockType, counter);
@@ -211,30 +207,24 @@ public class Block {
          * Add the character to the block.
          *
          * @param ch the character to add.
-         * @param isBold whether the character should be displayed in bold.
-         * @param isItalic whether the character should be displayed in italics.
-         * @param isSmallCaps whether the character should be displayed in small caps.
-         * @param isCode whether the character should be displayed as code.
+         * @param flags whether the character should be displayed in bold, italics, etc.
          */
-        public void addText(char ch, boolean isBold, boolean isItalic, boolean isSmallCaps, boolean isCode) {
+        public void addText(char ch, FontVariantFlags flags) {
             // Switch style if necessary.
-            if (isBold != mIsBold || isItalic != mIsItalic || isSmallCaps != mIsSmallCaps || isCode != mIsCode) {
+            if (!flags.equals(mFlags)) {
                 emitSpan();
-                mIsBold = isBold;
-                mIsItalic = isItalic;
-                mIsSmallCaps = isSmallCaps;
-                mIsCode = isCode;
+                mFlags = flags;
             }
 
             mStringBuilder.append(ch);
         }
 
         /**
-         * Add a string. See {@link #addText(char, boolean, boolean, boolean, boolean)} for details.
+         * Add a string. See {@link #addText(char, FontVariantFlags)} for details.
          */
-        public void addText(String text, boolean isBold, boolean isItalic, boolean isSmallCaps, boolean isCode) {
+        public void addText(String text, FontVariantFlags flags) {
             for (char ch : text.toCharArray()) {
-                addText(ch, isBold, isItalic, isSmallCaps, isCode);
+                addText(ch, flags);
             }
         }
 
@@ -242,7 +232,7 @@ public class Block {
          * Add a plain string (no markup).
          */
         public void addText(String text) {
-            addText(text, false, false, false, false);
+            addText(text, FontVariantFlags.PLAIN);
         }
 
         /**
@@ -290,7 +280,7 @@ public class Block {
          */
         private void emitSpan() {
             if (mStringBuilder.length() > 0) {
-                TextSpan span = new TextSpan(mStringBuilder.toString(), mIsBold, mIsItalic, mIsSmallCaps, mIsCode);
+                TextSpan span = new TextSpan(mStringBuilder.toString(), mFlags);
                 mStringBuilder.setLength(0);
                 mBlock.addSpan(span);
             }
