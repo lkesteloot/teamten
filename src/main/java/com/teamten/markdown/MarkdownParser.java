@@ -125,7 +125,7 @@ public class MarkdownParser {
                     } else if (ch == '%' && !mForceBody) {
                         // Comment, skip rest of line.
                         state = ParserState.COMMENT;
-                    } else if (builder == null && Character.isDigit(ch) && !mForceBody) {
+                    } else if (builder == null && Character.isDigit(ch) && !mForceBody && blockType == BlockType.BODY) {
                         state = ParserState.NUMBERED_LIST;
                         // Not really a tag, but we use the builder to keep the number in case it ends up
                         // not being a numbered list (just a line that starts with a number).
@@ -329,7 +329,7 @@ public class MarkdownParser {
                         state = ParserState.SKIP_WHITESPACE;
                     } else {
                         // Wasn't a numbered list. Start a normal paragraph.
-                        builder = new Block.Builder(BlockType.BODY, lineNumber);
+                        builder = new Block.Builder(blockType, lineNumber);
                         for (int i = 0; i < tagBuilder.length(); i++) {
                             builder.addText(tagBuilder.charAt(i), flags);
                         }
@@ -354,6 +354,14 @@ public class MarkdownParser {
                         }
                     }
                     break;
+            }
+        }
+
+        // Check if we were in the middle of parsing a number for a numbered list.
+        if (state == ParserState.NUMBERED_LIST) {
+            builder = new Block.Builder(blockType, lineNumber);
+            for (int i = 0; i < tagBuilder.length(); i++) {
+                builder.addText(tagBuilder.charAt(i), flags);
             }
         }
 

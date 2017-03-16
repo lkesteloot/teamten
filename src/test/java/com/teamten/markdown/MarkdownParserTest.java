@@ -34,6 +34,7 @@ public class MarkdownParserTest {
     public void blockParseTest() {
         assertBlockEquals(BlockType.BODY, "Hello", "Hello");
         assertBlockEquals(BlockType.BODY, "Hello", " Hello");
+        assertBlockEquals(BlockType.BODY, "1234", "1234");
         assertBlockEquals(BlockType.PART_HEADER, "Hello", "# Hello");
         assertBlockEquals(BlockType.CHAPTER_HEADER, "Hello", "## Hello");
         assertBlockEquals(BlockType.MINOR_SECTION_HEADER, "Hello", "### Hello");
@@ -41,6 +42,8 @@ public class MarkdownParserTest {
         assertBlockEquals(BlockType.NUMBERED_LIST, "Hello", "1. Hello");
         assertBlockEquals(BlockType.CODE, "Hello", "    Hello");
         assertBlockEquals(BlockType.CODE, "    Hello", "        Hello");
+        assertBlockEquals(BlockType.MINOR_HEADER, "1234", "#### 1234");
+        assertBlockEquals(BlockType.MINOR_HEADER, "1234. Hello", "#### 1234. Hello");
     }
 
     @Test
