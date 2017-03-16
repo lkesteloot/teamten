@@ -195,6 +195,7 @@ public class HorizontalList extends ElementList {
 
         // Roughly copy TeX.
         Glue spaceGlue = new Glue(spaceWidth, spaceWidth/2, spaceWidth/3, true);
+        Glue thinSpaceGlue = new Glue(spaceWidth/2, spaceWidth/4, spaceWidth/6, true);
 
         for (int i = 0; i < text.length(); ) {
             // Pick out the code point at this location. Could take two chars.
@@ -209,6 +210,10 @@ public class HorizontalList extends ElementList {
                 // Non-break space. Precede with infinite penalty.
                 elements.add(new Penalty(Penalty.INFINITY));
                 elements.add(spaceGlue);
+            } else if (ch == '\u202F' && allowLineBreaks) {
+                // Thin non-break space. Precede with infinite penalty.
+                elements.add(new Penalty(Penalty.INFINITY));
+                elements.add(thinSpaceGlue);
             } else {
                 StringBuilder word = new StringBuilder();
                 word.appendCodePoint(ch);
@@ -219,7 +224,7 @@ public class HorizontalList extends ElementList {
                 // Look forward and grab all the letters of the word (or not word).
                 while (i < text.length()) {
                     ch = text.codePointAt(i);
-                    if (isWord != isWordCharacter(ch) || ((ch == ' ' || ch == '\u00A0') && allowLineBreaks)) {
+                    if (isWord != isWordCharacter(ch) || ((ch == ' ' || ch == '\u00A0' || ch == '\u202F') && allowLineBreaks)) {
                         break;
                     }
 

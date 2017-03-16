@@ -105,6 +105,23 @@ public class Block {
 //                            builder.append(insideQuotation ? '”' : '“');
                             builder.append(insideQuotation ? "\u00A0»" : "«\u00A0");
                             insideQuotation = !insideQuotation;
+                        } else if (ch == '-' && i == 0 && j == 0 && text.length() >= 2 && text.codePointAt(j + 1) == ' ') {
+                            // Em-dash for start of dialog.
+                            builder.appendCodePoint('—');
+
+                            // Skip space.
+                            j++;
+                        } else if (ch == '.' && j + 2 < text.length() && text.codePointAt(j + 1) == '.' &&
+                                text.codePointAt(j + 2) == '.') {
+                            // Ellipsis.
+                            builder.append("\u00A0.\u00A0.\u00A0.");
+
+                            // Skip dots.
+                            j += 2;
+                        } else if (ch == ':' || ch == ';' || ch == '!' || ch == '?') {
+                            // Insert thin non-break space in front of two-part punctuation.
+                            builder.append('\u202F');
+                            builder.appendCodePoint(ch);
                         } else {
                             builder.appendCodePoint(ch);
                         }

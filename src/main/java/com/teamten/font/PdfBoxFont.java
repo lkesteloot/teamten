@@ -169,6 +169,9 @@ public class PdfBoxFont extends AbstractFont {
 
     @Override
     public void draw(String text, double fontSize, long x, long y, PDPageContentStream contents) throws IOException {
+        // Here some non-break spaces might get through. Replace them because they don't have a glyph.
+        text = text.replaceAll("\u202F", " ").replaceAll("\u00A0", " ");
+
         contents.beginText();
         contents.setFont(getPdFont(), (float) fontSize);
         contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));

@@ -72,6 +72,80 @@ public class MarkdownParserTest {
         spans = parseStringToBlocks("    Hello *there* my friend").get(0).getSpans();
         assertEquals(1, spans.size());
         assertTextSpanEquals(spans.get(0), "Hello *there* my friend", false, false);
+
+        // Initial hyphen for conversation.
+        spans = parseStringToBlocks("- Hey there").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "—Hey there", false, false);
+        // Space is required:
+        spans = parseStringToBlocks("-Hey there").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "-Hey there", false, false);
+        // Not in middle of text:
+        spans = parseStringToBlocks("Hi- Hey there").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "Hi- Hey there", false, false);
+        spans = parseStringToBlocks("*Hi*- Hey there").get(0).getSpans();
+        assertEquals(2, spans.size());
+        assertTextSpanEquals(spans.get(0), "Hi", true, false);
+        assertTextSpanEquals(spans.get(1), "- Hey there", false, false);
+    }
+
+    @Test
+    public void spanEllipsisParseTest() {
+        List<Span> spans;
+
+        // In the middle of text.
+        spans = parseStringToBlocks("Hello...there").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "Hello\u00A0.\u00A0.\u00A0.there", false, false);
+        spans = parseStringToBlocks("Hello... there").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "Hello\u00A0.\u00A0.\u00A0. there", false, false);
+
+        // End of text.
+        spans = parseStringToBlocks("Hello...").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "Hello\u00A0.\u00A0.\u00A0.", false, false);
+
+        // Beginning of text.
+        spans = parseStringToBlocks("... there").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "\u00A0.\u00A0.\u00A0. there", false, false);
+
+        // Before punctuation.
+        spans = parseStringToBlocks("Hello...!").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "Hello\u00A0.\u00A0.\u00A0.!", false, false);
+    }
+
+    @Test
+    public void spanPunctuationParseTest() {
+        List<Span> spans;
+
+        // Period. No special parsing.
+        spans = parseStringToBlocks("Hello.").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "Hello.", false, false);
+
+        // Comma. No special parsing.
+        spans = parseStringToBlocks("Hello, there.").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "Hello, there.", false, false);
+
+        // Colon, semicolon, question mark, and exclamation mark: insert thin space in front.
+        spans = parseStringToBlocks("This: that.").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "This\u202F: that.", false, false);
+        spans = parseStringToBlocks("One thing; the other.").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "One thing\u202F; the other.", false, false);
+        spans = parseStringToBlocks("Wow!").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "Wow\u202F!", false, false);
+        spans = parseStringToBlocks("What?").get(0).getSpans();
+        assertEquals(1, spans.size());
+        assertTextSpanEquals(spans.get(0), "What\u202F?", false, false);
     }
 
     private static void assertBlockEquals(BlockType expectedBlockType, String expectedText, String input) {
