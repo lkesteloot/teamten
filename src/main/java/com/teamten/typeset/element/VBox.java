@@ -83,7 +83,8 @@ public class VBox extends Box {
 
         // Lay out the items vertically.
         for (Element element : mElements) {
-            long advanceY = element.layOutVertically(x, y, contents);
+            long shift = element instanceof Box ? ((Box) element).getShift() : 0;
+            long advanceY = element.layOutVertically(x, y + shift, contents);
             y -= advanceY;
         }
 

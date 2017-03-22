@@ -57,6 +57,6 @@ public class ImageSpan extends Span {
 
     @Override
     public String toString() {
-        return "[!" + mCaption + "]";
+        return "[!" + mPathname + " " + mCaption + "]";
     }
 }

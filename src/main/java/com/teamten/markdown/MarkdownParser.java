@@ -305,7 +305,9 @@ public class MarkdownParser {
                             // Index entry.
                             builder.addSpan(IndexSpan.fromBarSeparatedEntries(tag.substring(1)));
                         } else if (tag.startsWith("^")) {
-                            // Ignore footnote.
+                            // Footnote.
+                            Doc footnoteDoc = parseDoc(tag.substring(1));
+                            builder.addSpan(new FootnoteSpan(footnoteDoc));
                         } else if (tag.startsWith("!")) {
                             builder.addSpan(ImageSpan.fromTag(tag.substring(1)));
                         } else {
@@ -391,20 +393,27 @@ public class MarkdownParser {
      * @throws IllegalArgumentException if the text cannot be parsed to exactly one block.
      */
     public static Block parseSingleBlock(String text) {
+        Doc doc = parseDoc(text);
+
+        List<Block> blocks = doc.getBlocks();
+
+        if (blocks.size() != 1) {
+            throw new IllegalArgumentException("text was not a single block: " + text);
+        }
+
+        return blocks.get(0);
+    }
+
+    /**
+     * Parse a doc from a string. This does not support comments in the Markdown.
+     */
+    public static Doc parseDoc(String text) {
         try {
             InputStream inputStream = new ByteArrayInputStream(text.getBytes("UTF-8"));
             MarkdownParser parser = new MarkdownParser();
             parser.setForceBody(true);
 
-            Doc doc = parser.parse(inputStream);
-
-            List<Block> blocks = doc.getBlocks();
-
-            if (blocks.size() != 1) {
-                throw new IllegalArgumentException("text was not a single block: " + text);
-            }
-
-            return blocks.get(0);
+            return parser.parse(inputStream);
         } catch (IOException e) {
             // Shouldn't happen, we don't do any actual I/O.
             throw new UncheckedIOException(e);

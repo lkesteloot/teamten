@@ -48,7 +48,7 @@ public abstract class Element implements Dimensions {
     public abstract long getDepth();
 
     /**
-     * Add the element to the contents.
+     * Add the element to the contents as part of a horizontal sequence.
      *
      * @param x the left-most point of the element.
      * @param y the baseline of the element.
@@ -67,7 +67,7 @@ public abstract class Element implements Dimensions {
     }
 
     /**
-     * Add the element to the contents.
+     * Add the element to the contents as part of a vertical sequence.
      *
      * @param x the left-most point of the element.
      * @param y the upper-left point of the element.

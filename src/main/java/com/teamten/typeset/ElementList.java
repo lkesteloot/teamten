@@ -108,7 +108,7 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Format the list and add the elements to the sync. For horizontal lists this makes paragraphs,
+     * Format the list and add the elements to the sink. For horizontal lists this makes paragraphs,
      * and for vertical lists this makes pages.
      */
     public void format(ElementSink output, long maxSize) {
@@ -116,7 +116,7 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Format the list and add the elements to the sync. For horizontal lists this makes paragraphs,
+     * Format the list and add the elements to the sink. For horizontal lists this makes paragraphs,
      * and for vertical lists this makes pages.
      *
      * @param outputShape the shape of the output paragraph of pages.
@@ -148,7 +148,7 @@ public abstract class ElementList implements ElementSink {
 
             // Go through all active breakpoints, considering them as start of the line or page. We'll find the
             // one that results in the best paragraph or page ending at endBreakpoint. To do that we'll compute the
-            // demerits of this line, and add that to the sum of the demerits ending at the beginBreakpoint.
+            // demerits of this line/page, and add that to the sum of the demerits ending at the beginBreakpoint.
 
             // Initialize the current (end) breakpoint with max values.
             endBreakpoint.setTotalDemerits(Long.MAX_VALUE);
@@ -424,7 +424,7 @@ public abstract class ElementList implements ElementSink {
     }
 
     /**
-     * Output all the boxes to the sync, warning if they're the wrong size.
+     * Output all the boxes to the sink, warning if they're the wrong size.
      */
     private void outputBoxes(Iterable<Box> boxes, ElementSink output, OutputShape outputShape) {
         int counter = 1;

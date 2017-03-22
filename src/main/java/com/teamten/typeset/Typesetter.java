@@ -31,6 +31,7 @@ import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
 import com.teamten.markdown.Doc;
+import com.teamten.markdown.FootnoteSpan;
 import com.teamten.markdown.ImageSpan;
 import com.teamten.markdown.IndexSpan;
 import com.teamten.markdown.MarkdownParser;
@@ -47,6 +48,7 @@ import com.teamten.typeset.element.Penalty;
 import com.teamten.typeset.element.Rule;
 import com.teamten.typeset.element.SectionBookmark;
 import com.teamten.typeset.element.Text;
+import com.teamten.typeset.element.VBox;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -59,6 +61,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -173,6 +176,7 @@ public class Typesetter {
                                            HyphenDictionary hyphenDictionary) throws IOException {
 
         VerticalList verticalList = new VerticalList();
+        int footnoteNumber = 1;
 
         BlockType previousBlockType = null;
         for (Block block : doc.getBlocks()) {
@@ -205,6 +209,7 @@ public class Typesetter {
                     oddPage = true;
                     ownPage = true;
                     addTracking = true;
+                    footnoteNumber = 1;
                     break;
 
                 case CHAPTER_HEADER:
@@ -215,6 +220,7 @@ public class Typesetter {
                     marginBottom = IN.toSp(0.75);
                     oddPage = true;
                     addTracking = true;
+                    footnoteNumber = 1;
                     break;
 
                 case MINOR_HEADER:
@@ -380,6 +386,20 @@ public class Typesetter {
                     long maxWidth = config.getBodyWidth();
                     long maxHeight = config.getBodyHeight()*8/10;
                     horizontalList.addElement(Image.load(imagePath, maxWidth, maxHeight, caption, pdDoc));
+                } else if (span instanceof FootnoteSpan) {
+                    // Span to put a footnote at the bottom of the page.
+                    FootnoteSpan footnoteSpan = (FootnoteSpan) span;
+
+                    Doc footnoteDoc = footnoteSpan.getDoc();
+
+                    SizedFont footnoteFont = fontManager.get(config.getFont(Config.Key.FOOTNOTE_NUMBER_FONT));
+                    long footnoteShift = config.getDistance(Config.Key.FOOTNOTE_SHIFT);
+                    Text text = new Text(String.valueOf(footnoteNumber), footnoteFont);
+                    HBox hbox = new HBox(Collections.singletonList(text), footnoteShift);
+                    horizontalList.addElement(hbox);
+
+                    // Increment footnote. It's reset at the start of each chapter and part.
+                    footnoteNumber++;
                 } else {
                     System.out.println("Warning: Unknown span type " + span.getClass().getSimpleName());
                 }

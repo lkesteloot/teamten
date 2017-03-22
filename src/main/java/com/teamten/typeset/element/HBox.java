@@ -127,7 +127,8 @@ public class HBox extends Box {
         /// drawDebugRectangle(contents, x, y);
 
         for (Element element : mElements) {
-            long advanceX = element.layOutHorizontally(x, y, contents);
+            long shift = element instanceof Box ? ((Box) element).getShift() : 0;
+            long advanceX = element.layOutHorizontally(x, y + shift, contents);
             x += advanceX;
         }
 
