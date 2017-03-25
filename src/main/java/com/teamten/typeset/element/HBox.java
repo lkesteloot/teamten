@@ -52,7 +52,7 @@ public class HBox extends Box {
      * Make a new HBox that's forced to be the specified width.
      */
     public static HBox ofWidth(List<Element> elements, long width) {
-        Chunk chunk = Chunk.create(elements, width, -1, false, Element::getWidth);
+        Chunk chunk = Chunk.create(elements, width, -1, false, false, Element::getWidth);
         elements = chunk.fixed();
         return new HBox(elements, 0);
     }

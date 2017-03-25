@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
+import com.teamten.typeset.element.Footnote;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.Image;
 import com.teamten.typeset.element.NonDiscardableElement;
@@ -171,7 +172,7 @@ public abstract class ElementList implements ElementSink {
 
                 // Compute the chunk of this sublist.
                 Chunk chunk = Chunk.create(getElementSublist(beginBreakpoint, endBreakpoint), maxSize, -1,
-                        true, this::getElementSize);
+                        true, this instanceof VerticalList, this::getElementSize);
 
                 // Compute badness for the line. This is based on how much we had to stretch or shrink.
                 long badness = chunk.computeBadness();
@@ -387,11 +388,22 @@ public abstract class ElementList implements ElementSink {
                             imagePage.add(image.getCaption());
                         }
                         imagePage.add(Glue.infiniteVertical());
-                        Chunk imageChunk = Chunk.create(imagePage, size, -1, false, this::getElementSize);
+                        Chunk imageChunk = Chunk.create(imagePage, size, -1, false, false, this::getElementSize);
                         imagePage = imageChunk.fixed();
                         boxes.addFirst(makeOutputBox(imagePage, counter, 0));
                         counter--;
                     }
+                }
+            }
+
+            // See if we got any footnotes.
+            List<Footnote> footnotes = chunk.getFootnotes();
+            if (!footnotes.isEmpty()) {
+                if (this instanceof HorizontalList) {
+                    // Move them right after this line.
+                    footnotes.forEach(boxes::addFirst);
+                } else if (this instanceof VerticalList) {
+                    // They're fine, they're at the bottom of the page.
                 }
             }
 

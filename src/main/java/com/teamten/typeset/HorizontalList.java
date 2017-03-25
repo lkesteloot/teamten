@@ -19,10 +19,13 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Strings;
+import com.teamten.font.FontPack;
 import com.teamten.font.SizedFont;
 import com.teamten.hyphen.HyphenDictionary;
+import com.teamten.markdown.TextSpan;
 import com.teamten.typeset.element.Discretionary;
 import com.teamten.typeset.element.Element;
+import com.teamten.typeset.element.Footnote;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Kern;
@@ -78,6 +81,39 @@ public class HorizontalList extends ElementList {
      */
     public static HorizontalList noLineBreaks() {
         return new HorizontalList(false, true, false);
+    }
+
+    /**
+     * Add the text span to the horizontal list, properly picking the font.
+     */
+    public void addTextSpan(TextSpan textSpan, FontPack fontPack, HyphenDictionary hyphenDictionary) {
+        // Pick the right font.
+        SizedFont font = textSpan.isSmallCaps() ? fontPack.getSmallCapsFont()
+                : textSpan.isBold() && textSpan.isItalic() ? fontPack.getBoldItalicFont()
+                : textSpan.isBold() ? fontPack.getBoldFont()
+                : textSpan.isItalic() ? fontPack.getItalicFont()
+                : textSpan.isCode() ? fontPack.getCodeFont()
+                : fontPack.getRegularFont();
+
+        String text = textSpan.getText();
+
+        // Add the text to the current horizontal list.
+        addText(text, font, hyphenDictionary);
+    }
+
+    /**
+     * Get the number of footnotes in this horizontal list.
+     */
+    public int getFootnoteCount() {
+        int count = 0;
+
+        for (Element element : getElements()) {
+            if (element instanceof Footnote) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     @Override

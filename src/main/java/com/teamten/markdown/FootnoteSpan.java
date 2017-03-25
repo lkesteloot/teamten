@@ -22,13 +22,13 @@ package com.teamten.markdown;
  * Stores a footnote.
  */
 public class FootnoteSpan extends Span {
-    private final Doc mDoc;
+    private final Block mBlock;
 
-    public FootnoteSpan(Doc doc) {
-        mDoc = doc;
+    public FootnoteSpan(Block block) {
+        mBlock = block;
     }
 
-    public Doc getDoc() {
-        return mDoc;
+    public Block getBlock() {
+        return mBlock;
     }
 }

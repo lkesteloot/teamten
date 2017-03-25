@@ -306,8 +306,8 @@ public class MarkdownParser {
                             builder.addSpan(IndexSpan.fromBarSeparatedEntries(tag.substring(1)));
                         } else if (tag.startsWith("^")) {
                             // Footnote.
-                            Doc footnoteDoc = parseDoc(tag.substring(1));
-                            builder.addSpan(new FootnoteSpan(footnoteDoc));
+                            Block block = parseSingleBlock(tag.substring(1));
+                            builder.addSpan(new FootnoteSpan(block));
                         } else if (tag.startsWith("!")) {
                             builder.addSpan(ImageSpan.fromTag(tag.substring(1)));
                         } else {

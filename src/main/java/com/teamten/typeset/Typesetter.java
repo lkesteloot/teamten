@@ -22,11 +22,9 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.teamten.font.FontManager;
 import com.teamten.font.FontPack;
-import com.teamten.font.FontVariant;
 import com.teamten.font.PdfBoxFontManager;
 import com.teamten.font.SizedFont;
 import com.teamten.font.TrackingFont;
-import com.teamten.font.TypefaceVariantSize;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
@@ -39,6 +37,7 @@ import com.teamten.markdown.Span;
 import com.teamten.markdown.TextSpan;
 import com.teamten.typeset.element.Box;
 import com.teamten.typeset.element.Element;
+import com.teamten.typeset.element.Footnote;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Image;
@@ -48,11 +47,11 @@ import com.teamten.typeset.element.Penalty;
 import com.teamten.typeset.element.Rule;
 import com.teamten.typeset.element.SectionBookmark;
 import com.teamten.typeset.element.Text;
-import com.teamten.typeset.element.VBox;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -94,9 +93,8 @@ public class Typesetter {
         PDDocument pdDoc = typesetter.typeset(doc);
 
         // Save the PDF.
-        stopwatch = Stopwatch.createStarted();
         pdDoc.save(args[1]);
-        System.out.println("Saving: " + stopwatch);
+        System.out.println("Total time: " + stopwatch);
     }
 
     public PDDocument typeset(Doc doc) throws IOException {
@@ -180,97 +178,8 @@ public class Typesetter {
 
         BlockType previousBlockType = null;
         for (Block block : doc.getBlocks()) {
-            Config.Key regularFontKey;
-            // Move this to the switch statement if we end up with code in headers, etc.:
-            Config.Key codeFontKey = Config.Key.BODY_CODE_FONT;
-            boolean indentFirstLine = false;
-            boolean center = false;
-            boolean newPage = false;
-            boolean oddPage = false;
-            boolean ownPage = false;
-            boolean addTracking = false;
-            boolean allowLineBreaks = true;
-            long marginTop = 0;
-            long marginBottom = 0;
-
+            // Generate special pages (table of contents, index, etc.).
             switch (block.getBlockType()) {
-                case BODY:
-                    regularFontKey = Config.Key.BODY_FONT;
-                    indentFirstLine = previousBlockType == BlockType.BODY;
-                    if (previousBlockType == BlockType.NUMBERED_LIST || previousBlockType == BlockType.BULLET_LIST) {
-                        marginTop = PT.toSp(4.0);
-                    }
-                    break;
-
-                case PART_HEADER:
-                    regularFontKey = Config.Key.PART_HEADER_FONT;
-                    center = true;
-                    marginTop = IN.toSp(1.75);
-                    oddPage = true;
-                    ownPage = true;
-                    addTracking = true;
-                    footnoteNumber = 1;
-                    break;
-
-                case CHAPTER_HEADER:
-                case MINOR_SECTION_HEADER:
-                    regularFontKey = Config.Key.CHAPTER_HEADER_FONT;
-                    center = true;
-                    marginTop = IN.toSp(0.75);
-                    marginBottom = IN.toSp(0.75);
-                    oddPage = true;
-                    addTracking = true;
-                    footnoteNumber = 1;
-                    break;
-
-                case MINOR_HEADER:
-                    regularFontKey = Config.Key.MINOR_HEADER_FONT;
-                    center = true;
-                    marginTop = IN.toSp(0.25);
-                    marginBottom = IN.toSp(0.10);
-                    break;
-
-                case NUMBERED_LIST:
-                    regularFontKey = Config.Key.BODY_FONT;
-                    if (previousBlockType != BlockType.NUMBERED_LIST) {
-                        marginTop = PT.toSp(8.0);
-                    }
-                    marginBottom = PT.toSp(4.0);
-                    break;
-
-                case BULLET_LIST:
-                    regularFontKey = Config.Key.BODY_FONT;
-                    if (previousBlockType != BlockType.BULLET_LIST) {
-                        marginTop = PT.toSp(8.0);
-                    }
-                    marginBottom = PT.toSp(4.0);
-                    break;
-
-                case CODE:
-                    regularFontKey = Config.Key.CODE_FONT;
-                    if (previousBlockType != BlockType.CODE) {
-                        marginTop = PT.toSp(8.0);
-                    }
-                    indentFirstLine = true;
-                    allowLineBreaks = false;
-                    break;
-
-                case OUTPUT:
-                    regularFontKey = Config.Key.OUTPUT_FONT;
-                    if (!previousBlockType.isConsole()) {
-                        marginTop = PT.toSp(8.0);
-                    }
-                    indentFirstLine = true;
-                    break;
-
-                case INPUT:
-                    regularFontKey = Config.Key.INPUT_FONT;
-                    if (!previousBlockType.isConsole()) {
-                        marginTop = PT.toSp(8.0);
-                    }
-                    indentFirstLine = true;
-                    break;
-
                 case HALF_TITLE_PAGE:
                     generateHalfTitlePage(config, sections, verticalList, fontManager);
                     continue;
@@ -292,177 +201,64 @@ public class Typesetter {
                     continue;
 
                 default:
-                    System.out.println("Warning: Unknown block type " + block.getBlockType());
-                    continue;
+                    // Single paragraph.
+                    break;
             }
 
-            // Margin below code blocks.
-            if (block.getBlockType() != BlockType.CODE && previousBlockType == BlockType.CODE) {
-                marginTop = Math.max(marginTop, PT.toSp(8.0));
+            // Get the style for this paragraph given its block type.
+            ParagraphStyle paragraphStyle = ParagraphStyle.forBlock(block, previousBlockType, config, fontManager);
+
+            // Reset the footnote number at start of chapters.
+            if (paragraphStyle.isResetFootnoteNumber()) {
+                footnoteNumber = 1;
             }
-            if (!block.getBlockType().isConsole() && previousBlockType != null && previousBlockType.isConsole()) {
-                marginTop = Math.max(marginTop, PT.toSp(8.0));
-            }
-
-            TypefaceVariantSize regularFontDesc = config.getFont(regularFontKey);
-            TypefaceVariantSize codeFontDesc = config.getFont(codeFontKey);
-
-            FontPack fontPack = FontPack.create(fontManager, regularFontDesc, codeFontDesc);
-            double fontSize = regularFontDesc.getSize();
-
-            if (addTracking) {
-                // Add tracking (space between letters).
-                fontPack = fontPack.withTracking(0.1, 0.5);
-            }
-
-            // 135% recommended by http://practicaltypography.com/line-spacing.html
-            long leading = PT.toSp(fontSize*1.35f);
-            long interParagraphSpacing = 0;
-            long paragraphIndent = PT.toSp(fontSize*2);
 
             // Set the distance between baselines based on the paragraph's main font.
-            verticalList.setBaselineSkip(leading);
+            verticalList.setBaselineSkip(paragraphStyle.getLeading());
 
-            if (oddPage) {
+            if (paragraphStyle.isOddPage()) {
                 verticalList.oddPage();
-            } else if (newPage) {
+            } else if (paragraphStyle.isNewPage()) {
                 verticalList.newPage();
             }
 
-            if (marginTop != 0) {
-                verticalList.addElement(new Box(0, marginTop, 0));
+            if (paragraphStyle.getMarginTop() != 0) {
+                verticalList.addElement(new Box(0, paragraphStyle.getMarginTop(), 0));
             }
 
-            HorizontalList horizontalList;
+            // Create a horizontal list for this paragraph.
+            HorizontalList horizontalList = makeHorizontalListFromBlock(block, paragraphStyle, pdDoc, config,
+                    fontManager, hyphenDictionary, footnoteNumber);
 
-            if (center) {
-                horizontalList = HorizontalList.centered();
-            } else if (allowLineBreaks) {
-                horizontalList = new HorizontalList();
-            } else {
-                horizontalList = HorizontalList.noLineBreaks();
-            }
-
-            // Add the counter at the front of a numbered list paragraph.
-            if (block.getBlockType() == BlockType.NUMBERED_LIST) {
-                List<Element> elements = new ArrayList<>();
-                elements.add(new Glue(0, PT.toSp(1.0), true, 0, false, true));
-                elements.add(new Text(block.getCounter() + ". ", fontPack.getRegularFont()));
-                HBox hbox = HBox.ofWidth(elements, paragraphIndent);
-                horizontalList.addElement(hbox);
-            }
-
-            // Add bullet at the front of a bullet paragraph.
-            if (block.getBlockType() == BlockType.BULLET_LIST) {
-                List<Element> elements = new ArrayList<>();
-                elements.add(new Glue(0, PT.toSp(1.0), true, 0, false, true));
-                elements.add(new Text("– ", fontPack.getRegularFont()));
-                HBox hbox = HBox.ofWidth(elements, paragraphIndent);
-                horizontalList.addElement(hbox);
-            }
-
-            // Each span in the paragraph.
-            for (Span span : block.getSpans()) {
-                if (span instanceof TextSpan) {
-                    // Span for text that's part of the paragraph.
-                    addTextSpanToHorizontalList((TextSpan) span, horizontalList, fontPack, hyphenDictionary);
-                } else if (span instanceof IndexSpan) {
-                    // Span that creates an index entry.
-                    IndexSpan indexSpan = (IndexSpan) span;
-
-                    horizontalList.addElement(new IndexBookmark(indexSpan.getEntries()));
-                } else if (span instanceof ImageSpan) {
-                    // Span to include an image, though not necessarily right here.
-                    ImageSpan imageSpan = (ImageSpan) span;
-
-                    Path imagePath = Paths.get(imageSpan.getPathname());
-                    HBox caption;
-                    if (Strings.isNullOrEmpty(imageSpan.getCaption())) {
-                        caption = null;
-                    } else {
-                        SizedFont captionFont = fontManager.get(config.getFont(Config.Key.CAPTION_FONT));
-                        caption = HBox.centered(new Text(imageSpan.getCaption(), captionFont), config.getBodyWidth());
-                    }
-                    long maxWidth = config.getBodyWidth();
-                    long maxHeight = config.getBodyHeight()*8/10;
-                    horizontalList.addElement(Image.load(imagePath, maxWidth, maxHeight, caption, pdDoc));
-                } else if (span instanceof FootnoteSpan) {
-                    // Span to put a footnote at the bottom of the page.
-                    FootnoteSpan footnoteSpan = (FootnoteSpan) span;
-
-                    Doc footnoteDoc = footnoteSpan.getDoc();
-
-                    SizedFont footnoteFont = fontManager.get(config.getFont(Config.Key.FOOTNOTE_NUMBER_FONT));
-                    long footnoteShift = config.getDistance(Config.Key.FOOTNOTE_SHIFT);
-                    Text text = new Text(String.valueOf(footnoteNumber), footnoteFont);
-                    HBox hbox = new HBox(Collections.singletonList(text), footnoteShift);
-                    horizontalList.addElement(hbox);
-
-                    // Increment footnote. It's reset at the start of each chapter and part.
-                    footnoteNumber++;
-                } else {
-                    System.out.println("Warning: Unknown span type " + span.getClass().getSimpleName());
-                }
-            }
-
-            // Potentially add bookmark if we're starting a new part or chapter.
-            switch (block.getBlockType()) {
-                case BODY:
-                case MINOR_HEADER:
-                case NUMBERED_LIST:
-                case BULLET_LIST:
-                case CODE:
-                case OUTPUT:
-                case INPUT:
-                    // Nothing special.
-                    break;
-
-                case PART_HEADER:
-                    horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.PART, block.getText()));
-                    break;
-
-                case CHAPTER_HEADER:
-                    horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.CHAPTER, block.getText()));
-                    break;
-
-                case MINOR_SECTION_HEADER:
-                    horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.MINOR_SECTION, block.getText()));
-                    break;
-
-                default:
-                    System.out.println("Warning: Unknown block type " + block.getBlockType());
-                    break;
-            }
-
-            // Eject the paragraph.
-            if (center) {
-                horizontalList.addElement(new Penalty(-Penalty.INFINITY));
-            } else {
-                horizontalList.addEndOfParagraph();
-            }
+            // Bump footnote number by the number of footnotes in this horizontal list.
+            footnoteNumber += horizontalList.getFootnoteCount();
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             long bodyWidth = config.getBodyWidth();
             OutputShape outputShape;
             if (block.getBlockType() == BlockType.NUMBERED_LIST || block.getBlockType() == BlockType.BULLET_LIST) {
-                outputShape = OutputShape.singleLine(bodyWidth, 0, paragraphIndent);
-            } else if (indentFirstLine) {
-                outputShape = OutputShape.singleLine(bodyWidth, paragraphIndent, 0);
+                outputShape = OutputShape.singleLine(bodyWidth, 0, paragraphStyle.getParagraphIndent());
+            } else if (paragraphStyle.isIndentFirstLine()) {
+                outputShape = OutputShape.singleLine(bodyWidth, paragraphStyle.getParagraphIndent(), 0);
             } else {
                 outputShape = OutputShape.fixed(bodyWidth);
             }
             horizontalList.format(verticalList, outputShape);
 
-            if (ownPage) {
+            // Eject if we're supposed to be on our own page.
+            if (paragraphStyle.isOwnPage()) {
                 verticalList.oddPage();
                 // Space at the top of the section.
                 verticalList.addElement(new Box(0, IN.toSp(2.0), 0));
                 previousBlockType = null;
             } else {
-                if (marginBottom != 0) {
-                    verticalList.addElement(new Glue(marginBottom, marginBottom/4, 0, false));
+                // Add bottom margin.
+                if (paragraphStyle.getMarginBottom() != 0) {
+                    verticalList.addElement(new Glue(paragraphStyle.getMarginBottom(),
+                            paragraphStyle.getMarginBottom()/4, 0, false));
                 }
-                verticalList.addElement(new Glue(interParagraphSpacing, PT.toSp(3), 0, false));
+                // Some flexibility between paragraphs.
+                verticalList.addElement(new Glue(0, PT.toSp(3), 0, false));
                 previousBlockType = block.getBlockType();
             }
         }
@@ -476,33 +272,125 @@ public class Typesetter {
         return verticalList;
     }
 
-    /**
-     * Add all the spans from the block to the horizontal list.
-     */
-    private void addBlockToHorizontalList(PDDocument pdDoc, Config config, FontManager fontManager,
-                                          HyphenDictionary hyphenDictionary, Block block, FontPack fontPack,
-                                          HorizontalList horizontalList) throws IOException {
+    @NotNull
+    public static HorizontalList makeHorizontalListFromBlock(Block block, ParagraphStyle paragraphStyle,
+                                                              PDDocument pdDoc, Config config, FontManager fontManager,
+                                                              HyphenDictionary hyphenDictionary, int footnoteNumber) throws IOException {
+        HorizontalList horizontalList;
 
-    }
+        if (paragraphStyle.isCenter()) {
+            horizontalList = HorizontalList.centered();
+        } else if (paragraphStyle.isAllowLineBreaks()) {
+            horizontalList = new HorizontalList();
+        } else {
+            horizontalList = HorizontalList.noLineBreaks();
+        }
 
-    /**
-     * Add the text span to the horizontal list, properly picking the font.
-     */
-    private void addTextSpanToHorizontalList(TextSpan textSpan, HorizontalList horizontalList,
-                                             FontPack fontPack, HyphenDictionary hyphenDictionary) {
+        // Add the counter at the front of a numbered list paragraph.
+        if (block.getBlockType() == BlockType.NUMBERED_LIST) {
+            List<Element> elements = new ArrayList<>();
+            elements.add(new Glue(0, PT.toSp(1.0), true, 0, false, true));
+            elements.add(new Text(block.getCounter() + ". ", paragraphStyle.getFontPack().getRegularFont()));
+            HBox hbox = HBox.ofWidth(elements, paragraphStyle.getParagraphIndent());
+            horizontalList.addElement(hbox);
+        }
 
-        // Pick the right font.
-        SizedFont font = textSpan.isSmallCaps() ? fontPack.getSmallCapsFont()
-                : textSpan.isBold() && textSpan.isItalic() ? fontPack.getBoldItalicFont()
-                : textSpan.isBold() ? fontPack.getBoldFont()
-                : textSpan.isItalic() ? fontPack.getItalicFont()
-                : textSpan.isCode() ? fontPack.getCodeFont()
-                : fontPack.getRegularFont();
+        // Add bullet at the front of a bullet paragraph.
+        if (block.getBlockType() == BlockType.BULLET_LIST) {
+            List<Element> elements = new ArrayList<>();
+            elements.add(new Glue(0, PT.toSp(1.0), true, 0, false, true));
+            elements.add(new Text("– ", paragraphStyle.getFontPack().getRegularFont()));
+            HBox hbox = HBox.ofWidth(elements, paragraphStyle.getParagraphIndent());
+            horizontalList.addElement(hbox);
+        }
 
-        String text = textSpan.getText();
+        // Each span in the paragraph.
+        for (Span span : block.getSpans()) {
+            if (span instanceof TextSpan) {
+                // Span for text that's part of the paragraph.
+                horizontalList.addTextSpan((TextSpan) span, paragraphStyle.getFontPack(), hyphenDictionary);
+            } else if (span instanceof IndexSpan) {
+                // Span that creates an index entry.
+                IndexSpan indexSpan = (IndexSpan) span;
 
-        // Add the text to the current horizontal list.
-        horizontalList.addText(text, font, hyphenDictionary);
+                horizontalList.addElement(new IndexBookmark(indexSpan.getEntries()));
+            } else if (span instanceof ImageSpan) {
+                // Span to include an image, though not necessarily right here.
+                ImageSpan imageSpan = (ImageSpan) span;
+
+                Path imagePath = Paths.get(imageSpan.getPathname());
+                HBox caption;
+                if (Strings.isNullOrEmpty(imageSpan.getCaption())) {
+                    caption = null;
+                } else {
+                    SizedFont captionFont = fontManager.get(config.getFont(Config.Key.CAPTION_FONT));
+                    caption = HBox.centered(new Text(imageSpan.getCaption(), captionFont), config.getBodyWidth());
+                }
+                long maxWidth = config.getBodyWidth();
+                long maxHeight = config.getBodyHeight()*8/10;
+                horizontalList.addElement(Image.load(imagePath, maxWidth, maxHeight, caption, pdDoc));
+            } else if (span instanceof FootnoteSpan) {
+                // Span to put a footnote at the bottom of the page.
+                FootnoteSpan footnoteSpan = (FootnoteSpan) span;
+
+                // What the footnote mark looks like.
+                String mark = String.valueOf(footnoteNumber);
+
+                // Draw the footnote in-line.
+                SizedFont footnoteFont = fontManager.get(config.getFont(Config.Key.FOOTNOTE_NUMBER_FONT));
+                long footnoteShift = config.getDistance(Config.Key.FOOTNOTE_SHIFT);
+                Text text = new Text(mark, footnoteFont);
+                HBox hbox = new HBox(Collections.singletonList(text), footnoteShift);
+                horizontalList.addElement(hbox);
+
+                // Add the footnote text so that it's later placed at the bottom of the page.
+                horizontalList.addElement(Footnote.create(hbox, footnoteSpan.getBlock(), config, fontManager, hyphenDictionary));
+
+                // Increment footnote number. This is only valid within this block. After the block is processed
+                // we increment the global footnote number by the number of footnotes in this block.
+                footnoteNumber++;
+            } else {
+                System.out.println("Warning: Unknown span type " + span.getClass().getSimpleName());
+            }
+        }
+
+        // Potentially add bookmark if we're starting a new part or chapter.
+        switch (block.getBlockType()) {
+            case BODY:
+            case MINOR_HEADER:
+            case NUMBERED_LIST:
+            case BULLET_LIST:
+            case CODE:
+            case OUTPUT:
+            case INPUT:
+                // Nothing special.
+                break;
+
+            case PART_HEADER:
+                horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.PART, block.getText()));
+                break;
+
+            case CHAPTER_HEADER:
+                horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.CHAPTER, block.getText()));
+                break;
+
+            case MINOR_SECTION_HEADER:
+                horizontalList.addElement(new SectionBookmark(SectionBookmark.Type.MINOR_SECTION, block.getText()));
+                break;
+
+            default:
+                System.out.println("Warning: Unknown block type " + block.getBlockType());
+                break;
+        }
+
+        // Eject the paragraph.
+        if (paragraphStyle.isCenter()) {
+            horizontalList.addElement(new Penalty(-Penalty.INFINITY));
+        } else {
+            horizontalList.addEndOfParagraph();
+        }
+
+        return horizontalList;
     }
 
     /**
@@ -962,7 +850,7 @@ public class Typesetter {
             for (Span span : block.getSpans()) {
                 if (span instanceof TextSpan) {
                     // Span for text that's part of the paragraph.
-                    addTextSpanToHorizontalList((TextSpan) span, horizontalList, fontPack, hyphenDictionary);
+                    horizontalList.addTextSpan((TextSpan) span, fontPack, hyphenDictionary);
                 } else {
                     throw new IllegalStateException("index spans must be text");
                 }

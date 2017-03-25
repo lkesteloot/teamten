@@ -65,7 +65,7 @@ public class VBox extends Box {
      */
     public VBox fixed(long newSize, VerticalAlignment verticalAlignment) {
         // Figure out how well our existing elements fit in this new size.
-        Chunk chunk = Chunk.create(getElements(), newSize, getVerticalSize(), false, Element::getVerticalSize);
+        Chunk chunk = Chunk.create(getElements(), newSize, getVerticalSize(), false, true, Element::getVerticalSize);
 
         // Stretch or shrink them to fit.
         List<Element> fixedElements = chunk.fixed();
@@ -89,6 +89,18 @@ public class VBox extends Box {
         }
 
         return getWidth();
+    }
+
+    @Override
+    public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
+        // Skip down our height so that "y" points to our baseline.
+        y -= getHeight();
+
+        // Lay out the elements horizontally.
+        layOutHorizontally(x, y + getShift(), contents);
+
+        // Our height is the combined height and depth.
+        return getVerticalSize();
     }
 
     @Override

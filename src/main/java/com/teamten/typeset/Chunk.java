@@ -21,14 +21,21 @@ package com.teamten.typeset;
 import com.teamten.typeset.element.Element;
 import com.teamten.typeset.element.Flexibility;
 import com.teamten.typeset.element.Flexible;
+import com.teamten.typeset.element.Footnote;
+import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Image;
+import com.teamten.typeset.element.Rule;
 import com.teamten.typeset.element.Text;
 import com.teamten.typeset.element.TotalFlexibility;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.teamten.typeset.SpaceUnit.IN;
+import static com.teamten.typeset.SpaceUnit.PC;
+import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * Represents a sequence of elements being considered for fitting into a space, either horizontally
@@ -38,6 +45,7 @@ public class Chunk {
     private static final long INFINITELY_BAD = 100_000;
     private final List<Element> mElements;
     private final List<Image> mImages;
+    private final List<Footnote> mFootnotes;
     private final long mExtraSpace;
     private final long mSize;
     private final double mRatio;
@@ -47,12 +55,14 @@ public class Chunk {
 
     private Chunk(List<Element> elements,
                   List<Image> images,
+                  List<Footnote> footnotes,
                   long extraSpace, long size,
                   double ratio, boolean ratioIsInfinite,
                   boolean isFlexible, boolean isOverfull) {
 
         mElements = elements;
         mImages = images;
+        mFootnotes = footnotes;
         mExtraSpace = extraSpace;
         mSize = size;
         mRatio = ratio;
@@ -67,6 +77,14 @@ public class Chunk {
      */
     public List<Image> getImages() {
         return mImages;
+    }
+
+    /**
+     * The list of footnotes that were extracted from the original list of elements. If there were none,
+     * this returns an empty list.
+     */
+    public List<Footnote> getFootnotes() {
+        return mFootnotes;
     }
 
     public long getExtraSpace() {
@@ -89,40 +107,56 @@ public class Chunk {
      * Create a new Chunk object given a list of elements and a size they must fit into.
      *
      * @param actualSize the total size of the elements. Use -1 to have this method compute it.
-     * @param extractImages whether to pull images into the separate {@code images} property.
+     * @param extractImagesAndFootnotes whether to pull images and footnotes into the separate {@code images}
+     * and {@code footnotes} properties.
      * @param elementSizer returns the size of an element.
      */
     public static Chunk create(List<Element> elements, long maxSize, long actualSize,
-                               boolean extractImages, ElementSizer elementSizer) {
+                               boolean extractImagesAndFootnotes,
+                               boolean placeFootnotes, ElementSizer elementSizer) {
 
-        // See if our list has any images. These are never supposed to be in-line.
-        boolean hasImage = false;
-        if (extractImages) {
+        // See if our list has any images or footnotes. These are never supposed to be in-line.
+        boolean hasImageOrFootnote = false;
+        if (extractImagesAndFootnotes) {
             for (Element element : elements) {
-                if (element instanceof Image) {
-                    hasImage = true;
+                if (element instanceof Image || element instanceof Footnote) {
+                    hasImageOrFootnote = true;
                     break;
                 }
             }
         }
 
-        // If we had any images, pull them out into a separate list.
+        // If we had any images or footnotes, pull them out into a separate list.
         List<Image> images;
-        if (hasImage) {
+        List<Footnote> footnotes;
+        if (hasImageOrFootnote) {
             // Don't modify the original, it might be used again by the caller.
-            List<Element> listWithoutImages = new ArrayList<>(elements.size());
+            List<Element> newElements = new ArrayList<>(elements.size());
             images = new ArrayList<>();
+            footnotes = new ArrayList<>();
             for (Element element : elements) {
                 if (element instanceof Image) {
                     images.add((Image) element);
+                } else if (element instanceof Footnote) {
+                    footnotes.add((Footnote) element);
                 } else {
-                    listWithoutImages.add(element);
+                    newElements.add(element);
                 }
             }
             // Replace original.
-            elements = listWithoutImages;
+            elements = newElements;
         } else {
             images = Collections.emptyList();
+            footnotes = Collections.emptyList();
+        }
+
+        // Add the footnotes to the bottom.
+        if (placeFootnotes && !footnotes.isEmpty() && false) {
+            // TODO make space above line flexible:
+            elements.add(new Glue(PC.toSp(1), 0, 0, false));
+            elements.add(new Rule(IN.toSp(0.5), PT.toSp(0.5), 0));
+            elements.add(new Glue(PC.toSp(1), 0, 0, false));
+            footnotes.forEach(elements::add);
         }
 
         // Find the sum of the sizes of all the elements in this line or page. Also compute the total stretch
@@ -190,7 +224,7 @@ public class Chunk {
             ratioIsInfinite = false;
         }
 
-        return new Chunk(elements, images, extraSpace, size,
+        return new Chunk(elements, images, footnotes, extraSpace, size,
                 ratio, ratioIsInfinite, isStretchable, isOverfull);
     }
 
