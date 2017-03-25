@@ -244,6 +244,29 @@ public class ImageUtils {
     }
 
     /**
+     * Returns the name of the image type.
+     */
+    public static String getTypeName(int imageType) {
+        switch (imageType) {
+            case BufferedImage.TYPE_INT_RGB: return "INT_RGB";
+            case BufferedImage.TYPE_INT_ARGB: return "INT_ARGB";
+            case BufferedImage.TYPE_INT_ARGB_PRE: return "INT_ARGB_PRE";
+            case BufferedImage.TYPE_INT_BGR: return "INT_BGR";
+            case BufferedImage.TYPE_3BYTE_BGR: return "3BYTE_BGR";
+            case BufferedImage.TYPE_4BYTE_ABGR: return "4BYTE_ABGR";
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE: return "4BYTE_ABGR_PRE";
+            case BufferedImage.TYPE_BYTE_GRAY: return "BYTE_GRAY";
+            case BufferedImage.TYPE_BYTE_BINARY: return "BYTE_BINARY";
+            case BufferedImage.TYPE_BYTE_INDEXED: return "BYTE_INDEXED";
+            case BufferedImage.TYPE_USHORT_GRAY: return "USHORT_GRAY";
+            case BufferedImage.TYPE_USHORT_565_RGB: return "USHORT_565_RGB";
+            case BufferedImage.TYPE_USHORT_555_RGB: return "USHORT_555_RGB";
+            case BufferedImage.TYPE_CUSTOM: return "CUSTOM";
+            default: return "Unknown image type";
+        }
+    }
+
+    /**
      * Return the number of bytes per pixel for this image.
      *
      * @throws IllegalArgumentException if the type is not TYPE_3BYTE_BGR or
@@ -256,7 +279,8 @@ public class ImageUtils {
         } else if (image.getType() == BufferedImage.TYPE_4BYTE_ABGR) {
             return 4;
         } else {
-            throw new IllegalArgumentException("Image type must be BGR or ABGR");
+            throw new IllegalArgumentException("Image type must be 3BYTE_BGR or 4BYTE_ABGR, not " +
+                    getTypeName(image.getType()));
         }
     }
 
@@ -544,6 +568,44 @@ public class ImageUtils {
                 image.getWidth(), image.getHeight(), fitWidth, fitHeight, width, height);
 
         return resize(image, width, height);
+    }
+
+    /**
+     * Like resizeToFit() but only shrinks. If the image is smaller, it is returned.
+     * Returns the image shrunk to fit in this size but keep the original aspect
+     * ratio. Use 0 as either size (but not both) to mean "infinity".
+     */
+    public static BufferedImage shrinkToFit(BufferedImage image, int width, int height) {
+        int fitWidth = width;
+        int fitHeight = height;
+
+        if (width == 0 && height == 0) {
+            throw new IllegalArgumentException("Must specify either width or height");
+        }
+
+        if (width != 0 && height != 0) {
+            if (image.getWidth() * height < image.getHeight() * width) {
+                width = 0;
+            } else {
+                height = 0;
+            }
+        }
+
+        if (width == 0) {
+            width = image.getWidth() * height / image.getHeight();
+        } else {
+            height = image.getHeight() * width / image.getWidth();
+        }
+
+        // See if the computed size is smaller.
+        if (width < image.getWidth() && height < image.getHeight()) {
+            log("Shrinking from (%dx%d) to fit (%dx%d), final size is (%dx%d)",
+                    image.getWidth(), image.getHeight(), fitWidth, fitHeight, width, height);
+
+            image = resize(image, width, height);
+        }
+
+        return image;
     }
 
     /**

@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.teamten.typeset.SpaceUnit.IN;
 import static com.teamten.typeset.SpaceUnit.PT;
@@ -79,8 +80,11 @@ public class Typesetter {
      * of page numbers.
      */
     private static final int MAX_ITERATIONS = 5;
+    private static long mTimeSpentLoadingImages;
 
     public static void main(String[] args) throws IOException {
+        mTimeSpentLoadingImages = 0;
+
         // Load and parse the Markdown file.
         Stopwatch stopwatch = Stopwatch.createStarted();
         InputStream inputStream = new FileInputStream(args[0]);
@@ -94,6 +98,8 @@ public class Typesetter {
 
         // Save the PDF.
         pdDoc.save(args[1]);
+
+        System.out.printf("Total time spent loading images: %,d ms%n", mTimeSpentLoadingImages);
         System.out.println("Total time: " + stopwatch);
     }
 
@@ -328,7 +334,17 @@ public class Typesetter {
                 }
                 long maxWidth = config.getBodyWidth();
                 long maxHeight = config.getBodyHeight()*8/10;
+
+                // Make sure we have a resized version. Lulu recommends 300 DPI, there's no point
+                // in loading a larger image.
+                imagePath = Image.preprocessImage(imagePath, maxWidth, maxHeight);
+
+                // Load the image. We could cache the image so that we don't load it again on
+                // subsequent passes, but currently we spend less than one second total loading all
+                // images for all passes.
+                Stopwatch stopwatch = Stopwatch.createStarted();
                 horizontalList.addElement(Image.load(imagePath, maxWidth, maxHeight, caption, pdDoc));
+                mTimeSpentLoadingImages += stopwatch.elapsed(TimeUnit.MILLISECONDS);
             } else if (span instanceof FootnoteSpan) {
                 // Span to put a footnote at the bottom of the page.
                 FootnoteSpan footnoteSpan = (FootnoteSpan) span;
