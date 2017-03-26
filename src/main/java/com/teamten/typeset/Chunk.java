@@ -151,12 +151,26 @@ public class Chunk {
         }
 
         // Add the footnotes to the bottom.
-        if (placeFootnotes && !footnotes.isEmpty() && false) {
+        if (placeFootnotes && !footnotes.isEmpty()) {
             // TODO make space above line flexible:
             elements.add(new Glue(PC.toSp(1), 0, 0, false));
             elements.add(new Rule(IN.toSp(0.5), PT.toSp(0.5), 0));
             elements.add(new Glue(PC.toSp(1), 0, 0, false));
-            footnotes.forEach(elements::add);
+
+            // Add all the footnotes, putting space between them to get the right baseline skip.
+            Footnote previousFootnote = null;
+            for (Footnote footnote : footnotes) {
+                // Add space between footnotes.
+                if (previousFootnote != null) {
+                    long skip = Math.max(0, previousFootnote.getBaselineSkip() -
+                            previousFootnote.getLastHBoxDepth() - footnote.getFirstHBoxHeight());
+                    if (skip > 0) {
+                        elements.add(new Glue(skip, 0, 0, false));
+                    }
+                }
+                elements.add(footnote);
+                previousFootnote = footnote;
+            }
         }
 
         // Find the sum of the sizes of all the elements in this line or page. Also compute the total stretch

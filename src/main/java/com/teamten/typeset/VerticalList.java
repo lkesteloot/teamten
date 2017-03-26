@@ -47,6 +47,13 @@ public class VerticalList extends ElementList {
      * Whether we've seen a box before.
      */
     private boolean mSawHBox = false;
+    /**
+     * The height of the first HBox we saw.
+     */
+    private long mFirstHBoxHeight = 0;
+    /**
+     * The distance between baselines. We insert glue between lines to keep this distance.
+     */
     private long mBaselineSkip = PT.toSp(11*1.2); // Default for 11pt font.
     /**
      * Map from the element index to a column change. The specified element is the first
@@ -70,6 +77,10 @@ public class VerticalList extends ElementList {
             if (mSawHBox) {
                 long skip = Math.max(0, mBaselineSkip - mPreviousDepth - element.getHeight());
                 super.addElement(new Glue(skip, 0, 0, false));
+            } else {
+                // Keep track of this so that the whole VBox can be spaced properly when assembled
+                // (e.g., for footnotes).
+                mFirstHBoxHeight = element.getHeight();
             }
 
             mPreviousDepth = element.getDepth();
@@ -77,6 +88,27 @@ public class VerticalList extends ElementList {
         }
 
         super.addElement(element);
+    }
+
+    /**
+     * Get the distance between baselines.
+     */
+    public long getBaselineSkip() {
+        return mBaselineSkip;
+    }
+
+    /**
+     * Get the height of the first HBox we saw.
+     */
+    public long getFirstHBoxHeight() {
+        return mFirstHBoxHeight;
+    }
+
+    /**
+     * Get the depth of the most recent HBox we've seen.
+     */
+    public long getLastHBoxDepth() {
+        return mPreviousDepth;
     }
 
     /**

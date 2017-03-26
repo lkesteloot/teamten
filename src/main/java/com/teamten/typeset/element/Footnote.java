@@ -37,18 +37,43 @@ import java.util.List;
  * Represents a footnote that will be displayed at the bottom of the page.
  */
 public class Footnote extends VBox {
-    private final Block mBlock;
+    private final long mBaselineSkip;
+    private final long mFirstHBoxHeight;
+    private final long mLastHBoxDepth;
 
-    private Footnote(List<Element> elements, Block block) {
+    private Footnote(List<Element> elements, long baselineSkip, long firstHBoxHeight, long lastHBoxDepth) {
         super(elements);
-        mBlock = block;
+        mBaselineSkip = baselineSkip;
+        mFirstHBoxHeight = firstHBoxHeight;
+        mLastHBoxDepth = lastHBoxDepth;
+    }
+
+    /**
+     * Get the distance between baselines in this footnote.
+     */
+    public long getBaselineSkip() {
+        return mBaselineSkip;
+    }
+
+    /**
+     * Get the height of the first HBox in this footnote.
+     */
+    public long getFirstHBoxHeight() {
+        return mFirstHBoxHeight;
+    }
+
+    /**
+     * Get the depth of the last HBox in this footnote.
+     */
+    public long getLastHBoxDepth() {
+        return mLastHBoxDepth;
     }
 
     @NotNull
     public static Footnote create(HBox mark, Block block, Config config, FontManager fontManager,
                                   HyphenDictionary hyphenDictionary) throws IOException {
 
-        // Format the block into a box.
+        // Only plain body for footnotes.
         if (block.getBlockType() != BlockType.BODY) {
             throw new IllegalArgumentException("Footnote block must be of type BODY");
         }
@@ -76,6 +101,9 @@ public class Footnote extends VBox {
 
         horizontalList.format(verticalList, outputShape);
 
-        return new Footnote(verticalList.getElements(), block);
+        return new Footnote(verticalList.getElements(),
+                verticalList.getBaselineSkip(),
+                verticalList.getFirstHBoxHeight(),
+                verticalList.getLastHBoxDepth());
     }
 }
