@@ -122,15 +122,22 @@ public class HBox extends Box {
         return new HBox(Arrays.asList(new Text(text, font)));
     }
 
-    @Override
-    public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
-        /// drawDebugRectangle(contents, x, y);
-
+    /**
+     * Lay out all the elements back to back horizontally. Y is the baseline.
+     */
+    private void layOut(long x, long y, PDPageContentStream contents) throws IOException {
         for (Element element : mElements) {
-            long shift = element instanceof Box ? ((Box) element).getShift() : 0;
-            long advanceX = element.layOutHorizontally(x, y + shift, contents);
+            long advanceX = element.layOutHorizontally(x, y, contents);
             x += advanceX;
         }
+    }
+
+    @Override
+    public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
+        // We're being laid out horizontally, so shift up.
+        y += getShift();
+
+        layOut(x, y, contents);
 
         return getWidth();
     }
@@ -140,8 +147,11 @@ public class HBox extends Box {
         // Skip down our height so that "y" points to our baseline.
         y -= getHeight();
 
+        // We're being laid out vertically, so shift right.
+        x += getShift();
+
         // Lay out the elements horizontally.
-        layOutHorizontally(x + getShift(), y, contents);
+        layOut(x, y, contents);
 
         // Our height is the combined height and depth.
         return getVerticalSize();

@@ -74,30 +74,37 @@ public class VBox extends Box {
         return new VBox(fixedElements, Dimensions.vertically(fixedElements, verticalAlignment), 0);
     }
 
-    @Override
-    public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
-        /// drawDebugRectangle(contents, x, y);
-
-        // The layOutVertically() method expects the upper-left, not the baseline.
-        y += getHeight();
-
-        // Lay out the items vertically.
+    /**
+     * Lay out all the elements back to back vertically. Y is the upper-left, not the baseline.
+     */
+    public void layOut(long x, long y, PDPageContentStream contents) throws IOException {
         for (Element element : mElements) {
-            long shift = element instanceof Box ? ((Box) element).getShift() : 0;
-            long advanceY = element.layOutVertically(x, y + shift, contents);
+            long advanceY = element.layOutVertically(x, y, contents);
             y -= advanceY;
         }
+    }
+
+    @Override
+    public long layOutHorizontally(long x, long y, PDPageContentStream contents) throws IOException {
+        // The layOut() method expects the upper-left, not the baseline.
+        y += getHeight();
+
+        // We're being laid out horizontally, so shift up.
+        y += getShift();
+
+        // Lay out the items vertically.
+        layOut(x, y, contents);
 
         return getWidth();
     }
 
     @Override
     public long layOutVertically(long x, long y, PDPageContentStream contents) throws IOException {
-        // Skip down our height so that "y" points to our baseline.
-        y -= getHeight();
+        // We're being laid out vertically, so shift right.
+        x += getShift();
 
         // Lay out the elements horizontally.
-        layOutHorizontally(x, y + getShift(), contents);
+        layOut(x, y, contents);
 
         // Our height is the combined height and depth.
         return getVerticalSize();
