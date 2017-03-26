@@ -33,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.List;
 
+import static com.teamten.typeset.SpaceUnit.PT;
+
 /**
  * Represents a footnote that will be displayed at the bottom of the page.
  */
@@ -80,6 +82,9 @@ public class Footnote extends VBox {
 
         // Get the style for this paragraph given its block type.
         ParagraphStyle paragraphStyle = ParagraphStyle.forBlock(block, null, config, fontManager);
+
+        // Substitute the footnote font.
+        paragraphStyle = paragraphStyle.withFontSize(PT.fromSp(config.getDistance(Config.Key.FOOTNOTE_FONT_SIZE)));
 
         // Make a vertical list for the footnote.
         VerticalList verticalList = new VerticalList();

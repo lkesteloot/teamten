@@ -92,4 +92,17 @@ public class FontPack {
                 TrackingFont.create(mCodeFont, tracking, kerning)
         );
     }
+
+    /**
+     * Return a new font pack with all the fonts set to the specified size.
+     */
+    public FontPack withFontSize(double fontSize) {
+        return new FontPack(
+                mRegularFont.withSize(fontSize),
+                mBoldFont.withSize(fontSize),
+                mItalicFont.withSize(fontSize),
+                mBoldItalicFont.withSize(fontSize),
+                mSmallCapsFont.withSize(fontSize),
+                mCodeFont.withSize(fontSize));
+    }
 }

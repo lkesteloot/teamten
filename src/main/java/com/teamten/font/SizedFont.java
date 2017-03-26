@@ -58,6 +58,12 @@ public class SizedFont {
     }
 
     /**
+     * Create a new object, replacing the size.
+     */
+    public SizedFont withSize(double size) {
+        return new SizedFont(mFont, size);
+    }
+    /**
      * Get the kerning between the two code points. The result is in scaled points.
      */
     public long getKerning(int leftChar, int rightChar) {

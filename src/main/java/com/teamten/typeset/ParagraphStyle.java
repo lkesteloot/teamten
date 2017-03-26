@@ -149,6 +149,25 @@ public class ParagraphStyle {
         return mFontPack;
     }
 
+    /**
+     * Return a new paragraph size, identical except the font pack is set to the specified font size.
+     */
+    public ParagraphStyle withFontSize(double fontSize) {
+        return new ParagraphStyle(
+                mIndentFirstLine,
+                mCenter,
+                mNewPage,
+                mOddPage,
+                mOwnPage,
+                mAllowLineBreaks,
+                mMarginTop,
+                mMarginBottom,
+                mResetFootnoteNumber,
+                mLeading,
+                mParagraphIndent,
+                mFontPack.withFontSize(fontSize));
+    }
+
     public static ParagraphStyle forBlock(Block block, BlockType previousBlockType,
                                           Config config, FontManager fontManager) {
 
