@@ -152,8 +152,7 @@ public class Chunk {
 
         // Add the footnotes to the bottom.
         if (placeFootnotes && !footnotes.isEmpty()) {
-            // TODO make space above line flexible:
-            elements.add(new Glue(PC.toSp(1), 0, 0, false));
+            elements.add(new Glue(PC.toSp(1), PT.toSp(1), 0, false));
             elements.add(new Rule(IN.toSp(0.5), PT.toSp(0.5), 0));
             elements.add(new Glue(PC.toSp(1), 0, 0, false));
 
