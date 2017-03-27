@@ -241,14 +241,8 @@ public class Typesetter {
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             long bodyWidth = config.getBodyWidth();
-            OutputShape outputShape;
-            if (block.getBlockType() == BlockType.NUMBERED_LIST || block.getBlockType() == BlockType.BULLET_LIST) {
-                outputShape = OutputShape.singleLine(bodyWidth, 0, paragraphStyle.getParagraphIndent());
-            } else if (paragraphStyle.isIndentFirstLine()) {
-                outputShape = OutputShape.singleLine(bodyWidth, paragraphStyle.getParagraphIndent(), 0);
-            } else {
-                outputShape = OutputShape.fixed(bodyWidth);
-            }
+            OutputShape outputShape = OutputShape.singleLine(bodyWidth, paragraphStyle.getFirstLineIndent(),
+                    paragraphStyle.getSubsequentLinesIndent());
             horizontalList.format(verticalList, outputShape);
 
             // Eject if we're supposed to be on our own page.
@@ -263,8 +257,10 @@ public class Typesetter {
                     verticalList.addElement(new Glue(paragraphStyle.getMarginBottom(),
                             paragraphStyle.getMarginBottom()/4, 0, false));
                 }
-                // Some flexibility between paragraphs.
-                verticalList.addElement(new Glue(0, PT.toSp(3), 0, false));
+                // Some flexibility between paragraphs, unless this is between poetry lines.
+                if (block.getBlockType() != BlockType.POETRY || previousBlockType != BlockType.POETRY) {
+                    verticalList.addElement(new Glue(0, PT.toSp(3), 0, false));
+                }
                 previousBlockType = block.getBlockType();
             }
         }
@@ -384,6 +380,7 @@ public class Typesetter {
             case CODE:
             case OUTPUT:
             case INPUT:
+            case POETRY:
                 // Nothing special.
                 break;
 
@@ -400,8 +397,7 @@ public class Typesetter {
                 break;
 
             default:
-                System.out.println("Warning: Unknown block type " + block.getBlockType());
-                break;
+                throw new IllegalStateException("Unknown block type " + block.getBlockType());
         }
 
         // Eject the paragraph.

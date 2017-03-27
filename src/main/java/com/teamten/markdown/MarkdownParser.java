@@ -203,6 +203,9 @@ public class MarkdownParser {
                     } else if (ch == '<') {
                         state = ParserState.LINE_OF_CODE;
                         builder = new Block.Builder(BlockType.INPUT, lineNumber);
+                    } else if (ch == '/') {
+                        state = ParserState.IN_LINE;
+                        builder = new Block.Builder(BlockType.POETRY, lineNumber);
                     } else {
                         state = ParserState.START_OF_LINE;
                         processSameCharacter = true;
@@ -213,9 +216,9 @@ public class MarkdownParser {
                     if (ch == '\n') {
                         lineNumber++;
                         state = ParserState.START_OF_LINE;
-                        if (blockType == BlockType.CODE) {
-                            // Code blocks don't wrap.
-                            if (builder != null && !builder.isEmpty()) {
+                        if (builder != null && builder.getBlockType() == BlockType.POETRY) {
+                            // Poetry doesn't wrap.
+                            if (!builder.isEmpty()) {
                                 doc.addBlock(builder.build());
                             }
                             builder = null;

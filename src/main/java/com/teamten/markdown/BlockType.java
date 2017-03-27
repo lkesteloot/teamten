@@ -32,6 +32,7 @@ public enum BlockType {
     CODE,
     OUTPUT,
     INPUT,
+    POETRY,
 
     // Specific pages:
     HALF_TITLE_PAGE,

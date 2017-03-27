@@ -31,7 +31,6 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * Describes various layout attributes about a paragraph.
  */
 public class ParagraphStyle {
-    private final boolean mIndentFirstLine;
     private final boolean mCenter;
     private final boolean mNewPage;
     private final boolean mOddPage;
@@ -42,14 +41,15 @@ public class ParagraphStyle {
     private final boolean mResetFootnoteNumber;
     private final long mLeading;
     private final long mParagraphIndent;
+    private final long mFirstLineIndent;
+    private final long mSubsequentLinesIndent;
     private final FontPack mFontPack;
 
-    public ParagraphStyle(boolean indentFirstLine, boolean center, boolean newPage, boolean oddPage,
+    public ParagraphStyle(boolean center, boolean newPage, boolean oddPage,
                           boolean ownPage, boolean allowLineBreaks, long marginTop, long marginBottom,
                           boolean resetFootnoteNumber, long leading,
-                          long paragraphIndent, FontPack fontPack) {
+                          long paragraphIndent, long firstLineIndent, long subsequentLinesIndent, FontPack fontPack) {
 
-        mIndentFirstLine = indentFirstLine;
         mCenter = center;
         mNewPage = newPage;
         mOddPage = oddPage;
@@ -60,15 +60,9 @@ public class ParagraphStyle {
         mResetFootnoteNumber = resetFootnoteNumber;
         mLeading = leading;
         mParagraphIndent = paragraphIndent;
+        mFirstLineIndent = firstLineIndent;
+        mSubsequentLinesIndent = subsequentLinesIndent;
         mFontPack = fontPack;
-    }
-
-    /**
-     * Whether the first line of the paragraph should be indented. This is the case for normal paragraphs, but only
-     * if following another normal paragraph.
-     */
-    public boolean isIndentFirstLine() {
-        return mIndentFirstLine;
     }
 
     /**
@@ -136,10 +130,24 @@ public class ParagraphStyle {
     }
 
     /**
-     * How must to indent the whole paragraph.
+     * Indent size, whether used or not.
      */
     public long getParagraphIndent() {
         return mParagraphIndent;
+    }
+
+    /**
+     * Indent for the first line.
+     */
+    public long getFirstLineIndent() {
+        return mFirstLineIndent;
+    }
+
+    /**
+     * Indent for all lines but the first.
+     */
+    public long getSubsequentLinesIndent() {
+        return mSubsequentLinesIndent;
     }
 
     /**
@@ -154,7 +162,6 @@ public class ParagraphStyle {
      */
     public ParagraphStyle withScaledFont(double scale) {
         return new ParagraphStyle(
-                mIndentFirstLine,
                 mCenter,
                 mNewPage,
                 mOddPage,
@@ -165,6 +172,8 @@ public class ParagraphStyle {
                 mResetFootnoteNumber,
                 (long) (mLeading*scale),
                 mParagraphIndent,
+                mFirstLineIndent,
+                mSubsequentLinesIndent,
                 mFontPack.withScaledFont(scale));
     }
 
@@ -174,7 +183,6 @@ public class ParagraphStyle {
         Config.Key regularFontKey;
         // Move this to the switch statement if we end up with code in headers, etc.:
         Config.Key codeFontKey = Config.Key.BODY_CODE_FONT;
-        boolean indentFirstLine = false;
         boolean center = false;
         boolean newPage = false;
         boolean oddPage = false;
@@ -184,13 +192,17 @@ public class ParagraphStyle {
         long marginTop = 0;
         long marginBottom = 0;
         boolean resetFootnoteNumber = false;
+        int firstLineIndentCount = 0;
+        int subsequentLinesIndentCount = 0;
 
         switch (block.getBlockType()) {
             case BODY:
                 regularFontKey = Config.Key.BODY_FONT;
-                indentFirstLine = previousBlockType == BlockType.BODY;
+                firstLineIndentCount = previousBlockType == BlockType.BODY ? 1 : 0;
                 if (previousBlockType == BlockType.NUMBERED_LIST || previousBlockType == BlockType.BULLET_LIST) {
                     marginTop = PT.toSp(4.0);
+                } else if (previousBlockType == BlockType.POETRY) {
+                    marginTop = PT.toSp(8.0);
                 }
                 break;
 
@@ -228,6 +240,7 @@ public class ParagraphStyle {
                     marginTop = PT.toSp(8.0);
                 }
                 marginBottom = PT.toSp(4.0);
+                subsequentLinesIndentCount = 1;
                 break;
 
             case BULLET_LIST:
@@ -236,6 +249,7 @@ public class ParagraphStyle {
                     marginTop = PT.toSp(8.0);
                 }
                 marginBottom = PT.toSp(4.0);
+                subsequentLinesIndentCount = 1;
                 break;
 
             case CODE:
@@ -243,7 +257,7 @@ public class ParagraphStyle {
                 if (previousBlockType != BlockType.CODE) {
                     marginTop = PT.toSp(8.0);
                 }
-                indentFirstLine = true;
+                firstLineIndentCount = 1;
                 allowLineBreaks = false;
                 break;
 
@@ -252,7 +266,7 @@ public class ParagraphStyle {
                 if (!previousBlockType.isConsole()) {
                     marginTop = PT.toSp(8.0);
                 }
-                indentFirstLine = true;
+                firstLineIndentCount = 1;
                 break;
 
             case INPUT:
@@ -260,7 +274,16 @@ public class ParagraphStyle {
                 if (!previousBlockType.isConsole()) {
                     marginTop = PT.toSp(8.0);
                 }
-                indentFirstLine = true;
+                firstLineIndentCount = 1;
+                break;
+
+            case POETRY:
+                regularFontKey = Config.Key.BODY_FONT;
+                if (previousBlockType != BlockType.POETRY) {
+                    marginTop = PT.toSp(8.0);
+                }
+                firstLineIndentCount = 1;
+                subsequentLinesIndentCount = 2;
                 break;
 
             default:
@@ -290,7 +313,10 @@ public class ParagraphStyle {
         long leading = PT.toSp(fontSize*1.35f);
         long paragraphIndent = PT.toSp(fontSize*2);
 
-        return new ParagraphStyle(indentFirstLine, center, newPage, oddPage, ownPage, allowLineBreaks, marginTop,
-                marginBottom, resetFootnoteNumber, leading, paragraphIndent, fontPack);
+        return new ParagraphStyle(center, newPage, oddPage, ownPage, allowLineBreaks, marginTop,
+                marginBottom, resetFootnoteNumber, leading, paragraphIndent,
+                paragraphIndent*firstLineIndentCount,
+                paragraphIndent*subsequentLinesIndentCount,
+                fontPack);
     }
 }

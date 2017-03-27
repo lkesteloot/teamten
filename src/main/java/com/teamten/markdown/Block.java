@@ -229,6 +229,10 @@ public class Block {
             this(blockType, lineNumber, 0);
         }
 
+        public BlockType getBlockType() {
+            return mBlock.getBlockType();
+        }
+
         /**
          * Add the character to the block.
          *
