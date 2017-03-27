@@ -92,7 +92,6 @@ public class Typesetter {
         InputStream inputStream = new FileInputStream(args[0]);
         MarkdownParser parser = new MarkdownParser();
         Doc doc = parser.parse(inputStream);
-        System.out.println("Parsing: " + stopwatch);
 
         // Typeset the document.
         Typesetter typesetter = new Typesetter();
