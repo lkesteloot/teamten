@@ -59,9 +59,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -130,6 +132,22 @@ public class Typesetter {
             hyphenDictionary = null;
         }
 
+        // Get a locale for sorting.
+        Collator collator;
+        switch (language) {
+            case "en":
+                collator = Collator.getInstance(Locale.US);
+                break;
+
+            case "fr":
+                collator = Collator.getInstance(Locale.FRENCH);
+                break;
+
+            default:
+                throw new IllegalStateException("Unknown language \"" + language + "\" for collation");
+        }
+
+
         // Do several passes at laying out the book until the page numbers stabilize.
         List<Page> pages = null;
         Bookmarks bookmarks = Bookmarks.empty();
@@ -138,7 +156,7 @@ public class Typesetter {
             System.out.printf("Pass %d:%n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
             VerticalList verticalList = docToVerticalList(doc, pdDoc, config, sections,
-                    fontManager, bookmarks, hyphenDictionary);
+                    fontManager, bookmarks, collator, hyphenDictionary);
             System.out.println("  Horizontal layout: " + stopwatch);
 
             // Format the vertical list into pages.
@@ -177,7 +195,7 @@ public class Typesetter {
      */
     private VerticalList docToVerticalList(Doc doc, PDDocument pdDoc, Config config, Sections sections,
                                            FontManager fontManager, Bookmarks bookmarks,
-                                           HyphenDictionary hyphenDictionary) throws IOException {
+                                           Collator collator, HyphenDictionary hyphenDictionary) throws IOException {
 
         VerticalList verticalList = new VerticalList();
         int footnoteNumber = 1;
@@ -203,7 +221,7 @@ public class Typesetter {
                     continue;
 
                 case INDEX:
-                    generateIndex(config, sections, verticalList, fontManager, bookmarks, hyphenDictionary);
+                    generateIndex(config, sections, verticalList, fontManager, bookmarks, collator, hyphenDictionary);
                     continue;
 
                 default:
@@ -765,7 +783,7 @@ public class Typesetter {
      */
     private void generateIndex(Config config, Sections sections, VerticalList verticalList,
                                FontManager fontManager, Bookmarks bookmarks,
-                               HyphenDictionary hyphenDictionary) throws IOException {
+                               Collator collator, HyphenDictionary hyphenDictionary) throws IOException {
 
         long marginTop = IN.toSp(1.0);
         long paddingBelowTitle = IN.toSp(0.75);
@@ -807,9 +825,9 @@ public class Typesetter {
         verticalList.addElement(new Glue(paddingBelowTitle*2/3, 0, 0, false));
 
         // Generate the index entries.
-        IndexEntries indexEntries = new IndexEntries();
+        IndexEntries indexEntries = new IndexEntries(collator);
         if (FAKE_INDEX_LENGTH > 0) {
-            indexEntries.makeFakeIndex(FAKE_INDEX_LENGTH);
+            indexEntries.makeFakeIndex(collator, FAKE_INDEX_LENGTH);
         } else {
             bookmarks.entries().stream()
                     .filter((entry) -> (entry.getValue() instanceof IndexBookmark))
@@ -825,7 +843,7 @@ public class Typesetter {
         verticalList.changeColumnLayout(columnLayout);
 
         // Generate the paragraphs.
-        generateIndexEntries(indexEntries, sections, verticalList, entryFontPack, hyphenDictionary,
+        generateIndexEntries(indexEntries, sections, verticalList, entryFontPack, collator, hyphenDictionary,
                 columnLayout.getColumnWidth(), 0);
 
         // Switch back to a single column.
@@ -838,7 +856,7 @@ public class Typesetter {
      * @param depth the depth of the recursion, where 0 is for entries, 1 for sub-entries, etc.
      */
     private void generateIndexEntries(IndexEntries indexEntries, Sections sections, VerticalList verticalList,
-                                      FontPack fontPack, HyphenDictionary hyphenDictionary,
+                                      FontPack fontPack, Collator collator, HyphenDictionary hyphenDictionary,
                                       long textWidth, int depth) throws IOException {
         // Space between sections.
         long sectionBreak = PT.toSp(6.0);
@@ -851,6 +869,7 @@ public class Typesetter {
         // We want to put a space between sections, so keep track of the last section's category (first letter).
         int previousCategory = -1;
 
+        // Process each index entry in order.
         for (IndexEntry indexEntry : indexEntries.getEntries()) {
             // See if we moved to a different category.
             int category = indexEntry.getCategory();
@@ -881,8 +900,8 @@ public class Typesetter {
             verticalList.addElement(new Glue(0, PT.toSp(0.8), 0, false));
 
             // Now do the children of this entry.
-            generateIndexEntries(indexEntry.getSubEntries(), sections, verticalList, fontPack, hyphenDictionary,
-                    textWidth, depth + 1);
+            generateIndexEntries(indexEntry.getSubEntries(), sections, verticalList, fontPack,
+                    collator, hyphenDictionary, textWidth, depth + 1);
 
             // Kee track of the last category.
             previousCategory = category;

@@ -22,6 +22,8 @@ import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
 
 import java.io.PrintStream;
+import java.text.Collator;
+import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,12 +35,15 @@ import java.util.stream.Collectors;
 public class IndexEntry implements Comparable<IndexEntry> {
     private final Block mText;
     private final String mTextAsString;
+    private final Collator mCollator;
     private final Set<Integer> mPhysicalPageNumbers = new HashSet<>();
-    private final IndexEntries mSubEntries = new IndexEntries();
+    private final IndexEntries mSubEntries;
 
-    public IndexEntry(Block text) {
+    public IndexEntry(Block text, Collator collator) {
         mText = text;
         mTextAsString = text.toBriefString();
+        mCollator = collator;
+        mSubEntries = new IndexEntries(mCollator);
     }
 
     /**
@@ -107,10 +112,15 @@ public class IndexEntry implements Comparable<IndexEntry> {
      */
     public int getCategory() {
         // Based on the first character.
-        int firstCh = mTextAsString.codePointAt(0);
+        String firstCh = mTextAsString.substring(0, 1);
+
+        // Strip accents, they don't matter to the category. Also convert to lower case.
+        firstCh = Normalizer.normalize(firstCh, Normalizer.Form.NFD).toLowerCase();
+
+        int firstCodePoint = firstCh.codePointAt(0);
 
         // Use '@' to represent non-alphabetic first letters.
-        return Character.isAlphabetic(firstCh) ? Character.toLowerCase(firstCh) : '@';
+        return Character.isAlphabetic(firstCodePoint) ? firstCodePoint : '@';
     }
 
     /**
@@ -144,15 +154,14 @@ public class IndexEntry implements Comparable<IndexEntry> {
 
     @Override
     public int compareTo(IndexEntry o) {
+        // If one is not alphabetic, put it first.
         int ch1 = mTextAsString.codePointAt(0);
         int ch2 = o.mTextAsString.codePointAt(0);
-
-        // If one is not alphabetic, put it first.
         if (Character.isAlphabetic(ch1) != Character.isAlphabetic(ch2)) {
             return Character.isAlphabetic(ch1) ? 1 : -1;
         }
 
-        // Else compare case-insensitively.
-        return mTextAsString.compareToIgnoreCase(o.mTextAsString);
+        // Else compare according to collator.
+        return mCollator.compare(mTextAsString, o.mTextAsString);
     }
 }

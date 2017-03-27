@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,15 @@ import java.util.stream.Collectors;
  * Stores a set of index entries.
  */
 public class IndexEntries {
+    private final Collator mCollator;
     private final Map<Block,IndexEntry> mEntryMap = new HashMap<>();
+
+    /**
+     * Specify a collator for sorting the index entries.
+     */
+    public IndexEntries(Collator collator) {
+        mCollator = collator;
+    }
 
     /**
      * Adds an entry to the set.
@@ -91,12 +100,12 @@ public class IndexEntries {
     /**
      * Fill this object with count entries or sub-entries.
      */
-    public void makeFakeIndex(int count) throws IOException {
+    public void makeFakeIndex(Collator collator, int count) throws IOException {
         // Load a fake dictionary.
         Path dictionaryPath = Paths.get("/usr/share/dict/web2");
         List<String> words = Files.readAllLines(dictionaryPath);
         Random random = new Random(0);
-        addFakeEntries(words, random, count, 0);
+        addFakeEntries(words, random, collator, count, 0);
     }
 
     /**
@@ -107,7 +116,7 @@ public class IndexEntries {
      * @param count number of entries to add.
      * @param depth the depth of the index, where 0 is entries and 1 is subentries.
      */
-    private void addFakeEntries(List<String> words, Random random, int count, int depth) {
+    private void addFakeEntries(List<String> words, Random random, Collator collator, int count, int depth) {
         // Keep going until we have enough entries.
         while (count > 0) {
             // Add an entry with a random word.
@@ -129,7 +138,7 @@ public class IndexEntries {
                     break;
             }
 
-            IndexEntry indexEntry = new IndexEntry(Block.bodyBlock(word));
+            IndexEntry indexEntry = new IndexEntry(Block.bodyBlock(word), collator);
             add(indexEntry);
             count--;
 
@@ -143,7 +152,7 @@ public class IndexEntries {
             if (depth == 0 && random.nextInt(5) == 0) {
                 int subEntryCount = Math.min(random.nextInt(8) + 1, count);
                 if (subEntryCount > 0) {
-                    indexEntry.getSubEntries().addFakeEntries(words, random, subEntryCount, depth + 1);
+                    indexEntry.getSubEntries().addFakeEntries(words, random, collator, subEntryCount, depth + 1);
                     count -= subEntryCount;
                 }
             }
@@ -163,6 +172,6 @@ public class IndexEntries {
      * Get an existing entry or create one.
      */
     private IndexEntry getOrCreate(Block text) {
-        return mEntryMap.computeIfAbsent(text, IndexEntry::new);
+        return mEntryMap.computeIfAbsent(text, missingText -> new IndexEntry(missingText, mCollator));
     }
 }
