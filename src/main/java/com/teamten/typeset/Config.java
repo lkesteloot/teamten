@@ -92,15 +92,14 @@ public class Config {
         TOC_PAGE_CHAPTER_FONT(KeyType.FONT),
         FOOTNOTE_NUMBER_FONT(KeyType.FONT),
 
-        // Distances and sizes.
+        // Distances.
         PAGE_WIDTH(KeyType.DISTANCE),
         PAGE_HEIGHT(KeyType.DISTANCE),
         PAGE_MARGIN_TOP(KeyType.DISTANCE),
         PAGE_MARGIN_BOTTOM(KeyType.DISTANCE),
         PAGE_MARGIN_OUTER(KeyType.DISTANCE),
         PAGE_MARGIN_INNER(KeyType.DISTANCE),
-        FOOTNOTE_SHIFT(KeyType.DISTANCE),
-        FOOTNOTE_FONT_SIZE(KeyType.DISTANCE);
+        FOOTNOTE_SHIFT(KeyType.DISTANCE);
 
         private final KeyType mKeyType;
 
@@ -162,7 +161,6 @@ public class Config {
         add(Key.INPUT_FONT, "Courier New, regular, 10pt");
         add(Key.HEADLINE_FONT, "Times New Roman, regular, 11pt");
         add(Key.FOOTNOTE_NUMBER_FONT, "Times New Roman, regular, 8pt");
-        add(Key.FOOTNOTE_FONT_SIZE, "9pt");
     }
 
     /**

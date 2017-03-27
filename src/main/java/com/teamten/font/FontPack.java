@@ -94,15 +94,15 @@ public class FontPack {
     }
 
     /**
-     * Return a new font pack with all the fonts set to the specified size.
+     * Return a new font pack with all the fonts scaled by the specified amount.
      */
-    public FontPack withFontSize(double fontSize) {
+    public FontPack withScaledFont(double scale) {
         return new FontPack(
-                mRegularFont.withSize(fontSize),
-                mBoldFont.withSize(fontSize),
-                mItalicFont.withSize(fontSize),
-                mBoldItalicFont.withSize(fontSize),
-                mSmallCapsFont.withSize(fontSize),
-                mCodeFont.withSize(fontSize));
+                mRegularFont.withScaledSize(scale),
+                mBoldFont.withScaledSize(scale),
+                mItalicFont.withScaledSize(scale),
+                mBoldItalicFont.withScaledSize(scale),
+                mSmallCapsFont.withScaledSize(scale),
+                mCodeFont.withScaledSize(scale));
     }
 }

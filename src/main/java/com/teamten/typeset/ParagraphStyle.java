@@ -150,9 +150,9 @@ public class ParagraphStyle {
     }
 
     /**
-     * Return a new paragraph size, identical except the font pack is set to the specified font size.
+     * Return a new paragraph size, identical except the font pack is scaled by the specified amount.
      */
-    public ParagraphStyle withFontSize(double fontSize) {
+    public ParagraphStyle withScaledFont(double scale) {
         return new ParagraphStyle(
                 mIndentFirstLine,
                 mCenter,
@@ -163,9 +163,9 @@ public class ParagraphStyle {
                 mMarginTop,
                 mMarginBottom,
                 mResetFootnoteNumber,
-                mLeading,
+                (long) (mLeading*scale),
                 mParagraphIndent,
-                mFontPack.withFontSize(fontSize));
+                mFontPack.withScaledFont(scale));
     }
 
     public static ParagraphStyle forBlock(Block block, BlockType previousBlockType,

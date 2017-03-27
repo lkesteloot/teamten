@@ -39,6 +39,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
  * Represents a footnote that will be displayed at the bottom of the page.
  */
 public class Footnote extends VBox {
+    public static final double FOOTNOTE_FONT_SCALE = 0.80;
     private final long mBaselineSkip;
     private final long mFirstHBoxHeight;
     private final long mLastHBoxDepth;
@@ -84,7 +85,7 @@ public class Footnote extends VBox {
         ParagraphStyle paragraphStyle = ParagraphStyle.forBlock(block, null, config, fontManager);
 
         // Substitute the footnote font.
-        paragraphStyle = paragraphStyle.withFontSize(PT.fromSp(config.getDistance(Config.Key.FOOTNOTE_FONT_SIZE)));
+        paragraphStyle = paragraphStyle.withScaledFont(FOOTNOTE_FONT_SCALE);
 
         // Make a vertical list for the footnote.
         VerticalList verticalList = new VerticalList();

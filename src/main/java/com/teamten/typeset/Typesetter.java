@@ -359,6 +359,11 @@ public class Typesetter {
                 HBox hbox = new HBox(Collections.singletonList(text), footnoteShift);
                 horizontalList.addElement(hbox);
 
+                // Smaller version for the one in the footnote.
+                footnoteFont = footnoteFont.withScaledSize(Footnote.FOOTNOTE_FONT_SCALE);
+                text = new Text(mark, footnoteFont);
+                hbox = new HBox(Collections.singletonList(text), (long) (footnoteShift*Footnote.FOOTNOTE_FONT_SCALE));
+
                 // Add the footnote text so that it's later placed at the bottom of the page.
                 horizontalList.addElement(Footnote.create(hbox, footnoteSpan.getBlock(), config, fontManager, hyphenDictionary));
 
