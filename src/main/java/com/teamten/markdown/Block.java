@@ -201,8 +201,8 @@ public class Block {
     /**
      * Make a builder for numbered lists.
      */
-    public static Builder numberedListBuilder(int counter) {
-        return new Builder(BlockType.NUMBERED_LIST, counter);
+    public static Builder numberedListBuilder(int lineNumber, int counter) {
+        return new Builder(BlockType.NUMBERED_LIST, lineNumber, counter);
     }
 
     /**

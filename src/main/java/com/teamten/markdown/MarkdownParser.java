@@ -327,7 +327,7 @@ public class MarkdownParser {
                     } else if (ch == '.') {
                         // It was a numbered list.
                         int counter = Integer.parseInt(tagBuilder.toString(), 10);
-                        builder = Block.numberedListBuilder(counter);
+                        builder = Block.numberedListBuilder(lineNumber, counter);
                         state = ParserState.SKIP_WHITESPACE;
                     } else {
                         // Wasn't a numbered list. Start a normal paragraph.
