@@ -647,7 +647,7 @@ public class Typesetter {
     private void generateTableOfContents(Config config, Sections sections, VerticalList verticalList,
                                          FontManager fontManager) throws IOException {
 
-        long marginTop = IN.toSp(1.0);
+        long marginTop = IN.toSp(0.8);
         long paddingBelowTitle = IN.toSp(0.75);
         boolean hasParts = sections.hasParts();
 
