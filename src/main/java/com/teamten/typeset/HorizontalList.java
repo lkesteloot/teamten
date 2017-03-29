@@ -141,8 +141,7 @@ public class HorizontalList extends ElementList {
 
         if (mRaggedLeft) {
             // This 10pt is a bit arbitrary. Could make it configurable later. Its purpose is to make it
-            // acceptable to leave a bunch of space on the left. It still causes inter-word spacing
-            // to spread out a bit, but almost none.
+            // acceptable to leave a bunch of space on the left.
             elements.add(new Glue(0, PT.toSp(10.0), false, 0, false, true));
         }
 
@@ -203,7 +202,7 @@ public class HorizontalList extends ElementList {
         // First, convert the single string to a sequence of elements, where each word
         // is a single Text element. There will be other elements, like glues and
         // penalties.
-        List<Element> elements = textToWords(text, font, mAllowLineBreaks);
+        List<Element> elements = textToWords(text, font);
 
         // Second, go through the text elements and add discretionary hyphens.
         if (hyphenDictionary != null && mAllowLineBreaks) {
@@ -224,14 +223,17 @@ public class HorizontalList extends ElementList {
      * Take the single large string and break it into three kinds of elements: glue (for space and non-breaking
      * space); words; and sequences of non-word characters.
      */
-    private static List<Element> textToWords(String text, SizedFont font, boolean allowLineBreaks) {
+    private List<Element> textToWords(String text, SizedFont font) {
         List<Element> elements = new ArrayList<>();
 
         long spaceWidth = font.getSpaceWidth();
 
+        // Don't allow stretching or shrinking if we're not justified.
+        long stretchability = mRaggedLeft || mRaggedRight ? 0 : 1;
+
         // Roughly copy TeX.
-        Glue spaceGlue = new Glue(spaceWidth, spaceWidth/2, spaceWidth/3, true);
-        Glue thinSpaceGlue = new Glue(spaceWidth/2, spaceWidth/4, spaceWidth/6, true);
+        Glue spaceGlue = new Glue(spaceWidth, spaceWidth/2*stretchability, spaceWidth/3*stretchability, true);
+        Glue thinSpaceGlue = new Glue(spaceWidth/2, spaceWidth/4*stretchability, spaceWidth/6*stretchability, true);
 
         for (int i = 0; i < text.length(); ) {
             // Pick out the code point at this location. Could take two chars.
@@ -240,13 +242,13 @@ public class HorizontalList extends ElementList {
             // Advance to the next code point.
             i += Character.charCount(ch);
 
-            if (ch == ' ' && allowLineBreaks) {
+            if (ch == ' ' && mAllowLineBreaks) {
                 elements.add(spaceGlue);
-            } else if (ch == '\u00A0' && allowLineBreaks) {
+            } else if (ch == '\u00A0' && mAllowLineBreaks) {
                 // Non-break space. Precede with infinite penalty.
                 elements.add(new Penalty(Penalty.INFINITY));
                 elements.add(spaceGlue);
-            } else if (ch == '\u202F' && allowLineBreaks) {
+            } else if (ch == '\u202F' && mAllowLineBreaks) {
                 // Thin non-break space. Precede with infinite penalty.
                 elements.add(new Penalty(Penalty.INFINITY));
                 elements.add(thinSpaceGlue);
@@ -260,7 +262,7 @@ public class HorizontalList extends ElementList {
                 // Look forward and grab all the letters of the word (or not word).
                 while (i < text.length()) {
                     ch = text.codePointAt(i);
-                    if (isWord != isWordCharacter(ch) || ((ch == ' ' || ch == '\u00A0' || ch == '\u202F') && allowLineBreaks)) {
+                    if (isWord != isWordCharacter(ch) || ((ch == ' ' || ch == '\u00A0' || ch == '\u202F') && mAllowLineBreaks)) {
                         break;
                     }
 
