@@ -53,6 +53,7 @@ public class Columns extends HBox implements Flexible {
                 .forEach(element -> {
                     VBox vbox = (VBox) element;
 
+                    // Add all the flexibles for this column.
                     vbox.getElements().stream()
                             .filter(subelement -> subelement instanceof Flexible)
                             .forEach(subelement -> {

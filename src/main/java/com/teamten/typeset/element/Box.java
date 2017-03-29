@@ -107,7 +107,7 @@ public class Box extends NonDiscardableElement {
 
     @Override
     public String toString() {
-        return "Box" + getDimensionString();
+        return getClass().getSimpleName() + getDimensionString();
     }
 
     /**

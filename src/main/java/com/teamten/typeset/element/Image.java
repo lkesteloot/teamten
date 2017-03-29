@@ -104,6 +104,11 @@ public class Image extends Box {
         return super.layOutVertically(x, y, contents);
     }
 
+    @Override
+    public String toString() {
+        return "Image{" + mImagePath.getFileName() + '}';
+    }
+
     /**
      * Make a copy of this image, ensuring that its resolution is not unnecessarily high. Note that the
      * cached file will be recomputed if it's missing or old, but not if the resolution (width

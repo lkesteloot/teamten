@@ -44,4 +44,9 @@ public class Page extends VBox {
     public boolean isLeftPage() {
         return mPhysicalPageNumber%2 == 0;
     }
+
+    @Override
+    public String toString() {
+        return "Page{" + mPhysicalPageNumber + '}';
+    }
 }

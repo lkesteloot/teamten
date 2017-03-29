@@ -26,6 +26,13 @@ public class ColumnLayout {
     private final long mColumnWidth;
     private final long mMargin;
 
+    /**
+     * Create a new column layout.
+     *
+     * @param columnCount the number of columns.
+     * @param columnWidth the width of each column. Can be 0 for a single column.
+     * @param margin the space between columns.
+     */
     public ColumnLayout(int columnCount, long columnWidth, long margin) {
         mColumnCount = columnCount;
         mColumnWidth = columnWidth;

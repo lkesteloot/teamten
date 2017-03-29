@@ -53,4 +53,9 @@ public class Flexibility {
             return String.format("%s%.1f%s", prefix, PT.fromSp(mAmount), mIsInfinite ? "inf" : "pt");
         }
     }
+
+    @Override
+    public String toString() {
+        return "Flexibility{" + toString("") + "}";
+    }
 }

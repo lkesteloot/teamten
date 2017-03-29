@@ -448,9 +448,9 @@ public abstract class ElementList implements ElementSink {
             if (boxSize != maxSize) {
                 long difference = boxSize - maxSize;
                 double percentOff = difference*100.0/maxSize;
-                if (percentOff < -0.001 || percentOff > 0.001) {
+                if (percentOff < -1 || percentOff > 1) {
                     System.out.printf("  Warning: %s is of wrong size (should be %,d but is %,d, off by %,d or %.3f%%)\n",
-                            box.getClass().getSimpleName(), maxSize, boxSize, difference, percentOff);
+                            box/*.getClass().getSimpleName()*/, maxSize, boxSize, difference, percentOff);
                     String boxString = box.toTextString().trim();
                     if (!boxString.isEmpty()) {
                         System.out.printf("    %s\n", boxString);
