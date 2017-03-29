@@ -33,6 +33,7 @@ public enum BlockType {
     OUTPUT,
     INPUT,
     POETRY,
+    SEPARATOR,
 
     // Specific pages:
     HALF_TITLE_PAGE,

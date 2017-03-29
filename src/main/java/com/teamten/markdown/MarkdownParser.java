@@ -60,6 +60,7 @@ public class MarkdownParser {
         TAG_BLOCK_TYPE_MAP.put("COPYRIGHT", BlockType.COPYRIGHT_PAGE);
         TAG_BLOCK_TYPE_MAP.put("TOC", BlockType.TABLE_OF_CONTENTS);
         TAG_BLOCK_TYPE_MAP.put("INDEX", BlockType.INDEX);
+        TAG_BLOCK_TYPE_MAP.put("SEPARATOR", BlockType.SEPARATOR);
     }
 
     public static void main(String[] args) throws IOException {

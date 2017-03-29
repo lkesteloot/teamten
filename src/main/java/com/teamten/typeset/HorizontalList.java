@@ -171,8 +171,7 @@ public class HorizontalList extends ElementList {
 
         if (mRaggedRight) {
             // This 10pt is a bit arbitrary. Could make it configurable later. Its purpose is to make it
-            // acceptable to leave a bunch of space on the right. It still causes inter-word spacing
-            // to spread out a bit, but almost none.
+            // acceptable to leave a bunch of space on the right.
             elements.add(new Glue(0, PT.toSp(10.0), false, 0, false, true));
         }
 
@@ -189,7 +188,7 @@ public class HorizontalList extends ElementList {
     /**
      * Add the specified text, in the specified font, to the horizontal list.
      */
-    public void addText(String text, SizedFont font) throws IOException {
+    public void addText(String text, SizedFont font) {
         addText(text, font, null);
     }
 

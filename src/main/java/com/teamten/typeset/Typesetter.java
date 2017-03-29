@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.teamten.typeset.SpaceUnit.IN;
+import static com.teamten.typeset.SpaceUnit.PC;
 import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
@@ -223,6 +224,10 @@ public class Typesetter {
                     generateIndex(config, sections, verticalList, fontManager, bookmarks, collator, hyphenDictionary);
                     continue;
 
+                case SEPARATOR:
+                    generateSeparator(config, verticalList, fontManager);
+                    continue;
+
                 default:
                     // Single paragraph.
                     break;
@@ -298,10 +303,13 @@ public class Typesetter {
         HorizontalList horizontalList;
 
         if (paragraphStyle.isCenter()) {
+            // Headers, etc.
             horizontalList = HorizontalList.centered();
         } else if (paragraphStyle.isAllowLineBreaks()) {
+            // Normal paragraph.
             horizontalList = new HorizontalList();
         } else {
+            // Code.
             horizontalList = HorizontalList.noLineBreaks();
         }
 
@@ -905,6 +913,35 @@ public class Typesetter {
             // Kee track of the last category.
             previousCategory = category;
         }
+    }
+
+    /**
+     * Draw a separator.
+     */
+    private void generateSeparator(Config config, VerticalList verticalList, FontManager fontManager) {
+        long verticalSpace = PC.toSp(1);
+        long horizontalSpace = PC.toSp(1);
+        Glue verticalGlue = new Glue(verticalSpace, verticalSpace, verticalSpace/2, false);
+        Glue horizontalGlue = Glue.horizontal(horizontalSpace);
+
+        // Space above.
+        verticalList.addElement(verticalGlue);
+
+        // Simple separator with three stars.
+        SizedFont font = fontManager.get(config.getFont(Config.Key.BODY_FONT));
+        HorizontalList horizontalList = HorizontalList.centered();
+        horizontalList.addElement(new Text("*", font));
+        horizontalList.addElement(horizontalGlue);
+        horizontalList.addElement(new Text("*", font));
+        horizontalList.addElement(horizontalGlue);
+        horizontalList.addElement(new Text("*", font));
+        horizontalList.addElement(new Penalty(-Penalty.INFINITY));
+
+        OutputShape outputShape = OutputShape.fixed(config.getBodyWidth());
+        horizontalList.format(verticalList, outputShape);
+
+        // Space below.
+        verticalList.addElement(verticalGlue);
     }
 
     /**
