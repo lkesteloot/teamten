@@ -333,8 +333,9 @@ public class Typesetter {
         // Each span in the paragraph.
         for (Span span : block.getSpans()) {
             if (span instanceof TextSpan) {
-                // Span for text that's part of the paragraph.
-                horizontalList.addTextSpan((TextSpan) span, paragraphStyle.getFontPack(), hyphenDictionary);
+                // Span for text that's part of the paragraph. Don't hyphenate if we're centered.
+                horizontalList.addTextSpan((TextSpan) span, paragraphStyle.getFontPack(),
+                        paragraphStyle.isCenter() ? null : hyphenDictionary);
             } else if (span instanceof IndexSpan) {
                 // Span that creates an index entry.
                 IndexSpan indexSpan = (IndexSpan) span;
