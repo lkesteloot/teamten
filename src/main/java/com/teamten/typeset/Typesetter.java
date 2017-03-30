@@ -263,9 +263,7 @@ public class Typesetter {
             footnoteNumber += horizontalList.getFootnoteCount();
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
-            long bodyWidth = config.getBodyWidth();
-            OutputShape outputShape = OutputShape.singleLine(bodyWidth, paragraphStyle.getFirstLineIndent(),
-                    paragraphStyle.getSubsequentLinesIndent());
+            OutputShape outputShape = paragraphStyle.makeOutputShape(config.getBodyWidth());
             horizontalList.format(verticalList, outputShape);
 
             // Eject if we're supposed to be on our own page.

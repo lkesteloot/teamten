@@ -127,8 +127,7 @@ public class Image extends Box {
                 fontManager, hyphenDictionary, 0);
 
         // Break the horizontal list into HBox elements, adding them to the vertical list.
-        long bodyWidth = config.getBodyWidth();
-        OutputShape outputShape = OutputShape.fixed(bodyWidth);
+        OutputShape outputShape = paragraphStyle.makeOutputShape(config.getBodyWidth());
 
         horizontalList.format(verticalList, outputShape);
 

@@ -33,9 +33,9 @@ public class OutputShape {
      * Creates an OutputShape object.
      *
      * @param firstLength number of lines that are of firstSize and firstIndent.
-     * @param firstSize width of the first firstLength lines.
+     * @param firstSize width of the first firstLength lines (not including indent).
      * @param firstIndent indent of the first firstLength lines.
-     * @param secondSize width of the subsequent lines.
+     * @param secondSize width of the subsequent lines (not including indent).
      * @param secondIndent indent of the subsequent lines.
      */
     public OutputShape(int firstLength, long firstSize, long firstIndent, long secondSize, long secondIndent) {

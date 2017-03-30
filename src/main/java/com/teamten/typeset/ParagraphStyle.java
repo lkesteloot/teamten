@@ -158,6 +158,13 @@ public class ParagraphStyle {
     }
 
     /**
+     * Creates an OutputShape object corresponding to this style for the specified body width.
+     */
+    public OutputShape makeOutputShape(long bodyWidth) {
+        return OutputShape.singleLine(bodyWidth, mFirstLineIndent, mSubsequentLinesIndent);
+    }
+
+    /**
      * Return a new paragraph size, identical except the font pack is scaled by the specified amount.
      */
     public ParagraphStyle withScaledFont(double scale) {

@@ -82,7 +82,7 @@ public class Footnote extends VBox {
         }
 
         // Get the style for this paragraph given its block type.
-        ParagraphStyle paragraphStyle = ParagraphStyle.forBlock(block, null, config, fontManager);
+        ParagraphStyle paragraphStyle = ParagraphStyle.forBlock(block, BlockType.BODY, config, fontManager);
 
         // Substitute the footnote font.
         paragraphStyle = paragraphStyle.withScaledFont(FOOTNOTE_FONT_SCALE);
@@ -102,8 +102,7 @@ public class Footnote extends VBox {
         elements.add(0, mark);
 
         // Break the horizontal list into HBox elements, adding them to the vertical list.
-        long bodyWidth = config.getBodyWidth();
-        OutputShape outputShape = OutputShape.singleLine(bodyWidth, paragraphStyle.getParagraphIndent(), 0);
+        OutputShape outputShape = paragraphStyle.makeOutputShape(config.getBodyWidth());
 
         horizontalList.format(verticalList, outputShape);
 
