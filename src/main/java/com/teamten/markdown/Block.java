@@ -128,8 +128,14 @@ public class Block {
                             // Skip dots.
                             j += 2;
                         } else if (ch == ':' || ch == ';' || ch == '!' || ch == '?') {
-                            // Insert thin non-break space in front of two-part punctuation.
-                            builder.append('\u202F');
+                            // In French there's a space before two-part punctuation.
+                            if (previousCh == '.') {
+                                // After a period use a full width space (it's probably after ellipsis).
+                                builder.append('\u00A0');
+                            } else {
+                                // Otherwise use thin non-break space.
+                                builder.append('\u202F');
+                            }
                             builder.appendCodePoint(ch);
                         } else {
                             builder.appendCodePoint(ch);
