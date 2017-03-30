@@ -92,9 +92,18 @@ public class Image extends Box {
             height = height*maxWidth/width;
             width = maxWidth;
         } else {
-            // Top and bottom will touch.
+            // Top and bottom will touch. Note that this will result in an HBox
+            // that's too narrow and we'll get a warning. We don't currently handle
+            // this because none of our images are tall enough to trigger it.
             width = width*maxHeight/height;
             height = maxHeight;
+        }
+
+        // Warn if the image is too low-res.
+        int dpi = (int) (imageXObject.getWidth()/IN.fromSp(width) + 0.5);
+        if (dpi < IDEAL_DPI) {
+            System.out.println("Warning: Image " + imagePath.getFileName() + " is " + dpi +
+                    " DPI, should be at least " + IDEAL_DPI + " DPI");
         }
 
         // Deal with the caption. Check type of block.
