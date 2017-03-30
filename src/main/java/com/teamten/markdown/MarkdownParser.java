@@ -313,7 +313,14 @@ public class MarkdownParser {
                             Block block = parseSingleBlock(tag.substring(1));
                             builder.addSpan(new FootnoteSpan(block));
                         } else if (tag.startsWith("!")) {
-                            builder.addSpan(ImageSpan.fromTag(tag.substring(1)));
+                            // Split into filename and the caption.
+                            String[] parts = tag.substring(1).trim().split(" ", 2);
+                            String filename = parts[0];
+                            Block caption = parts.length == 1
+                                    ? null
+                                    : parseSingleBlock(parts[1].trim()).withBlockType(BlockType.CAPTION);
+
+                            builder.addSpan(new ImageSpan(filename, caption));
                         } else {
                             System.out.println("Warning (line " + lineNumber + "): Unknown block type: " + tag);
                         }

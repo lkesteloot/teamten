@@ -383,9 +383,10 @@ public abstract class ElementList implements ElementSink {
                         List<Element> imagePage = new ArrayList<>();
                         imagePage.add(Glue.infiniteVertical());
                         imagePage.add(image);
-                        if (image.getCaption() != null) {
+                        Box caption = image.getCaption();
+                        if (caption != null) {
                             imagePage.add(Glue.vertical(PT.toSp(8.0)));
-                            imagePage.add(image.getCaption());
+                            imagePage.add(caption);
                         }
                         imagePage.add(Glue.infiniteVertical());
                         Chunk imageChunk = Chunk.create(imagePage, size, -1, false, false, this::getElementSize);

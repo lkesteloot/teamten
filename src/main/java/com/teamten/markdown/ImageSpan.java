@@ -19,29 +19,15 @@
 package com.teamten.markdown;
 
 /**
- * Stores an image tag.
+ * Stores an image and its caption.
  */
 public class ImageSpan extends Span {
     private final String mPathname;
-    private final String mCaption;
+    private final Block mCaption;
 
-    public ImageSpan(String pathname, String caption) {
+    public ImageSpan(String pathname, Block caption) {
         mPathname = pathname;
         mCaption = caption;
-    }
-
-    /**
-     * Creates a {@code ImageSpan} from a tag that consists of a pathname
-     * (that doesn't contain any spaces), a space, and a caption.
-     */
-    public static ImageSpan fromTag(String tag) {
-        String[] parts = tag.trim().split(" ", 2);
-
-        if (parts.length == 1) {
-            return new ImageSpan(parts[0], "");
-        } else {
-            return new ImageSpan(parts[0], parts[1].trim());
-        }
     }
 
     public String getPathname() {
@@ -49,9 +35,9 @@ public class ImageSpan extends Span {
     }
 
     /**
-     * The caption as a marked-up paragraph, or an empty string if none was specified.
+     * The caption as a block, or an empty string if none was specified.
      */
-    public String getCaption() {
+    public Block getCaption() {
         return mCaption;
     }
 

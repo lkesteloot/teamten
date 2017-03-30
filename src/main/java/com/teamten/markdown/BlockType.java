@@ -34,6 +34,7 @@ public enum BlockType {
     INPUT,
     POETRY,
     SEPARATOR,
+    CAPTION,
 
     // Specific pages:
     HALF_TITLE_PAGE,

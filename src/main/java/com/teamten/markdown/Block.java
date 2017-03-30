@@ -77,6 +77,15 @@ public class Block {
     }
 
     /**
+     * Return a copy of this block with a different block type.
+     */
+    public Block withBlockType(BlockType blockType) {
+        Block newBlock = new Block(blockType, mLineNumber, mCounter);
+        newBlock.mSpans.addAll(mSpans);
+        return newBlock;
+    }
+
+    /**
      * Convert apostrophes, quotes, etc.
      */
     public void postProcessText() {

@@ -181,7 +181,7 @@ public class ParagraphStyle {
                                           Config config, FontManager fontManager) {
 
         Config.Key regularFontKey;
-        // Move this to the switch statement if we end up with code in headers, etc.:
+        // Move this to the switch statement if we end up with code in headers, captions, etc.:
         Config.Key codeFontKey = Config.Key.BODY_CODE_FONT;
         boolean center = false;
         boolean newPage = false;
@@ -284,6 +284,11 @@ public class ParagraphStyle {
                 }
                 firstLineIndentCount = 1;
                 subsequentLinesIndentCount = 2;
+                break;
+
+            case CAPTION:
+                regularFontKey = Config.Key.CAPTION_FONT;
+                center = true;
                 break;
 
             default:

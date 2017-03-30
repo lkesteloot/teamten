@@ -47,6 +47,7 @@ import com.teamten.typeset.element.Penalty;
 import com.teamten.typeset.element.Rule;
 import com.teamten.typeset.element.SectionBookmark;
 import com.teamten.typeset.element.Text;
+import com.teamten.typeset.element.VBox;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -346,13 +347,6 @@ public class Typesetter {
                 ImageSpan imageSpan = (ImageSpan) span;
 
                 Path imagePath = Paths.get(imageSpan.getPathname());
-                HBox caption;
-                if (Strings.isNullOrEmpty(imageSpan.getCaption())) {
-                    caption = null;
-                } else {
-                    SizedFont captionFont = fontManager.get(config.getFont(Config.Key.CAPTION_FONT));
-                    caption = HBox.centered(new Text(imageSpan.getCaption(), captionFont), config.getBodyWidth());
-                }
                 long maxWidth = config.getBodyWidth();
                 long maxHeight = config.getBodyHeight()*8/10;
 
@@ -364,7 +358,8 @@ public class Typesetter {
                 // subsequent passes, but currently we spend less than one second total loading all
                 // images for all passes.
                 Stopwatch stopwatch = Stopwatch.createStarted();
-                horizontalList.addElement(Image.load(imagePath, maxWidth, maxHeight, caption, pdDoc));
+                horizontalList.addElement(Image.load(imagePath, maxWidth, maxHeight, imageSpan.getCaption(), config,
+                        fontManager, hyphenDictionary, pdDoc));
                 mTimeSpentLoadingImages += stopwatch.elapsed(TimeUnit.MILLISECONDS);
             } else if (span instanceof FootnoteSpan) {
                 // Span to put a footnote at the bottom of the page.
@@ -406,6 +401,7 @@ public class Typesetter {
             case OUTPUT:
             case INPUT:
             case POETRY:
+            case CAPTION:
                 // Nothing special.
                 break;
 

@@ -18,13 +18,22 @@
 
 package com.teamten.typeset.element;
 
+import com.teamten.font.FontManager;
+import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.image.ImageUtils;
+import com.teamten.markdown.Block;
+import com.teamten.markdown.BlockType;
+import com.teamten.typeset.Config;
+import com.teamten.typeset.HorizontalList;
+import com.teamten.typeset.OutputShape;
+import com.teamten.typeset.ParagraphStyle;
+import com.teamten.typeset.Typesetter;
+import com.teamten.typeset.VerticalList;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,11 +49,12 @@ public class Image extends Box {
     private static final Path CACHE_DIR = Paths.get("image_cache");
     // Lulu recommends 300 DPI for images.
     private static final int IDEAL_DPI = 300;
+    private static final double CAPTION_FONT_SCALE = 1.0;
     private final Path mImagePath;
     private final PDImageXObject mImageXObject;
-    private final HBox mCaption;
+    private final Box mCaption;
 
-    private Image(Path imagePath, PDImageXObject imageXObject, HBox caption, long width, long height, long depth) {
+    private Image(Path imagePath, PDImageXObject imageXObject, Box caption, long width, long height, long depth) {
         super(width, height, depth);
 
         mImagePath = imagePath;
@@ -53,9 +63,9 @@ public class Image extends Box {
     }
 
     /**
-     * The caption as a horizontal box, or null if there's no caption.
+     * The caption as a box, or null if there's no caption.
      */
-    public HBox getCaption() {
+    public Box getCaption() {
         return mCaption;
     }
 
@@ -65,8 +75,11 @@ public class Image extends Box {
      * is at the bottom of the image.
      */
     public static Image load(Path imagePath, long maxWidth, long maxHeight,
-                             HBox caption, PDDocument pdDoc) throws IOException {
+                             Block block, Config config, FontManager fontManager,
+                             HyphenDictionary hyphenDictionary,
+                             PDDocument pdDoc) throws IOException {
 
+        // Deal with the image.
         PDImageXObject imageXObject = PDImageXObject.createFromFileByExtension(imagePath.toFile(), pdDoc);
 
         // Get the native size of the image.
@@ -83,6 +96,34 @@ public class Image extends Box {
             width = width*maxHeight/height;
             height = maxHeight;
         }
+
+        // Deal with the caption. Check type of block.
+        if (block.getBlockType() != BlockType.CAPTION) {
+            throw new IllegalArgumentException("Image caption block must be of type CAPTION");
+        }
+
+        ParagraphStyle paragraphStyle = ParagraphStyle.forBlock(block, null, config, fontManager);
+
+        // Substitute the footnote font.
+        paragraphStyle = paragraphStyle.withScaledFont(CAPTION_FONT_SCALE);
+
+        // Make a vertical list for the footnote.
+        VerticalList verticalList = new VerticalList();
+
+        // Set the distance between baselines based on the paragraph's main font.
+        verticalList.setBaselineSkip(paragraphStyle.getLeading());
+
+        // Create a horizontal list for this paragraph.
+        HorizontalList horizontalList = Typesetter.makeHorizontalListFromBlock(block, paragraphStyle, null, config,
+                fontManager, hyphenDictionary, 0);
+
+        // Break the horizontal list into HBox elements, adding them to the vertical list.
+        long bodyWidth = config.getBodyWidth();
+        OutputShape outputShape = OutputShape.fixed(bodyWidth);
+
+        horizontalList.format(verticalList, outputShape);
+
+        VBox caption = new VBox(verticalList.getElements());
 
         return new Image(imagePath, imageXObject, caption, width, height, 0);
     }
