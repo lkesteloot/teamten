@@ -307,12 +307,24 @@ public class MarkdownParser {
                             // Nothing to do, the method added it.
                         } else if (tag.startsWith("@")) {
                             // Index entry.
+                            if (builder == null) {
+                                // Not tested.
+                                builder = new Block.Builder(blockType, lineNumber);
+                            }
                             builder.addSpan(IndexSpan.fromBarSeparatedEntries(tag.substring(1)));
                         } else if (tag.startsWith("^")) {
                             // Footnote.
+                            if (builder == null) {
+                                // Not tested.
+                                builder = new Block.Builder(blockType, lineNumber);
+                            }
                             Block block = parseSingleBlock(tag.substring(1));
                             builder.addSpan(new FootnoteSpan(block));
                         } else if (tag.startsWith("!")) {
+                            if (builder == null) {
+                                builder = new Block.Builder(blockType, lineNumber);
+                            }
+
                             // Split into filename and the caption.
                             String[] parts = tag.substring(1).trim().split(" ", 2);
                             String filename = parts[0];

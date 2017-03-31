@@ -106,32 +106,39 @@ public class Image extends Box {
                     " DPI, should be at least " + IDEAL_DPI + " DPI");
         }
 
-        // Deal with the caption. Check type of block.
-        if (block.getBlockType() != BlockType.CAPTION) {
-            throw new IllegalArgumentException("Image caption block must be of type CAPTION");
+        // Deal with the caption.
+        VBox caption;
+        if (block != null) {
+            // Check type of block.
+            if (block.getBlockType() != BlockType.CAPTION) {
+                throw new IllegalArgumentException("Image caption block must be of type CAPTION");
+            }
+
+            ParagraphStyle paragraphStyle = ParagraphStyle.forBlock(block, null, config, fontManager);
+
+            // Substitute the footnote font.
+            paragraphStyle = paragraphStyle.withScaledFont(CAPTION_FONT_SCALE);
+
+            // Make a vertical list for the footnote.
+            VerticalList verticalList = new VerticalList();
+
+            // Set the distance between baselines based on the paragraph's main font.
+            verticalList.setBaselineSkip(paragraphStyle.getLeading());
+
+            // Create a horizontal list for this paragraph.
+            HorizontalList horizontalList = Typesetter.makeHorizontalListFromBlock(block, paragraphStyle, null, config,
+                    fontManager, hyphenDictionary, 0);
+
+            // Break the horizontal list into HBox elements, adding them to the vertical list.
+            OutputShape outputShape = paragraphStyle.makeOutputShape(config.getBodyWidth());
+
+            horizontalList.format(verticalList, outputShape);
+
+            caption = new VBox(verticalList.getElements());
+        } else {
+            // No caption.
+            caption = null;
         }
-
-        ParagraphStyle paragraphStyle = ParagraphStyle.forBlock(block, null, config, fontManager);
-
-        // Substitute the footnote font.
-        paragraphStyle = paragraphStyle.withScaledFont(CAPTION_FONT_SCALE);
-
-        // Make a vertical list for the footnote.
-        VerticalList verticalList = new VerticalList();
-
-        // Set the distance between baselines based on the paragraph's main font.
-        verticalList.setBaselineSkip(paragraphStyle.getLeading());
-
-        // Create a horizontal list for this paragraph.
-        HorizontalList horizontalList = Typesetter.makeHorizontalListFromBlock(block, paragraphStyle, null, config,
-                fontManager, hyphenDictionary, 0);
-
-        // Break the horizontal list into HBox elements, adding them to the vertical list.
-        OutputShape outputShape = paragraphStyle.makeOutputShape(config.getBodyWidth());
-
-        horizontalList.format(verticalList, outputShape);
-
-        VBox caption = new VBox(verticalList.getElements());
 
         return new Image(imagePath, imageXObject, caption, width, height, 0);
     }

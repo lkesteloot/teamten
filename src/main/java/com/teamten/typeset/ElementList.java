@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -374,7 +375,7 @@ public abstract class ElementList implements ElementSink {
             if (!images.isEmpty()) {
                 if (this instanceof HorizontalList) {
                     // Move them right after this line.
-                    images.forEach(boxes::addFirst);
+                    Lists.reverse(images).forEach(boxes::addFirst);
                 } else if (this instanceof VerticalList) {
                     // Create new pages for the images.
                     // Must go backward since we want them in the right order and we're inserting at the front.
