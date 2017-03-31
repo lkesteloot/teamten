@@ -380,7 +380,6 @@ public abstract class ElementList implements ElementSink {
                     // Create new pages for the images.
                     // Must go backward since we want them in the right order and we're inserting at the front.
                     for (Image image : Lists.reverse(images)) {
-                        //  TODO Perhaps this should be moved to VerticalList.
                         List<Element> imagePage = new ArrayList<>();
                         imagePage.add(Glue.infiniteVertical());
                         imagePage.add(image);

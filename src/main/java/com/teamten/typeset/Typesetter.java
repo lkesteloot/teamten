@@ -970,7 +970,7 @@ public class Typesetter {
 
             // Draw headline label.
             if (headlineLabel != null) {
-                // Draw this in upper case. TODO put this into a style.
+                // Draw this in upper case.
                 headlineLabel = headlineLabel.toUpperCase();
 
                 // TODO this doesn't kern.

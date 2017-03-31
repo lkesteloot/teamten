@@ -110,7 +110,6 @@ public class Block {
                         } else if (ch == '\'') {
                             builder.append('’');
                         } else if (ch == '"') {
-                            // TODO make this configurable.
 //                            builder.append(insideQuotation ? '”' : '“');
                             builder.append(insideQuotation ? "\u00A0»" : "«\u00A0");
                             insideQuotation = !insideQuotation;

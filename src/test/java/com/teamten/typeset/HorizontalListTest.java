@@ -65,7 +65,6 @@ public class HorizontalListTest {
         horizontalList.format(verticalList, IN.toSp(5));
 
         verticalList.assertSize(1);
-        // TODO fill this out.
 
         pdDoc.close();
     }

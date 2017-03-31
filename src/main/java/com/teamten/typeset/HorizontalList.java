@@ -333,7 +333,7 @@ public class HorizontalList extends ElementList {
      * Whether the character can be part of a hyphenated word.
      */
     public static boolean isWordCharacter(int ch) {
-        // Both kinds of apostrophes. TODO normalize this apostrophe stuff elsewhere.
+        // Both kinds of apostrophes.
         return Character.isLetter(ch) || ch == '-' || ch == '\'' || ch == '’';
     }
 
