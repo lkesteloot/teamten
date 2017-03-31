@@ -229,6 +229,14 @@ public class Typesetter {
                     generateSeparator(config, verticalList, fontManager);
                     continue;
 
+                case NEW_PAGE:
+                    verticalList.newPage();
+                    continue;
+
+                case ODD_PAGE:
+                    verticalList.oddPage();
+                    continue;
+
                 default:
                     // Single paragraph.
                     break;

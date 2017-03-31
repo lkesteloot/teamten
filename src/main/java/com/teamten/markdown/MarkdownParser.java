@@ -61,6 +61,8 @@ public class MarkdownParser {
         TAG_BLOCK_TYPE_MAP.put("TOC", BlockType.TABLE_OF_CONTENTS);
         TAG_BLOCK_TYPE_MAP.put("INDEX", BlockType.INDEX);
         TAG_BLOCK_TYPE_MAP.put("SEPARATOR", BlockType.SEPARATOR);
+        TAG_BLOCK_TYPE_MAP.put("NEW-PAGE", BlockType.NEW_PAGE);
+        TAG_BLOCK_TYPE_MAP.put("ODD-PAGE", BlockType.ODD_PAGE);
     }
 
     public static void main(String[] args) throws IOException {
