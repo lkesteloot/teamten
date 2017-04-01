@@ -104,6 +104,7 @@ public class MarkdownParser {
         // Accumulated tag.
         StringBuilder tagBuilder = new StringBuilder();
         ParserState preTagState = null;
+        int nestedTags = 0;
         boolean processSameCharacter = false;
         int chOrEof = 0;
         while (processSameCharacter || (chOrEof = reader.read()) != -1) {
@@ -284,7 +285,7 @@ public class MarkdownParser {
                     break;
 
                 case IN_TAG:
-                    if (ch == ']') {
+                    if (ch == ']' && nestedTags == 0) {
                         String tag = tagBuilder.toString();
                         BlockType tagBlockType = TAG_BLOCK_TYPE_MAP.get(tag);
                         if (tagBlockType != null) {
@@ -341,6 +342,11 @@ public class MarkdownParser {
                         state = preTagState;
                         preTagState = null;
                     } else {
+                        if (ch == '[') {
+                            nestedTags++;
+                        } else if (ch == ']') {
+                            nestedTags--;
+                        }
                         tagBuilder.append(ch);
                     }
                     break;
