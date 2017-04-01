@@ -30,9 +30,16 @@ import org.apache.fontbox.ttf.OTFParser;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitDestination;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination;
 
 import java.io.File;
 import java.io.IOException;
@@ -177,5 +184,18 @@ public class PdfBoxFont extends AbstractFont {
         contents.newLineAtOffset(PT.fromSpAsFloat(x), PT.fromSpAsFloat(y));
         contents.showText(text);
         contents.endText();
+        PDPageDestination destination = new PDPageFitDestination(); // TODO maybe XYZ?
+        destination.setPageNumber(123);
+        PDAnnotationLink link = new PDAnnotationLink();
+        link.setDestination(destination);
+        Metrics metrics = getStringMetrics(text, fontSize);
+        PDRectangle rectangle = new PDRectangle(
+                PT.fromSpAsFloat(x),
+                PT.fromSpAsFloat(y),
+                PT.fromSpAsFloat(metrics.getWidth()),
+                PT.fromSpAsFloat(metrics.getHeight() + metrics.getDepth()));
+        link.setRectangle(rectangle);
+        PDPage page;
+        page.getAnnotations().add(link);
     }
 }
