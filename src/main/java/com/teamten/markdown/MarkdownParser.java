@@ -336,8 +336,22 @@ public class MarkdownParser {
                                     : parseSingleBlock(parts[1].trim()).withBlockType(BlockType.CAPTION);
 
                             builder.addSpan(new ImageSpan(filename, caption));
+                        } else if (tag.startsWith("LABEL ")) {
+                            if (builder == null) {
+                                builder = new Block.Builder(blockType, lineNumber);
+                            }
+
+                            String name = tag.substring(6).trim();
+                            builder.addSpan(new LabelSpan(name));
+                        } else if (tag.startsWith("PAGE-OF ")) {
+                            if (builder == null) {
+                                builder = new Block.Builder(blockType, lineNumber);
+                            }
+
+                            String name = tag.substring(8).trim();
+                            builder.addSpan(new PageRefSpan(name, flags));
                         } else {
-                            System.out.println("Warning (line " + lineNumber + "): Unknown block type: " + tag);
+                            System.out.println("Warning (line " + lineNumber + "): Unknown tag: " + tag);
                         }
                         state = preTagState;
                         preTagState = null;

@@ -23,10 +23,12 @@ import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.image.ImageUtils;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
+import com.teamten.typeset.Bookmarks;
 import com.teamten.typeset.Config;
 import com.teamten.typeset.HorizontalList;
 import com.teamten.typeset.OutputShape;
 import com.teamten.typeset.ParagraphStyle;
+import com.teamten.typeset.Sections;
 import com.teamten.typeset.Typesetter;
 import com.teamten.typeset.VerticalList;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -76,7 +78,7 @@ public class Image extends Box {
      */
     public static Image load(Path imagePath, long maxWidth, long maxHeight,
                              Block block, Config config, FontManager fontManager,
-                             HyphenDictionary hyphenDictionary,
+                             Bookmarks bookmarks, Sections sections, HyphenDictionary hyphenDictionary,
                              PDDocument pdDoc) throws IOException {
 
         // Deal with the image.
@@ -127,7 +129,7 @@ public class Image extends Box {
 
             // Create a horizontal list for this paragraph.
             HorizontalList horizontalList = Typesetter.makeHorizontalListFromBlock(block, paragraphStyle, null, config,
-                    fontManager, hyphenDictionary, 0);
+                    fontManager, bookmarks, sections, hyphenDictionary, 0);
 
             // Break the horizontal list into HBox elements, adding them to the vertical list.
             OutputShape outputShape = paragraphStyle.makeOutputShape(config.getBodyWidth());

@@ -19,7 +19,6 @@
 package com.teamten.typeset;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Strings;
 import com.teamten.font.FontManager;
 import com.teamten.font.FontPack;
 import com.teamten.font.PdfBoxFontManager;
@@ -32,7 +31,9 @@ import com.teamten.markdown.Doc;
 import com.teamten.markdown.FootnoteSpan;
 import com.teamten.markdown.ImageSpan;
 import com.teamten.markdown.IndexSpan;
+import com.teamten.markdown.LabelSpan;
 import com.teamten.markdown.MarkdownParser;
+import com.teamten.markdown.PageRefSpan;
 import com.teamten.markdown.Span;
 import com.teamten.markdown.TextSpan;
 import com.teamten.typeset.element.Box;
@@ -41,13 +42,13 @@ import com.teamten.typeset.element.Footnote;
 import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.HBox;
 import com.teamten.typeset.element.Image;
+import com.teamten.typeset.element.LabelBookmark;
 import com.teamten.typeset.element.Leader;
 import com.teamten.typeset.element.Page;
 import com.teamten.typeset.element.Penalty;
 import com.teamten.typeset.element.Rule;
 import com.teamten.typeset.element.SectionBookmark;
 import com.teamten.typeset.element.Text;
-import com.teamten.typeset.element.VBox;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -85,6 +86,7 @@ public class Typesetter {
      */
     private static final int MAX_ITERATIONS = 5;
     private static long mTimeSpentLoadingImages;
+    private static int mUnknownLabelReferenceCount;
 
     public static void main(String[] args) throws IOException {
         mTimeSpentLoadingImages = 0;
@@ -154,6 +156,7 @@ public class Typesetter {
         Bookmarks bookmarks = Bookmarks.empty();
         int pass;
         for (pass = 0; pass < MAX_ITERATIONS; pass++) {
+            mUnknownLabelReferenceCount = 0;
             System.out.printf("Pass %d:%n", pass + 1);
             Stopwatch stopwatch = Stopwatch.createStarted();
             VerticalList verticalList = docToVerticalList(doc, pdDoc, config, sections,
@@ -181,6 +184,11 @@ public class Typesetter {
         }
         if (pass == MAX_ITERATIONS) {
             throw new IllegalStateException("took too many passes to converge on stable page numbers");
+        }
+
+        // Warn if there are still unknown label references.
+        if (mUnknownLabelReferenceCount > 0) {
+            System.out.println("Warning: " + mUnknownLabelReferenceCount + " unknown label references");
         }
 
         // Send pages to PDF.
@@ -265,7 +273,7 @@ public class Typesetter {
 
             // Create a horizontal list for this paragraph.
             HorizontalList horizontalList = makeHorizontalListFromBlock(block, paragraphStyle, pdDoc, config,
-                    fontManager, hyphenDictionary, footnoteNumber);
+                    fontManager, bookmarks, sections, hyphenDictionary, footnoteNumber);
 
             // Bump footnote number by the number of footnotes in this horizontal list.
             footnoteNumber += horizontalList.getFootnoteCount();
@@ -306,6 +314,7 @@ public class Typesetter {
     @NotNull
     public static HorizontalList makeHorizontalListFromBlock(Block block, ParagraphStyle paragraphStyle,
                                                               PDDocument pdDoc, Config config, FontManager fontManager,
+                                                              Bookmarks bookmarks, Sections sections,
                                                               HyphenDictionary hyphenDictionary, int footnoteNumber) throws IOException {
         HorizontalList horizontalList;
 
@@ -366,7 +375,7 @@ public class Typesetter {
                 // images for all passes.
                 Stopwatch stopwatch = Stopwatch.createStarted();
                 horizontalList.addElement(Image.load(imagePath, maxWidth, maxHeight, imageSpan.getCaption(), config,
-                        fontManager, hyphenDictionary, pdDoc));
+                        fontManager, bookmarks, sections, hyphenDictionary, pdDoc));
                 mTimeSpentLoadingImages += stopwatch.elapsed(TimeUnit.MILLISECONDS);
             } else if (span instanceof FootnoteSpan) {
                 // Span to put a footnote at the bottom of the page.
@@ -388,13 +397,30 @@ public class Typesetter {
                 hbox = new HBox(Collections.singletonList(text), (long) (footnoteShift*Footnote.FOOTNOTE_FONT_SCALE));
 
                 // Add the footnote text so that it's later placed at the bottom of the page.
-                horizontalList.addElement(Footnote.create(hbox, footnoteSpan.getBlock(), config, fontManager, hyphenDictionary));
+                horizontalList.addElement(Footnote.create(hbox, footnoteSpan.getBlock(), config,
+                        fontManager, bookmarks, sections, hyphenDictionary));
 
                 // Increment footnote number. This is only valid within this block. After the block is processed
                 // we increment the global footnote number by the number of footnotes in this block.
                 footnoteNumber++;
+            } else if (span instanceof LabelSpan) {
+                LabelSpan labelSpan = (LabelSpan) span;
+                horizontalList.addElement(new LabelBookmark(labelSpan.getName()));
+            } else if (span instanceof PageRefSpan) {
+                // Convert a page reference to a page number.
+                PageRefSpan pageRefSpan = (PageRefSpan) span;
+                Integer physicalPageNumber = bookmarks.getPhysicalPageNumberForLabel(pageRefSpan.getName());
+                String pageNumber;
+                if (physicalPageNumber == null) {
+                    pageNumber = "UNKNOWN";
+                    mUnknownLabelReferenceCount++;
+                } else {
+                    pageNumber = sections.getPageNumberLabel(physicalPageNumber);
+                }
+                horizontalList.addTextSpan(new TextSpan(pageNumber, pageRefSpan.getFlags()),
+                        paragraphStyle.getFontPack(), null);
             } else {
-                System.out.println("Warning: Unknown span type " + span.getClass().getSimpleName());
+                throw new IllegalStateException("unknown span type " + span.getClass().getSimpleName());
             }
         }
 

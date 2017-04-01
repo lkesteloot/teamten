@@ -21,10 +21,12 @@ package com.teamten.typeset;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.teamten.typeset.element.Bookmark;
+import com.teamten.typeset.element.LabelBookmark;
 import com.teamten.typeset.element.Page;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +35,15 @@ import java.util.Set;
  * Keeps track of a set of bookmarks and which physical page they're on.
  */
 public class Bookmarks {
+    /**
+     * Keeps track of all the bookmarks on each page.
+     */
     private final @NotNull SetMultimap<Integer,Bookmark> mPhysicalPageNumberToBookmark = HashMultimap.create();
+
+    /**
+     * Keeps track of the physical page for each label name.
+     */
+    private final @NotNull Map<String,Integer> mLabelToPhysicalPageNumber = new HashMap<>();
 
     private Bookmarks() {
         // Private constructor.
@@ -62,6 +72,12 @@ public class Bookmarks {
      */
     private void add(Integer physicalPageNumber, Bookmark bookmark) {
         mPhysicalPageNumberToBookmark.put(physicalPageNumber, bookmark);
+
+        // Remember all labels.
+        if (bookmark instanceof LabelBookmark) {
+            LabelBookmark labelBookmark = (LabelBookmark) bookmark;
+            mLabelToPhysicalPageNumber.put(labelBookmark.getName(), physicalPageNumber);
+        }
     }
 
     /**
@@ -70,6 +86,13 @@ public class Bookmarks {
      */
     public Set<Map.Entry<Integer,Bookmark>> entries() {
         return mPhysicalPageNumberToBookmark.entries();
+    }
+
+    /**
+     * Return the physical page number for a label, or null if not found.
+     */
+    public Integer getPhysicalPageNumberForLabel(String name) {
+        return mLabelToPhysicalPageNumber.get(name);
     }
 
     /**

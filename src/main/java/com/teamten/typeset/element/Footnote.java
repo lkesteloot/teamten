@@ -22,18 +22,18 @@ import com.teamten.font.FontManager;
 import com.teamten.hyphen.HyphenDictionary;
 import com.teamten.markdown.Block;
 import com.teamten.markdown.BlockType;
+import com.teamten.typeset.Bookmarks;
 import com.teamten.typeset.Config;
 import com.teamten.typeset.HorizontalList;
 import com.teamten.typeset.OutputShape;
 import com.teamten.typeset.ParagraphStyle;
+import com.teamten.typeset.Sections;
 import com.teamten.typeset.Typesetter;
 import com.teamten.typeset.VerticalList;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
-
-import static com.teamten.typeset.SpaceUnit.PT;
 
 /**
  * Represents a footnote that will be displayed at the bottom of the page.
@@ -74,6 +74,7 @@ public class Footnote extends VBox {
 
     @NotNull
     public static Footnote create(HBox mark, Block block, Config config, FontManager fontManager,
+                                  Bookmarks bookmarks, Sections sections,
                                   HyphenDictionary hyphenDictionary) throws IOException {
 
         // Only plain body for footnotes.
@@ -95,7 +96,7 @@ public class Footnote extends VBox {
 
         // Create a horizontal list for this paragraph.
         HorizontalList horizontalList = Typesetter.makeHorizontalListFromBlock(block, paragraphStyle, null, config,
-                fontManager, hyphenDictionary, 0);
+                fontManager, bookmarks, sections, hyphenDictionary, 0);
 
         // Prepend footnote.
         List<Element> elements = horizontalList.getElements();
