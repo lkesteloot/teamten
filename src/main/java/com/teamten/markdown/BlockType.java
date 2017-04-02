@@ -34,6 +34,7 @@ public enum BlockType {
     INPUT,
     POETRY,
     SEPARATOR,
+    VERTICAL_SPACE,
     CAPTION,
     NEW_PAGE,
     ODD_PAGE,

@@ -237,6 +237,10 @@ public class Typesetter {
                     generateSeparator(config, verticalList, fontManager);
                     continue;
 
+                case VERTICAL_SPACE:
+                    generateVerticalSpace(verticalList);
+                    continue;
+
                 case NEW_PAGE:
                     verticalList.newPage();
                     continue;
@@ -970,6 +974,15 @@ public class Typesetter {
         horizontalList.format(verticalList, outputShape);
 
         // Space below.
+        verticalList.addElement(verticalGlue);
+    }
+
+    /**
+     * Leave some vertical space. This is not currently used and can be removed if it's getting in the way.
+     */
+    private void generateVerticalSpace(VerticalList verticalList) {
+        long verticalSpace = PC.toSp(2);
+        Glue verticalGlue = new Glue(verticalSpace, verticalSpace, verticalSpace/2, false);
         verticalList.addElement(verticalGlue);
     }
 
