@@ -350,6 +350,8 @@ public class MarkdownParser {
 
                             String name = tag.substring(8).trim();
                             builder.addSpan(new PageRefSpan(name, flags));
+                        } else if (tag.startsWith("TODO ")) {
+                            // Ignore to-do tag, it's basically a comment.
                         } else {
                             System.out.println("Warning (line " + lineNumber + "): Unknown tag: " + tag);
                         }
