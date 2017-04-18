@@ -234,6 +234,7 @@ public class Typesetter {
                     continue;
 
                 case SEPARATOR:
+                    previousBlockType = block.getBlockType();
                     generateSeparator(config, verticalList, fontManager);
                     continue;
 
