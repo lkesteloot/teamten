@@ -432,6 +432,7 @@ public class Typesetter {
         // Potentially add bookmark if we're starting a new part or chapter.
         switch (block.getBlockType()) {
             case BODY:
+            case BLOCK_QUOTE:
             case MINOR_HEADER:
             case NUMBERED_LIST:
             case BULLET_LIST:

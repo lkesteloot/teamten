@@ -206,9 +206,22 @@ public class ParagraphStyle {
             case BODY:
                 regularFontKey = Config.Key.BODY_FONT;
                 firstLineIndentCount = previousBlockType == BlockType.BODY ? 1 : 0;
-                if (previousBlockType == BlockType.NUMBERED_LIST || previousBlockType == BlockType.BULLET_LIST) {
+                if (previousBlockType == BlockType.NUMBERED_LIST ||
+                        previousBlockType == BlockType.BULLET_LIST) {
+
                     marginTop = PT.toSp(4.0);
-                } else if (previousBlockType == BlockType.POETRY) {
+                } else if (previousBlockType == BlockType.POETRY ||
+                        previousBlockType == BlockType.BLOCK_QUOTE) {
+
+                    marginTop = PT.toSp(8.0);
+                }
+                break;
+
+            case BLOCK_QUOTE:
+                regularFontKey = Config.Key.BLOCK_QUOTE_FONT;
+                firstLineIndentCount = previousBlockType == BlockType.BLOCK_QUOTE ? 2 : 1;
+                subsequentLinesIndentCount = 1;
+                if (previousBlockType != BlockType.BLOCK_QUOTE) {
                     marginTop = PT.toSp(8.0);
                 }
                 break;

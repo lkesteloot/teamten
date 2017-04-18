@@ -23,6 +23,7 @@ package com.teamten.markdown;
  */
 public enum BlockType {
     BODY,
+    BLOCK_QUOTE,
     PART_HEADER,
     CHAPTER_HEADER,
     MINOR_SECTION_HEADER,

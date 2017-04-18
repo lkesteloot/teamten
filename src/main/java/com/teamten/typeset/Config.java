@@ -70,6 +70,7 @@ public class Config {
 
         // Fonts.
         BODY_FONT(KeyType.FONT),
+        BLOCK_QUOTE_FONT(KeyType.FONT),
         BODY_CODE_FONT(KeyType.FONT),
         CAPTION_FONT(KeyType.FONT),
         PART_HEADER_FONT(KeyType.FONT),
