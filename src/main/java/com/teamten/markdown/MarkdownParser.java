@@ -257,6 +257,9 @@ public class MarkdownParser {
                     break;
 
                 case SKIP_WHITESPACE:
+                    // This is called "skip whitespace", but it's really just skipping spaces.
+                    // It's used after bullet points and numbered list numbers, and after
+                    // spaces in the middle of lines.
                     if (ch == '\n') {
                         lineNumber++;
                         state = ParserState.START_OF_LINE;
@@ -270,7 +273,9 @@ public class MarkdownParser {
                         flags = flags.toggleCode();
                     } else if (ch == '[') {
                         tagBuilder.setLength(0);
-                        preTagState = state;
+                        // Don't go back to skipping spaces, since a "space-tag-space" triple
+                        // should include both spaces.
+                        preTagState = ParserState.IN_LINE;
                         state = ParserState.IN_TAG;
                     } else {
                         state = ParserState.IN_LINE;
@@ -328,6 +333,7 @@ public class MarkdownParser {
                             Block block = parseSingleBlock(tag.substring(1));
                             builder.addSpan(new FootnoteSpan(block));
                         } else if (tag.startsWith("!")) {
+                            // Photo.
                             if (builder == null) {
                                 builder = new Block.Builder(blockType, lineNumber);
                             }
@@ -341,6 +347,7 @@ public class MarkdownParser {
 
                             builder.addSpan(new ImageSpan(filename, caption));
                         } else if (tag.startsWith("LABEL ")) {
+                            // Label that can be referred-to by PAGE-OF.
                             if (builder == null) {
                                 builder = new Block.Builder(blockType, lineNumber);
                             }
@@ -348,6 +355,7 @@ public class MarkdownParser {
                             String name = tag.substring(6).trim();
                             builder.addSpan(new LabelSpan(name));
                         } else if (tag.startsWith("PAGE-OF ")) {
+                            // Page of a LABEL.
                             if (builder == null) {
                                 builder = new Block.Builder(blockType, lineNumber);
                             }
@@ -362,6 +370,8 @@ public class MarkdownParser {
                         state = preTagState;
                         preTagState = null;
                     } else {
+                        // Handle nested tags, so we can put index entries in footnotes, make references
+                        // to photo captions, etc.
                         if (ch == '[') {
                             nestedTags++;
                         } else if (ch == ']') {

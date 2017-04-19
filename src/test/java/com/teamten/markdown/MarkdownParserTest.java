@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for the {@link MarkdownParser} class.
@@ -116,7 +117,7 @@ public class MarkdownParserTest {
         // Before punctuation.
         spans = parseStringToBlocks("Hello...!").get(0).getSpans();
         assertEquals(1, spans.size());
-        assertTextSpanEquals(spans.get(0), "Hello\u00A0.\u00A0.\u00A0.!", false, false);
+        assertTextSpanEquals(spans.get(0), "Hello\u00A0.\u00A0.\u00A0.\u00A0!", false, false);
     }
 
     @Test
@@ -146,6 +147,20 @@ public class MarkdownParserTest {
         spans = parseStringToBlocks("What?").get(0).getSpans();
         assertEquals(1, spans.size());
         assertTextSpanEquals(spans.get(0), "What\u202F?", false, false);
+    }
+
+    @Test
+    public void pageOfTagTest() {
+        List<Span> spans;
+
+        // Parse PAGE-OF in middle of text.
+        spans = parseStringToBlocks("Before [PAGE-OF abc] after").get(0).getSpans();
+        assertEquals(3, spans.size());
+        assertTextSpanEquals(spans.get(0), "Before ", false, false);
+        assertTrue(spans.get(1) instanceof PageRefSpan);
+        PageRefSpan pageRefSpan = (PageRefSpan) spans.get(1);
+        assertEquals("abc", pageRefSpan.getName());
+        assertTextSpanEquals(spans.get(2), " after", false, false);
     }
 
     private static void assertBlockEquals(BlockType expectedBlockType, String expectedText, String input) {

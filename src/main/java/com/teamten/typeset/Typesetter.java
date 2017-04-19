@@ -885,7 +885,7 @@ public class Typesetter {
         verticalList.changeColumnLayout(columnLayout);
 
         // Generate the paragraphs.
-        generateIndexEntries(indexEntries, sections, verticalList, entryFontPack, collator, hyphenDictionary,
+        generateIndexEntries(indexEntries, sections, verticalList, entryFontPack, hyphenDictionary,
                 columnLayout.getColumnWidth(), 0);
 
         // Switch back to a single column.
@@ -898,7 +898,7 @@ public class Typesetter {
      * @param depth the depth of the recursion, where 0 is for entries, 1 for sub-entries, etc.
      */
     private void generateIndexEntries(IndexEntries indexEntries, Sections sections, VerticalList verticalList,
-                                      FontPack fontPack, Collator collator, HyphenDictionary hyphenDictionary,
+                                      FontPack fontPack, HyphenDictionary hyphenDictionary,
                                       long textWidth, int depth) throws IOException {
         // Space between sections.
         long sectionBreak = PT.toSp(6.0);
@@ -943,9 +943,9 @@ public class Typesetter {
 
             // Now do the children of this entry.
             generateIndexEntries(indexEntry.getSubEntries(), sections, verticalList, fontPack,
-                    collator, hyphenDictionary, textWidth, depth + 1);
+                    hyphenDictionary, textWidth, depth + 1);
 
-            // Kee track of the last category.
+            // Keep track of the last category so we can insert spaces.
             previousCategory = category;
         }
     }
