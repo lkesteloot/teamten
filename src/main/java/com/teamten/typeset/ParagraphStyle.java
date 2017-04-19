@@ -214,6 +214,8 @@ public class ParagraphStyle {
                         previousBlockType == BlockType.BLOCK_QUOTE) {
 
                     marginTop = PT.toSp(8.0);
+                } else if (previousBlockType == BlockType.SIGNATURE) {
+                    marginTop = PT.toSp(32.0);
                 }
                 break;
 
@@ -304,6 +306,15 @@ public class ParagraphStyle {
                 }
                 firstLineIndentCount = 1;
                 subsequentLinesIndentCount = 2;
+                break;
+
+            case SIGNATURE:
+                regularFontKey = Config.Key.BODY_FONT;
+                if (previousBlockType != BlockType.SIGNATURE) {
+                    marginTop = PT.toSp(32.0);
+                }
+                firstLineIndentCount = 0;
+                subsequentLinesIndentCount = 0;
                 break;
 
             case CAPTION:

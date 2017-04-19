@@ -214,6 +214,9 @@ public class MarkdownParser {
                     } else if (ch == '"') {
                         state = ParserState.IN_LINE;
                         builder = new Block.Builder(BlockType.BLOCK_QUOTE, lineNumber);
+                    } else if (ch == '-') {
+                        state = ParserState.IN_LINE;
+                        builder = new Block.Builder(BlockType.SIGNATURE, lineNumber);
                     } else {
                         state = ParserState.START_OF_LINE;
                         processSameCharacter = true;

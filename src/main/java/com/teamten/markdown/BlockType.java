@@ -34,6 +34,7 @@ public enum BlockType {
     OUTPUT,
     INPUT,
     POETRY,
+    SIGNATURE,
     SEPARATOR,
     VERTICAL_SPACE,
     CAPTION,

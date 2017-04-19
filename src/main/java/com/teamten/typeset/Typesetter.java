@@ -440,6 +440,7 @@ public class Typesetter {
             case OUTPUT:
             case INPUT:
             case POETRY:
+            case SIGNATURE:
             case CAPTION:
                 // Nothing special.
                 break;
