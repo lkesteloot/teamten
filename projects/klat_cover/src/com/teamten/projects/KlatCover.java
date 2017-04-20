@@ -49,12 +49,12 @@ public class KlatCover {
     private static final double BLEED_IN = 0.125;
     private static final double PAGE_WIDTH_IN = 6; // Not including bleed, including margin.
     private static final double PAGE_HEIGHT_IN = 9;
-    private static final double SPINE_WIDTH_IN = 0.572; // Get from Lulu, depends on page count
+    private static final double SPINE_WIDTH_IN = 0.766; // Get from Lulu, depends on page count
     private static final double WIDTH_IN = 2*PAGE_WIDTH_IN + SPINE_WIDTH_IN + 2*BLEED_IN;
     private static final double HEIGHT_IN = PAGE_HEIGHT_IN + 2*BLEED_IN;
     // Red frame.
-    private static final double FRAME_MARGIN_LEFT = 0.625;
-    private static final double FRAME_MARGIN_RIGHT = 0.75;
+    private static final double FRAME_MARGIN_LEFT = 0.75;
+    private static final double FRAME_MARGIN_RIGHT = 0.70;
     private static final double FRAME_MARGIN_TOP = 0.875;
     private static final double FRAME_MARGIN_BOTTOM = 0.875;
     private static final double FRAME_OUTSIDE_THICKNESS = 0.012;
@@ -83,8 +83,8 @@ public class KlatCover {
     private static final Color HIGHLIGHT_COLOR = new Color(0.8f, 0.0f, 0.0f, 1.0f);
     private static final Color DEBUG_COLOR = Color.GRAY;
     private static final Color BLACK_TEXT_COLOR = Color.BLACK;
-    private static final Color LIGHT_YELLOW_COLOR = new Color(203, 193, 166);
-    private static final Color DARK_YELLOW_COLOR = new Color(181, 148, 95);
+    private static final Color LIGHT_YELLOW_COLOR = new Color(255, 236, 204);
+    private static final Color DARK_YELLOW_COLOR = new Color(255, 218, 153);
 
     // Typefaces.
     private static final Typeface TYPEFACE = Typeface.MINION;
@@ -197,7 +197,7 @@ public class KlatCover {
         textWidth = (int) textLayout.getBounds().getWidth();
         textHeight = (int) textLayout.getBounds().getHeight();
         y = toPixels(AUTHOR_POS_IN + BLEED_IN);
-        textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2, y + textHeight/2);
+        textLayout.draw(g, frameX + frameWidth/2 - textWidth/2, y + textHeight/2);
 
         // Title.
         font = ImageUtils.getFont(TYPEFACE, false, false, false, toPixels(TITLE_FONT_SIZE_IN));
@@ -207,7 +207,7 @@ public class KlatCover {
         textWidth = (int) textLayout.getBounds().getWidth();
         textHeight = (int) textLayout.getBounds().getHeight();
         y = toPixels(TITLE_POS_IN + BLEED_IN);
-        textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2, y + textHeight/2);
+        textLayout.draw(g, frameX + frameWidth/2 - textWidth/2, y + textHeight/2);
 
         // Date.
         font = ImageUtils.getFont(TYPEFACE, false, false, false, toPixels(DATE_FONT_SIZE_IN));
@@ -217,7 +217,7 @@ public class KlatCover {
         textWidth = (int) textLayout.getBounds().getWidth();
         textHeight = (int) textLayout.getBounds().getHeight();
         y = toPixels(DATE_POS_IN + BLEED_IN);
-        textLayout.draw(g, pageLeft + toPixels(PAGE_WIDTH_IN)/2 - textWidth/2, y + textHeight/2);
+        textLayout.draw(g, frameX + frameWidth/2 - textWidth/2, y + textHeight/2);
 
         // ----------------------------------------------------------------------------------
         // Spine
