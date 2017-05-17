@@ -305,8 +305,8 @@ public class Typesetter {
                     verticalList.addElement(new Glue(paragraphStyle.getMarginBottom(),
                             paragraphStyle.getMarginBottom()/4, 0, false));
                 }
-                // Some flexibility between paragraphs, unless this is between poetry lines.
-                if (block.getBlockType() != BlockType.POETRY || previousBlockType != BlockType.POETRY) {
+                // Some flexibility between paragraphs, unless this is after poetry lines.
+                if (block.getBlockType() != BlockType.POETRY) {
                     verticalList.addElement(new Glue(0, PT.toSp(3), 0, false));
                 }
                 previousBlockType = block.getBlockType();
