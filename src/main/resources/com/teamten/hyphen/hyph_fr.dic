@@ -1,7 +1,7 @@
 UTF-8
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-LEFTHYPHENMIN 2
-RIGHTHYPHENMIN 2
+LEFTHYPHENMIN 3
+RIGHTHYPHENMIN 3
 COMPOUNDLEFTHYPHENMIN 2
 COMPOUNDRIGHTHYPHENMIN 2
 %%%   Do not remove the following line   %%%
