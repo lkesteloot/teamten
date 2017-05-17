@@ -47,10 +47,13 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public abstract class ElementList implements ElementSink {
     private static final long LINE_PENALTY = 10;
+    private static final long EVEN_PAGE_IMAGE_PENALTY = 1_000_000;
     private static final long BADNESS_TOLERANCE = 8_000;
     private static final boolean DEBUG_HORIZONTAL_LIST = false;
     private static final boolean DEBUG_VERTICAL_LIST = false;
     private final List<Element> mElements = new ArrayList<>();
+    private int mOddPageImageCount = 0;
+    private int mEvenPageImageCount = 0;
 
     @Override
     public void addElement(Element element) {
@@ -154,7 +157,8 @@ public abstract class ElementList implements ElementSink {
 
             // Initialize the current (end) breakpoint with max values.
             endBreakpoint.setTotalDemerits(Long.MAX_VALUE);
-            endBreakpoint.setPreviousBreakpoint(null, 0);
+            endBreakpoint.setPreviousBreakpoint(null);
+            endBreakpoint.setCounter(0);
 
             // We use an iterator so that we can easily and efficiently remove breakpoints that are too far away.
             Iterator<Breakpoint> itr = activeBreakpoints.iterator();
@@ -200,6 +204,22 @@ public abstract class ElementList implements ElementSink {
                         // No point in adding a constant to a line we know we're going to break anyway.
                     }
 
+                    // Figure out how much to increase the counter for this particular case. This is normally
+                    // for images that will be inserted on subsequent pages.
+                    int extraIncrement = getChunkExtraIncrement(chunk);
+
+                    // Extra penalty if this puts images on even (left) pages.
+                    for (int page = 0; page < extraIncrement; page++) {
+                        counter++;
+                        if (this instanceof VerticalList) {
+                            if (counter % 2 == 0) {
+                                // Even extra page, penalize. Note that here we don't verify that the
+                                // extra page is for an image, but that's all we use them for currently.
+                                demerits += EVEN_PAGE_IMAGE_PENALTY;
+                            }
+                        }
+                    }
+
                     // Add the demerits for the paragraph or page ending at the beginning breakpoint.
                     long totalDemerits = demerits + beginBreakpoint.getTotalDemerits();
 
@@ -212,10 +232,8 @@ public abstract class ElementList implements ElementSink {
 
                     // If it's the best we've seen so far, remember it.
                     if (totalDemerits < endBreakpoint.getTotalDemerits()) {
-                        // Figure out how much to increase the counter for this particular case.
-                        // Add one because we have to include this chunk.
-                        int increment = getChunkExtraIncrement(chunk) + 1;
-                        endBreakpoint.setPreviousBreakpoint(beginBreakpoint, increment);
+                        endBreakpoint.setPreviousBreakpoint(beginBreakpoint);
+                        endBreakpoint.setCounter(counter);
                         endBreakpoint.setChunk(chunk);
                         endBreakpoint.setTotalDemerits(totalDemerits);
 
@@ -266,6 +284,11 @@ public abstract class ElementList implements ElementSink {
 
         // Send the boxes to the sink.
         outputBoxes(boxes, output, outputShape);
+
+        if (this instanceof VerticalList) {
+            System.out.printf("  Images on odd pages: %d, on even pages: %d%n",
+                    mOddPageImageCount, mEvenPageImageCount);
+        }
     }
 
     /**
@@ -355,6 +378,7 @@ public abstract class ElementList implements ElementSink {
     private Iterable<Box> makeAllFinalBoxes(List<Breakpoint> breakpoints, OutputShape outputShape) {
         Deque<Box> boxes = new ArrayDeque<>();
 
+        // Start with the last breakpoint and move backward.
         Breakpoint endBreakpoint = breakpoints.get(breakpoints.size() - 1);
         while (true) {
             Breakpoint beginBreakpoint = endBreakpoint.getPreviousBreakpoint();
@@ -392,6 +416,11 @@ public abstract class ElementList implements ElementSink {
                         Chunk imageChunk = Chunk.create(imagePage, size, -1, false, false, this::getElementSize);
                         imagePage = imageChunk.fixed();
                         boxes.addFirst(makeOutputBox(imagePage, counter, 0));
+                        if (counter % 2 != 0) {
+                            mOddPageImageCount++;
+                        } else {
+                            mEvenPageImageCount++;
+                        }
                         counter--;
                     }
                 }
@@ -542,7 +571,9 @@ public abstract class ElementList implements ElementSink {
 
         /**
          * Generic counter, used for line number or physical page number. The counter of a section
-         * is stored in the breakpoint at its end (end of line or end of page).
+         * is stored in the breakpoint at its end (end of line or end of page). If a page makes
+         * references to several images, then the counter points to the page of the last image.
+         * For example, page 6 has two images, then counter is 8.
          */
         public int getCounter() {
             return mCounter;
@@ -585,17 +616,17 @@ public abstract class ElementList implements ElementSink {
 
         /**
          * Set the previous breakpoint in the paragraph or page assuming we're selected as a breakpoint.
-         * Also updates the counter to be {@code increment} more than the previous breakpoint's counter.
-         * If the previous breakpoint is null, the counter is set to {@code increment}
          */
-        public void setPreviousBreakpoint(Breakpoint previousBreakpoint, int increment) {
+        public void setPreviousBreakpoint(Breakpoint previousBreakpoint) {
             mPreviousBreakpoint = previousBreakpoint;
+        }
 
-            if (mPreviousBreakpoint == null) {
-                mCounter = increment;
-            } else {
-                mCounter = mPreviousBreakpoint.mCounter + increment;
-            }
+        /**
+         * Set the counter (line or page number) for this chunk. If the chunk covers multiple pages,
+         * the counters should point to the last one.
+         */
+        public void setCounter(int counter) {
+            mCounter = counter;
         }
 
         /**
