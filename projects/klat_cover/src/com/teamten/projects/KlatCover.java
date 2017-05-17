@@ -53,7 +53,7 @@ public class KlatCover {
     private static final double WIDTH_IN = 2*PAGE_WIDTH_IN + SPINE_WIDTH_IN + 2*BLEED_IN;
     private static final double HEIGHT_IN = PAGE_HEIGHT_IN + 2*BLEED_IN;
     // Red frame.
-    private static final double FRAME_MARGIN_LEFT = 0.75;
+    private static final double FRAME_MARGIN_LEFT = 0.90;
     private static final double FRAME_MARGIN_RIGHT = 0.70;
     private static final double FRAME_MARGIN_TOP = 0.875;
     private static final double FRAME_MARGIN_BOTTOM = 0.875;
