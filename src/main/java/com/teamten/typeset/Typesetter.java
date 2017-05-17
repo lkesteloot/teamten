@@ -294,6 +294,12 @@ public class Typesetter {
                 verticalList.addElement(new Box(0, IN.toSp(2.0), 0));
                 previousBlockType = null;
             } else {
+                // If the paragraph shouldn't have a break after it (e.g., a section title), prohibit
+                // it by having an infinite penalty before the glue.
+                if (paragraphStyle.preventBreak()) {
+                    verticalList.addElement(new Penalty(Penalty.INFINITY));
+                }
+
                 // Add bottom margin.
                 if (paragraphStyle.getMarginBottom() != 0) {
                     verticalList.addElement(new Glue(paragraphStyle.getMarginBottom(),

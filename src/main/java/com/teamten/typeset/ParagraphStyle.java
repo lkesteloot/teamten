@@ -43,12 +43,14 @@ public class ParagraphStyle {
     private final long mParagraphIndent;
     private final long mFirstLineIndent;
     private final long mSubsequentLinesIndent;
+    private final boolean mPreventBreak;
     private final FontPack mFontPack;
 
     public ParagraphStyle(boolean center, boolean newPage, boolean oddPage,
                           boolean ownPage, boolean allowLineBreaks, long marginTop, long marginBottom,
                           boolean resetFootnoteNumber, long leading,
-                          long paragraphIndent, long firstLineIndent, long subsequentLinesIndent, FontPack fontPack) {
+                          long paragraphIndent, long firstLineIndent, long subsequentLinesIndent,
+                          boolean preventBreak, FontPack fontPack) {
 
         mCenter = center;
         mNewPage = newPage;
@@ -62,6 +64,7 @@ public class ParagraphStyle {
         mParagraphIndent = paragraphIndent;
         mFirstLineIndent = firstLineIndent;
         mSubsequentLinesIndent = subsequentLinesIndent;
+        mPreventBreak = preventBreak;
         mFontPack = fontPack;
     }
 
@@ -151,6 +154,13 @@ public class ParagraphStyle {
     }
 
     /**
+     * Whether to prevent a page break after this paragraph (for titles).
+     */
+    public boolean preventBreak() {
+        return mPreventBreak;
+    }
+
+    /**
      * The font pack for this paragraph.
      */
     public FontPack getFontPack() {
@@ -181,6 +191,7 @@ public class ParagraphStyle {
                 mParagraphIndent,
                 mFirstLineIndent,
                 mSubsequentLinesIndent,
+                mPreventBreak,
                 mFontPack.withScaledFont(scale));
     }
 
@@ -201,6 +212,7 @@ public class ParagraphStyle {
         boolean resetFootnoteNumber = false;
         int firstLineIndentCount = 0;
         int subsequentLinesIndentCount = 0;
+        boolean preventBreak = false;
 
         switch (block.getBlockType()) {
             case BODY:
@@ -236,6 +248,7 @@ public class ParagraphStyle {
                 ownPage = true;
                 addTracking = true;
                 resetFootnoteNumber = true;
+                preventBreak = true;
                 break;
 
             case CHAPTER_HEADER:
@@ -247,6 +260,7 @@ public class ParagraphStyle {
                 oddPage = true;
                 addTracking = true;
                 resetFootnoteNumber = true;
+                preventBreak = true;
                 break;
 
             case MINOR_HEADER:
@@ -254,6 +268,7 @@ public class ParagraphStyle {
                 center = true;
                 marginTop = IN.toSp(0.25);
                 marginBottom = IN.toSp(0.10);
+                preventBreak = true;
                 break;
 
             case NUMBERED_LIST:
@@ -352,7 +367,7 @@ public class ParagraphStyle {
         return new ParagraphStyle(center, newPage, oddPage, ownPage, allowLineBreaks, marginTop,
                 marginBottom, resetFootnoteNumber, leading, paragraphIndent,
                 paragraphIndent*firstLineIndentCount,
-                paragraphIndent*subsequentLinesIndentCount,
+                paragraphIndent*subsequentLinesIndentCount, preventBreak,
                 fontPack);
     }
 }
