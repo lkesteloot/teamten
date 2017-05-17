@@ -603,6 +603,7 @@ public class Typesetter {
 
         long marginTop = IN.toSp(0.5);
         long titleMargin = IN.toSp(1.5);
+        long publisherMargin = IN.toSp(3.5);
         long publisherLocationMargin = IN.toSp(0.02);
         SizedFont authorFont = fontManager.get(config.getFont(Config.Key.TITLE_PAGE_AUTHOR_FONT));
         authorFont = TrackingFont.create(authorFont, 0.1, 0.5);
@@ -635,7 +636,7 @@ public class Typesetter {
         verticalList.setBaselineSkip(oldLeading);
 
         if (publisherName != null) {
-            verticalList.addElement(Glue.infiniteVertical());
+            verticalList.addElement(new Box(0, publisherMargin, 0));
 
             // Publisher name.
             horizontalList = new HorizontalList();
