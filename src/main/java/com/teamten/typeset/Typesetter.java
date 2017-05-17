@@ -78,7 +78,7 @@ import static com.teamten.typeset.SpaceUnit.PT;
  */
 public class Typesetter {
     private static final boolean DRAW_MARGINS = false;
-    private static final boolean DRAW_PAGE_BOUNDARY = true;
+    private static final boolean DRAW_PAGE_BOUNDARY = false;
     private static final int FAKE_INDEX_LENGTH = 0;
     /**
      * The maximum number of times that we'll typeset the document without it converging on a stable set
