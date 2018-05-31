@@ -2,11 +2,10 @@
 /build
 /repo
 *.pdf
-*.md
-*.tex
 /libs/fontbox-*.jar
 /libs/pdfbox-*.jar
 out.log
+/UPLOAD
 
 # For IDEA:
 /.idea/workspace.xml

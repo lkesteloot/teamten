@@ -24,7 +24,6 @@ import com.teamten.typeset.element.Glue;
 import com.teamten.typeset.element.VBox;
 import com.teamten.util.IncreasingCounter;
 import org.jetbrains.annotations.NotNull;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class ColumnVerticalList extends ElementList {
 
     @Override
     protected List<Element> getElementSublist(Breakpoint beginBreakpoint, Breakpoint endBreakpoint) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**

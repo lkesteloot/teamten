@@ -1,6 +1,9 @@
 
-// Apply the java plugin to add support for Java
-apply plugin: 'java'
+plugins {
+    id "com.jfrog.bintray" version "1.8.0"
+    id "maven-publish"
+    id "java"
+}
 
 // Metadata.
 group = 'com.teamten'
@@ -63,3 +66,85 @@ uploadArchives {
     }
 }
 
+// https://reflectoring.io/guide-publishing-to-bintray-with-gradle/
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc.failOnError = false
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+// Used below in the "pom" object.
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "lkesteloot"
+            name "Lawrence Kesteloot"
+            email "lk@teamten.com"
+        }
+    }
+
+    scm {
+        url "https://github.com/lkesteloot/teamten"
+    }
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar {
+                classifier "sources"
+            }
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+            groupId group
+            artifactId 'teamten'
+            version version
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Variety of useful code.')
+                root.appendNode('name', 'Team Ten library')
+                root.appendNode('url', 'https://github.com/lkesteloot/teamten')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+// To publish to bintray (jcenter).
+bintray {
+    user = System.getProperty('bintray.user')
+    key = System.getProperty('bintray.key')
+    publications = ['mavenPublication']
+
+    pkg {
+        repo = 'com.teamten'
+        name = 'teamten'
+        userOrg = ''
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/lkesteloot/teamten.git'
+        version {
+            name = '1.0'
+            desc = '1.0'
+            released = new Date()
+        }
+    }
+}
