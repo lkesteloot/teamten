@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
 <li>com.teamten.render.AmbientOcclusionMaterial</li>
@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">AmbientOcclusionMaterial</span>
-extends <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
+extends java.lang.Object
 implements <a href="../../../com/teamten/render/Material.html" title="interface in com.teamten.render">Material</a></pre>
 <div class="block">Implements the ambient occlusion material.</div>
 </li>
@@ -156,8 +156,8 @@ implements <a href="../../../com/teamten/render/Material.html" title="interface 
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../com/teamten/render/Color.html" title="class in com.teamten.render">Color</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/AmbientOcclusionMaterial.html#shade-com.teamten.render.RayTracer-com.teamten.math.Vector-com.teamten.render.Intersection-com.teamten.render.Light:A-boolean-">shade</a></span>(<a href="../../../com/teamten/render/RayTracer.html" title="interface in com.teamten.render">RayTracer</a>&nbsp;rayTracer,
-     <a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;eye,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/AmbientOcclusionMaterial.html#shade-com.teamten.render.RayTracer-Vector-com.teamten.render.Intersection-com.teamten.render.Light:A-boolean-">shade</a></span>(<a href="../../../com/teamten/render/RayTracer.html" title="interface in com.teamten.render">RayTracer</a>&nbsp;rayTracer,
+     Vector&nbsp;eye,
      <a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersection,
      <a href="../../../com/teamten/render/Light.html" title="interface in com.teamten.render">Light</a>[]&nbsp;lightList,
      boolean&nbsp;debug)</code>
@@ -169,8 +169,8 @@ implements <a href="../../../com/teamten/render/Material.html" title="interface 
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -207,23 +207,23 @@ implements <a href="../../../com/teamten/render/Material.html" title="interface 
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="shade-com.teamten.render.RayTracer-com.teamten.math.Vector-com.teamten.render.Intersection-com.teamten.render.Light:A-boolean-">
+<a name="shade-com.teamten.render.RayTracer-Vector-com.teamten.render.Intersection-com.teamten.render.Light:A-boolean-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>shade</h4>
 <pre>public&nbsp;<a href="../../../com/teamten/render/Color.html" title="class in com.teamten.render">Color</a>&nbsp;shade(<a href="../../../com/teamten/render/RayTracer.html" title="interface in com.teamten.render">RayTracer</a>&nbsp;rayTracer,
-                   <a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;eye,
+                   Vector&nbsp;eye,
                    <a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersection,
                    <a href="../../../com/teamten/render/Light.html" title="interface in com.teamten.render">Light</a>[]&nbsp;lightList,
                    boolean&nbsp;debug)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/teamten/render/Material.html#shade-com.teamten.render.RayTracer-com.teamten.math.Vector-com.teamten.render.Intersection-com.teamten.render.Light:A-boolean-">Material</a></code></span></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/teamten/render/Material.html#shade-com.teamten.render.RayTracer-Vector-com.teamten.render.Intersection-com.teamten.render.Light:A-boolean-">Material</a></code></span></div>
 <div class="block">Return the shaded point for this intersection. The intersection must not
  be empty and must be in camera space.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../com/teamten/render/Material.html#shade-com.teamten.render.RayTracer-com.teamten.math.Vector-com.teamten.render.Intersection-com.teamten.render.Light:A-boolean-">shade</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/teamten/render/Material.html" title="interface in com.teamten.render">Material</a></code></dd>
+<dd><code><a href="../../../com/teamten/render/Material.html#shade-com.teamten.render.RayTracer-Vector-com.teamten.render.Intersection-com.teamten.render.Light:A-boolean-">shade</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/teamten/render/Material.html" title="interface in com.teamten.render">Material</a></code></dd>
 <dd><code>eye</code> - vector from eye, not normalized.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>color of shaded point, never null.</dd>

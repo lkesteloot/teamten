@@ -95,7 +95,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
-<li><a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
 <li>com.teamten.render.DirectionalLight</li>
@@ -112,7 +112,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">DirectionalLight</span>
-extends <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
+extends java.lang.Object
 implements <a href="../../../com/teamten/render/Light.html" title="interface in com.teamten.render">Light</a></pre>
 <div class="block">Represents an infinitely far away directional light.</div>
 </li>
@@ -140,14 +140,14 @@ implements <a href="../../../com/teamten/render/Light.html" title="interface in 
 </td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a></code></td>
+<td class="colFirst"><code>Vector</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/DirectionalLight.html#getLightVector-com.teamten.render.Intersection-">getLightVector</a></span>(<a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersection)</code>
 <div class="block">Return a unit vector from the intersection point to the light.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/DirectionalLight.html#setCamera-com.teamten.math.Matrix-">setCamera</a></span>(<a href="../../../com/teamten/math/Matrix.html" title="class in com.teamten.math">Matrix</a>&nbsp;camera)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/DirectionalLight.html#setCamera-Matrix-">setCamera</a></span>(Matrix&nbsp;camera)</code>
 <div class="block">Sets the camera transform for this pass.</div>
 </td>
 </tr>
@@ -156,8 +156,8 @@ implements <a href="../../../com/teamten/render/Light.html" title="interface in 
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -179,7 +179,7 @@ implements <a href="../../../com/teamten/render/Light.html" title="interface in 
 <ul class="blockList">
 <li class="blockList">
 <h4>getLightVector</h4>
-<pre>public&nbsp;<a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;getLightVector(<a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersection)</pre>
+<pre>public&nbsp;Vector&nbsp;getLightVector(<a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersection)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/teamten/render/Light.html#getLightVector-com.teamten.render.Intersection-">Light</a></code></span></div>
 <div class="block">Return a unit vector from the intersection point to the light. The
  intersection must not be empty and must be in camera space.</div>
@@ -205,18 +205,18 @@ implements <a href="../../../com/teamten/render/Light.html" title="interface in 
 </dl>
 </li>
 </ul>
-<a name="setCamera-com.teamten.math.Matrix-">
+<a name="setCamera-Matrix-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>setCamera</h4>
-<pre>public&nbsp;void&nbsp;setCamera(<a href="../../../com/teamten/math/Matrix.html" title="class in com.teamten.math">Matrix</a>&nbsp;camera)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/teamten/render/Light.html#setCamera-com.teamten.math.Matrix-">Light</a></code></span></div>
+<pre>public&nbsp;void&nbsp;setCamera(Matrix&nbsp;camera)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../com/teamten/render/Light.html#setCamera-Matrix-">Light</a></code></span></div>
 <div class="block">Sets the camera transform for this pass.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../com/teamten/render/Light.html#setCamera-com.teamten.math.Matrix-">setCamera</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/teamten/render/Light.html" title="interface in com.teamten.render">Light</a></code></dd>
+<dd><code><a href="../../../com/teamten/render/Light.html#setCamera-Matrix-">setCamera</a></code>&nbsp;in interface&nbsp;<code><a href="../../../com/teamten/render/Light.html" title="interface in com.teamten.render">Light</a></code></dd>
 </dl>
 </li>
 </ul>

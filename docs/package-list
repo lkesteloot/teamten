@@ -1,15 +1,6 @@
 com.teamten.chess
 com.teamten.chess.server
-com.teamten.font
-com.teamten.hyphen
-com.teamten.image
 com.teamten.jawa
 com.teamten.mario
-com.teamten.markdown
-com.teamten.math
 com.teamten.render
-com.teamten.tex
 com.teamten.tictactoe
-com.teamten.typeset
-com.teamten.typeset.element
-com.teamten.util

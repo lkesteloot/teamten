@@ -14,6 +14,11 @@ repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+
+    // XXX temporary, remove:
+    maven {
+        url "https://dl.bintray.com/lkesteloot/com.teamten"
+    }
 }
 
 // In this section you declare the dependencies for your production and test code

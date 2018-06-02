@@ -121,8 +121,8 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/RayTracer.html#intersect-com.teamten.math.Vector-com.teamten.math.Vector-boolean-">intersect</a></span>(<a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;r0,
-         <a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;r,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/RayTracer.html#intersect-Vector-Vector-boolean-">intersect</a></span>(Vector&nbsp;r0,
+         Vector&nbsp;r,
          boolean&nbsp;debug)</code>
 <div class="block">Return the intersection information for a ray starting at r0 and heading in the
  direction of vector r.</div>
@@ -130,7 +130,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/teamten/render/Color.html" title="class in com.teamten.render">Color</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/RayTracer.html#shade-com.teamten.math.Vector-com.teamten.render.Intersection-boolean-">shade</a></span>(<a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;eye,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/teamten/render/RayTracer.html#shade-Vector-com.teamten.render.Intersection-boolean-">shade</a></span>(Vector&nbsp;eye,
      <a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersection,
      boolean&nbsp;debug)</code>
 <div class="block">Shade the point at the intersection (whose triangle is not null), given that
@@ -152,27 +152,27 @@ var activeTableTab = "activeTableTab";
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="intersect-com.teamten.math.Vector-com.teamten.math.Vector-boolean-">
+<a name="intersect-Vector-Vector-boolean-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>intersect</h4>
-<pre><a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersect(<a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;r0,
-                       <a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;r,
+<pre><a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersect(Vector&nbsp;r0,
+                       Vector&nbsp;r,
                        boolean&nbsp;debug)</pre>
 <div class="block">Return the intersection information for a ray starting at r0 and heading in the
  direction of vector r.  The returned object is never null, but its
  triangle will be null if the ray didn't hit anything.</div>
 </li>
 </ul>
-<a name="shade-com.teamten.math.Vector-com.teamten.render.Intersection-boolean-">
+<a name="shade-Vector-com.teamten.render.Intersection-boolean-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>shade</h4>
-<pre><a href="../../../com/teamten/render/Color.html" title="class in com.teamten.render">Color</a>&nbsp;shade(<a href="../../../com/teamten/math/Vector.html" title="class in com.teamten.math">Vector</a>&nbsp;eye,
+<pre><a href="../../../com/teamten/render/Color.html" title="class in com.teamten.render">Color</a>&nbsp;shade(Vector&nbsp;eye,
             <a href="../../../com/teamten/render/Intersection.html" title="class in com.teamten.render">Intersection</a>&nbsp;intersection,
             boolean&nbsp;debug)</pre>
 <div class="block">Shade the point at the intersection (whose triangle is not null), given that

@@ -1,3 +1,0 @@
-
-// Set name of project, otherwise it uses the name of the directory, which is just "java".
-rootProject.name = 'teamten'
