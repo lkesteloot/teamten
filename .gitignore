@@ -1,10 +1,6 @@
 .gradle
 /build
 /repo
-*.pdf
-/libs/fontbox-*.jar
-/libs/pdfbox-*.jar
-out.log
 /UPLOAD
 
 # For IDEA:
