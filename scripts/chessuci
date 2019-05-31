@@ -1,3 +1,0 @@
-#!/bin/bash
-
-java -cp ../dist/\* com.teamten.chess.UciParser
